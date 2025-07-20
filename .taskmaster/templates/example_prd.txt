@@ -1,0 +1,43 @@
+# Example Product Requirements Document (PRD)
+
+## Project Overview
+Brief description of what you're building.
+
+## Goals & Objectives
+- Primary goal
+- Secondary goal  
+- Success metrics
+
+## User Stories
+As a [user type], I want [functionality] so that [benefit].
+
+## Requirements
+### Functional Requirements
+- Feature 1: Description
+- Feature 2: Description
+- Feature 3: Description
+
+### Non-Functional Requirements
+- Performance requirements
+- Security requirements
+- Scalability requirements
+
+## Technical Architecture
+- Technology stack
+- Database design
+- API design
+- Integration points
+
+## Timeline & Milestones
+- Phase 1: [Date] - [Deliverables]
+- Phase 2: [Date] - [Deliverables]
+- Phase 3: [Date] - [Deliverables]
+
+## Resources & Dependencies
+- Team members required
+- External dependencies
+- API keys/services needed
+
+## Risks & Mitigation
+- Risk 1: [Description] - Mitigation: [Strategy]
+- Risk 2: [Description] - Mitigation: [Strategy] 

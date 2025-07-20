@@ -1,0 +1,71 @@
+# Multi-Niche Lead System - Make Solar System Work for All Industries
+
+## Project Overview
+Transform the existing Solar Lead System into a multi-niche lead generation system that works for any industry. The current system is fully operational for solar companies but hardcoded with solar-specific prompts and messaging.
+
+## Current System Architecture (KEEP EXACTLY THE SAME)
+- **N8N Workflow**: Processes webhooks, qualifies leads with AI, creates demos via API, sends emails via Instantly.ai
+- **API Endpoints**: `/api/create-prototype` creates assistants, `/api/company-assistant` stores mappings, `/api/chat` handles conversations  
+- **Tech Stack**: Next.js 15.4.1, Vercel deployment, Upstash Redis, OpenAI Assistants API
+- **Domain**: solarbookers.com with dynamic company slug URLs
+- **User Flow**: Webhook → AI qualification → Demo creation → Email with link → Prospect clicks → Chat interface
+
+## Goal
+Make the system work for ANY industry by making the AI chatbot prompts dynamic instead of hardcoded for solar.
+
+## Core Changes Required
+The ONLY thing that needs to change is making the hardcoded solar prompt dynamic in `/api/create-prototype/route.tsx`. Currently the assistant instructions are hardcoded with:
+- Solar-specific messaging 
+- Solar-specific qualification questions
+- Solar-specific company name (Solar Bookers)
+- Solar-specific service descriptions
+
+## Technical Requirements
+
+### Primary Change: Dynamic Prompt System
+- Replace hardcoded solar prompt with dynamic prompt generation
+- Accept industry/niche parameter in API calls
+- Generate appropriate prompts based on industry type
+- Maintain exact same structure and flow, just different content
+
+### Supported Industries (Initial)
+- Solar (keep existing as template)
+- HVAC/Air Conditioning
+- Roofing
+- Windows/Doors
+- Security Systems
+- Landscaping
+- Real Estate
+- Insurance
+- Financial Services
+- Home Improvement
+
+### Implementation Approach
+1. **Extract Current Prompt**: Move hardcoded solar prompt to template
+2. **Create Industry Templates**: Build prompt templates for each niche
+3. **Add Industry Parameter**: Accept industry type in API payload
+4. **Dynamic Prompt Generation**: Select and populate appropriate template
+5. **Maintain All Logic**: Keep same qualification flow, just different questions
+
+## Success Criteria
+- Same exact system architecture and workflow
+- Same user experience and flow
+- Only the chatbot conversation content changes based on industry
+- All existing functionality works identically
+- Easy to add new industries by adding new prompt templates
+
+## Key Constraints
+- **DO NOT change the architecture**
+- **DO NOT change the structure** 
+- **DO NOT change the workflow**
+- **DO NOT change the API endpoints**
+- **ONLY change the prompt content generation**
+
+## Questions to Clarify
+1. How should the industry type be passed to the API? (query parameter, request body field, etc.)
+2. What should be the default industry if none specified?
+3. Should we maintain the solarbookers.com domain or make that dynamic too?
+4. What are the specific qualification questions for each industry?
+
+## Current Working System
+The solar system is fully operational and working perfectly. This is purely about making it work for other industries without breaking anything that already works. 

@@ -1,0 +1,384 @@
+{
+  "name": "AI SDR (direct approach)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "database-reactivation-webhook",
+        "options": {}
+      },
+      "id": "13665822-311c-4d87-8a81-3a3af5efb312",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1860,
+        140
+      ],
+      "webhookId": "webhook-database-reactivation"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"interested\"]}}",
+              "value2": "YES"
+            }
+          ]
+        }
+      },
+      "id": "39e5f79a-3efd-4684-996c-358633b6702e",
+      "name": "Is Interested?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        740,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.instantly.ai/api/v2/emails/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer MzRhNmM3ZjAtZDQzOS00NWRkLThlMzctNjgwMzYxY2MzZWU4OnBZRkZNeUlkb1hhaQ=="
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "eaccount",
+              "value": "={{$json.eaccount}}"
+            },
+            {
+              "name": "reply_to_uuid",
+              "value": "={{$json.reply_to_uuid}}"
+            },
+            {
+              "name": "subject",
+              "value": "={{$json.subject}}"
+            },
+            {
+              "name": "to_address_email_list",
+              "value": "={{$json.to_address_email_list}}"
+            },
+            {
+              "name": "body",
+              "value": "={{$json.body}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "156f6bb4-c425-403c-94a0-b12aec57e319",
+      "name": "Send via Instantly1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1000,
+        120
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Bvqly2nT5PCZKmUp",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        180,
+        -280
+      ],
+      "id": "cbe955cc-79d3-4072-a424-4600e54e8986",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1660,
+        140
+      ],
+      "id": "67bec4f7-03ed-4e62-a0fa-ad52be75c2e9",
+      "name": "Wait",
+      "webhookId": "bdd924d0-9cef-48f9-922f-f8f6aaae7cf6"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Database Reactivation SDR Guidelines\n\nconst guidelines = `\n# Database Reactivation Sales Guidelines\n\n## Our Service\n- We offer database reactivation services to turn inactive leads into revenue\n- We re-engage dormant contacts in client databases through targeted outreach\n- We help businesses maximize their existing assets without acquiring new leads\n- Our service typically reduces churn by 20-30% and generates immediate ROI\n\n## Most Common Responses & How to Handle\n\n### Questions about the service\n**\"What exactly is database reactivation?\" / \"How does this work?\" / \"Tell me more\"**\n- Database reactivation identifies and re-engages dormant contacts in your existing database\n- We use personalized email/SMS sequences to spark renewed interest\n- We turn \"dead\" data into revenue opportunities without starting from scratch\n- Most clients see 20-30% of inactive leads become responsive again\n- **Always offer to schedule a brief call to discuss their specific database**\n\n**\"How much does this cost?\" / \"What's your pricing?\"**\n- Pricing depends on database size and complexity\n- Most clients see ROI within 30-60 days\n- We offer performance-based options to minimize risk\n- **Always suggest a quick call to assess their database and provide accurate pricing**\n\n**\"Do you guarantee results?\" / \"What kind of results do you get?\"**\n- Typical results: 20-30% reactivation rate on dormant leads\n- Most clients see immediate response within first week\n- We offer performance guarantees based on database quality\n- Results vary by industry - some see up to 40% reactivation\n- **Offer to review their database to give specific projections**\n\n### Interest Assessment\n**Clear YES signals:**\n- Asks about pricing, process, or results\n- Wants to know timeline or next steps\n- Mentions their inactive database or lead challenges\n- Asks about scheduling a call or demo\n- Shows concern about wasted leads or missed opportunities\n\n**Clear NO signals:**\n- Says \"not interested\" or \"we're good\"\n- Asks to be removed from contact\n- Says they don't have a database or inactive leads\n- Gives clear rejection without questions\n\n## Industry-Specific Approaches\n\n### High-Value Industries (Recruitment, SaaS, Financial Services, Real Estate)\n- Emphasize revenue impact and cost per acquisition savings\n- Mention typical database sizes and reactivation potential\n- Focus on competitive advantage and speed to market\n\n### Service Industries (Consulting, Marketing Agencies, IT Services)\n- Focus on client retention and relationship building\n- Emphasize the consultative value they can provide to their own clients\n- Mention how this can become a service they offer\n\n### E-commerce and Retail\n- Focus on customer lifetime value and repeat purchases\n- Mention seasonal reactivation opportunities\n- Emphasize cart abandonment and past customer re-engagement\n\n## Objection Handling\n\n### \"We already do email marketing\" / \"We have our own system\"\n- Acknowledge their current efforts\n- Explain this is specifically for dormant/inactive contacts\n- Most internal efforts miss 60-70% of reactivation opportunities\n- Offer to audit their current approach for gaps\n\n### \"Our database is too old\" / \"These leads are dead\"\n- Perfect! Those are exactly the leads that have the highest potential\n- Older databases often have less competition for attention\n- We specialize in \"impossible\" reactivations\n- Share success story of X-month old database generating $Y revenue\n\n### \"We don't have time\" / \"Too busy\"\n- This is completely done-for-you - zero time investment\n- Most clients see results while they focus on other priorities\n- Takes longer to NOT do it than to set it up\n- **Offer a 15-minute assessment call to minimize their time investment**\n\n### \"We tried this before and it didn't work\"\n- Ask what approach they used previously\n- Most attempts fail due to generic messaging or poor segmentation\n- We use AI-powered personalization and proven sequences\n- Different from typical \"batch and blast\" approaches\n\n## Our Value Propositions\n- Turn dormant leads into immediate revenue within 30-60 days\n- 20-30% typical reactivation rate (some industries higher)\n- Done-for-you service requiring zero client time investment\n- Performance-based pricing options available\n- Proven sequences and AI-powered personalization\n- Industry-specific expertise across 10+ verticals\n\n## Response Style\n- Professional and results-focused\n- Use specific numbers and percentages when possible\n- Show understanding of their business challenges\n- Always push toward a discovery call\n- Be confident about the service value\n- Focus on ROI and business impact\n\n## What NOT to do\n- Don't get into technical details about the process\n- Don't over-promise unrealistic results\n- Don't sound pushy or desperate\n- Don't give away too much information without scheduling a call\n- Don't dismiss their current marketing efforts\n- Don't get stuck answering endless questions via email\n- Always push toward a phone conversation for qualified prospects\n`;\n\n// Return the item with guidelines added\nreturn [{\n  json: {\n    ...$json,\n    sales_guidelines: guidelines\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1220,
+        140
+      ],
+      "id": "99d820a1-7009-44ef-9163-ff0b31c3ccb3",
+      "name": "SDR behavior"
+    },
+    {
+      "parameters": {
+        "jsCode": "/* ---------- Fetch thread with automatic retry ---------- */\n\n/*\n   Tries up to 5 times to GET /emails/{id}.\n   Waits 2 seconds between tries to give Instantly time\n   to finish indexing the email after the webhook fires.\n   Add or shorten attempts / delay by changing MAX_TRIES or WAIT_MS.\n*/\n\nconst MAX_TRIES = 5;\nconst WAIT_MS   = 2000;\nconst TOKEN     = 'Bearer MzRhNmM3ZjAtZDQzOS00NWRkLThlMzctNjgwMzYxY2MzZWU4OnBZRkZNeUlkb1hhaQ==';\n\n// helper: pause\nconst sleep = ms => new Promise(r => setTimeout(r, ms));\n\n// get the email_id that came in from the webhook\nconst emailId = $json.email_id ?? $json.body?.email_id;\nif (!emailId) throw new Error('No email_id on item; cannot fetch thread.');\n\nlet thread = null;\n\nfor (let attempt = 1; attempt <= MAX_TRIES; attempt++) {\n  try {\n    thread = await this.helpers.httpRequest({\n      method: 'GET',\n      url: `https://api.instantly.ai/api/v2/emails/${emailId}?include_messages=true&limit=5`,\n      headers: { Authorization: TOKEN },\n      json: true,\n    });\n    break; // success\n  } catch (err) {\n    // If it's the last attempt, re‑throw so the workflow fails visibly\n    if (attempt === MAX_TRIES) throw err;\n\n    // Otherwise wait a bit then retry\n    await sleep(WAIT_MS);\n  }\n}\n\n// attach the thread JSON for downstream nodes\nitems[0].json.thread = thread;\nreturn items;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1440,
+        140
+      ],
+      "id": "a7c07b95-3d06-4836-a489-2439510b309a",
+      "name": "Fetch email thread"
+    },
+    {
+      "parameters": {
+        "jsCode": "// FIXED - Corrected Data Passthrough\nlet logs = ['Data Passthrough node started.'];\nconst data = $json.body || {};\n\nlogs.push('Extracting data from webhook body...');\n\n// Use the correct keys from the provided log data\nconst companyName = data.organization_name || '';\nconst firstName = (data.name || 'there').split(' ')[0];\nconst leadEmail = data.lead_email || '';\nconst eaccount = data.email_account || '';\nconst replyText = data.reply_text || '';\n\n// Clean the reply text\nconst cleanReply = replyText.split(/On .* wrote:|--- FULL THREAD ---/)[0].trim();\n\nif (companyName) {\n    logs.push(`SUCCESS: Extracted Company Name: \\\"${companyName}\\\"`);\n} else {\n    logs.push('ERROR: Could not find organization_name.');\n}\n\nif (eaccount) {\n    logs.push(`SUCCESS: Extracted eaccount: \\\"${eaccount}\\\"`);\n} else {\n    logs.push('ERROR: Could not find email_account.');\n}\n\n// FIXED: Pre-generate a slug-based URL for the AI prompt using correct Vercel domain\nconst demoSlug = (companyName || 'demo').toLowerCase()\n  .replace(/\\b(llc|inc|corp|ltd|co)\\b/g, '')\n  .replace(/[^a-z0-9\\s-]/g, '')\n  .replace(/\\s+/g, '-')\n  .replace(/-+/g, '-')\n  .replace(/^-|-$/g, '');\nconst provisionalDemoUrl = `https://solarbookers.com/${demoSlug}`;\n\nlogs.push('Data Passthrough node finished.');\n\nreturn [{\n  json: {\n    ...$json, // Pass original data through\n    // Add correctly parsed top-level fields for downstream nodes\n    lead_email: leadEmail,\n    clean_lead_reply_text: cleanReply,\n    first_name: firstName,\n    organization_name: companyName,\n    eaccount: eaccount,\n    sendingaccountfirstname: (eaccount.split('@')[0].charAt(0).toUpperCase() + eaccount.split('@')[0].slice(1)),\n    demo_url: provisionalDemoUrl, // This is the PROVISIONAL url for the AI\n    execution_log: logs\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1020,
+        140
+      ],
+      "id": "3890bf83-a4fb-44b9-a46f-05e83e9f67e2",
+      "name": "Data passthrough"
+    },
+    {
+      "parameters": {
+        "jsCode": "// FIXED - Build Instantly Payload (Corrected API URL)\nlet logs = ['Build Instantly payload node started.'];\n\nconst aiOutput = $json.output ? JSON.parse($json.output) : {};\nconst isInterested = aiOutput.interested === 'YES';\nlogs.push(`AI classified lead as interested: ${isInterested}`);\n\n// --- START: CORRECTED DATA MAPPING ---\nconst companyName = $json.organization_name || $json.body?.organization_name || '';\nconst sendingMailbox = $json.eaccount || $json.body?.email_account || '';\nconst leadEmail = $json.lead_email || $json.body?.lead_email || '';\nconst contactName = $json.first_name || ($json.body?.name || 'there').split(' ')[0];\nconst jobTitle = $json.title || $json.body?.jobTitle || '';\nconst location = `${$json.body?.city || ''}, ${$json.body?.state || ''}`.replace(/^,\\s*|,\\\\s*$/g, '');\nconst emailId = $json.body?.email_id || $json.email_id || '';\n// --- END: CORRECTED DATA MAPPING ---\n\nlet demoCreated = false;\nlet actualDemoUrl = '';\n\nif (isInterested && companyName) {\n    logs.push(`Attempting to create demo for company: \\\"${companyName}\\\"`);\n    try {\n        const payload = {\n            companyName: companyName,\n            location: location,\n            contactEmail: leadEmail,\n            contactName: contactName,\n            title: jobTitle,\n        };\n        logs.push(`Calling Vercel API with payload: ${JSON.stringify(payload)}`);\n\n        // FIXED: Use the custom domain\n        const demoResponse = await this.helpers.httpRequest({\n            method: 'POST',\n            url: 'https://solarbookers.com/api/create-prototype',\n            headers: { 'Content-Type': 'application/json' },\n            body: payload,\n            json: true,\n            timeout: 30000 // Increased timeout\n        });\n\n        if (demoResponse && demoResponse.url) {\n            actualDemoUrl = demoResponse.url;\n            demoCreated = true;\n            logs.push(`SUCCESS: Demo creation successful. REAL URL: ${actualDemoUrl}`);\n        } else {\n            throw new Error('API response did not contain a URL.');\n        }\n\n    } catch (error) {\n        logs.push(`ERROR: Demo creation API call FAILED: ${error.message}`);\n        \n        // FALLBACK: Generate a working demo URL manually if API fails\n        const demoSlug = companyName.toLowerCase()\n            .replace(/\\b(llc|inc|corp|ltd|co)\\b/g, '')\n            .replace(/[^a-z0-9\\s-]/g, '')\n            .replace(/\\s+/g, '-')\n            .replace(/-+/g, '-')\n            .replace(/^-|-$/g, '');\n        \n        actualDemoUrl = `https://solarbookers.com/${demoSlug}`;\n        logs.push(`FALLBACK: Using manual demo URL: ${actualDemoUrl}`);\n        demoCreated = true; // Set to true so the link gets included\n    }\n} else {\n    if (!isInterested) logs.push('Skipping demo creation: Lead was not interested.');\n    if (!companyName) logs.push('Skipping demo creation: Company Name was missing.');\n}\n\nconst senderFirst = ($json.sendingaccountfirstname || 'Oden');\nlet replyBody = (aiOutput.message || '').trim();\n\nif (demoCreated && actualDemoUrl) {\n    logs.push('Demo was created, adding REAL link to email.');\n    const demoText = `\\n\\nI've prepared a working prototype that shows how this could work for ${companyName}. You can view it here: ${actualDemoUrl}`;\n    replyBody += demoText;\n} else {\n    logs.push('Demo was NOT created, link will NOT be added to email.');\n}\n\nconst finalHtml = replyBody.replace(/\\n/g, '<br>');\nconst signatureHtml = `<br><br>-${senderFirst}<br><br>Sent from my iPhone`;\nconst subject = $json.body?.reply_subject || 'Re: (no subject)';\n\nlogs.push('Build Instantly payload node finished.');\n\nreturn [{\n  json: {\n    eaccount: sendingMailbox,\n    reply_to_uuid: emailId,\n    subject: subject,\n    to_address_email_list: leadEmail,\n    body: {\n      html: finalHtml + signatureHtml,\n      text: replyBody + `\\n\\n-${senderFirst}\\n\\nSent from my iPhone`\n    },\n    workflow_meta: {\n      lead_qualified: isInterested,\n      demo_attempted: isInterested && !!companyName,\n      demo_created: demoCreated,\n      demo_url: actualDemoUrl,\n      company_name: companyName,\n      execution_logs: logs\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        120
+      ],
+      "id": "56d36baa-34e2-4cd0-b35b-23cde60c0bce",
+      "name": "Build Instantly payload"
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_Mg778qKZlXbo7jARcq4ppSv6",
+          "mode": "list",
+          "cachedResultName": "Jon"
+        },
+        "prompt": "define",
+        "text": "=Reply ONLY with a single JSON object.\nNothing is allowed outside the braces.\n\nRequired shape ⬇️\n{\n  \"interested\": \"YES\" | \"NO\",\n  \"message\": \"<your reply here>\"\n}\n\nDATABASE REACTIVATION SALES GUIDELINES:\n{{$json.sales_guidelines}}\n\nLEAD CONTEXT:\nFirst Name: {{$json.first_name}}\nTitle: {{$json.title}}\nCompany: {{$json.organization_name}}\nDescription: {{$json.organization_short_description}}\nIndustry: {{$json.industry}}\nCity: {{$json.city}}, {{$json.state}}\n\nLEAD'S MESSAGE:\n{{$json.clean_lead_reply_text}}\n\nCRITICAL QUALIFICATION RULES:\n- ANY question about pricing, cost, or \"how much\" = \"YES\"\n- ANY question about the service or process = \"YES\"\n- Words like \"possibly\", \"maybe\", \"might be\", \"could be\" = \"YES\"\n- Asking for more information or details = \"YES\"\n- Mentioning competitors or comparisons = \"YES\"\n- ONLY respond \"NO\" if they explicitly say \"not interested\", \"no thanks\", or ask to be removed\n\nRESPONSE INSTRUCTIONS FOR INTERESTED LEADS:\n- Answer their specific question about database reactivation\n- Reference their location ({{$json.city}}, {{$json.state}}) and business context\n- Use {{$json.organization_short_description}} to show you understand their business model\n- Connect database reactivation to their specific industry/service mentioned in description\n- For interested leads, ALWAYS mention the working demo you've prepared\n- Use this exact demo URL: {{$json.demo_url}}\n- Explain it's a working prototype branded specifically for {{$json.organization_name}}\n- Suggest they view the demo AND schedule a call\n- Position as immediate value they can see right now\n\nRESPONSE TEMPLATE FOR INTERESTED LEADS:\n\"Great question about [their question]! Given {{$json.organization_name}}'s focus on [reference something from {{$json.organization_short_description}}], database reactivation could be particularly valuable for turning your dormant client leads into revenue.\n\nI've actually already prepared a working prototype specifically for {{$json.organization_name}} that shows exactly how this works for [their industry/business type]. You can view it here: {{$json.demo_url}}\n\nThis demo shows the personalized approach we'd use for your business in {{$json.city}}, {{$json.state}}, tailored to your [reference their business model/focus from description].\n\nLet's schedule a brief call to discuss your specific database and how we can customize this further for {{$json.organization_name}}'s unique approach. When works best for you this week?\"\n\nINSTRUCTIONS:\n- Apply the qualification rules above - err on the side of YES\n- For interested leads, ALWAYS include the demo URL from {{$json.demo_url}}\n- Be professional but direct about the business value\n- Write 1 short sentence per paragraph\n- Put EXACTLY two newlines (\\n\\n) between each paragraph/sentence\n- Use plain text only (no HTML, no markdown, no backticks)\n- End every message with two newlines (\\n\\n) followed by \"Sent from my iPhone\"\n- Do NOT include a signature like \"-Name\" as this will be added automatically",
+        "options": {}
+      },
+      "id": "21a8a55d-db88-4c11-8e36-cf0e3df253e3",
+      "name": "Qualify lead",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -560,
+        140
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "S6tFxLsYuWyM8nHj",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiOutput = $json.output ? JSON.parse($json.output) : {};\n\nreturn [{\n  json: {\n    // keep the full webhook item\n    ...$input.first().json,\n    // add the AI fields\n    interested: aiOutput.interested,\n    message: aiOutput.message\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        140
+      ],
+      "id": "d6e6b069-ddfa-4c28-9434-875b00581849",
+      "name": "Parse Message"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Add this as a new Code node BEFORE your AI node to debug data flow\n// Call it \"Debug Data Flow\"\n\nconsole.log('=== DEBUG DATA FLOW ===');\nconsole.log('Full input object:', JSON.stringify($json, null, 2));\nconsole.log('Available fields:');\nObject.keys($json).forEach(key => {\n  console.log(`- ${key}:`, typeof $json[key], $json[key] ? $json[key].toString().substring(0, 50) + '...' : 'empty');\n});\n\nconsole.log('=== CHECKING REQUIRED FIELDS ===');\nconst requiredFields = [\n  'first_name', 'title', 'organization_name', 'organization_short_description',\n  'industry', 'city', 'state', 'clean_lead_reply_text', 'sales_guidelines', 'demo_url'\n];\n\nrequiredFields.forEach(field => {\n  const value = $json[field];\n  console.log(`${field}:`, value ? '✅ Present' : '❌ Missing', value ? value.toString().substring(0, 30) + '...' : '');\n});\n\n// Pass through all data unchanged\nreturn [{\n  json: $json\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        140
+      ],
+      "id": "06bd33de-aeb0-4b47-8b18-005f4a856480",
+      "name": "Debug data flow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Interested?1": {
+      "main": [
+        [
+          {
+            "node": "Send via Instantly1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send via Instantly1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Build Instantly payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Fetch email thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SDR behavior": {
+      "main": [
+        [
+          {
+            "node": "Data passthrough",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch email thread": {
+      "main": [
+        [
+          {
+            "node": "SDR behavior",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data passthrough": {
+      "main": [
+        [
+          {
+            "node": "Debug data flow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Instantly payload": {
+      "main": [
+        [
+          {
+            "node": "Is Interested?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualify lead": {
+      "main": [
+        [
+          {
+            "node": "Parse Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Debug data flow": {
+      "main": [
+        [
+          {
+            "node": "Qualify lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b41cc0d8-4c2d-4b92-85d4-0fbe85a179d3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5d59cf67cb16d3c74e811745baeeb988305ae4816cd3bbb9e7c6fc9ae01c357f"
+  },
+  "id": "rny4Fg5zol50eR3q",
+  "tags": []
+}
