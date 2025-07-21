@@ -185,7 +185,7 @@ FAQ:
       demoUrl: demoUrl,       // Keep for backward compatibility
       companySlug: companySlug,
       calendarLink: dynamicCalendarLink,
-      message: `Solar consultation assistant created for ${name} at ${organization_name}`
+      message: `${industryText} consultation assistant created for ${name} at ${organization_name}`
     };
 
     console.log('Returning response:', response);
