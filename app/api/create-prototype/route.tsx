@@ -85,8 +85,8 @@ export async function POST(request: NextRequest) {
     console.log('Industry text used:', industryText);
     console.log('Template test - expecting industry in message:', `${industryText} consultation assistant`);
 
-    // Debug the first message construction
-    const firstMessage = `It's Sarah from ${client_company_name} here. Is this the same ${name} that got a quote for ${industryText} from us in the last couple of months?`;
+    // Debug the first message construction - let AI generate industry-appropriate contact reason
+    const firstMessage = `It's Sarah from ${client_company_name} here. Is this the same ${name} that contacted us about ${industryText} services in the last couple of months?`;
     console.log('First message will be:', firstMessage);
 
     // Initialize OpenAI client inside function to avoid build-time issues
@@ -112,7 +112,15 @@ Your Output style: casual message, conversational, UK Idiom, British dialect
 ###
 Your training: The Challenger Sale, ${industryText}
 ###
-FIRST Message: "It's Sarah from ${client_company_name} here. Is this the same ${name} that got a quote for ${industryText} from us in the last couple of months?"
+FIRST Message: "It's Sarah from ${client_company_name} here. Is this the same ${name} that contacted us about ${industryText} services in the last couple of months?"
+
+IMPORTANT: Use industry-appropriate contact reasons in your responses. Examples:
+- Dental: "inquired about a cleaning", "asked about teeth whitening", "contacted us about dental care"
+- Automotive: "inquired about financing", "asked about a vehicle", "contacted us about service"
+- Legal: "reached out about legal representation", "inquired about consultation"
+- Chiropractic: "contacted us about pain relief", "inquired about treatment"
+- Business Funding: "asked about funding options", "inquired about business loans"
+Use realistic reasons people would contact a ${industryText} business, not generic "quotes".
 ###
 Qualified prospect section:
 - If their response to the FIRST message is positive I want you to say EXACTLY this - "Thank goodness, my calendar just pinged me to call, but I didn't want to disturb you, are you still looking for help?" but if their response to the FIRST message was negative I want you to say EXACTLY this "Sorry about that, just to confirm, are you interested in ${industryText} services?". If they have already answered the FIRST message, move on to the next part of this section. 
