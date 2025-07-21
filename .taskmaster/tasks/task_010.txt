@@ -1,0 +1,146 @@
+# Task ID: 10
+# Title: Build Integration Test Suite Page
+# Status: done
+# Dependencies: 9
+# Priority: high
+# Description: Create a test suite page that allows manual validation of each integration point independently, including Redis operations, OpenAI assistant creation, URL generation, and n8n workflow integration.
+# Details:
+Develop a protected admin page at `/admin/test-suite` that provides UI controls to test each component of the system:
+
+1. Create a Next.js page with TypeScript and Tailwind CSS styling:
+   - Organized test grid layout with color-coded test categories (blue for debug, green for integration, orange for n8n)
+   - Test data configuration panel for customizing company/contact information
+   - Real-time loading states with spinners and result display
+   - Color-coded success/failure indicators
+   - Detailed JSON result display with syntax highlighting
+
+2. Implement Debug Tests (6 tests total):
+   - Complete System Debug (all checks)
+   - Redis Connection (set/get operations, company data lookup)
+   - OpenAI API (model access, assistant functionality)
+   - Environment Variables (validation of required vars)
+   - URL Generation (n8n-compatible slug algorithm)
+   - Company Mappings (Redis key listings)
+
+3. Implement Integration Tests (3 tests total):
+   - Create Prototype (full demo site creation)
+   - Company Assistant Lookup (Redis mapping retrieval)
+   - Chat Functionality (end-to-end chat flow)
+
+4. Implement n8n Workflow Tests:
+   - n8n webhook endpoint tests (verify proper data reception)
+   - Error handling scenarios (test with invalid data, missing fields)
+   - Data validation tests (verify data integrity throughout workflow)
+   - Test data cleanup functionality (remove test artifacts)
+   - n8n workflow health checks (verify workflow status)
+   - Bulk/load testing capabilities (simulate multiple simultaneous requests)
+   - Test sequencing and automation (run tests in specific order)
+
+5. Add technical features:
+   - Query parameter support for targeted debug testing
+   - POST endpoint testing for advanced functionality
+   - Error handling with success/failure indicators
+   - TypeScript with proper interfaces
+
+6. Add basic authentication to protect the test suite page
+
+# Test Strategy:
+Manually test each component through the UI, verifying that all test endpoints return expected results. Test with valid and invalid inputs to ensure proper error handling. Verify that the test suite accurately reflects the state of each integration point. Use the test suite to diagnose the n8n workflow integration issues identified in the PRD. Test n8n webhook endpoints with various payloads to verify proper handling. Validate error scenarios by sending malformed data. Verify test data cleanup functionality properly removes test artifacts. Run bulk tests to ensure system stability under load.
+
+# Subtasks:
+## 1. Create UI layout with Tailwind CSS [done]
+### Dependencies: None
+### Description: Implement the test suite page with Tailwind CSS styling, organized grid layout, and color-coded test categories
+### Details:
+
+
+## 2. Implement test data configuration panel [done]
+### Dependencies: None
+### Description: Create a panel for customizing company and contact information used in tests
+### Details:
+
+
+## 3. Implement Debug Tests [done]
+### Dependencies: None
+### Description: Create 6 debug tests including system debug, Redis connection, OpenAI API, environment variables, URL generation, and company mappings
+### Details:
+
+
+## 4. Implement Integration Tests [done]
+### Dependencies: None
+### Description: Create 3 integration tests for prototype creation, company assistant lookup, and chat functionality
+### Details:
+
+
+## 5. Add loading states and result display [done]
+### Dependencies: None
+### Description: Implement real-time loading indicators with spinners and JSON result display with syntax highlighting
+### Details:
+
+
+## 6. Add query parameter support [done]
+### Dependencies: None
+### Description: Implement support for targeted debug testing via query parameters
+### Details:
+
+
+## 7. Add TypeScript interfaces [done]
+### Dependencies: None
+### Description: Convert JavaScript to TypeScript with proper interfaces for type safety
+### Details:
+
+
+## 8. Implement authentication [done]
+### Dependencies: None
+### Description: Add basic authentication to protect the test suite page
+### Details:
+
+
+## 9. Create n8n webhook endpoint tests [done]
+### Dependencies: None
+### Description: Implement tests to verify n8n webhook endpoints properly receive and process data
+### Details:
+Create tests that send various payloads to n8n webhook endpoints and verify proper data reception and processing. Include tests for different data formats and payload sizes.
+
+## 10. Implement error handling scenario tests [done]
+### Dependencies: None
+### Description: Create tests for error handling scenarios with invalid data and missing fields
+### Details:
+Develop tests that intentionally send malformed data, missing required fields, and other error conditions to verify proper error handling in n8n workflows.
+
+## 11. Add data validation tests [done]
+### Dependencies: None
+### Description: Create tests to verify data integrity throughout n8n workflows
+### Details:
+Implement tests that track data as it moves through different stages of n8n workflows to ensure data integrity is maintained.
+
+## 12. Implement test data cleanup functionality [done]
+### Dependencies: None
+### Description: Create functionality to clean up test data after test execution
+### Details:
+Develop cleanup routines that remove test artifacts from Redis, databases, and other storage after tests complete to prevent test data accumulation.
+
+## 13. Add n8n workflow health checks [done]
+### Dependencies: None
+### Description: Implement tests to verify n8n workflow status and health
+### Details:
+Create tests that check the operational status of n8n workflows, including activation status, error rates, and execution history.
+
+## 14. Implement bulk/load testing capabilities [done]
+### Dependencies: None
+### Description: Create functionality to test system performance under load
+### Details:
+Develop tests that can simulate multiple simultaneous requests to n8n workflows to verify system stability under load conditions.
+
+## 15. Add test sequencing and automation [done]
+### Dependencies: None
+### Description: Implement functionality to run tests in specific sequences
+### Details:
+Create a test orchestration system that can run tests in specific orders to test complex workflows that span multiple systems.
+
+## 16. Update UI with n8n test category [done]
+### Dependencies: 10.1
+### Description: Add a new orange-colored category for n8n-specific tests in the UI
+### Details:
+Extend the existing UI layout to include a new category specifically for n8n workflow tests, using orange color coding to distinguish from other test types.
+

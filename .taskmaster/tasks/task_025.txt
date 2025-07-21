@@ -1,0 +1,131 @@
+# Task ID: 25
+# Title: Integrate Calendly Links in AI Responses and Fix Production Domain Detection
+# Status: done
+# Dependencies: 13, 14, 15, 20, 22
+# Priority: medium
+# Description: Enhance the chatbot system to automatically include Calendly scheduling links in AI responses and fix production domain detection to ensure n8n workflow properly processes solarbookers.com URLs.
+# Details:
+1. Calendly Integration:
+   - Create a configuration system to store Calendly links per company in the Redis database:
+     ```javascript
+     // Example Redis structure
+     {
+       "company:solarbookers:calendly": "https://calendly.com/solarbookers/30min"
+     }
+     ```
+   - Modify the OpenAI prompt template to include instructions for suggesting scheduling when appropriate:
+     ```javascript
+     const systemPrompt = `...existing instructions...
+     When a user expresses interest in scheduling a call or meeting, include the following Calendly link: {{calendlyLink}}
+     Format the link naturally in your response, such as "You can schedule a call with our team here: [Schedule a Call]({{calendlyLink}})"
+     ...`;
+     ```
+   - Update the chat API endpoint to fetch and inject the Calendly link into the prompt:
+     ```javascript
+     // In api/chat.js
+     const companySlug = req.query.company || '';
+     const calendlyLink = await redisClient.get(`company:${companySlug}:calendly`) || defaultCalendlyLink;
+     
+     const formattedPrompt = systemPrompt.replace('{{calendlyLink}}', calendlyLink);
+     ```
+   - Add a function to detect scheduling intent in user messages to trigger Calendly suggestions
+   - Implement proper markdown-to-HTML conversion to ensure links are clickable in the chat interface
+
+2. Production Domain Detection Fix:
+   - Analyze the current n8n workflow to identify where domain detection is failing
+   - Update URL generation logic to ensure consistent domain structure:
+     ```javascript
+     // utils/urlUtils.js
+     export function generateProductionUrl(companySlug) {
+       // Ensure we're using the production domain
+       return `https://solarbookers.com/${companySlug}`;
+     }
+     ```
+   - Implement domain validation to verify URLs match expected patterns:
+     ```javascript
+     export function isProductionUrl(url) {
+       return url.startsWith('https://solarbookers.com/');
+     }
+     ```
+   - Update the webhook handler to properly detect and process production URLs:
+     ```javascript
+     // api/webhook.js
+     if (isProductionUrl(incomingUrl)) {
+       // Extract company slug from URL
+       const slug = extractSlugFromUrl(incomingUrl);
+       // Process as production request
+     }
+     ```
+   - Add logging for URL processing to track and debug domain detection issues
+   - Create a test endpoint to verify domain detection is working correctly
+
+3. Duplicate URL and Signature Resolution:
+   - Implement deduplication logic for URLs in AI responses:
+     ```javascript
+     function deduplicateUrls(message) {
+       const urls = new Set();
+       // Extract all URLs from message
+       const urlRegex = /(https?:\/\/[^\s]+)/g;
+       const matches = message.match(urlRegex) || [];
+       
+       // Replace duplicates
+       let dedupedMessage = message;
+       matches.forEach(url => {
+         if (urls.has(url)) {
+           // Remove duplicate
+           dedupedMessage = dedupedMessage.replace(url, '');
+         } else {
+           urls.add(url);
+         }
+       });
+       
+       return dedupedMessage;
+     }
+     ```
+   - Fix signature duplication by ensuring the signature is only added once at the end of messages:
+     ```javascript
+     function addSignature(message) {
+       const signature = "\n\nBest regards,\nSolar Bookers Team";
+       // Remove any existing signatures
+       const messageWithoutSignature = message.replace(/\n\nBest regards,\nSolar Bookers Team/g, '');
+       // Add signature once
+       return messageWithoutSignature + signature;
+     }
+     ```
+   - Update the message processing pipeline to apply these fixes before sending responses
+
+# Test Strategy:
+1. Calendly Integration Testing:
+   - Create test cases for different user intents that should trigger Calendly suggestions:
+     - "I'd like to schedule a call"
+     - "Can someone contact me?"
+     - "I want to speak with a representative"
+   - Verify that the Calendly link appears correctly formatted in the AI response
+   - Test with multiple company configurations to ensure company-specific Calendly links are used
+   - Verify links are clickable and correctly redirect to the Calendly scheduling page
+   - Test edge cases where Calendly links are not found in Redis to ensure fallback to default link
+
+2. Production Domain Detection Testing:
+   - Create a test suite with various URL formats:
+     - https://solarbookers.com/company-name
+     - https://solarbookers.com/company-name/page
+     - http://solarbookers.com/company-name (non-HTTPS)
+     - https://www.solarbookers.com/company-name (with www)
+     - https://staging.solarbookers.com/company-name (staging environment)
+   - Verify each URL is correctly identified as production or non-production
+   - Test the n8n workflow with these URLs to confirm proper handling
+   - Create a monitoring system to log URL processing for ongoing verification
+   - Perform end-to-end testing by submitting forms on the production site and verifying proper workflow execution
+
+3. Duplicate URL and Signature Testing:
+   - Create test messages with multiple identical URLs and verify deduplication
+   - Test messages with various signature formats to ensure proper signature handling
+   - Verify that the final message contains exactly one signature in the correct format
+   - Test with real OpenAI responses to ensure the fixes work with actual AI-generated content
+   - Create a visual comparison test to show before/after examples of fixed messages
+
+4. End-to-End Testing:
+   - Set up a complete test environment that simulates the production flow
+   - Test the entire user journey from initial chat to scheduling via Calendly
+   - Verify all components work together seamlessly
+   - Document the test results with screenshots and logs

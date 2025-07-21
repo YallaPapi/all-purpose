@@ -1,6 +1,9 @@
 {
   "toolConfirmation": false,
   "permissions": {
-    "allow": ["*"]
+    "allow": [
+      "Bash(git add:*)"
+    ],
+    "deny": []
   }
 }

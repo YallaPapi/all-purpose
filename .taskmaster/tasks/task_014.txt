@@ -1,0 +1,176 @@
+# Task ID: 14
+# Title: Fix Redis Connection and Assistant Mapping
+# Status: done
+# Dependencies: 12, 13
+# Priority: high
+# Description: Resolve Redis connection issues and improve key storage/retrieval for company-assistant mappings to ensure demo sites load correctly.
+# Details:
+1. Implement a robust Redis connection with error handling and retry logic:
+
+```javascript
+// utils/redis.js
+import { Redis } from '@upstash/redis';
+
+let redisClient = null;
+
+export async function getRedisClient() {
+  if (redisClient) return redisClient;
+  
+  try {
+    redisClient = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+    
+    // Test connection
+    await redisClient.ping();
+    return redisClient;
+  } catch (error) {
+    console.error('Redis connection error:', error);
+    redisClient = null;
+    throw new Error(`Failed to connect to Redis: ${error.message}`);
+  }
+}
+
+export async function getAssistantId(companySlug) {
+  try {
+    const redis = await getRedisClient();
+    const key = `company:${companySlug}`;
+    const assistantId = await redis.get(key);
+    
+    if (!assistantId) {
+      console.warn(`No assistant found for company slug: ${companySlug}`);
+      return null;
+    }
+    
+    return assistantId;
+  } catch (error) {
+    console.error(`Error retrieving assistant for ${companySlug}:`, error);
+    throw error;
+  }
+}
+
+export async function storeAssistantMapping(companySlug, assistantId) {
+  try {
+    const redis = await getRedisClient();
+    const key = `company:${companySlug}`;
+    
+    // Store with expiration (30 days)
+    await redis.set(key, assistantId, { ex: 60 * 60 * 24 * 30 });
+    
+    // Store reverse lookup for debugging
+    await redis.set(`assistant:${assistantId}`, companySlug, { ex: 60 * 60 * 24 * 30 });
+    
+    return true;
+  } catch (error) {
+    console.error(`Error storing assistant mapping for ${companySlug}:`, error);
+    throw error;
+  }
+}
+```
+
+2. Update the company-assistant API endpoint to use the improved Redis utilities:
+
+```javascript
+// pages/api/company-assistant.js
+import { getAssistantId } from '../../utils/redis';
+
+export default async function handler(req, res) {
+  const { companySlug } = req.query;
+  
+  if (!companySlug) {
+    return res.status(400).json({ error: 'Company slug is required' });
+  }
+  
+  try {
+    const assistantId = await getAssistantId(companySlug);
+    
+    if (!assistantId) {
+      return res.status(404).json({ 
+        error: 'Assistant not found for this company',
+        companySlug 
+      });
+    }
+    
+    return res.status(200).json({ assistantId, companySlug });
+  } catch (error) {
+    console.error('Error retrieving assistant:', error);
+    return res.status(500).json({ 
+      error: error.message,
+      companySlug 
+    });
+  }
+}
+```
+
+3. Update the create-prototype endpoint to use the improved Redis utilities:
+
+```javascript
+// pages/api/create-prototype.js
+import { storeAssistantMapping } from '../../utils/redis';
+import { generateSlug, generateDemoUrl } from '../../utils/slugUtils';
+import OpenAI from 'openai';
+
+export default async function handler(req, res) {
+  try {
+    // ... extract fields from request
+    
+    const companySlug = generateSlug(companyName);
+    
+    // Create OpenAI assistant
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    
+    const assistant = await openai.beta.assistants.create({
+      name: `${companyName} Solar Assistant`,
+      instructions: `You are a helpful assistant for ${companyName}, a solar company located in ${location || 'the United States'}. Help potential customers learn about solar options.`,
+      model: "gpt-4-1106-preview",
+    });
+    
+    // Store mapping in Redis
+    await storeAssistantMapping(companySlug, assistant.id);
+    
+    // Generate demo URL
+    const demoUrl = generateDemoUrl(companyName);
+    
+    // Return success with demo URL
+    return res.status(200).json({
+      success: true,
+      demoUrl,
+      assistantId: assistant.id,
+      companySlug
+    });
+  } catch (error) {
+    console.error('Error creating prototype:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+```
+
+4. Add a Redis health check endpoint for monitoring:
+
+```javascript
+// pages/api/health/redis.js
+import { getRedisClient } from '../../../utils/redis';
+
+export default async function handler(req, res) {
+  try {
+    const redis = await getRedisClient();
+    const pingResult = await redis.ping();
+    
+    return res.status(200).json({
+      status: 'healthy',
+      ping: pingResult
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 'unhealthy',
+      error: error.message
+    });
+  }
+}
+```
+
+# Test Strategy:
+Test Redis connection with both valid and invalid credentials to verify error handling. Test storing and retrieving assistant mappings with various company slugs. Verify that Redis keys are properly formatted and have appropriate expiration times. Test the health check endpoint to ensure it correctly reports Redis status. Simulate Redis connection failures to verify retry logic works correctly.

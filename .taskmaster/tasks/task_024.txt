@@ -1,0 +1,86 @@
+# Task ID: 24
+# Title: Implement Two-Column Branded Demo Platform Layout
+# Status: done
+# Dependencies: 19, 21, 22, 23
+# Priority: medium
+# Description: Redesign the demo interface with a professional two-column layout featuring company branding in the left sidebar with logo and instructions, and an iPhone mockup display on the right side with clear SMS agent functionality explanation.
+# Details:
+1. Layout Structure Implementation:
+   - Create a responsive two-column grid layout with appropriate breakpoints
+   - Left column (sidebar): fixed width (25-30% on desktop) with company branding elements
+   - Right column: flexible width (70-75% on desktop) containing the iPhone mockup
+   - Implement collapsible sidebar for mobile views with toggle mechanism
+
+2. Left Sidebar Development:
+   - Design a clean, branded sidebar with consistent padding and spacing
+   - Create a prominent area for company logo placement (supporting SVG and PNG formats)
+   - Implement sections for:
+     - Company name and tagline with appropriate typography
+     - Demo explanation with concise, scannable text
+     - User instructions with numbered or bulleted steps
+     - "Act like a customer!" callout with visual emphasis (bold styling, accent color)
+   - Add subtle background styling that aligns with company brand colors
+
+3. Right Column Implementation:
+   - Center the existing iPhone mockup (from Task #23) in this column
+   - Ensure proper spacing around the device frame
+   - Optimize the iPhone mockup scaling for different viewport sizes
+   - Maintain the authentic iPhone UI styling from Task #22
+
+4. Branding Integration:
+   - Create a configuration system to dynamically inject company branding:
+     - Company name variable for use throughout the interface
+     - Color scheme variables that can be customized per client
+     - Logo placement with appropriate fallbacks
+   - Implement consistent typography that aligns with brand guidelines
+   - Add subtle branded elements (patterns, colors) that don't overwhelm the interface
+
+5. Instruction Content Development:
+   - Write clear, concise instructions explaining:
+     - How to interact with the demo ("Act like a customer!")
+     - What the SMS agent functionality is and how it works
+     - Expected response times and interaction patterns
+   - Use appropriate visual hierarchy to make instructions scannable
+   - Include small visual cues or icons to enhance understanding
+
+6. Deployment Pipeline:
+   - Set up a staging environment for testing the redesigned interface
+   - Create a deployment checklist for production release
+   - Implement a versioning system to track interface changes
+   - Document the deployment process for future updates
+
+# Test Strategy:
+1. Visual Consistency Testing:
+   - Verify the two-column layout renders correctly across all target devices and browsers
+   - Confirm that the company branding elements (logo, colors, typography) display consistently
+   - Test the responsive behavior at various breakpoints (desktop, tablet, mobile)
+   - Validate that the iPhone mockup maintains its authentic appearance in the right column
+
+2. Content and Instruction Validation:
+   - Review all instructional content for clarity, grammar, and alignment with product messaging
+   - Conduct user testing to ensure instructions are easily understood
+   - Verify that the "Act like a customer!" callout is prominently displayed and noticeable
+   - Confirm that the SMS agent functionality explanation is accurate and helpful
+
+3. Branding Implementation Testing:
+   - Test with multiple company profiles to ensure dynamic branding works correctly
+   - Verify that company name appears consistently throughout the interface
+   - Test logo display with various file formats and dimensions
+   - Validate color scheme application across all interface elements
+
+4. Responsive Design Testing:
+   - Test the collapsible sidebar functionality on mobile devices
+   - Verify that all content remains accessible and readable at all viewport sizes
+   - Confirm that touch interactions work properly on mobile devices
+   - Test landscape and portrait orientations on tablets and phones
+
+5. Performance Testing:
+   - Measure and optimize page load times with branding assets
+   - Test rendering performance across different device capabilities
+   - Verify that animations and transitions remain smooth on lower-end devices
+
+6. Production Deployment Validation:
+   - Perform a complete pre-launch checklist verification
+   - Validate the production environment matches staging results
+   - Conduct A/B comparison with the previous interface
+   - Monitor initial user interactions and gather feedback

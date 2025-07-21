@@ -1,0 +1,101 @@
+# Task ID: 12
+# Title: Fix API Endpoints to Handle N8N Field Mappings
+# Status: done
+# Dependencies: 11
+# Priority: high
+# Description: Update API endpoints to correctly handle the exact field names and data structures sent from the n8n workflow payload.
+# Details:
+Based on the field mapping analysis, update the following API endpoints to properly handle n8n payload fields:
+
+1. Update the `/api/create-prototype` endpoint to accept n8n field names:
+```javascript
+// pages/api/create-prototype.js
+export default async function handler(req, res) {
+  try {
+    // Extract fields using n8n field names with fallbacks to alternative names
+    const companyName = req.body.companyName || req.body.company_name || req.body.company;
+    const contactEmail = req.body.email || req.body.contactEmail || req.body.contact_email;
+    const location = req.body.location || req.body.city_state || req.body.cityState;
+    const phoneNumber = req.body.phone || req.body.phoneNumber || req.body.phone_number;
+    
+    // Validate required fields
+    if (!companyName) {
+      return res.status(400).json({ error: 'Company name is required' });
+    }
+    
+    // Generate slug consistently with n8n logic
+    const companySlug = companyName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    
+    // Create OpenAI assistant
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    
+    const assistant = await openai.beta.assistants.create({
+      name: `${companyName} Solar Assistant`,
+      instructions: `You are a helpful assistant for ${companyName}, a solar company located in ${location || 'the United States'}. Help potential customers learn about solar options.`,
+      model: "gpt-4-1106-preview",
+    });
+    
+    // Store mapping in Redis
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+    
+    await redis.set(`company:${companySlug}`, assistant.id);
+    
+    // Generate demo URL
+    const demoUrl = `https://solarbookers.com/${companySlug}`;
+    
+    // Return success with demo URL
+    return res.status(200).json({
+      success: true,
+      demoUrl,
+      assistantId: assistant.id,
+      companySlug
+    });
+  } catch (error) {
+    console.error('Error creating prototype:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+```
+
+2. Update the `/api/company-assistant` endpoint to ensure consistent slug generation:
+```javascript
+// pages/api/company-assistant.js
+export default async function handler(req, res) {
+  const { companySlug } = req.query;
+  
+  if (!companySlug) {
+    return res.status(400).json({ error: 'Company slug is required' });
+  }
+  
+  try {
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+    
+    const assistantId = await redis.get(`company:${companySlug}`);
+    
+    if (!assistantId) {
+      return res.status(404).json({ error: 'Assistant not found for this company' });
+    }
+    
+    return res.status(200).json({ assistantId });
+  } catch (error) {
+    console.error('Error retrieving assistant:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+```
+
+3. Add detailed logging to track field mappings and transformations
+
+# Test Strategy:
+Test API endpoints with exact payloads from n8n workflow. Verify that endpoints correctly handle all field variations. Test with missing fields to ensure proper error handling. Confirm that URL generation is consistent between n8n and API endpoints. Use the test suite page to validate each endpoint independently.

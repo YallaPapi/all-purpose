@@ -1,0 +1,175 @@
+# Task ID: 9
+# Title: Create Comprehensive Debug Endpoint
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Develop a debug endpoint that tests Redis connections, OpenAI API integration, and environment configuration to diagnose system issues.
+# Details:
+Create a new API route at `/api/debug` that performs the following checks:
+1. Redis connection test - verify connection to Upstash Redis, ability to set/get values, and company data lookup
+2. OpenAI API validation - test connection to OpenAI, model access, and Assistant API functionality
+3. Environment variable check - validate all required environment variables are present
+4. URL generation test - verify n8n-compatible slug generation algorithm produces consistent results
+5. Company mappings - list all stored company->assistant mappings in Redis
+
+Implementation should support both GET (diagnostics) and POST (interactive testing) operations with query parameters for targeted testing (redis, openai, environment, companies, urlGeneration).
+
+The endpoint should include:
+```javascript
+// pages/api/debug.js
+import { Redis } from '@upstash/redis'
+import OpenAI from 'openai'
+
+export default async function handler(req, res) {
+  // Determine which tests to run based on query parameters
+  const testsToRun = req.query.test ? [req.query.test] : ['redis', 'openai', 'environment', 'urlGeneration', 'companies'];
+  
+  const results = {
+    redis: { status: 'pending', details: null },
+    openai: { status: 'pending', details: null },
+    environment: { status: 'pending', details: null },
+    urlGeneration: { status: 'pending', details: null },
+    companies: { status: 'pending', details: null }
+  }
+  
+  // Handle POST requests for advanced testing
+  if (req.method === 'POST') {
+    // Add POST-specific testing functionality here
+    // - Chat testing
+    // - Redis data cleanup
+    // Return appropriate response
+  }
+  
+  // Test Redis connection
+  if (testsToRun.includes('redis')) {
+    try {
+      const redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+      const testKey = 'debug-test-' + Date.now()
+      await redis.set(testKey, 'test-value')
+      const value = await redis.get(testKey)
+      await redis.del(testKey)
+      results.redis = { status: 'success', details: 'Connection successful' }
+    } catch (error) {
+      results.redis = { status: 'error', details: error.message }
+    }
+  }
+  
+  // Test OpenAI connection
+  if (testsToRun.includes('openai')) {
+    try {
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      })
+      const assistants = await openai.beta.assistants.list({ limit: 1 })
+      results.openai = { status: 'success', details: `Found ${assistants.data.length} assistants` }
+    } catch (error) {
+      results.openai = { status: 'error', details: error.message }
+    }
+  }
+  
+  // Check environment variables
+  if (testsToRun.includes('environment')) {
+    const requiredVars = [
+      'OPENAI_API_KEY',
+      'UPSTASH_REDIS_REST_URL',
+      'UPSTASH_REDIS_REST_TOKEN',
+      // Add other required variables
+    ]
+    const missingVars = requiredVars.filter(v => !process.env[v])
+    results.environment = missingVars.length === 0 
+      ? { status: 'success', details: 'All required variables present' }
+      : { status: 'error', details: `Missing variables: ${missingVars.join(', ')}` }
+  }
+  
+  // Test URL generation
+  if (testsToRun.includes('urlGeneration')) {
+    try {
+      const testCompanies = ['Test Company Name', 'Solar & Wind Co.', 'Green Energy, Inc.']
+      const slugResults = testCompanies.map(company => {
+        const slug = company.toLowerCase().replace(/[^a-z0-9]/g, '-')
+        return { company, slug, url: `https://solarbookers.com/${slug}` }
+      })
+      results.urlGeneration = { status: 'success', details: slugResults }
+    } catch (error) {
+      results.urlGeneration = { status: 'error', details: error.message }
+    }
+  }
+  
+  // List company mappings
+  if (testsToRun.includes('companies')) {
+    try {
+      const redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+      const keys = await redis.keys('company:*')
+      const mappings = []
+      for (const key of keys) {
+        const value = await redis.get(key)
+        mappings.push({ key, value })
+      }
+      results.companies = { status: 'success', details: mappings }
+    } catch (error) {
+      results.companies = { status: 'error', details: error.message }
+    }
+  }
+  
+  return res.status(200).json(results)
+}
+```
+
+# Test Strategy:
+Test the debug endpoint by making both GET and POST requests with various query parameters to verify all checks run correctly. Test targeted functionality using query parameters (e.g., ?test=redis). Verify the company mappings feature correctly lists all stored Redis data. Test the advanced POST endpoints for chat testing and Redis data cleanup. Simulate failure conditions by temporarily modifying environment variables or disconnecting services to ensure proper error reporting. Verify the endpoint returns detailed diagnostic information for each integration point, especially focusing on n8n workflow integration issues.
+
+# Subtasks:
+## 1. Implement Redis connection testing [done]
+### Dependencies: None
+### Description: Implemented Redis connection testing with set/get operations and company data lookup functionality.
+### Details:
+
+
+## 2. Implement OpenAI API validation [done]
+### Dependencies: None
+### Description: Implemented OpenAI API validation with model access and assistant retrieval functionality testing.
+### Details:
+
+
+## 3. Implement environment variable checking [done]
+### Dependencies: None
+### Description: Implemented validation for all required environment variables.
+### Details:
+
+
+## 4. Implement URL generation testing [done]
+### Dependencies: None
+### Description: Implemented n8n-compatible slug generation algorithm testing with multiple examples.
+### Details:
+
+
+## 5. Implement company mappings listing [done]
+### Dependencies: None
+### Description: Implemented functionality to list all stored company->assistant mappings in Redis.
+### Details:
+
+
+## 6. Implement POST endpoints for advanced testing [done]
+### Dependencies: None
+### Description: Implemented POST endpoints for chat testing and Redis data cleanup.
+### Details:
+
+
+## 7. Add query parameter support for targeted testing [done]
+### Dependencies: None
+### Description: Added support for query parameters to run specific tests (redis, openai, environment, companies, urlGeneration).
+### Details:
+
+
+## 8. Document endpoint usage and test scenarios [done]
+### Dependencies: None
+### Description: Create documentation for the debug endpoint explaining all available tests, query parameters, and POST operations.
+### Details:
+
+

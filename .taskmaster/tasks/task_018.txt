@@ -1,0 +1,66 @@
+# Task ID: 18
+# Title: Migrate from Vercel Preview Domains to Production solarbookers.com Domain
+# Status: done
+# Dependencies: 12, 13, 14, 15, 16
+# Priority: medium
+# Description: Transition all application logic, integrations, and workflows from Vercel preview domains to the production solarbookers.com domain, updating domain detection, n8n workflow integration, and ensuring end-to-end system functionality.
+# Details:
+1. Update environment configuration to ensure the production deployment uses the solarbookers.com domain, following Vercel best practices for custom domain assignment (ensure the domain is assigned to the production branch and that all environment variables referencing the domain are updated accordingly).
+2. Refactor all domain detection logic throughout the codebase to default to solarbookers.com in production, while maintaining support for preview domains in non-production environments. Use environment variables such as NEXT_PUBLIC_ROOT_DOMAIN or VERCEL_URL to distinguish environments, and ensure all URL generation utilities reference the correct domain.
+3. Update n8n workflow integration: modify webhook URLs, callback URLs, and any API endpoints in the n8n workflow to use the production domain. Coordinate with the n8n workflow maintainers to update any hardcoded or dynamically generated URLs.
+4. Review and update all documentation and configuration files to reference the production domain where appropriate.
+5. Deploy to production and verify that the solarbookers.com domain is correctly assigned and serving the latest deployment (using Vercel dashboard and CLI as needed).
+6. Ensure that all redirects (e.g., www.solarbookers.com to solarbookers.com) are configured in Vercel's Domains tab if needed, following Vercel's redirect best practices.
+7. Perform a full end-to-end test of the workflow: from n8n demo creation, through API endpoints, to chat functionality, confirming that all components interact correctly under the production domain.
+
+# Test Strategy:
+- Deploy the application to production and verify that solarbookers.com serves the latest deployment and all endpoints are reachable.
+- Confirm that all domain detection logic correctly identifies the production environment and generates URLs using solarbookers.com.
+- Test the n8n workflow end-to-end: trigger a demo creation, ensure webhooks and callbacks use the production domain, and verify successful API interactions.
+- Validate chat functionality by initiating and completing a chat session, confirming OpenAI thread creation and persistence.
+- Use the integration test suite and end-to-end test scripts to simulate the complete workflow, ensuring all steps succeed with the production domain.
+- Check for proper redirects (e.g., www to apex domain) and absence of any references to preview domains in logs, emails, or user-facing URLs.
+
+# Subtasks:
+## 2. Refactor Domain Detection Logic in Codebase [done]
+### Dependencies: 18.1
+### Description: Update all domain detection logic to default to solarbookers.com in production while maintaining support for preview domains in non-production environments.
+### Details:
+Modify URL generation utilities and domain checks to use environment variables for distinguishing between production and preview environments, ensuring all generated URLs are accurate.
+
+## 3. Update n8n Workflow Integration for Production Domain [done]
+### Dependencies: 18.2
+### Description: Modify all webhook URLs, callback URLs, and API endpoints in n8n workflows to use the solarbookers.com domain, coordinating with workflow maintainers to update any hardcoded or dynamically generated URLs.
+### Details:
+Review all n8n workflows for domain references, update them to use the production domain, and ensure that any environment-based logic is consistent with the new configuration.
+
+## 4. Review and Update Documentation and Configuration Files [done]
+### Dependencies: 18.3
+### Description: Update all internal and external documentation, as well as configuration files, to reference the solarbookers.com production domain where appropriate.
+### Details:
+Search for outdated domain references in documentation, README files, and configuration templates, replacing them with the correct production domain.
+
+## 5. Configure Redirects and Deploy to Production [done]
+### Dependencies: 18.4
+### Description: Set up necessary redirects (e.g., www.solarbookers.com to solarbookers.com) in the Vercel Domains tab and deploy the latest code to production, ensuring the domain is correctly assigned and serving the latest deployment.
+### Details:
+Use Vercel's redirect configuration best practices to handle domain redirects, and verify deployment status via the Vercel dashboard and CLI.
+
+## 6. Perform End-to-End System Validation on Production Domain [done]
+### Dependencies: 18.5
+### Description: Conduct a comprehensive end-to-end test of all workflows, integrations, and application logic under the solarbookers.com domain to ensure full system functionality.
+### Details:
+Test the complete workflow from n8n demo creation through API endpoints to chat functionality, confirming that all components interact correctly and all URLs resolve as expected.
+
+## 7. Verify Domain Migration Completion [done]
+### Dependencies: 18.6
+### Description: Document and confirm all aspects of the domain migration are complete and functioning correctly.
+### Details:
+Create a final verification report confirming: solarbookers.com resolves correctly, n8n workflow is using https://solarbookers.com/api/create-prototype, API endpoints are using dynamic domain detection with solarbookers.com default, OpenAI assistant creation is working (asst_3Osm13Hv6AUYKMzbO91oGhhd), demo URL generation is functioning (https://solarbookers.com/test-solar), and all domain detection utilities are in place.
+
+## 1. Update Production Environment Configuration for solarbookers.com [done]
+### Dependencies: None
+### Description: Configure the production deployment to use the solarbookers.com domain, ensuring all environment variables and Vercel project settings reference the correct domain according to Vercel best practices.
+### Details:
+Assign the solarbookers.com domain to the production branch in the Vercel dashboard, update environment variables such as NEXT_PUBLIC_ROOT_DOMAIN or VERCEL_URL, and verify DNS and nameserver settings as needed.
+

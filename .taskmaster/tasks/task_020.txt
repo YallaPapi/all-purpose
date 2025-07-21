@@ -1,0 +1,53 @@
+# Task ID: 20
+# Title: Systematic Debugging and Resolution of Chatbot Functionality Issues
+# Status: done
+# Dependencies: 9, 15, 16, 19
+# Priority: medium
+# Description: Systematically diagnose and resolve chatbot functionality issues by following a structured debugging guide, leveraging debug endpoints, infrastructure checks, and browser console analysis, while adhering to the 30-minute rule and isolating components for targeted testing.
+# Details:
+1. Review the documented debugging guide and establish a clear workflow: start with the 30-minute rule—if an issue is not resolved within 30 minutes, escalate or seek assistance to avoid time sinks.
+2. Use the /api/debug and /api/test-chat-debug endpoints to verify the health of all critical integrations (Redis, OpenAI API, environment variables, URL generation, and company mappings). Log all results and compare with expected outputs.
+3. Check infrastructure status: confirm that all required services (databases, external APIs, hosting) are operational and accessible from the deployed environment. Use monitoring dashboards and logs for real-time status.
+4. Isolate components: systematically disable or mock dependencies (e.g., stub OpenAI responses, use test Redis data) to pinpoint the failing subsystem. Apply breakpoints and step-through debugging where possible.
+5. Analyze browser console errors in detail: reproduce the issue in the chat UI, capture all console errors and network requests, and trace failures back to their source (frontend, API, or external service).
+6. Test the chat API step by step: use tools like Postman or curl to send requests to each chat-related endpoint, starting with basic payloads and increasing complexity. Validate responses at each stage, referencing logs and debug output.
+7. Instrument code with detailed logging (including unique request IDs, timestamps, and context) to improve traceability and facilitate root cause analysis.
+8. Document all findings, fixes, and remaining issues for team visibility and future reference. Share insights and update the debugging guide as needed.
+9. When working with feature branches, verify deployment targets and domain configurations to ensure the correct branch is being deployed to production environments.
+
+Best practices include: automating regression tests after each fix, monitoring API performance metrics, and fostering a culture of collaborative debugging across engineering and product teams.
+
+# Test Strategy:
+- Trigger known chatbot failures and follow the debugging workflow step by step, documenting each action and outcome.
+- Use the /api/debug and /api/test-chat-debug endpoints to confirm all integrations are healthy; intentionally break one integration to verify detection and error reporting.
+- Simulate chat API requests with valid and invalid payloads, confirming that errors are logged, surfaced in the UI, and traceable via logs.
+- Reproduce issues in the browser, capture console and network errors, and verify that fixes resolve the root cause without introducing regressions.
+- Run automated and manual tests to ensure all chat functionality works as expected after fixes. Validate with both synthetic and real-world user scenarios, including edge cases and high-traffic simulations.
+- Verify that changes deployed to production at https://solarbookers.com/test-solar are functioning correctly, including both the professional UI redesign and chat functionality.
+- Test branch deployment processes to ensure proper merging from feature branches to main branch for production deployment.
+
+# Subtasks:
+## 1. Document branch deployment issue resolution [done]
+### Dependencies: None
+### Description: Document the resolution of the branch deployment issue where the claude-cursor-integration branch was being deployed to Vercel preview URLs while solarbookers.com production domain was pointing to the main branch. Include the process of merging changes to main branch and deploying to production.
+### Details:
+
+
+## 2. Integrate /api/test-chat-debug endpoint into debugging workflow [done]
+### Dependencies: None
+### Description: Update debugging documentation and procedures to include the new /api/test-chat-debug endpoint. Create guidelines for when to use this endpoint versus the existing /api/debug endpoint.
+### Details:
+
+
+## 3. Verify production deployment functionality [done]
+### Dependencies: None
+### Description: Perform comprehensive testing of the chat functionality and UI redesign on the production site at https://solarbookers.com/test-solar to ensure all features are working correctly after the merge to main branch.
+### Details:
+
+
+## 4. Create branch deployment checklist [done]
+### Dependencies: None
+### Description: Develop a checklist for future deployments that includes verification of branch targets, domain configurations, and proper merge procedures to prevent similar deployment issues.
+### Details:
+
+

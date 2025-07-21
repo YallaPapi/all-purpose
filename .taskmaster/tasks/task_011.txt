@@ -1,0 +1,51 @@
+# Task ID: 11
+# Title: Analyze N8N Workflow and Document Field Mappings
+# Status: done
+# Dependencies: 9
+# Priority: high
+# Description: Analyze the n8n workflow JSON to understand exact data flow and field mappings, documenting current vs. expected behavior at each integration point.
+# Details:
+1. Extract and analyze the n8n workflow JSON to identify all field names and data structures:
+   - Extract webhook payload structure
+   - Document field transformations within n8n
+   - Identify field names used when calling API endpoints
+
+2. Create a comprehensive mapping document that shows:
+   - Original field names from webhook source
+   - Transformed field names within n8n workflow
+   - Expected field names by API endpoints
+   - Any discrepancies or mismatches
+
+3. Document the exact URL generation logic used in n8n:
+```javascript
+// Example of current n8n URL generation logic (to be extracted from workflow):
+function generateSlug(companyName) {
+  return companyName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function generateDemoUrl(companyName) {
+  const slug = generateSlug(companyName);
+  return `https://solarbookers.com/${slug}`;
+}
+```
+
+4. Create a detailed flow diagram showing:
+   - Webhook trigger and data structure
+   - AI qualification step and data transformation
+   - Demo creation API call with field mappings
+   - Email sending via Instantly.ai with field mappings
+   - Expected user journey through demo site
+
+5. Document all identified issues and discrepancies:
+   - Field name mismatches between n8n and API
+   - URL generation inconsistencies
+   - Data format differences
+   - Missing required fields
+
+Output should be a comprehensive markdown document with code examples, diagrams, and tables showing exact field mappings.
+
+# Test Strategy:
+Review the documentation with the development team to ensure accuracy. Validate field mappings against actual API endpoint code. Test URL generation logic from both n8n and API to confirm they produce identical results. Use the documentation to guide implementation of fixes in subsequent tasks.

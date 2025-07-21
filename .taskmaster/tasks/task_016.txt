@@ -1,0 +1,308 @@
+# Task ID: 16
+# Title: Implement End-to-End Testing and Validation
+# Status: done
+# Dependencies: 12, 13, 14, 15
+# Priority: medium
+# Description: Create comprehensive end-to-end tests to validate the complete workflow from n8n webhook to working chat interface, ensuring all components work together correctly.
+# Details:
+1. Create an end-to-end test script that simulates the entire workflow:
+
+```javascript
+// scripts/e2e-test.js
+import fetch from 'node-fetch';
+import { generateSlug } from '../utils/slugUtils';
+
+async function runE2ETest() {
+  console.log('Starting end-to-end test...');
+  
+  // Test data matching n8n payload structure
+  const testData = {
+    companyName: 'Test Solar Company ' + Date.now(),
+    email: 'test@example.com',
+    location: 'Austin, TX',
+    phone: '555-123-4567'
+  };
+  
+  console.log(`Using test company: ${testData.companyName}`);
+  
+  try {
+    // Step 1: Create prototype
+    console.log('Step 1: Creating prototype...');
+    const createResponse = await fetch('http://localhost:3000/api/create-prototype', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(testData)
+    });
+    
+    const createData = await createResponse.json();
+    
+    if (!createResponse.ok) {
+      throw new Error(`Failed to create prototype: ${createData.error || 'Unknown error'}`);
+    }
+    
+    console.log(`Prototype created successfully: ${createData.demoUrl}`);
+    const { demoUrl, assistantId, companySlug } = createData;
+    
+    // Step 2: Verify company-assistant mapping
+    console.log('Step 2: Verifying company-assistant mapping...');
+    const mappingResponse = await fetch(`http://localhost:3000/api/company-assistant?companySlug=${companySlug}`);
+    const mappingData = await mappingResponse.json();
+    
+    if (!mappingResponse.ok) {
+      throw new Error(`Failed to verify mapping: ${mappingData.error || 'Unknown error'}`);
+    }
+    
+    if (mappingData.assistantId !== assistantId) {
+      throw new Error(`Assistant ID mismatch: ${mappingData.assistantId} vs ${assistantId}`);
+    }
+    
+    console.log('Company-assistant mapping verified successfully');
+    
+    // Step 3: Test chat functionality
+    console.log('Step 3: Testing chat functionality...');
+    const chatResponse = await fetch('http://localhost:3000/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        companySlug,
+        message: 'Hello, I\'m interested in solar panels for my home.'
+      })
+    });
+    
+    const chatData = await chatResponse.json();
+    
+    if (!chatResponse.ok) {
+      throw new Error(`Failed to test chat: ${chatData.error || 'Unknown error'}`);
+    }
+    
+    console.log('Chat response received successfully');
+    console.log(`Response: ${chatData.response.substring(0, 100)}...`);
+    
+    // Step 4: Verify URL generation consistency
+    console.log('Step 4: Verifying URL generation consistency...');
+    const expectedSlug = generateSlug(testData.companyName);
+    const expectedUrl = `https://solarbookers.com/${expectedSlug}`;
+    
+    if (companySlug !== expectedSlug) {
+      throw new Error(`Slug mismatch: ${companySlug} vs ${expectedSlug}`);
+    }
+    
+    if (demoUrl !== expectedUrl) {
+      throw new Error(`URL mismatch: ${demoUrl} vs ${expectedUrl}`);
+    }
+    
+    console.log('URL generation consistency verified successfully');
+    
+    // All tests passed
+    console.log('\n✅ All tests passed! The system is working correctly.');
+    return true;
+  } catch (error) {
+    console.error('\n❌ Test failed:', error.message);
+    return false;
+  }
+}
+
+// Run the test
+runE2ETest();
+```
+
+2. Create a webhook simulation endpoint for testing:
+
+```javascript
+// pages/api/test/simulate-webhook.js
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  
+  try {
+    // Simulate n8n webhook payload
+    const payload = req.body;
+    
+    // Call create-prototype endpoint
+    const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/create-prototype`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    const createData = await createResponse.json();
+    
+    if (!createResponse.ok) {
+      throw new Error(`Failed to create prototype: ${createData.error || 'Unknown error'}`);
+    }
+    
+    // Simulate Instantly.ai email sending
+    const emailData = {
+      success: true,
+      emailSent: true,
+      demoUrl: createData.demoUrl,
+      recipient: payload.email || 'test@example.com'
+    };
+    
+    return res.status(200).json({
+      webhookSimulated: true,
+      createPrototypeResult: createData,
+      emailSimulation: emailData
+    });
+  } catch (error) {
+    console.error('Error simulating webhook:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+```
+
+3. Create a test page to manually trigger the end-to-end test:
+
+```javascript
+// pages/admin/e2e-test.js
+import { useState } from 'react';
+import styles from '../../styles/E2ETest.module.css';
+
+export default function E2ETestPage() {
+  const [testData, setTestData] = useState({
+    companyName: 'Test Solar Company',
+    email: 'test@example.com',
+    location: 'Austin, TX',
+    phone: '555-123-4567'
+  });
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  const runTest = async () => {
+    setLoading(true);
+    setError(null);
+    setResults(null);
+    
+    try {
+      const response = await fetch('/api/test/simulate-webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(testData)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Unknown error');
+      }
+      
+      setResults(data);
+    } catch (error) {
+      console.error('Error running test:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <div className={styles.container}>
+      <h1>End-to-End Test</h1>
+      
+      <div className={styles.testForm}>
+        <h2>Test Data</h2>
+        <div className={styles.formGroup}>
+          <label>Company Name:</label>
+          <input 
+            value={testData.companyName} 
+            onChange={(e) => setTestData({...testData, companyName: e.target.value})} 
+          />
+        </div>
+        {/* Add other input fields */}
+        
+        <button 
+          onClick={runTest} 
+          disabled={loading}
+          className={styles.runButton}
+        >
+          {loading ? 'Running Test...' : 'Run End-to-End Test'}
+        </button>
+      </div>
+      
+      {error && (
+        <div className={styles.error}>
+          <h3>Error</h3>
+          <p>{error}</p>
+        </div>
+      )}
+      
+      {results && (
+        <div className={styles.results}>
+          <h3>Test Results</h3>
+          <div className={styles.resultCard}>
+            <h4>Demo URL</h4>
+            <p>
+              <a href={results.createPrototypeResult.demoUrl} target="_blank" rel="noopener noreferrer">
+                {results.createPrototypeResult.demoUrl}
+              </a>
+            </p>
+          </div>
+          
+          <div className={styles.resultCard}>
+            <h4>Email Simulation</h4>
+            <p>Recipient: {results.emailSimulation.recipient}</p>
+            <p>Demo URL included: {results.emailSimulation.demoUrl ? 'Yes' : 'No'}</p>
+          </div>
+          
+          <pre className={styles.jsonResults}>
+            {JSON.stringify(results, null, 2)}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+4. Add a GitHub Actions workflow for automated testing:
+
+```yaml
+# .github/workflows/e2e-test.yml
+name: End-to-End Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build application
+      run: npm run build
+    
+    - name: Start server
+      run: npm run start & npx wait-on http://localhost:3000
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+        UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+        NEXT_PUBLIC_BASE_URL: http://localhost:3000
+    
+    - name: Run E2E tests
+      run: node scripts/e2e-test.js
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+        UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+        NEXT_PUBLIC_BASE_URL: http://localhost:3000
+```
+
+# Test Strategy:
+Run the end-to-end test script in both development and production environments. Verify that all steps of the workflow complete successfully. Test with various company names and input data to ensure robustness. Validate that demo URLs are correctly generated and accessible. Confirm that chat functionality works correctly with the created assistants. Test the webhook simulation endpoint to verify it accurately mimics the n8n workflow.

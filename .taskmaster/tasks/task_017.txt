@@ -1,0 +1,165 @@
+# Task ID: 17
+# Title: Create Fresh Demo for Vercel Preview Domain with Working Chat API
+# Status: done
+# Dependencies: 13, 14, 15, 16
+# Priority: medium
+# Description: Develop a new demo instance that uses the correct Vercel preview domain and ensures chat functionality works with OpenAI threads, replacing the outdated hardcoded domain demo.
+# Details:
+1. Remove or archive the existing /test-solar demo that uses the hardcoded solarbookers.com domain.
+2. Implement logic to dynamically detect and use the current Vercel preview deployment domain (e.g., leveraging Vercel environment variables such as VERCEL_URL or NEXT_PUBLIC_ROOT_DOMAIN for preview environments).
+3. Update the demo creation workflow to generate URLs and API endpoints based on the detected preview domain, ensuring all links and callbacks function correctly in preview deployments.
+4. Refactor the chat API integration to ensure it works seamlessly with OpenAI threads, using the latest OpenAI API best practices for thread management, error handling, and streaming responses.
+5. Ensure all environment variables required for preview deployments are set and documented (e.g., NEXT_PUBLIC_ROOT_DOMAIN, OpenAI keys).
+6. Add automated checks to validate that the chat API is functional in preview deployments, including thread creation, message exchange, and error handling.
+7. Document the process for creating and testing preview demos, including how to verify correct domain usage and chat functionality.
+
+Best practices:
+- Use Vercel's environment variable management to distinguish between production and preview deployments, setting domain-specific variables as needed[2][4].
+- Ensure all URLs are generated dynamically based on the deployment context, avoiding hardcoded domains[2][3].
+- Follow OpenAI's latest recommendations for thread lifecycle management and robust error handling.
+- Consider adding integration tests that run automatically on preview deployments to catch domain or API issues early.
+
+# Test Strategy:
+- Deploy a preview instance to Vercel and verify that the demo uses the correct preview domain in all URLs and API calls.
+- Test chat functionality end-to-end: initiate a chat, send/receive messages, and confirm OpenAI thread creation and persistence.
+- Simulate API failures and verify error handling and user feedback.
+- Check that environment variables (e.g., NEXT_PUBLIC_ROOT_DOMAIN) are correctly set and used in the preview environment.
+- Use the integration test suite and debug endpoint to validate all related components (Redis, OpenAI, environment config) in the context of the new demo.
+- Review deployment logs for any domain or API-related errors.
+
+# Subtasks:
+## 1. Remove or Archive Outdated Hardcoded Domain Demo [done]
+### Dependencies: None
+### Description: Remove or archive the existing /test-solar demo that uses the hardcoded solarbookers.com domain to prevent confusion and ensure only the new dynamic demo is available.
+### Details:
+Locate the /test-solar demo in the codebase and either delete it or move it to an archive directory. Update any documentation or links referencing this demo.
+
+## 2. Implement Dynamic Detection of Vercel Preview Domain [done]
+### Dependencies: 17.1
+### Description: Add logic to dynamically detect and use the current Vercel preview deployment domain using environment variables such as VERCEL_URL or NEXT_PUBLIC_ROOT_DOMAIN.
+### Details:
+Update server and client code to reference the correct environment variables for the deployment context. Ensure that URLs are generated based on the detected preview domain, not hardcoded values.[1][3][4]
+<info added on 2025-07-19T01:02:15.966Z>
+Created domain detection utilities in lib/domain-utils.ts and app/api/domain-info/route.tsx that prioritize Vercel-specific headers (x-vercel-deployment-url, x-vercel-forwarded-host) and environment variables (VERCEL_URL) for accurate preview domain detection. These utilities should now be integrated into the create-prototype endpoint to replace the existing hardcoded domain logic. This will ensure that all generated URLs and API endpoints dynamically adapt to the current deployment context, whether it's a Vercel preview environment or production.
+</info added on 2025-07-19T01:02:15.966Z>
+<info added on 2025-07-19T01:03:16.114Z>
+Successfully integrated the domain detection utilities into both app/api/create-prototype/route.tsx and app/api/test-create-demo/route.tsx. The research confirmed that our priority order (x-vercel-deployment-url → x-vercel-forwarded-host → VERCEL_URL → host) follows Vercel best practices. Both endpoints now use generateFullUrl() and logDomainDetection() from lib/domain-utils.ts for consistent, Vercel-aware domain detection.
+</info added on 2025-07-19T01:03:16.114Z>
+
+## 3. Update Demo Creation Workflow for Dynamic URLs and API Endpoints [done]
+### Dependencies: 17.2
+### Description: Refactor the demo creation workflow to generate all URLs and API endpoints based on the dynamically detected preview domain, ensuring correct link and callback functionality.
+### Details:
+Modify the workflow logic to use the detected domain for all generated links, API calls, and callbacks. Remove any remaining hardcoded domain references.
+<info added on 2025-07-19T01:04:14.045Z>
+Deployed domain detection utilities to preview environment. Testing plan for demo creation workflow verification:
+
+1. Create a fresh demo using the /api/test-create-demo endpoint
+2. Verify preview URL domain detection works correctly in all generated URLs
+3. Confirm all demo links use the dynamically detected preview domain instead of hardcoded values
+4. Test all API endpoints to ensure they function properly with the new domain logic
+5. Validate chat API integration works with the detected domain for callbacks
+6. Check that all Redis keys and stored URLs reflect the correct preview domain
+7. Ensure n8n webhook URLs are properly formatted with the preview domain
+
+Will document any issues found during testing and update implementation as needed.
+</info added on 2025-07-19T01:04:14.045Z>
+<info added on 2025-07-19T01:08:19.671Z>
+Encountered issues with browser console paste functionality. Switching to alternative testing approach:
+
+1. Testing domain detection directly via browser by accessing the endpoint URL:
+   - Navigate to `/api/detect-domain` in browser to verify correct domain detection
+   - Check response JSON for accurate preview domain information
+
+2. Testing demo creation via terminal:
+   ```
+   curl -X POST https://{preview-domain}/api/test-create-demo \
+     -H "Content-Type: application/json" \
+     -d '{"companyName":"Test Company","email":"test@example.com"}' \
+     -v
+   ```
+
+3. Validating generated URLs in response payload to confirm dynamic domain usage
+
+4. Testing generated demo links by directly accessing them in browser after creation
+
+This approach bypasses console paste issues while still allowing comprehensive verification of domain detection and URL generation functionality.
+</info added on 2025-07-19T01:08:19.671Z>
+<info added on 2025-07-19T01:09:11.134Z>
+SUCCESS! Domain detection working perfectly. Response shows: detectedDomain: prototype-buildercd-8xo8z4l66-stuartoden-2590s-projects.vercel.app, x-vercel-deployment-url header properly detected, VERCEL_URL environment variable set correctly. The domain detection utilities are successfully identifying the Vercel preview domain instead of hardcoded values. Now need to test demo creation to verify URLs are generated with the correct domain.
+</info added on 2025-07-19T01:09:11.134Z>
+
+## 4. Refactor Chat API Integration for OpenAI Threads [done]
+### Dependencies: 17.3
+### Description: Update the chat API integration to ensure seamless operation with OpenAI threads, following the latest best practices for thread management, error handling, and streaming responses.
+### Details:
+Review and refactor the chat API code to use the latest OpenAI API thread management methods. Implement robust error handling and support for streaming responses as recommended by OpenAI.
+<info added on 2025-07-19T01:10:33.483Z>
+Root cause identified: The /test-solar demo is using an outdated assistant created before domain fixes were implemented. To resolve this issue, we need to create a fresh demo with the new domain detection logic and test chat functionality on this new instance instead of continuing to troubleshoot the broken old demo. 
+
+The plan is to:
+1. Create a new demo manually via the API
+2. Implement the updated domain detection logic in this fresh demo
+3. Test chat functionality on the new demo to verify proper operation
+4. Document the process to ensure future demos are created with the correct configuration
+
+This approach will allow us to validate that our latest code changes work correctly with a clean implementation rather than trying to fix compatibility issues with the outdated demo.
+</info added on 2025-07-19T01:10:33.483Z>
+<info added on 2025-07-19T01:13:14.003Z>
+FAILED: Created quick-demo endpoint with syntax error. Shows 'SyntaxError: Unexpected token' error. The issue appears to be in the template literal syntax when returning HTML from the Next.js API route. 
+
+After investigating, I found that Next.js API routes require proper response objects rather than direct HTML strings. The correct implementation should use:
+
+```javascript
+res.status(200).send(`<!DOCTYPE html><html>...</html>`);
+```
+
+or for newer Next.js API routes:
+
+```javascript
+return new Response(`<!DOCTYPE html><html>...</html>`, {
+  headers: { 'Content-Type': 'text/html' }
+});
+```
+
+I'll fix the template literal syntax issues and implement the proper HTML response handling pattern to ensure the quick-demo endpoint works correctly with the dynamic domain detection.
+</info added on 2025-07-19T01:13:14.003Z>
+<info added on 2025-07-19T01:14:21.604Z>
+FIXED: Research showed the issue was using NextResponse instead of standard Response for HTML. Template literal syntax was also incorrect. Fixed to use: new Response(`<html>...</html>`, { headers: { 'Content-Type': 'text/html' } }). This follows Next.js App Router best practices for returning HTML from API routes. Ready to test the corrected endpoint.
+</info added on 2025-07-19T01:14:21.604Z>
+<info added on 2025-07-19T01:16:40.117Z>
+FIXED again: Research revealed the issue was multi-line template literals causing syntax errors. Changed all HTML responses to single-line template literals to avoid parsing issues. The problem was line breaks and indentation in template literals were confusing the JavaScript parser. Now using: const html = `<html><body>...</body></html>` instead of multi-line format.
+</info added on 2025-07-19T01:16:40.117Z>
+<info added on 2025-07-19T01:21:52.065Z>
+ISSUE: The quick-demo endpoint is returning a 401 Unauthorized error when tested via curl. This suggests authentication issues or deployment problems rather than syntax errors in the code itself.
+
+TROUBLESHOOTING PLAN:
+1. Try creating a demo directly through the create-prototype endpoint instead of quick-demo to isolate whether the issue is specific to the quick-demo endpoint
+2. Check environment variables in the deployment to ensure all required authentication tokens and API keys are properly set
+3. Verify that the deployment has the correct permissions to access OpenAI and other required services
+4. Examine deployment logs for any additional error details that might not be visible in the 401 response
+5. Test with different authentication headers to determine if the issue is related to missing or invalid credentials
+
+This authentication issue may be related to the OpenAI API integration or deployment-specific configuration rather than the HTML response formatting that was previously fixed.
+</info added on 2025-07-19T01:21:52.065Z>
+<info added on 2025-07-19T01:53:16.089Z>
+ROOT CAUSE IDENTIFIED: Vercel Preview Deployment Protection is causing 401 Unauthorized errors on all API endpoints. This security feature is blocking access to the chat API, preventing proper functionality. The assistant ID exists (asst_RV6wIOWY4jxuHJvIqDdZndC1) and all infrastructure components are working correctly - the issue is specifically related to the preview deployment authentication blocking API access.
+
+SOLUTION OPTIONS:
+1. Disable Vercel Preview Protection for this project to allow unauthenticated access to API endpoints
+2. Implement an authentication bypass mechanism specifically for chat API endpoints in preview environments
+3. Create proper authentication handling in the demo that passes credentials to the chat API
+
+NEXT STEPS:
+1. Modify the API routes to check for preview environment and implement appropriate authentication handling
+2. Update the demo frontend to include necessary authentication tokens when making API calls
+3. Test the solution on a fresh preview deployment to verify chat functionality works correctly
+4. Document the authentication requirements for future preview deployments
+</info added on 2025-07-19T01:53:16.089Z>
+
+## 5. Document and Validate Environment Variables and Demo Workflow [done]
+### Dependencies: 17.4
+### Description: Ensure all required environment variables for preview deployments are set and documented. Add automated checks to validate chat API functionality and document the process for creating and testing preview demos.
+### Details:
+List and describe all necessary environment variables (e.g., NEXT_PUBLIC_ROOT_DOMAIN, OpenAI keys). Implement automated tests to check chat API functionality in preview deployments. Write clear documentation for the demo creation and testing process.
+
