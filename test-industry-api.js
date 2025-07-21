@@ -1,5 +1,5 @@
 // Test script for industry parameter API functionality
-const apiUrl = 'https://all-purpose-1pd1-rku255jxe-stuartoden-2590s-projects.vercel.app/api/create-prototype';
+const apiUrl = 'https://all-purpose-1pd1-git-main-stuartoden-2590s-projects.vercel.app/api/create-prototype';
 
 const testCases = [
   {

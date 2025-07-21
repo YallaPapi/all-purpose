@@ -2,23 +2,18 @@ import { NextRequest } from 'next/server';
 
 /**
  * Detect the current domain from request headers and environment variables
- * For production, always use solarbookers.com to ensure n8n gets production URLs
+ * Uses Vercel deployment URL for current deployment
  */
 export function detectDomain(request: NextRequest, fallbackDomain?: string): string {
-  // For production API calls (like from n8n), always use the production domain
-  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
-    return 'solarbookers.com';
-  }
-  
-  // For development/preview environments, use Vercel detection
-  const domain = request.headers.get('x-vercel-deployment-url') ||
+  // Priority order for domain detection
+  const domain = request.headers.get('host') ||
+                request.headers.get('x-vercel-deployment-url') ||
                 request.headers.get('x-vercel-forwarded-host') ||
                 request.headers.get('x-forwarded-host') ||
-                request.headers.get('host') ||
                 process.env.VERCEL_URL ||
                 process.env.VERCEL_BRANCH_URL ||
                 fallbackDomain ||
-                'solarbookers.com';
+                'all-purpose-1pd1-git-main-stuartoden-2590s-projects.vercel.app';
   
   return domain;
 }
