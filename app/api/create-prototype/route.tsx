@@ -55,9 +55,9 @@ export async function POST(request: NextRequest) {
       state = body.state || (body.location ? body.location.split(',')[1]?.trim() : '');
       organization_short_description = body.organization_short_description || '';
       industry = body.industry || '';
-      client_company_name = 'Solar Bookers';  // Always use service provider name
-      client_website = 'https://solarbookers.com';  // Always use service provider website
-      service_type = `${industryText} services`;  // Dynamic based on industry
+      client_company_name = body.client_company_name || organization_name;  // Use LEAD'S company for demo
+      client_website = body.client_website || `https://${organization_name.toLowerCase().replace(/\s+/g, '')}.com`;
+      service_type = body.service_type || `${industryText} services`;  // Dynamic based on industry
     }
 
     console.log('Processed fields:', { name, organization_name, client_company_name, client_website });
@@ -70,10 +70,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Set defaults if missing - these are the SERVICE PROVIDER details, not the lead's company
+    // Set defaults if missing
     if (!name) name = 'Prospect';
-    client_company_name = 'Solar Bookers';  // Always use service provider name
-    client_website = 'https://solarbookers.com';  // Always use service provider website
+    if (!client_company_name) client_company_name = organization_name;  // Use LEAD'S company for the demo
+    if (!client_website) client_website = `https://${organization_name.toLowerCase().replace(/\s+/g, '')}.com`;
 
     // Generate dynamic calendar link based on client company name
     const companySlug = createCompanySlug(organization_name);

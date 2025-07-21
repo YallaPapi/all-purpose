@@ -125,10 +125,11 @@ await fetch('/api/chat', {
   companyName?: string,            // Alternative to 'organization_name'
   location?: string,               // "City, State" format
   
-  // Client Information
-  client_company_name?: string,    // Default: 'Solar Bookers'
-  client_website?: string,         // Default: 'https://solarbookers.com'
-  service_type?: string            // Default: 'Solar installation...'
+  // Client Information - CRITICAL: These represent the LEAD'S company in demos
+  client_company_name?: string,    // Default: organization_name (LEAD'S company for demo)
+  client_website?: string,         // Default: Generated from organization_name
+  service_type?: string,           // Default: Dynamic based on industry parameter
+  industry?: string                // NEW: Industry parameter for dynamic prompts
 }
 ```
 
@@ -161,13 +162,14 @@ await fetch('/api/chat', {
 #### OpenAI Assistant Creation Parameters:
 ```typescript
 {
-  name: `${organization_name} Solar Assistant`,
+  name: `${organization_name} ${industryText} Assistant`,
   instructions: `Complex prompt with variables:
     - Name: ${name}
     - Company: ${organization_name}
     - Title: ${title}
     - Location: ${city}, ${state}
-    - FIRST Message: "It's Sarah from ${client_company_name} here..."
+    - Industry: ${industryText}
+    - FIRST Message: "It's Sarah from ${organization_name} here..." // LEAD'S company, not service provider
   `,
   model: "gpt-4-1106-preview",
   tools: [{ type: "code_interpreter" }]
@@ -183,7 +185,7 @@ await fetch('/api/chat', {
   demoUrl: string,          // Backward compatibility
   companySlug: string,
   calendarLink: string,
-  message: string
+  message: string           // Format: "${industry} consultation assistant created for ${name} at ${organization_name}"
 }
 ```
 

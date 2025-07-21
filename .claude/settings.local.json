@@ -1,0 +1,6 @@
+{
+  "toolConfirmation": false,
+  "permissions": {
+    "allow": ["*"]
+  }
+}

@@ -1,6 +1,7 @@
-# 🌟 Solar Lead System - Environment Setup Guide
+# 🌟 All-Purpose Lead System - Environment Setup Guide
 
-> **Complete setup instructions for development and production environments**
+> **Complete setup instructions for development and production environments**  
+> **NOW SUPPORTS ANY INDUSTRY**: Dental, Automotive, Legal, Chiropractic, Business Funding, etc.
 
 ---
 
@@ -25,11 +26,12 @@ KV_REST_API_TOKEN=your-redis-token-here
 
 ### **Domain Configuration**
 ```bash
-NEXT_PUBLIC_ROOT_DOMAIN=solarbookers.com
+NEXT_PUBLIC_ROOT_DOMAIN=solarbookers.com  # Current production domain
 VERCEL_URL=auto-populated-by-vercel
 ```
-- **NEXT_PUBLIC_ROOT_DOMAIN**: Production domain for URL generation
+- **NEXT_PUBLIC_ROOT_DOMAIN**: Production domain for URL generation (will migrate to generic DBR domain)
 - **VERCEL_URL**: Auto-populated by Vercel for preview deployments
+- **FUTURE**: Will use generic domain like `dbr.com` for all-purpose demos
 
 ---
 
@@ -78,8 +80,18 @@ VERCEL_URL=auto-populated-by-vercel
 ### **3. n8n Workflow Configuration**
 Update webhook URLs in n8n workflow:
 ```
-Production: https://solarbookers.com/api/create-prototype
+Production: https://all-purpose-1pd1-git-main-stuartoden-2590s-projects.vercel.app/api/create-prototype
 Preview: https://[preview-url].vercel.app/api/create-prototype
+```
+
+**IMPORTANT**: Include `industry` parameter in N8N requests:
+```json
+{
+  "companyName": "Bright Dental",
+  "contactName": "Dr. Sarah Johnson", 
+  "contactEmail": "sarah@brightdental.com",
+  "industry": "dental"
+}
 ```
 
 ---
@@ -94,11 +106,12 @@ Preview: https://[preview-url].vercel.app/api/create-prototype
 - [ ] Domain detection working
 
 ### **✅ Production Environment**
-- [ ] `solarbookers.com` resolves to latest deployment
+- [ ] Production domain resolves to latest deployment
 - [ ] All environment variables set in Vercel
 - [ ] `/api/debug` accessible on production
-- [ ] n8n workflow webhooks updated
-- [ ] End-to-end demo creation working
+- [ ] n8n workflow webhooks updated with industry parameter
+- [ ] End-to-end demo creation working for multiple industries
+- [ ] Industry parameter correctly generates dynamic assistants
 
 ### **✅ Preview Environment**
 - [ ] Preview URLs working with dynamic domain detection
