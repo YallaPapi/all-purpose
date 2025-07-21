@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
     const industryText = industry || 'business services';
     console.log('Industry received:', industry);
     console.log('Industry text used:', industryText);
+    console.log('Template test - expecting industry in message:', `${industryText} consultation assistant`);
 
     // Debug the first message construction
     const firstMessage = `It's Sarah from ${client_company_name} here. Is this the same ${name} that got a quote for ${industryText} from us in the last couple of months?`;
