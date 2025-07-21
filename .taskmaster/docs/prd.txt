@@ -1,71 +1,71 @@
-# Multi-Niche Lead System - Make Solar System Work for All Industries
+Industry-Agnostic Lead Generation System - Make Dynamic Prompts
 
 ## Project Overview
-Transform the existing Solar Lead System into a multi-niche lead generation system that works for any industry. The current system is fully operational for solar companies but hardcoded with solar-specific prompts and messaging.
+Transform the currently hardcoded solar-specific lead generation system to work for ALL industries while maintaining the exact same architecture. The system is fully operational for solar companies and needs minimal changes to become industry-agnostic.
 
-## Current System Architecture (KEEP EXACTLY THE SAME)
-- **N8N Workflow**: Processes webhooks, qualifies leads with AI, creates demos via API, sends emails via Instantly.ai
-- **API Endpoints**: `/api/create-prototype` creates assistants, `/api/company-assistant` stores mappings, `/api/chat` handles conversations  
-- **Tech Stack**: Next.js 15.4.1, Vercel deployment, Upstash Redis, OpenAI Assistants API
-- **Domain**: solarbookers.com with dynamic company slug URLs
-- **User Flow**: Webhook → AI qualification → Demo creation → Email with link → Prospect clicks → Chat interface
+## Current System Architecture (WORKING - DO NOT CHANGE)
+- N8N workflow processes email replies → qualifies leads → creates chatbot demos → sends demo links
+- Next.js app creates AI assistants and hosts chat interfaces  
+- Flow: Webhook → AI qualification → Demo creation → Email with working demo link
+- Fully operational at solarbookers.com
 
-## Goal
-Make the system work for ANY industry by making the AI chatbot prompts dynamic instead of hardcoded for solar.
+## Problem Statement
+The create-prototype API has hardcoded solar-specific prompts that prevent it from working with other industries (business funding, insurance, etc.).
 
-## Core Changes Required
-The ONLY thing that needs to change is making the hardcoded solar prompt dynamic in `/api/create-prototype/route.tsx`. Currently the assistant instructions are hardcoded with:
-- Solar-specific messaging 
-- Solar-specific qualification questions
-- Solar-specific company name (Solar Bookers)
-- Solar-specific service descriptions
+## Specific Changes Required
 
-## Technical Requirements
+### 1. N8N Workflow Update (AI SDR (direct approach)(3).json)
+- **File**: `AI SDR (direct approach)(3).json`
+- **Line**: ~170 in "Build Instantly payload" node
+- **Current**: API call only sends `companyName`, `location`, `contactEmail`, `contactName`, `title`
+- **Required**: Add `industry` field to the API payload from `$json.body?.industry`
 
-### Primary Change: Dynamic Prompt System
-- Replace hardcoded solar prompt with dynamic prompt generation
-- Accept industry/niche parameter in API calls
-- Generate appropriate prompts based on industry type
-- Maintain exact same structure and flow, just different content
+### 2. Create-Prototype API Update (route.tsx)
+- **File**: `app/api/create-prototype/route.tsx` 
+- **Lines**: ~101-193 (assistant instruction section)
+- **Current**: Hardcoded "Solar services" and solar-specific prompts
+- **Required**: Make prompts dynamic based on industry parameter
+- **Specific Changes**:
+  - Replace "Solar services" with "[industry] services"
+  - Replace solar-specific training with industry-agnostic approach
+  - Replace solar-specific FAQ with dynamic industry content
+  - Update FIRST message and qualification flows to be industry-aware
 
-### Supported Industries (Initial)
-- Solar (keep existing as template)
-- HVAC/Air Conditioning
-- Roofing
-- Windows/Doors
-- Security Systems
-- Landscaping
-- Real Estate
-- Insurance
-- Financial Services
-- Home Improvement
-
-### Implementation Approach
-1. **Extract Current Prompt**: Move hardcoded solar prompt to template
-2. **Create Industry Templates**: Build prompt templates for each niche
-3. **Add Industry Parameter**: Accept industry type in API payload
-4. **Dynamic Prompt Generation**: Select and populate appropriate template
-5. **Maintain All Logic**: Keep same qualification flow, just different questions
+### 3. Dynamic Content Generation
+- Create industry-specific prompt templates
+- Support multiple industries: Solar, Business Funding, Insurance, Real Estate, etc.
+- Maintain same conversation flow and structure
+- Keep UK idiom/British dialect consistent
 
 ## Success Criteria
-- Same exact system architecture and workflow
-- Same user experience and flow
-- Only the chatbot conversation content changes based on industry
-- All existing functionality works identically
-- Easy to add new industries by adding new prompt templates
+1. N8N workflow passes industry field to create-prototype API
+2. Create-prototype API accepts and uses industry parameter
+3. Assistant prompts are dynamically generated based on industry
+4. System works for solar, business funding, insurance, and other industries
+5. Exact same architecture maintained - no structural changes
+6. All existing functionality preserved
 
-## Key Constraints
-- **DO NOT change the architecture**
-- **DO NOT change the structure** 
-- **DO NOT change the workflow**
-- **DO NOT change the API endpoints**
-- **ONLY change the prompt content generation**
+## Technical Requirements
+- Preserve all existing API endpoints and responses
+- Maintain Redis storage functionality
+- Keep domain detection utilities unchanged  
+- Preserve calendly integration and demo URL generation
+- Maintain error handling and fallback mechanisms
 
-## Questions to Clarify
-1. How should the industry type be passed to the API? (query parameter, request body field, etc.)
-2. What should be the default industry if none specified?
-3. Should we maintain the solarbookers.com domain or make that dynamic too?
-4. What are the specific qualification questions for each industry?
+## Testing Requirements
+- Test with multiple industries
+- Verify solar functionality still works
+- Confirm N8N workflow processes industry field correctly
+- Validate assistant creation with dynamic prompts
 
-## Current Working System
-The solar system is fully operational and working perfectly. This is purely about making it work for other industries without breaking anything that already works. 
+## Files to Modify
+1. `AI SDR (direct approach)(3).json` - Add industry to API payload
+2. `app/api/create-prototype/route.tsx` - Make prompts dynamic
+3. Update any related documentation
+
+## Out of Scope
+- Changing system architecture
+- Modifying other API endpoints
+- Adding new features beyond industry-awareness
+- UI/UX changes
+- Database schema changes 

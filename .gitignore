@@ -24,8 +24,9 @@ dev-debug.log
 *.sw?
 # OS specific
 .DS_Store
-# Task files
-tasks.json
-tasks/
 # Knowledge Graph Memory Storage
 .knowledge-graph/ 
+
+# Task files
+# tasks.json
+# tasks/ 

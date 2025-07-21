@@ -1,0 +1,333 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Update N8N Workflow to Pass Industry Field",
+        "description": "Modify the N8N workflow file 'AI SDR (direct approach)(3).json' to include the 'industry' field in the API payload sent to the create-prototype endpoint.",
+        "details": "Locate the 'Build Instantly payload' node (around line 170) in the N8N workflow. Update the payload to add an 'industry' field, sourcing its value from '$json.body?.industry'. Ensure the field is correctly mapped and passed in all relevant API calls. Validate that the workflow does not break existing solar-specific flows and that the new field is optional for backward compatibility. Use N8N v1.24+ for best stability and JSONPath support.",
+        "testStrategy": "Test the workflow by triggering it with payloads for multiple industries (solar, business funding, insurance, real estate). Confirm that the 'industry' field is present in the outgoing API request. Validate that the workflow still functions for solar-only payloads.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Locate and Review the 'Build Instantly payload' Node",
+            "description": "Identify the 'Build Instantly payload' node in the 'AI SDR (direct approach)(3).json' N8N workflow file (around line 170). Review its current configuration and document its structure and data mapping.",
+            "dependencies": [],
+            "details": "Open the workflow JSON file, search for the node by name or by its position, and examine its existing payload structure. Note any existing fields and how data is currently sourced.\n<info added on 2025-07-21T00:26:54.897Z>\nThe 'Build Instantly payload' node has been successfully located in the workflow JSON file. The node is a JavaScript code node (type: n8n-nodes-base.code) found at lines 169-290 with ID 56d36baa-34e2-4cd0-b35b-23cde60c0bce.\n\nAnalysis of the current payload structure reveals that while the industry field is available in the data flow (referenced as $json.industry in the \"Qualify lead\" node), it is not being included in the payload sent to the create-prototype API. The current payload only contains companyName, location, contactEmail, contactName, and title fields.\n\nThis confirms the exact issue described in the task: the industry field exists in the workflow data but is not being passed to the API. The next step will be to modify the payload object to include the industry field and ensure the create-prototype API is updated to accept and utilize this parameter.\n</info added on 2025-07-21T00:26:54.897Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Modify Payload to Include 'Industry' Field with JSONPath Mapping",
+            "description": "Update the 'Build Instantly payload' node to add an 'industry' field, mapping its value from '$json.body?.industry'. Ensure the field is correctly included in the outgoing API payload.",
+            "dependencies": [
+              1
+            ],
+            "details": "Edit the node's configuration to append the 'industry' field. Use N8N's expression editor to map the value using JSONPath. Validate the syntax and ensure the field is optional if not present in the input.\n<info added on 2025-07-21T00:29:02.170Z>\n**✅ COMPLETED: N8N Workflow Updated Successfully!**\n\n**Changes Applied:**\n1. **Industry Field Mapping Added:**\n   ```javascript\n   const industry = $json.industry || $json.body?.industry || 'solar'; // Default to solar for backward compatibility\n   ```\n\n2. **Payload Updated to Include Industry:**\n   ```javascript\n   const payload = {\n       companyName: companyName,\n       location: location,\n       contactEmail: leadEmail,\n       contactName: contactName,\n       title: jobTitle,\n       industry: industry,  // <-- NEW FIELD ADDED\n   };\n   ```\n\n**Key Implementation Details:**\n- ✅ **Backward Compatible**: Defaults to 'solar' if industry field is missing\n- ✅ **Multiple Data Sources**: Checks both `$json.industry` and `$json.body?.industry`\n- ✅ **Optional Field**: Won't break existing flows that lack industry data\n- ✅ **Proper JSONPath Mapping**: Uses N8N's native data access patterns\n\n**Result:**\nThe N8N workflow now passes the industry field to the create-prototype API call. This allows the create-prototype endpoint to receive the industry parameter and generate industry-specific prompts instead of hardcoded solar prompts.\n\n**Next Step:**\nTask 2 - Update the create-prototype API endpoint to accept and use this industry parameter for dynamic prompt generation.\n</info added on 2025-07-21T00:29:02.170Z>\n<info added on 2025-07-21T00:30:51.428Z>\n**❗ CORRECTION: Manual N8N Update Required**\n\nThe workflow changes documented above were made to the JSON export file only, not to the live N8N workflow. Users must manually implement these changes in their N8N interface by:\n\n1. Navigate to the \"Build Instantly payload\" node in your N8N workflow\n2. Edit the node's JavaScript code to add the industry field mapping:\n   ```javascript\n   const industry = $json.industry || $json.body?.industry || 'solar'; // Default to solar for backward compatibility\n   ```\n3. Update the payload object to include the new industry field:\n   ```javascript\n   const payload = {\n       companyName: companyName,\n       location: location,\n       contactEmail: leadEmail,\n       contactName: contactName,\n       title: jobTitle,\n       industry: industry,  // <-- NEW FIELD ADDED\n   };\n   ```\n\nPlease implement these changes directly in your N8N interface to ensure the industry parameter is properly passed to the create-prototype API endpoint.\n</info added on 2025-07-21T00:30:51.428Z>",
+            "status": "in-progress",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Validate Backward Compatibility and Optionality for Solar Flows",
+            "description": "Ensure that the workflow remains functional for existing solar-specific payloads where the 'industry' field may be absent. Confirm that the new field is optional and does not break current flows.",
+            "dependencies": [
+              2
+            ],
+            "details": "Test the workflow with payloads lacking the 'industry' field (solar-only). Check for errors or unintended behavior. Review node logic to confirm optional handling and backward compatibility.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Test with Multiple Industry Payloads and Document Results",
+            "description": "Trigger the workflow with payloads for various industries (solar, business funding, insurance, real estate). Verify that the 'industry' field is present in the outgoing API request and document the test outcomes.",
+            "dependencies": [
+              3
+            ],
+            "details": "Prepare test payloads for each target industry. Run the workflow for each case, inspect the API request, and record whether the 'industry' field is correctly included. Document any issues or edge cases encountered.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Refactor Create-Prototype API to Accept Industry Parameter",
+        "description": "Update the create-prototype API (app/api/create-prototype/route.tsx) to accept and utilize the 'industry' parameter from the request payload.",
+        "details": "In the API route, extract the 'industry' parameter from the incoming request body. Ensure type safety using TypeScript (v5.4+). Validate the parameter and provide a default fallback (e.g., 'solar') if not present. Refactor all downstream logic to use the dynamic industry value. Maintain all existing API endpoints, Redis storage, and error handling as per current architecture.",
+        "testStrategy": "Send POST requests to the API with and without the 'industry' parameter. Confirm that the parameter is correctly parsed and available for prompt generation. Ensure API responses remain unchanged except for industry-specific content.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Extract and Validate 'Industry' Parameter from Request Body",
+            "description": "Implement extraction of the 'industry' parameter from the incoming API request body and validate its presence and correctness using TypeScript validation techniques.",
+            "dependencies": [],
+            "details": "Parse the request payload to retrieve the 'industry' field. Use TypeScript union types or validation utilities to ensure the parameter is a valid string matching supported industries. Provide clear error messages for invalid inputs. Consider using a validation utility or schema validation approach for robustness.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Ensure TypeScript Type Safety and Default Fallback for 'Industry'",
+            "description": "Enforce strict TypeScript typing for the 'industry' parameter and implement a default fallback value (e.g., 'solar') when the parameter is missing or invalid.",
+            "dependencies": [
+              1
+            ],
+            "details": "Define TypeScript types or enums for supported industries. Use type guards or validation results to safely assign the industry value. If the parameter is absent or invalid, default to 'solar' to maintain backward compatibility. Ensure the API handler function signatures reflect these types.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Refactor Downstream Logic to Use Dynamic Industry Value",
+            "description": "Update all downstream processing logic in the create-prototype API to utilize the dynamically extracted and validated 'industry' parameter instead of hardcoded values.",
+            "dependencies": [
+              2
+            ],
+            "details": "Replace any hardcoded 'solar' references with the dynamic industry variable. Ensure prompt generation, business logic, and any conditional flows adapt based on the industry value. Maintain existing functionality and ensure no regressions occur.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Maintain Redis Storage and Error Handling with Industry Parameter",
+            "description": "Ensure that Redis storage operations and error handling mechanisms continue to function correctly with the addition of the 'industry' parameter in the API workflow.",
+            "dependencies": [
+              3
+            ],
+            "details": "Verify that industry data is correctly stored or referenced in Redis as needed. Preserve existing error handling patterns, including validation errors and storage failures. Add any necessary error cases related to the new parameter while keeping the API stable.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Test API Behavior with and without 'Industry' Parameter",
+            "description": "Develop and execute tests to verify correct API behavior when the 'industry' parameter is provided and when it is omitted, ensuring default fallback and validation work as expected.",
+            "dependencies": [
+              4
+            ],
+            "details": "Create test cases sending POST requests with various valid and invalid 'industry' values, as well as requests without the parameter. Confirm that the API correctly parses, validates, and applies the industry value. Check that responses and downstream effects align with expectations and that no regressions occur.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement Dynamic Industry-Aware Prompt Generation",
+        "description": "Replace hardcoded solar prompts in the assistant instruction section with dynamic, industry-specific prompt templates.",
+        "details": "Create a prompt template system using a modern templating library (e.g., mustache@4.2.0 or handlebars@4.7.8) to generate prompts based on the 'industry' parameter. Store prompt templates for supported industries (solar, business funding, insurance, real estate, etc.) in a dedicated directory or as constants. Ensure the system falls back to a generic template if an industry is not recognized. Maintain UK idiom/British dialect consistency in all templates. Update the FAQ, training, and qualification flows to use the selected template. Avoid any changes to the overall conversation flow or architecture.",
+        "testStrategy": "Unit test the prompt generator with various industry inputs. Validate that the correct template is selected and rendered. Perform integration tests to ensure the assistant's first message, FAQ, and qualification flows are industry-appropriate. Regression test solar prompts for unchanged behavior.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Select and Integrate a Templating Library",
+            "description": "Research, choose, and install a modern templating library (e.g., Mustache, Handlebars, or a suitable alternative) that supports variable binding and reusable prompt templates.",
+            "dependencies": [],
+            "details": "Evaluate libraries for compatibility with the existing stack, extensibility, and support for features like variable placeholders and template versioning. Integrate the chosen library into the codebase and ensure it is available for prompt generation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Design Prompt Template Structure and Storage",
+            "description": "Define the structure for prompt templates and determine where and how they will be stored (e.g., as files in a directory or as constants).",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a directory or module for industry-specific templates. Establish naming conventions and file formats (e.g., .hbs, .mustache, or .js files). Ensure templates are easy to update and maintain.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Logic to Select and Render Templates by Industry",
+            "description": "Develop the logic to select the correct template based on the 'industry' parameter and render it with the appropriate data.",
+            "dependencies": [
+              2
+            ],
+            "details": "Map supported industries to their respective templates. Implement a function that takes the industry and context data, selects the correct template, and renders the final prompt using the templating library.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Ensure Fallback to Generic Templates",
+            "description": "Add fallback logic to use a generic template if an industry-specific template is not found.",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement error handling or conditional checks so that if the requested industry template does not exist, the system defaults to a generic prompt template. Ensure this fallback maintains UK idiom/British dialect consistency.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Update Assistant Flows to Use Dynamic Prompts",
+            "description": "Refactor all relevant assistant flows (first message, FAQ, qualification, etc.) to utilize the new dynamic prompt generation system.",
+            "dependencies": [
+              4
+            ],
+            "details": "Replace hardcoded prompts with calls to the new template rendering logic. Ensure all flows correctly pass the industry parameter and handle the rendered output.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Write Unit and Integration Tests for Template Selection and Rendering",
+            "description": "Develop comprehensive tests to validate correct template selection, rendering, and fallback behavior for all supported industries.",
+            "dependencies": [
+              5
+            ],
+            "details": "Write unit tests for the template selection and rendering functions. Implement integration tests to verify that assistant flows produce the correct prompts for each industry and that fallbacks work as intended.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Update Documentation for Industry-Agnostic Functionality",
+        "description": "Revise internal and external documentation to reflect the new industry-agnostic capabilities and usage instructions.",
+        "details": "Update README, API docs, and workflow documentation to describe the new 'industry' parameter, supported industries, and prompt customization process. Include example payloads and instructions for extending industry support. Ensure documentation is clear for both technical and non-technical users. Use Markdown and follow current documentation best practices (e.g., using Docusaurus or MkDocs for static docs).",
+        "testStrategy": "Review documentation for completeness and accuracy. Have a team member unfamiliar with the changes follow the docs to implement a new industry template. Address any gaps or ambiguities.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Revise README and API Documentation for 'Industry' Parameter",
+            "description": "Update the README and API documentation to describe the new 'industry' parameter, list all supported industries, and explain how the parameter affects API behavior. Ensure the documentation is clear for both technical and non-technical users.",
+            "dependencies": [],
+            "details": "Include a section in the README introducing the 'industry' parameter, its purpose, and a table or list of supported industries. Update API reference sections to show the parameter in request/response schemas and clarify its optional/default behavior.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Document Prompt Customization and Extension Process",
+            "description": "Provide detailed instructions on how to customize and extend prompt templates for new industries, including directory structure, template format, and fallback logic.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add a dedicated section explaining the prompt template system, how to add or modify industry-specific templates, and how the system handles unrecognized industries. Include code snippets and references to relevant files.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Provide Example Payloads and Usage Scenarios",
+            "description": "Add example API payloads and real-world usage scenarios for different industries to illustrate correct usage and expected outcomes.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create a set of example requests and responses for each supported industry. Include sample curl commands or code snippets, and describe typical use cases for both technical and non-technical audiences.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Review and Test Documentation Clarity with Unfamiliar Team Member",
+            "description": "Have a team member who is unfamiliar with the recent changes follow the updated documentation to implement a new industry template, and gather feedback to address any gaps or ambiguities.",
+            "dependencies": [
+              3
+            ],
+            "details": "Organize a review session where the team member attempts to use the documentation to add a new industry. Collect feedback on unclear sections, missing steps, or confusing terminology, and revise the documentation accordingly.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Comprehensive Multi-Industry Testing and Validation",
+        "description": "Test the entire lead generation system end-to-end for all supported industries, ensuring no regressions or loss of functionality.",
+        "details": "Develop automated integration tests using Jest (v29+) and Playwright (v1.44+) to simulate the full workflow for each industry. Manually verify demo link generation, assistant creation, and email delivery for edge cases. Confirm that Redis storage, domain detection, calendly integration, and error handling remain intact. Document all test cases and results.",
+        "testStrategy": "Run automated and manual tests for each supported industry. Validate that all success criteria from the PRD are met, including unchanged solar functionality and correct industry-specific prompt behavior. Log and resolve any issues found.",
+        "priority": "high",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Develop Automated Integration Tests for Each Industry",
+            "description": "Create automated integration tests using Jest and Playwright to simulate the full lead generation workflow for each supported industry. Ensure tests cover all major user flows and industry-specific behaviors.",
+            "dependencies": [],
+            "details": "Set up Jest and Playwright in the project. Write test suites for each industry, covering assistant creation, prompt generation, and workflow completion. Use Playwright to interact with the UI and Jest for assertions and test orchestration.[1][2][5]",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Manually Verify Demo Link Generation and Assistant Creation",
+            "description": "Perform manual testing to ensure demo links are generated correctly and assistants are created as expected for each industry.",
+            "dependencies": [
+              1
+            ],
+            "details": "For each industry, manually trigger the workflow, generate demo links, and verify that the assistant is created with the correct industry-specific configuration. Document any discrepancies or issues found.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Test Email Delivery and Edge Cases",
+            "description": "Test the email delivery system, including handling of edge cases such as invalid email addresses, missing fields, and delivery failures.",
+            "dependencies": [
+              2
+            ],
+            "details": "Send test emails through the system for each industry, including both valid and invalid scenarios. Confirm that emails are delivered as expected and that errors are handled gracefully.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Validate Redis Storage, Domain Detection, and Calendly Integration",
+            "description": "Verify that Redis storage, domain detection logic, and Calendly integration function correctly across all industries.",
+            "dependencies": [
+              3
+            ],
+            "details": "Check that data is correctly stored and retrieved from Redis, domain detection works for all supported industries, and Calendly links are generated and integrated properly. Test error handling for each subsystem.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Document All Test Cases, Results, and Issues Found",
+            "description": "Maintain comprehensive documentation of all test cases executed, results obtained, and issues discovered during testing.",
+            "dependencies": [
+              4
+            ],
+            "details": "Create a structured document or test report summarizing all automated and manual test cases, their outcomes, and any bugs or regressions identified. Include steps to reproduce, screenshots, and resolution status for each issue.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-20T23:53:59.007Z",
+      "updated": "2025-07-21T00:30:55.274Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

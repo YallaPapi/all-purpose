@@ -1,0 +1,53 @@
+{
+	"meta": {
+		"generatedAt": "2025-07-21T00:04:59.625Z",
+		"tasksAnalyzed": 5,
+		"totalTasks": 5,
+		"analysisCount": 5,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Update N8N Workflow to Pass Industry Field",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the N8N workflow update into: (1) Locating and reviewing the 'Build Instantly payload' node, (2) Modifying the payload to include the 'industry' field with correct JSONPath mapping, (3) Validating backward compatibility and optionality for solar flows, (4) Testing with multiple industry payloads and documenting results.",
+			"reasoning": "This task is moderately complex due to the need to modify an existing workflow, ensure backward compatibility, and validate changes across multiple scenarios. N8N best practices recommend clear node documentation, error handling, and thorough testing for such updates[1][2]. The task is self-contained and does not require deep architectural changes, but careful validation is needed to avoid breaking existing flows."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Refactor Create-Prototype API to Accept Industry Parameter",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Expand the API refactor into: (1) Extracting and validating the 'industry' parameter from the request body, (2) Ensuring TypeScript type safety and default fallback, (3) Refactoring downstream logic to use the industry value, (4) Maintaining Redis storage and error handling, (5) Testing with and without the parameter for correct behavior.",
+			"reasoning": "This task involves backend changes with type safety, validation, and integration into existing logic. It requires careful handling to avoid regressions and maintain error handling. The complexity is slightly higher due to the need for robust validation and integration with downstream processes, but it follows standard API refactoring patterns."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Implement Dynamic Industry-Aware Prompt Generation",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Decompose the prompt generation implementation into: (1) Selecting and integrating a templating library, (2) Designing the prompt template structure and storage, (3) Implementing logic to select and render templates based on industry, (4) Ensuring fallback to generic templates, (5) Updating all relevant assistant flows to use dynamic prompts, (6) Writing unit and integration tests for template selection and rendering.",
+			"reasoning": "This task is more complex due to the introduction of a new templating system, the need for extensibility, and integration with multiple assistant flows. It requires careful design to ensure maintainability and consistency, especially with language and fallback requirements. Industry best practices suggest modular template management and comprehensive testing for such dynamic systems."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Update Documentation for Industry-Agnostic Functionality",
+			"complexityScore": 3,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide the documentation update into: (1) Revising the README and API docs to include the 'industry' parameter and supported industries, (2) Documenting the prompt customization and extension process, (3) Providing example payloads and usage scenarios, (4) Reviewing and testing documentation clarity with a team member unfamiliar with the changes.",
+			"reasoning": "Documentation updates are straightforward but require attention to clarity and completeness. Following documentation best practices and using static site generators is standard in the industry. The main challenge is ensuring the docs are accessible to both technical and non-technical users."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Comprehensive Multi-Industry Testing and Validation",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Expand the testing and validation task into: (1) Developing automated integration tests for each industry using Jest and Playwright, (2) Manually verifying demo link generation and assistant creation, (3) Testing email delivery and edge cases, (4) Validating Redis storage, domain detection, and calendly integration, (5) Documenting all test cases, results, and issues found.",
+			"reasoning": "This task is complex due to the breadth of end-to-end testing across multiple industries and systems. It requires both automated and manual testing, as well as thorough documentation. Industry standards emphasize comprehensive regression testing and clear documentation of results for such multi-faceted validation efforts."
+		}
+	]
+}
