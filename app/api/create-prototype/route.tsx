@@ -85,6 +85,12 @@ export async function POST(request: NextRequest) {
 
     // Use AI to dynamically understand any industry
     const industryText = industry || 'business services';
+    console.log('Industry received:', industry);
+    console.log('Industry text used:', industryText);
+
+    // Debug the first message construction
+    const firstMessage = `It's Sarah from ${client_company_name} here. Is this the same ${name} that got a quote for ${industryText} from us in the last couple of months?`;
+    console.log('First message will be:', firstMessage);
 
     // Create the assistant
     const assistant = await openai.beta.assistants.create({
