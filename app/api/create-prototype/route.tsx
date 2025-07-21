@@ -1,6 +1,83 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// Supported industries type definition
+type SupportedIndustry = 
+  | 'solar' 
+  | 'dental' 
+  | 'automotive' 
+  | 'legal' 
+  | 'chiropractic' 
+  | 'business-funding' 
+  | 'insurance' 
+  | 'fitness' 
+  | 'real-estate' 
+  | 'healthcare' 
+  | 'business-services';
+
+// Request body interface
+interface CreatePrototypeRequest {
+  // N8N format
+  name?: string;
+  lead_email?: string;
+  organization_name?: string;
+  title?: string;
+  city?: string;
+  state?: string;
+  organization_short_description?: string;
+  industry?: string;
+  client_company_name?: string;
+  client_website?: string;
+  service_type?: string;
+  
+  // Test format
+  contactName?: string;
+  contactEmail?: string;
+  companyName?: string;
+  location?: string;
+  
+  // Additional fields
+  email?: string;
+  domain?: string;
+}
+
+// Validate and normalize industry parameter
+function validateIndustry(industry?: string): string {
+  if (!industry) return 'business-services';
+  
+  const normalizedIndustry = industry.toLowerCase().trim();
+  
+  // Map common variations to supported industries
+  const industryMappings: Record<string, string> = {
+    'solar': 'solar',
+    'dental': 'dental',
+    'dentist': 'dental',
+    'automotive': 'automotive',
+    'auto': 'automotive',
+    'car': 'automotive',
+    'legal': 'legal',
+    'law': 'legal',
+    'lawyer': 'legal',
+    'chiropractic': 'chiropractic',
+    'chiropractor': 'chiropractic',
+    'business-funding': 'business-funding',
+    'business funding': 'business-funding',
+    'funding': 'business-funding',
+    'loans': 'business-funding',
+    'insurance': 'insurance',
+    'fitness': 'fitness',
+    'gym': 'fitness',
+    'health': 'fitness',
+    'real-estate': 'real-estate',
+    'real estate': 'real-estate',
+    'property': 'real-estate',
+    'healthcare': 'healthcare',
+    'medical': 'healthcare'
+  };
+  
+  return industryMappings[normalizedIndustry] || 'business-services';
+}
+
 // FIXED: Use exact same slug generator as n8n workflow
 function createCompanySlug(companyName: string): string {
   return (companyName || 'demo').toLowerCase()
@@ -13,11 +90,21 @@ function createCompanySlug(companyName: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: CreatePrototypeRequest = await request.json();
     console.log('Received request body:', body);
+    
+    // Extract and validate industry parameter first
+    const validatedIndustry = validateIndustry(body.industry);
+    const industryText = validatedIndustry === 'business-services' ? 'business services' : validatedIndustry;
+    
+    console.log('Industry validation:', {
+      received: body.industry,
+      validated: validatedIndustry,
+      displayText: industryText
+    });
 
-    // FIXED: Handle n8n workflow field mappings exactly as they're sent
-    let name, email, organization_name, title, city, state, organization_short_description, industry;
+    // Handle n8n workflow field mappings exactly as they're sent
+    let name, email, organization_name, title, city, state, organization_short_description;
     let client_company_name, client_website, service_type;
 
     // FIXED: Check for exact n8n field names from the workflow
@@ -40,11 +127,10 @@ export async function POST(request: NextRequest) {
       }
       
       organization_short_description = body.organization_short_description || '';
-      industry = body.industry || '';
       
       client_company_name = organization_name;
-      client_website = 'https://solarbookers.com';
-      service_type = 'Solar installation and consultation services';
+      client_website = body.client_website || `https://${organization_name.toLowerCase().replace(/\s+/g, '')}.com`;
+      service_type = `${industryText} services`;
     } else {
       // FIXED: Handle n8n actual workflow format (organization_name, lead_email, name)
       name = body.name || (body.contactName || 'Prospect').split(' ')[0];
@@ -54,7 +140,6 @@ export async function POST(request: NextRequest) {
       city = body.city || (body.location ? body.location.split(',')[0]?.trim() : '');
       state = body.state || (body.location ? body.location.split(',')[1]?.trim() : '');
       organization_short_description = body.organization_short_description || '';
-      industry = body.industry || '';
       client_company_name = body.client_company_name || organization_name;  // Use LEAD'S company for demo
       client_website = body.client_website || `https://${organization_name.toLowerCase().replace(/\s+/g, '')}.com`;
       service_type = body.service_type || `${industryText} services`;  // Dynamic based on industry
@@ -79,11 +164,12 @@ export async function POST(request: NextRequest) {
     const companySlug = createCompanySlug(organization_name);
     const dynamicCalendarLink = `https://calendly.com/${companySlug}`;
 
-    // Use AI to dynamically understand any industry
-    const industryText = industry || 'business services';
-    console.log('Industry received:', industry);
-    console.log('Industry text used:', industryText);
-    console.log('Template test - expecting industry in message:', `${industryText} consultation assistant`);
+    console.log('Final processing:', {
+      validatedIndustry,
+      industryText,
+      companySlug,
+      clientCompany: client_company_name
+    });
 
     // Debug the first message construction - using natural, casual language
     const firstMessage = `It's Sarah from ${client_company_name} here. Is this the same ${name} that reached out to us about ${industryText} in the last couple of months?`;
@@ -96,7 +182,7 @@ export async function POST(request: NextRequest) {
 
     // Create the assistant
     const assistant = await openai.beta.assistants.create({
-      name: `${organization_name} Assistant`,
+      name: `${organization_name} ${industryText} Assistant`,
       instructions: `Your job is to qualify leads over SMS for ${industryText} services. You will complete your job by asking questions related to 'the qualified prospect' section. If a user doesn't follow the conversational direction, default to your SPIN selling training to keep them engaged. Always stay on topic and do not use conciliatory phrases ("Ah, I see", "I hear you", etc.) when the user expresses disinterest.
 
 ###
@@ -105,7 +191,7 @@ PROSPECT INFORMATION:
 - Company: ${organization_name}
 ${title ? `- Title: ${title}` : ''}
 ${city || state ? `- Location: ${city ? `${city}${state ? `, ${state}` : ''}` : state}` : ''}
-${industry ? `- Industry: ${industry}` : ''}
+- Industry: ${industryText}
 ${organization_short_description ? `- Company Description: ${organization_short_description}` : ''}
 ###
 Your Output style: casual message, conversational, UK Idiom, British dialect

@@ -1,8 +1,9 @@
 {
   "toolConfirmation": false,
+  "verbose": true,
   "permissions": {
     "allow": [
-      "Bash(git add:*)"
+      "Bash(node:*)"
     ],
     "deny": []
   }
