@@ -1,32 +1,49 @@
-*.zip
-node_modules/
-.next/
-.env*
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Added by Claude Task Master
-# Logs
-logs
-*.log
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-dev-debug.log
-# Dependency directories
-# Environment variables
-.env
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-# OS specific
-.DS_Store
-# Knowledge Graph Memory Storage
-.knowledge-graph/ 
 
-# Task files
-# tasks.json
-# tasks/ 
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# API Keys and sensitive config
+.cursor/mcp.json
+.env*
+
+# TaskMaster reports and temp files
+.taskmaster/reports/*
+
+# IDE files
+.idea/
+
+# Test files with sensitive data
+test-*-api.json 
