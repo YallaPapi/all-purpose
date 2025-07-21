@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export async function GET(request: NextRequest) {
+  // Simple test with query params
+  const industry = request.nextUrl.searchParams.get('industry') || 'business services';
+  const name = request.nextUrl.searchParams.get('name') || 'Prospect';
+  const company = request.nextUrl.searchParams.get('company') || 'Test Company';
+  
+  const firstMessage = `It's Sarah from ${company} here. Is this the same ${name} that got a quote for ${industry} from us in the last couple of months?`;
+  
+  return NextResponse.json({
+    success: true,
+    industry_used: industry,
+    first_message: firstMessage,
+    template_working: firstMessage.includes(industry)
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
