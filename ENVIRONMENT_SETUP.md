@@ -126,11 +126,21 @@ Preview: https://[preview-url].vercel.app/api/create-prototype
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| `401 Unauthorized` | Vercel Preview Protection | Disable in Vercel settings |
+| `401 Unauthorized` | Vercel Preview/Auth Protection | Disable protection in Vercel dashboard project settings |
 | `Chat API fails` | Invalid OpenAI key | Check key validity at OpenAI |
 | `Assistant not found` | Redis connection issue | Verify KV_REST_API_* variables |
-| `Domain detection fails` | Missing environment vars | Set NEXT_PUBLIC_ROOT_DOMAIN |
-| `n8n webhook fails` | Outdated URLs | Update webhook URLs in n8n |
+| `Domain detection fails` | Missing environment vars | Use actual deployment URL, not hardcoded domains |
+| `n8n webhook fails` | Missing industry parameter | Ensure N8N passes industry field in payload |
+| `Industry validation fails` | Unsupported industry value | Check industry mapping in validateIndustry function |
+
+### **Vercel Authentication Protection Issue**
+If API endpoints return 401 "Authentication Required" with SSO redirect page:
+
+1. **In Vercel Dashboard**: Go to Project Settings → Security
+2. **Disable "Deployment Protection"** for the environment
+3. **Wait 2-3 minutes** for settings to propagate
+4. **Test endpoints** - they should now return JSON instead of HTML
+5. **Secret Key**: If available, may be used for bypassing protection (implementation varies)
 
 ### **Debug Endpoints**
 - **System Status**: `/api/debug`
