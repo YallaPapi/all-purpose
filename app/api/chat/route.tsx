@@ -2,15 +2,6 @@
 import OpenAI from 'openai';
 import { Redis } from '@upstash/redis';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const redis = new Redis({
-  url: process.env.KV_REST_API_URL!,
-  token: process.env.KV_REST_API_TOKEN!,
-});
-
 export async function POST(request: NextRequest) {
   console.log('=== CHAT API START ===');
   
@@ -18,6 +9,16 @@ export async function POST(request: NextRequest) {
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 });
     }
+
+    // Initialize clients inside the function to avoid build-time issues
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const redis = new Redis({
+      url: process.env.KV_REST_API_URL!,
+      token: process.env.KV_REST_API_TOKEN!,
+    });
 
     const { assistantId, message, threadId, company, initialize } = await request.json();
     console.log('Chat API called with:', { assistantId, message, threadId, company, initialize });

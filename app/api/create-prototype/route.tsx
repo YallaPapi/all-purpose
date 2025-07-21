@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 // FIXED: Use exact same slug generator as n8n workflow
 function createCompanySlug(companyName: string): string {
   return (companyName || 'demo').toLowerCase()
@@ -92,6 +88,11 @@ export async function POST(request: NextRequest) {
     // Debug the first message construction
     const firstMessage = `It's Sarah from ${client_company_name} here. Is this the same ${name} that got a quote for ${industryText} from us in the last couple of months?`;
     console.log('First message will be:', firstMessage);
+
+    // Initialize OpenAI client inside function to avoid build-time issues
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     // Create the assistant
     const assistant = await openai.beta.assistants.create({
