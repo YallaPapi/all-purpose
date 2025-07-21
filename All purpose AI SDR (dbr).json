@@ -1,13 +1,13 @@
 {
-  "name": "AI SDR (direct approach)",
+  "name": "All purpose AI SDR (dbr)",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "database-reactivation-webhook",
+        "path": "all-purpose",
         "options": {}
       },
-      "id": "13665822-311c-4d87-8a81-3a3af5efb312",
+      "id": "b93fd689-b5bc-43d6-bb7c-59615e0c4ad7",
       "name": "Webhook1",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
@@ -15,7 +15,7 @@
         -1860,
         140
       ],
-      "webhookId": "webhook-database-reactivation"
+      "webhookId": "fba7b849-9fff-4635-957f-86ed113be9c4"
     },
     {
       "parameters": {
@@ -28,7 +28,7 @@
           ]
         }
       },
-      "id": "39e5f79a-3efd-4684-996c-358633b6702e",
+      "id": "a20482b7-d801-49ab-a09f-0c6efb62fc7f",
       "name": "Is Interested?1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
@@ -83,7 +83,7 @@
         },
         "options": {}
       },
-      "id": "156f6bb4-c425-403c-94a0-b12aec57e319",
+      "id": "2731f990-0cf3-4420-9348-8da8fe436401",
       "name": "Send via Instantly1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -110,7 +110,7 @@
         180,
         -280
       ],
-      "id": "cbe955cc-79d3-4072-a424-4600e54e8986",
+      "id": "26c0d58d-8665-4020-bd81-87577f6d3985",
       "name": "Merge"
     },
     {
@@ -123,9 +123,9 @@
         -1660,
         140
       ],
-      "id": "67bec4f7-03ed-4e62-a0fa-ad52be75c2e9",
+      "id": "44213b60-7c13-4db5-a088-136f1af56412",
       "name": "Wait",
-      "webhookId": "bdd924d0-9cef-48f9-922f-f8f6aaae7cf6"
+      "webhookId": "b7d3963f-65e6-42c2-9517-b00225e5e4a8"
     },
     {
       "parameters": {
@@ -137,7 +137,7 @@
         -1220,
         140
       ],
-      "id": "99d820a1-7009-44ef-9163-ff0b31c3ccb3",
+      "id": "dc5dfb84-8880-4f89-997a-09465e3f2f4a",
       "name": "SDR behavior"
     },
     {
@@ -150,7 +150,7 @@
         -1440,
         140
       ],
-      "id": "a7c07b95-3d06-4836-a489-2439510b309a",
+      "id": "b00f0579-4e30-4072-9a31-9f0da8633d2f",
       "name": "Fetch email thread"
     },
     {
@@ -163,12 +163,12 @@
         -1020,
         140
       ],
-      "id": "3890bf83-a4fb-44b9-a46f-05e83e9f67e2",
+      "id": "c0fc3fea-bad0-45ca-a683-6f057d571b7a",
       "name": "Data passthrough"
     },
     {
       "parameters": {
-        "jsCode": "// FIXED - Build Instantly Payload (Corrected API URL)\nlet logs = ['Build Instantly payload node started.'];\n\nconst aiOutput = $json.output ? JSON.parse($json.output) : {};\nconst isInterested = aiOutput.interested === 'YES';\nlogs.push(`AI classified lead as interested: ${isInterested}`);\n\n// --- START: CORRECTED DATA MAPPING ---\nconst companyName = $json.organization_name || $json.body?.organization_name || '';\nconst sendingMailbox = $json.eaccount || $json.body?.email_account || '';\nconst leadEmail = $json.lead_email || $json.body?.lead_email || '';\nconst contactName = $json.first_name || ($json.body?.name || 'there').split(' ')[0];\nconst jobTitle = $json.title || $json.body?.jobTitle || '';\nconst location = `${$json.body?.city || ''}, ${$json.body?.state || ''}`.replace(/^,\\s*|,\\\\s*$/g, '');\nconst industry = $json.industry || $json.body?.industry || 'solar'; // Default to solar for backward compatibility\nconst emailId = $json.body?.email_id || $json.email_id || '';\n// --- END: CORRECTED DATA MAPPING ---\n\nlet demoCreated = false;\nlet actualDemoUrl = '';\n\nif (isInterested && companyName) {\n    logs.push(`Attempting to create demo for company: \\\"${companyName}\\\"`);\n    try {\n        const payload = {\n            companyName: companyName,\n            location: location,\n            contactEmail: leadEmail,\n            contactName: contactName,\n            title: jobTitle,\n            industry: industry,\n        };\n        logs.push(`Calling Vercel API with payload: ${JSON.stringify(payload)}`);\n\n        // FIXED: Use the custom domain\n        const demoResponse = await this.helpers.httpRequest({\n            method: 'POST',\n            url: 'https://solarbookers.com/api/create-prototype',\n            headers: { 'Content-Type': 'application/json' },\n            body: payload,\n            json: true,\n            timeout: 30000 // Increased timeout\n        });\n\n        if (demoResponse && demoResponse.url) {\n            actualDemoUrl = demoResponse.url;\n            demoCreated = true;\n            logs.push(`SUCCESS: Demo creation successful. REAL URL: ${actualDemoUrl}`);\n        } else {\n            throw new Error('API response did not contain a URL.');\n        }\n\n    } catch (error) {\n        logs.push(`ERROR: Demo creation API call FAILED: ${error.message}`);\n        \n        // FALLBACK: Generate a working demo URL manually if API fails\n        const demoSlug = companyName.toLowerCase()\n            .replace(/\\b(llc|inc|corp|ltd|co)\\b/g, '')\n            .replace(/[^a-z0-9\\s-]/g, '')\n            .replace(/\\s+/g, '-')\n            .replace(/-+/g, '-')\n            .replace(/^-|-$/g, '');\n        \n        actualDemoUrl = `https://solarbookers.com/${demoSlug}`;\n        logs.push(`FALLBACK: Using manual demo URL: ${actualDemoUrl}`);\n        demoCreated = true; // Set to true so the link gets included\n    }\n} else {\n    if (!isInterested) logs.push('Skipping demo creation: Lead was not interested.');\n    if (!companyName) logs.push('Skipping demo creation: Company Name was missing.');\n}\n\nconst senderFirst = ($json.sendingaccountfirstname || 'Oden');\nlet replyBody = (aiOutput.message || '').trim();\n\nif (demoCreated && actualDemoUrl) {\n    logs.push('Demo was created, adding REAL link to email.');\n    const demoText = `\\n\\nI've prepared a working prototype that shows how this could work for ${companyName}. You can view it here: ${actualDemoUrl}`;\n    replyBody += demoText;\n} else {\n    logs.push('Demo was NOT created, link will NOT be added to email.');\n}\n\nconst finalHtml = replyBody.replace(/\\n/g, '<br>');\nconst signatureHtml = `<br><br>-${senderFirst}<br><br>Sent from my iPhone`;\nconst subject = $json.body?.reply_subject || 'Re: (no subject)';\n\nlogs.push('Build Instantly payload node finished.');\n\nreturn [{\n  json: {\n    eaccount: sendingMailbox,\n    reply_to_uuid: emailId,\n    subject: subject,\n    to_address_email_list: leadEmail,\n    body: {\n      html: finalHtml + signatureHtml,\n      text: replyBody + `\\n\\n-${senderFirst}\\n\\nSent from my iPhone`\n    },\n    workflow_meta: {\n      lead_qualified: isInterested,\n      demo_attempted: isInterested && !!companyName,\n      demo_created: demoCreated,\n      demo_url: actualDemoUrl,\n      company_name: companyName,\n      execution_logs: logs\n    }\n  }\n}];"
+        "jsCode": "// FIXED - Build Instantly Payload (Corrected API URL)\nlet logs = ['Build Instantly payload node started.'];\n\nconst aiOutput = $json.output ? JSON.parse($json.output) : {};\nconst isInterested = aiOutput.interested === 'YES';\nlogs.push(`AI classified lead as interested: ${isInterested}`);\n\n// --- START: CORRECTED DATA MAPPING ---\nconst companyName = $json.organization_name || $json.body?.organization_name || '';\nconst sendingMailbox = $json.eaccount || $json.body?.email_account || '';\nconst leadEmail = $json.lead_email || $json.body?.lead_email || '';\nconst contactName = $json.first_name || ($json.body?.name || 'there').split(' ')[0];\nconst jobTitle = $json.title || $json.body?.jobTitle || '';\nconst industry = $json.industry || $json.body?.industry || 'solar'; // Default to solar for backward compatibility\nconst location = `${$json.body?.city || ''}, ${$json.body?.state || ''}`.replace(/^,\\s*|,\\\\s*$/g, '');\nconst emailId = $json.body?.email_id || $json.email_id || '';\n// --- END: CORRECTED DATA MAPPING ---\n\nlet demoCreated = false;\nlet actualDemoUrl = '';\n\nif (isInterested && companyName) {\n    logs.push(`Attempting to create demo for company: \\\"${companyName}\\\"`);\n    try {\n        const payload = {\n            companyName: companyName,\n            location: location,\n            industry: industry,\n            contactEmail: leadEmail,\n            contactName: contactName,\n            title: jobTitle,\n        };\n        logs.push(`Calling Vercel API with payload: ${JSON.stringify(payload)}`);\n\n        // FIXED: Use the custom domain\n        const demoResponse = await this.helpers.httpRequest({\n            method: 'POST',\n            url: 'https://solarbookers.com/api/create-prototype',\n            headers: { 'Content-Type': 'application/json' },\n            body: payload,\n            json: true,\n            timeout: 30000 // Increased timeout\n        });\n\n        if (demoResponse && demoResponse.url) {\n            actualDemoUrl = demoResponse.url;\n            demoCreated = true;\n            logs.push(`SUCCESS: Demo creation successful. REAL URL: ${actualDemoUrl}`);\n        } else {\n            throw new Error('API response did not contain a URL.');\n        }\n\n    } catch (error) {\n        logs.push(`ERROR: Demo creation API call FAILED: ${error.message}`);\n        \n        // FALLBACK: Generate a working demo URL manually if API fails\n        const demoSlug = companyName.toLowerCase()\n            .replace(/\\b(llc|inc|corp|ltd|co)\\b/g, '')\n            .replace(/[^a-z0-9\\s-]/g, '')\n            .replace(/\\s+/g, '-')\n            .replace(/-+/g, '-')\n            .replace(/^-|-$/g, '');\n        \n        actualDemoUrl = `https://solarbookers.com/${demoSlug}`;\n        logs.push(`FALLBACK: Using manual demo URL: ${actualDemoUrl}`);\n        demoCreated = true; // Set to true so the link gets included\n    }\n} else {\n    if (!isInterested) logs.push('Skipping demo creation: Lead was not interested.');\n    if (!companyName) logs.push('Skipping demo creation: Company Name was missing.');\n}\n\nconst senderFirst = ($json.sendingaccountfirstname || 'Oden');\nlet replyBody = (aiOutput.message || '').trim();\n\nconst finalHtml = replyBody.replace(/\\n/g, '<br>');\nconst signatureHtml = `<br><br>-${senderFirst}<br><br>Sent from my iPhone`;\nconst subject = $json.body?.reply_subject || 'Re: (no subject)';\n\nlogs.push('Build Instantly payload node finished.');\n\nreturn [{\n  json: {\n    eaccount: sendingMailbox,\n    reply_to_uuid: emailId,\n    subject: subject,\n    to_address_email_list: leadEmail,\n    body: {\n      html: finalHtml + signatureHtml,\n      text: replyBody + `\\n\\n-${senderFirst}\\n\\nSent from my iPhone`\n    },\n    workflow_meta: {\n      lead_qualified: isInterested,\n      demo_attempted: isInterested && !!companyName,\n      demo_created: demoCreated,\n      demo_url: actualDemoUrl,\n      company_name: companyName,\n      execution_logs: logs\n    }\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -176,7 +176,7 @@
         540,
         120
       ],
-      "id": "56d36baa-34e2-4cd0-b35b-23cde60c0bce",
+      "id": "9b0d35b0-d32b-4507-ae78-2de2ce4bbd1a",
       "name": "Build Instantly payload"
     },
     {
@@ -189,10 +189,10 @@
           "cachedResultName": "Jon"
         },
         "prompt": "define",
-        "text": "=Reply ONLY with a single JSON object.\nNothing is allowed outside the braces.\n\nRequired shape ⬇️\n{\n  \"interested\": \"YES\" | \"NO\",\n  \"message\": \"<your reply here>\"\n}\n\nDATABASE REACTIVATION SALES GUIDELINES:\n{{$json.sales_guidelines}}\n\nLEAD CONTEXT:\nFirst Name: {{$json.first_name}}\nTitle: {{$json.title}}\nCompany: {{$json.organization_name}}\nDescription: {{$json.organization_short_description}}\nIndustry: {{$json.industry}}\nCity: {{$json.city}}, {{$json.state}}\n\nLEAD'S MESSAGE:\n{{$json.clean_lead_reply_text}}\n\nCRITICAL QUALIFICATION RULES:\n- ANY question about pricing, cost, or \"how much\" = \"YES\"\n- ANY question about the service or process = \"YES\"\n- Words like \"possibly\", \"maybe\", \"might be\", \"could be\" = \"YES\"\n- Asking for more information or details = \"YES\"\n- Mentioning competitors or comparisons = \"YES\"\n- ONLY respond \"NO\" if they explicitly say \"not interested\", \"no thanks\", or ask to be removed\n\nRESPONSE INSTRUCTIONS FOR INTERESTED LEADS:\n- Answer their specific question about database reactivation\n- Reference their location ({{$json.city}}, {{$json.state}}) and business context\n- Use {{$json.organization_short_description}} to show you understand their business model\n- Connect database reactivation to their specific industry/service mentioned in description\n- For interested leads, ALWAYS mention the working demo you've prepared\n- Use this exact demo URL: {{$json.demo_url}}\n- Explain it's a working prototype branded specifically for {{$json.organization_name}}\n- Suggest they view the demo AND schedule a call\n- Position as immediate value they can see right now\n\nRESPONSE TEMPLATE FOR INTERESTED LEADS:\n\"Great question about [their question]! Given {{$json.organization_name}}'s focus on [reference something from {{$json.organization_short_description}}], database reactivation could be particularly valuable for turning your dormant client leads into revenue.\n\nI've actually already prepared a working prototype specifically for {{$json.organization_name}} that shows exactly how this works for [their industry/business type]. You can view it here: {{$json.demo_url}}\n\nThis demo shows the personalized approach we'd use for your business in {{$json.city}}, {{$json.state}}, tailored to your [reference their business model/focus from description].\n\nLet's schedule a brief call to discuss your specific database and how we can customize this further for {{$json.organization_name}}'s unique approach. When works best for you this week?\"\n\nINSTRUCTIONS:\n- Apply the qualification rules above - err on the side of YES\n- For interested leads, ALWAYS include the demo URL from {{$json.demo_url}}\n- Be professional but direct about the business value\n- Write 1 short sentence per paragraph\n- Put EXACTLY two newlines (\\n\\n) between each paragraph/sentence\n- Use plain text only (no HTML, no markdown, no backticks)\n- End every message with two newlines (\\n\\n) followed by \"Sent from my iPhone\"\n- Do NOT include a signature like \"-Name\" as this will be added automatically",
+        "text": "=Reply ONLY with a single JSON object.\nNothing is allowed outside the braces.\n\nRequired shape ⬇️\n{\n  \"interested\": \"YES\" | \"NO\",\n  \"message\": \"<your reply here>\"\n}\n\nDATABASE REACTIVATION SALES GUIDELINES:\n{{$json.sales_guidelines}}\n\nLEAD CONTEXT:\nFirst Name: {{$json.first_name}}\nTitle: {{$json.title}}\nCompany: {{$json.organization_name}}\nDescription: {{$json.organization_short_description}}\nIndustry: {{$json.industry}}\nCity: {{$json.city}}, {{$json.state}}\n\nLEAD'S MESSAGE:\n{{$json.clean_lead_reply_text}}\n\nCRITICAL QUALIFICATION RULES:\n- ANY question about pricing, cost, or \"how much\" = \"YES\"\n- ANY question about the service or process = \"YES\"\n- Words like \"possibly\", \"maybe\", \"might be\", \"could be\" = \"YES\"\n- Asking for more information or details = \"YES\"\n- Mentioning competitors or comparisons = \"YES\"\n- ONLY respond \"NO\" if they explicitly say \"not interested\", \"no thanks\", or ask to be removed\n\nRESPONSE INSTRUCTIONS FOR INTERESTED LEADS:\n- Answer their specific question about database reactivation\n- Reference their location ({{$json.city}}, {{$json.state}}) and business context\n- Use {{$json.organization_short_description}} to show you understand their business model\n- Connect database reactivation to their specific industry/service mentioned in description\n- For interested leads, ALWAYS mention the working demo you've prepared\n- Use this exact demo URL: {{$json.demo_url}}\n- Explain it's a working prototype branded specifically for {{$json.organization_name}}\n- Suggest they view the demo AND schedule a call\n- Position as immediate value they can see right now\n\nRESPONSE TEMPLATE FOR INTERESTED LEADS:\n\"Great question about [their question]! Given {{$json.organization_name}}'s focus on [reference something from {{$json.organization_short_description}}], database reactivation could be particularly valuable for turning your dormant client leads into revenue.\n\nI've actually already prepared a working prototype specifically for {{$json.organization_name}} that shows exactly how this works for [their industry/business type]. You can view it here: {{$json.demo_url}}\n\nThis demo shows the personalized approach we'd use for your business in {{$json.city}}, {{$json.state}}, tailored to your [reference their business model/focus from description].\n\nLet's book a call here and we can go over it: https://calendly.com/{{$json.demo_url.split('/').pop()}}\"\n\nINSTRUCTIONS:\n- Apply the qualification rules above - err on the side of YES\n- For interested leads, ALWAYS include the demo URL from {{$json.demo_url}}\n- Be professional but direct about the business value\n- Write 1 short sentence per paragraph\n- Put EXACTLY two newlines (\\n\\n) between each paragraph/sentence\n- Use plain text only (no HTML, no markdown, no backticks)\n- Do NOT include a signature like \"-Name\" as this will be added automatically",
         "options": {}
       },
-      "id": "21a8a55d-db88-4c11-8e36-cf0e3df253e3",
+      "id": "cc0741ab-1345-4df6-b6f8-2867c5ea6c0c",
       "name": "Qualify lead",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
@@ -217,7 +217,7 @@
         -180,
         140
       ],
-      "id": "d6e6b069-ddfa-4c28-9434-875b00581849",
+      "id": "b29115ed-1f29-4531-b011-192fdf3ae904",
       "name": "Parse Message"
     },
     {
@@ -230,7 +230,7 @@
         -800,
         140
       ],
-      "id": "06bd33de-aeb0-4b47-8b18-005f4a856480",
+      "id": "1433a58f-01c8-4a13-bc16-1a14aa528252",
       "name": "Debug data flow"
     }
   ],
@@ -374,11 +374,11 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "b41cc0d8-4c2d-4b92-85d4-0fbe85a179d3",
+  "versionId": "f5be4802-1c4e-491a-b961-e8b19f6bac80",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5d59cf67cb16d3c74e811745baeeb988305ae4816cd3bbb9e7c6fc9ae01c357f"
   },
-  "id": "rny4Fg5zol50eR3q",
+  "id": "JCKVDd61J28zls1Q",
   "tags": []
 }
