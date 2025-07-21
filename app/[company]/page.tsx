@@ -9,13 +9,23 @@ interface Message {
   timestamp: Date;
 }
 
+interface IndustryDisplayData {
+  name: string;
+  branding: string;
+  description: string;
+  leadType: string;
+  interest: string;
+  sampleResponses: string[];
+  howItWorks: string;
+}
+
 export default function CompanyPage() {
   const params = useParams();
   const company = params?.company as string;
   
   // Format company name for display
   const formatCompanyName = (name: string) => {
-    if (!name) return 'Solar Advisor';
+    if (!name) return 'Lead Advisor';
     return name
       .replace(/-/g, ' ')
       .split(' ')
@@ -28,6 +38,8 @@ export default function CompanyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
+  const [industryData, setIndustryData] = useState<IndustryDisplayData | null>(null);
+  const [loadingIndustry, setLoadingIndustry] = useState(true);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,9 +51,56 @@ export default function CompanyPage() {
 
   useEffect(() => {
     if (company) {
+      loadIndustryData();
       initializeChat();
     }
   }, [company]);
+
+  const loadIndustryData = async () => {
+    try {
+      setLoadingIndustry(true);
+      const response = await fetch(`/api/company-industry?company=${company}`);
+      if (response.ok) {
+        const data = await response.json();
+        setIndustryData(data.displayData);
+      } else {
+        // Fallback to default business services if API fails
+        setIndustryData({
+          name: 'Business Services',
+          branding: 'Business Lead Pro',
+          description: 'Business Consultation System',
+          leadType: 'Business owner needing services',
+          interest: 'Professional business services',
+          sampleResponses: [
+            '"Yes, I need business help"',
+            '"Not interested in services"',
+            '"What services do you offer?"',
+            '"How much do your services cost?"'
+          ],
+          howItWorks: 'This SMS agent automatically reaches out to your business prospects with personalized messages using their name, company, and context. It engages them in natural conversation about their business needs and works to book consultations for your services.'
+        });
+      }
+    } catch (error) {
+      console.error('Error loading industry data:', error);
+      // Set fallback data
+      setIndustryData({
+        name: 'Business Services',
+        branding: 'Business Lead Pro', 
+        description: 'Business Consultation System',
+        leadType: 'Business owner needing services',
+        interest: 'Professional business services',
+        sampleResponses: [
+          '"Yes, I need business help"',
+          '"Not interested in services"',
+          '"What services do you offer?"',
+          '"How much do your services cost?"'
+        ],
+        howItWorks: 'This SMS agent automatically reaches out to your business prospects with personalized messages using their name, company, and context. It engages them in natural conversation about their business needs and works to book consultations for your services.'
+      });
+    } finally {
+      setLoadingIndustry(false);
+    }
+  };
 
   const initializeChat = async () => {
     try {
@@ -165,8 +224,12 @@ export default function CompanyPage() {
                 <span className="text-white font-bold text-lg">S</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Solar Bookers</h1>
-                <p className="text-sm text-gray-600">Solar Consultation Demo for {formatCompanyName(company)}</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {industryData?.branding || 'Lead Generation Pro'}
+                </h1>
+                <p className="text-sm text-gray-600">
+                  {industryData?.description || 'Lead Consultation Demo'} for {formatCompanyName(company)}
+                </p>
               </div>
             </div>
             <div className="bg-green-50 px-4 py-2 rounded-full border border-green-200">
@@ -187,32 +250,31 @@ export default function CompanyPage() {
                   <span className="text-white font-bold text-2xl">{formatCompanyName(company).charAt(0)}</span>
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">{formatCompanyName(company)}</h2>
-                <p className="text-blue-600 font-medium">Solar Consultation System</p>
+                <p className="text-blue-600 font-medium">{industryData?.description || 'Lead Consultation System'}</p>
               </div>
 
               <div className="space-y-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <h3 className="font-semibold text-blue-900 mb-2">🤖 How It Works</h3>
                   <p className="text-blue-800 text-sm leading-relaxed">
-                    This SMS agent automatically reaches out to your solar prospects with <strong>personalized messages</strong> using their name, company, and context. 
-                    It engages them in natural conversation about their energy needs and works to book solar consultations for your sales team.
+                    {industryData?.howItWorks || 'This SMS agent automatically reaches out to your prospects with personalized messages using their name, company, and context. It engages them in natural conversation and works to book consultations for your business.'}
                   </p>
                 </div>
 
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                   <h3 className="font-semibold text-green-900 mb-2">💬 Try It Out</h3>
                   <p className="text-green-800 text-sm leading-relaxed">
-                    <strong>Act like the lead person!</strong> This demo shows a personalized solar consultation message for a specific prospect. 
-                    Try different responses like "Yes, I'm interested" or "Tell me more about solar" to see how the AI handles various scenarios.
+                    <strong>Act like the lead person!</strong> This demo shows a personalized {industryData?.name?.toLowerCase() || 'business'} consultation message for a specific prospect. 
+                    Try different responses to see how the AI handles various scenarios for {industryData?.name?.toLowerCase() || 'business'} services.
                   </p>
                 </div>
 
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                   <h3 className="font-semibold text-yellow-900 mb-2">👤 Demo Lead Profile</h3>
                   <div className="text-yellow-800 text-sm space-y-1">
-                    <div><strong>Name:</strong> Prospect looking for solar</div>
-                    <div><strong>Type:</strong> Homeowner/Business owner</div>
-                    <div><strong>Interest:</strong> Solar panel installation</div>
+                    <div><strong>Name:</strong> {industryData?.leadType || 'Prospect looking for services'}</div>
+                    <div><strong>Type:</strong> Potential client/customer</div>
+                    <div><strong>Interest:</strong> {industryData?.interest || 'Professional services'}</div>
                     <div><strong>Calendar:</strong> <a href={`https://calendly.com/${company}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Book consultation →</a></div>
                   </div>
                 </div>
@@ -220,22 +282,33 @@ export default function CompanyPage() {
                 <div className="border-t border-gray-200 pt-4">
                   <h4 className="font-medium text-gray-900 mb-3">Quick Responses to Try:</h4>
                                       <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      <span className="text-sm text-gray-700">"Yes, I'm interested in solar"</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      <span className="text-sm text-gray-700">"Not interested in solar"</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                      <span className="text-sm text-gray-700">"How much do solar panels cost?"</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                      <span className="text-sm text-gray-700">"Tell me more about solar"</span>
-                    </div>
+                    {industryData?.sampleResponses ? (
+                      industryData.sampleResponses.map((response, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <span className={`w-2 h-2 rounded-full ${
+                            index === 0 ? 'bg-green-500' : 
+                            index === 1 ? 'bg-blue-500' :
+                            index === 2 ? 'bg-purple-500' : 'bg-orange-500'
+                          }`}></span>
+                          <span className="text-sm text-gray-700">{response}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                          <span className="text-sm text-gray-700">"Yes, I'm interested"</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                          <span className="text-sm text-gray-700">"Not interested"</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                          <span className="text-sm text-gray-700">"Tell me more about your services"</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
