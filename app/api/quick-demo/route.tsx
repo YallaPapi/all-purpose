@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function GET(request: NextRequest) {
   try {
+    // Initialize OpenAI client inside function to avoid build-time issues
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
     // Get the current domain dynamically
     const protocol = request.headers.get('x-forwarded-proto') || 'https';
     const host = request.headers.get('x-vercel-deployment-url') || 
