@@ -56,14 +56,10 @@ export default function CompanyPage() {
     }
   }, [company]);
 
-  // Smart industry detection from company name
-  const detectIndustryFromCompanyName = (companyName: string) => {
-    const name = companyName.toLowerCase();
-    
-    // Plumbing indicators
-    if (name.includes('plumb') || name.includes('drain') || name.includes('pipe') || name.includes('water heater')) {
-      return {
-        type: 'plumbing',
+  // Get industry-specific sample responses based on industry type
+  const getIndustryResponses = (industryType: string) => {
+    const responses: Record<string, any> = {
+      'plumbing': {
         name: 'Plumbing',
         service: 'plumbing services',
         responses: [
@@ -72,43 +68,18 @@ export default function CompanyPage() {
           '"What services do you offer?"',
           '"How much does it cost?"'
         ]
-      };
-    }
-    
-    // Photography indicators
-    if (name.includes('photo') || name.includes('wedding') || name.includes('portrait') || name.includes('studio')) {
-      return {
-        type: 'photography',
-        name: 'Photography',
-        service: 'photography services',
-        responses: [
-          '"Yes I need a photographer"',
-          '"Not interested"',
-          '"What packages do you have?"',
-          '"How much does it cost?"'
-        ]
-      };
-    }
-    
-    // Dental indicators
-    if (name.includes('dental') || name.includes('dentist') || name.includes('smile') || name.includes('tooth') || name.includes('ortho')) {
-      return {
-        type: 'dental',
+      },
+      'dental': {
         name: 'Dental',
-        service: 'dental services',
+        service: 'dental services', 
         responses: [
           '"Yes I need dental work"',
           '"Not interested"',
           '"What services do you provide?"',
           '"How much does it cost?"'
         ]
-      };
-    }
-    
-    // Legal indicators
-    if (name.includes('law') || name.includes('legal') || name.includes('attorney') || name.includes('lawyer') || name.includes('injury')) {
-      return {
-        type: 'legal',
+      },
+      'legal': {
         name: 'Legal',
         service: 'legal services',
         responses: [
@@ -117,13 +88,8 @@ export default function CompanyPage() {
           '"What cases do you handle?"',
           '"How much does it cost?"'
         ]
-      };
-    }
-    
-    // Fitness indicators
-    if (name.includes('fitness') || name.includes('gym') || name.includes('training') || name.includes('performance') || name.includes('coach')) {
-      return {
-        type: 'fitness',
+      },
+      'fitness': {
         name: 'Fitness',
         service: 'fitness services',
         responses: [
@@ -132,13 +98,8 @@ export default function CompanyPage() {
           '"What programs do you have?"',
           '"How much does it cost?"'
         ]
-      };
-    }
-    
-    // Automotive indicators
-    if (name.includes('auto') || name.includes('car') || name.includes('vehicle') || name.includes('motor') || name.includes('repair')) {
-      return {
-        type: 'automotive',
+      },
+      'automotive': {
         name: 'Automotive',
         service: 'automotive services',
         responses: [
@@ -147,12 +108,50 @@ export default function CompanyPage() {
           '"What services do you offer?"',
           '"How much does it cost?"'
         ]
-      };
-    }
+      },
+      'chiropractic': {
+        name: 'Chiropractic',
+        service: 'chiropractic services',
+        responses: [
+          '"Yes I have back pain"',
+          '"Not interested"',
+          '"What treatments do you offer?"',
+          '"How much does it cost?"'
+        ]
+      },
+      'real-estate': {
+        name: 'Real Estate',
+        service: 'real estate services',
+        responses: [
+          '"Yes I want to buy/sell"',
+          '"Not interested"',
+          '"What properties do you have?"',
+          '"How much does it cost?"'
+        ]
+      },
+      'healthcare': {
+        name: 'Healthcare',
+        service: 'healthcare services',
+        responses: [
+          '"Yes I need medical care"',
+          '"Not interested"',
+          '"What services do you provide?"',
+          '"How much does it cost?"'
+        ]
+      },
+      'solar': {
+        name: 'Solar',
+        service: 'solar services',
+        responses: [
+          '"Yes I want solar panels"',
+          '"Not interested"',
+          '"How much do panels cost?"',
+          '"Tell me more about solar"'
+        ]
+      }
+    };
     
-    // Default business services
-    return {
-      type: 'business-services',
+    return responses[industryType] || {
       name: 'Business Services',
       service: 'business services',
       responses: [
@@ -168,19 +167,30 @@ export default function CompanyPage() {
     try {
       setLoadingIndustry(true);
       
-      // Generate dynamic display data based on intelligent company name analysis
-      const companyDisplayName = formatCompanyName(company);
-      const detectedIndustry = detectIndustryFromCompanyName(company);
+      // Try to get company data from Redis which includes industry
+      let industryData = null;
+      try {
+        const response = await fetch(`/api/company-data/${company}`);
+        if (response.ok) {
+          industryData = await response.json();
+        }
+      } catch (error) {
+        console.log('Could not fetch company data:', error);
+      }
       
-      // Dynamic display data that adapts to detected industry
+      const companyDisplayName = formatCompanyName(company);
+      const industryType = industryData?.industry || 'business-services';
+      const industryInfo = getIndustryResponses(industryType);
+      
+      // Dynamic display data that adapts to the actual industry
       const displayData: IndustryDisplayData = {
-        name: detectedIndustry.name,
+        name: industryInfo.name,
         branding: `${companyDisplayName} Lead Generation`,
-        description: `${detectedIndustry.name} Consultation System`,
-        leadType: `Customer seeking ${detectedIndustry.service}`,
-        interest: detectedIndustry.service,
-        sampleResponses: detectedIndustry.responses,
-        howItWorks: `This SMS agent automatically reaches out to your prospects with personalized messages using their name, company, and context. It engages them in natural conversation about their ${detectedIndustry.service} needs and works to book consultations for ${companyDisplayName}.`
+        description: `${industryInfo.name} Consultation System`,
+        leadType: `Customer seeking ${industryInfo.service}`,
+        interest: industryInfo.service,
+        sampleResponses: industryInfo.responses,
+        howItWorks: `This SMS agent automatically reaches out to your prospects with personalized messages using their name, company, and context. It engages them in natural conversation about their ${industryInfo.service} needs and works to book consultations for ${companyDisplayName}.`
       };
       
       setIndustryData(displayData);

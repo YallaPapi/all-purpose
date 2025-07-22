@@ -18,7 +18,9 @@
       "details": "In the API route, extract the 'industry' parameter from the incoming request body. Ensure type safety using TypeScript (v5.4+). Validate the parameter and provide a default fallback (e.g., 'solar') if not present. Refactor all downstream logic to use the dynamic industry value. Maintain all existing API endpoints, Redis storage, and error handling as per current architecture.",
       "testStrategy": "Send POST requests to the API with and without the 'industry' parameter. Confirm that the parameter is correctly parsed and available for prompt generation. Ensure API responses remain unchanged except for industry-specific content.",
       "priority": "high",
-      "dependencies": [1],
+      "dependencies": [
+        1
+      ],
       "status": "done",
       "subtasks": []
     },
@@ -29,9 +31,87 @@
       "details": "Create a prompt template system using a modern templating library (e.g., mustache@4.2.0 or handlebars@4.7.8) to generate prompts based on the 'industry' parameter. Store prompt templates for supported industries (solar, business funding, insurance, real estate, etc.) in a dedicated directory or as constants. Ensure the system falls back to a generic template if an industry is not recognized. Maintain UK idiom/British dialect consistency in all templates. Update the FAQ, training, and qualification flows to use the selected template. Avoid any changes to the overall conversation flow or architecture.",
       "testStrategy": "Unit test the prompt generator with various industry inputs. Validate that the correct template is selected and rendered. Perform integration tests to ensure the assistant's first message, FAQ, and qualification flows are industry-appropriate. Regression test solar prompts for unchanged behavior.",
       "priority": "high",
-      "dependencies": [2],
+      "dependencies": [
+        2
+      ],
       "status": "pending",
-      "subtasks": []
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Select and Integrate a Templating Library",
+          "description": "Research, choose, and install a modern templating library (e.g., mustache@4.2.0 or handlebars@4.7.8) suitable for dynamic prompt generation. Integrate the library into the codebase, ensuring compatibility with the existing prompt generation system.",
+          "dependencies": [],
+          "details": "Evaluate templating libraries for features, performance, and maintainability. Add the chosen library to project dependencies and create a basic integration point for rendering prompt templates.\n<info added on 2025-07-22T02:08:33.289Z>\nSelected Mustache@4.2.0 as the templating library after evaluation of features, performance, and maintainability. Integrated the library into project dependencies and created a PromptTemplateManager class with support for industry-specific templates. Successfully replaced hardcoded instructions in the create-prototype API with the new dynamic template system. All compilation errors have been resolved, and the template system is now fully operational. The implementation is ready for expansion with additional industry-specific templates.\n</info added on 2025-07-22T02:08:33.289Z>",
+          "status": "pending",
+          "testStrategy": ""
+        },
+        {
+          "id": 2,
+          "title": "Design the Prompt Template Directory/Structure",
+          "description": "Define and implement a directory structure for storing industry-specific prompt templates. Ensure the structure supports easy addition and maintenance of templates for new industries.",
+          "dependencies": [
+            1
+          ],
+          "details": "Create a dedicated directory (e.g., /prompts or /templates) with subfolders or files for each supported industry. Document naming conventions and organization for consistency.",
+          "status": "pending",
+          "testStrategy": ""
+        },
+        {
+          "id": 3,
+          "title": "Create Templates for Each Supported Industry",
+          "description": "Develop prompt templates for all currently supported industries (solar, business funding, insurance, real estate, etc.) using the selected templating library and directory structure.",
+          "dependencies": [
+            2
+          ],
+          "details": "Write and test templates for each industry, ensuring they cover all required assistant flows (instruction, FAQ, training, qualification). Use placeholders for dynamic content as needed.",
+          "status": "pending",
+          "testStrategy": ""
+        },
+        {
+          "id": 4,
+          "title": "Implement Fallback Logic for Unrecognized Industries",
+          "description": "Add logic to the prompt generation system to detect unrecognized industries and fall back to a generic template when necessary.",
+          "dependencies": [
+            3
+          ],
+          "details": "Ensure that if the 'industry' parameter does not match a supported template, the system uses a default generic prompt. Log or handle unknown industries for future template expansion.",
+          "status": "pending",
+          "testStrategy": ""
+        },
+        {
+          "id": 5,
+          "title": "Enforce UK Idiom/British Dialect Consistency",
+          "description": "Review and update all templates to ensure consistent use of UK idioms and British English spelling and phrasing.",
+          "dependencies": [
+            3
+          ],
+          "details": "Audit all prompt templates for language consistency. Update wording, spelling, and idiomatic expressions to align with British English standards.",
+          "status": "pending",
+          "testStrategy": ""
+        },
+        {
+          "id": 6,
+          "title": "Update FAQ, Training, and Qualification Flows to Use Dynamic Templates",
+          "description": "Refactor the assistant's FAQ, training, and qualification flows to utilize the new dynamic, industry-aware prompt templates.",
+          "dependencies": [
+            3,
+            4,
+            5
+          ],
+          "details": "Replace hardcoded prompts in these flows with calls to the dynamic template system, ensuring correct template selection based on the 'industry' parameter.",
+          "status": "pending",
+          "testStrategy": ""
+        },
+        {
+          "id": 7,
+          "title": "Write Unit and Integration Tests for Prompt Selection and Rendering",
+          "description": "Develop comprehensive unit and integration tests to validate correct template selection, rendering, and fallback behavior for all supported industries.",
+          "dependencies": [],
+          "details": "Test prompt generation with various industry inputs, including edge cases and unknown industries. Ensure rendered prompts are accurate, contextually appropriate, and linguistically consistent.",
+          "status": "pending",
+          "testStrategy": ""
+        }
+      ]
     },
     {
       "id": 4,
@@ -40,7 +120,9 @@
       "details": "Update README, API docs, and workflow documentation to describe the new 'industry' parameter, supported industries, and prompt customization process. Include example payloads and instructions for extending industry support. Ensure documentation is clear for both technical and non-technical users. Use Markdown and follow current documentation best practices (e.g., using Docusaurus or MkDocs for static docs).",
       "testStrategy": "Review documentation for completeness and accuracy. Have a team member unfamiliar with the changes follow the docs to implement a new industry template. Address any gaps or ambiguities.",
       "priority": "medium",
-      "dependencies": [3],
+      "dependencies": [
+        3
+      ],
       "status": "pending",
       "subtasks": []
     },
@@ -51,7 +133,9 @@
       "details": "Develop automated integration tests using Jest (v29+) and Playwright (v1.44+) to simulate the full workflow for each industry. Manually verify demo link generation, assistant creation, and email delivery for edge cases. Confirm that Redis storage, domain detection, calendly integration, and error handling remain intact. Document all test cases and results.",
       "testStrategy": "Run automated and manual tests for each supported industry. Validate that all success criteria from the PRD are met, including unchanged solar functionality and correct industry-specific prompt behavior. Log and resolve any issues found.",
       "priority": "high",
-      "dependencies": [4],
+      "dependencies": [
+        4
+      ],
       "status": "pending",
       "subtasks": []
     }
@@ -62,5 +146,160 @@
     "description": "Tasks for master context",
     "totalTasks": 5,
     "completedTasks": 2
+  },
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Investigate and Fix TaskMaster Format Issue",
+        "description": "Identify and resolve the TaskMaster configuration format issue that is currently blocking workflow validation and production launch.",
+        "details": "1. Review current TaskMaster configuration files and error logs\n2. Compare against documentation for expected format\n3. Test different configuration formats until finding the correct one\n4. Verify that TaskMaster can properly parse PRDs and generate tasks\n5. Ensure the full workflow (parse PRD → analyze complexity → expand tasks → implement) is functional\n6. Restore MCP tool functionality in the Cursor environment\n7. Document the solution for future reference with examples of correct format",
+        "testStrategy": "1. Run TaskMaster commands against sample PRDs to verify format acceptance\n2. Validate that all stages of the TaskMaster workflow execute without errors\n3. Confirm MCP tools are functional in Cursor environment\n4. Have another team member verify the solution works on their setup",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Dynamic Sample Response Generation",
+        "description": "Replace all hardcoded industry-specific sample responses with dynamically generated AI responses based on the business context.",
+        "details": "1. Refactor the generateSpecificResponses function in app/[company]/page.tsx (lines 251-339)\n2. Remove all hardcoded industry mappings and conditional logic\n3. Implement a function that uses the organization_short_description parameter to generate contextually relevant responses\n4. Ensure the function generates exactly 4 sample responses per business type\n5. Optimize implementation to avoid additional API calls during page load\n6. Consider implementing a caching mechanism to reduce token usage\n7. Sample implementation:\n```typescript\nasync function generateSpecificResponses(organizationDescription: string) {\n  // Use existing API context or cached responses if available\n  // Generate responses based on description without industry-specific hardcoding\n  const baseResponses = [\"Hi, I'm interested in your services\", \"Do you offer free consultations?\"];\n  \n  // Generate additional contextual responses or use cached ones\n  const contextualResponses = await getContextualResponses(organizationDescription);\n  \n  return [...baseResponses, ...contextualResponses];\n}\n```",
+        "testStrategy": "1. Test function with various industry descriptions (dental, automotive, legal, etc.)\n2. Verify responses are contextually relevant to each industry\n3. Measure page load performance to ensure it remains under 3 seconds\n4. Test with previously unseen industry types to confirm adaptability\n5. Monitor token usage to ensure cost-effectiveness",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement Response Caching Mechanism",
+        "description": "Create a caching system for dynamically generated responses to maintain performance and reduce API costs.",
+        "details": "1. Design a Redis-based caching mechanism for sample responses\n2. Create a cache key based on organization description or industry type\n3. Set appropriate TTL (time-to-live) for cached responses (e.g., 24 hours)\n4. Implement cache check before generating new responses\n5. Add cache update logic for new organization types\n6. Sample implementation:\n```typescript\nasync function getCachedOrGenerateResponses(organizationDescription: string) {\n  const cacheKey = `sample_responses:${createHash(organizationDescription)}`;\n  \n  // Try to get from cache first\n  const cachedResponses = await redis.get(cacheKey);\n  if (cachedResponses) return JSON.parse(cachedResponses);\n  \n  // Generate new responses if not in cache\n  const generatedResponses = await generateAIResponses(organizationDescription);\n  \n  // Cache the new responses\n  await redis.set(cacheKey, JSON.stringify(generatedResponses), 'EX', 86400); // 24 hours\n  \n  return generatedResponses;\n}\n```",
+        "testStrategy": "1. Verify cache hits and misses with different organization descriptions\n2. Measure response time difference between cached and non-cached requests\n3. Test cache expiration and refresh functionality\n4. Validate that cached responses maintain relevance to the industry\n5. Monitor Redis memory usage under load",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "in-progress",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Validate Complete N8N to Frontend Workflow",
+        "description": "Test and validate the full production workflow from N8N through the API to the frontend interface across multiple industries.",
+        "details": "1. Set up test cases for at least 5 different industries (dental, automotive, legal, chiropractic, business funding)\n2. Configure N8N workflows with appropriate industry parameters\n3. Trace request flow from N8N trigger through create-prototype API\n4. Verify industry parameter is correctly passed and processed at each step\n5. Confirm chat interface dynamically adapts to each industry\n6. Test concurrent demo creations to validate system scalability\n7. Document the complete workflow with sequence diagrams\n8. Verify error handling at each integration point",
+        "testStrategy": "1. Create end-to-end test scripts for each industry\n2. Monitor API responses and error rates during testing\n3. Validate that AI responses are appropriate for each industry\n4. Test edge cases with unusual industry descriptions\n5. Measure end-to-end response times and system performance\n6. Verify all components maintain expected behavior under load",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Perform Architecture Compliance Audit",
+        "description": "Scan the entire codebase to identify and remove any remaining hardcoded industry-specific logic to ensure true industry-agnostic functionality.",
+        "details": "1. Create a list of patterns to search for that might indicate hardcoded industry logic\n2. Scan all frontend and backend code files for these patterns\n3. Pay special attention to conditional logic based on industry or company names\n4. Review all prompt templates for industry-specific language\n5. Check API parameter mappings across all integration points\n6. Verify that all components follow the 'dynamic AI adaptation' principle\n7. Document any found violations and their remediation plan\n8. Patterns to search for include:\n   - Industry-specific terms (dental, legal, automotive, etc.)\n   - Conditional logic based on company names\n   - Hardcoded response templates\n   - Industry-specific UI elements or styling",
+        "testStrategy": "1. Use automated code scanning tools to identify potential issues\n2. Manually review flagged code sections\n3. Create test cases for each identified issue to verify resolution\n4. Validate system behavior before and after changes\n5. Perform regression testing to ensure no new issues are introduced",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Graceful Fallback Mechanism",
+        "description": "Create a robust fallback system for handling API failures or edge cases to ensure the system remains functional even under adverse conditions.",
+        "details": "1. Identify potential failure points in the system\n2. Design fallback responses for API failures\n3. Implement error boundary components in the React frontend\n4. Create a set of generic industry-agnostic responses as ultimate fallbacks\n5. Add logging for all fallback activations to monitor frequency\n6. Implement progressive degradation rather than complete failure\n7. Sample implementation:\n```typescript\nasync function getSampleResponses(organizationDescription: string) {\n  try {\n    // Primary path - dynamic AI-generated responses\n    return await getCachedOrGenerateResponses(organizationDescription);\n  } catch (error) {\n    // Log the error\n    console.error('Failed to generate dynamic responses:', error);\n    \n    // Fallback to generic responses\n    return [\n      \"Hi, I'm interested in learning more about your services\",\n      \"Do you offer consultations?\",\n      \"What makes your company different from competitors?\",\n      \"How can I schedule an appointment?\"\n    ];\n  }\n}\n```",
+        "testStrategy": "1. Simulate API failures to verify fallback behavior\n2. Test with various error conditions (timeouts, rate limits, malformed responses)\n3. Verify user experience remains acceptable with fallbacks\n4. Ensure all fallback activations are properly logged\n5. Test recovery from fallback to normal operation",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Optimize System Performance",
+        "description": "Analyze and optimize the system performance to ensure fast page loads and efficient API usage under production conditions.",
+        "details": "1. Profile page load performance across different components\n2. Identify bottlenecks in API calls and data processing\n3. Implement lazy loading for non-critical components\n4. Optimize Redis queries and caching strategies\n5. Review and optimize OpenAI API usage patterns\n6. Consider implementing streaming responses where appropriate\n7. Ensure all images and assets are properly optimized\n8. Add performance monitoring instrumentation\n9. Optimize React component rendering and state management\n10. Consider implementing server-side rendering for critical paths",
+        "testStrategy": "1. Measure page load times before and after optimizations\n2. Use Lighthouse and Web Vitals to quantify performance improvements\n3. Test performance across different device types and network conditions\n4. Monitor API response times under various load conditions\n5. Verify performance meets the < 3 second load time requirement",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Update System Documentation",
+        "description": "Create comprehensive documentation covering the current system state, architecture, and operational procedures for production readiness.",
+        "details": "1. Document the resolved TaskMaster configuration format\n2. Create architecture diagrams showing all system components\n3. Document the N8N workflow integration process\n4. Update API documentation with current endpoints and parameters\n5. Create troubleshooting guides for common issues\n6. Document the Redis schema and caching strategy\n7. Create operational runbooks for production monitoring\n8. Document the dynamic response generation mechanism\n9. Update environment variable requirements for all environments\n10. Create a system overview for new team members",
+        "testStrategy": "1. Have team members review documentation for clarity and completeness\n2. Verify all procedures can be followed successfully by different team members\n3. Test documentation against the actual system behavior\n4. Ensure all configuration parameters are accurately documented\n5. Validate that troubleshooting guides address common failure modes",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Production Monitoring",
+        "description": "Set up comprehensive monitoring and alerting for the production system to ensure visibility into system health and performance.",
+        "details": "1. Implement logging for all critical system components\n2. Set up error tracking and alerting\n3. Create dashboards for key performance metrics\n4. Monitor API usage and rate limits\n5. Track Redis performance and memory usage\n6. Set up alerts for abnormal system behavior\n7. Implement user experience monitoring\n8. Track industry distribution and adaptation success\n9. Monitor cache hit rates and effectiveness\n10. Create regular performance reports\n11. Consider tools like Datadog, New Relic, or custom Vercel integrations",
+        "testStrategy": "1. Trigger test alerts to verify notification systems\n2. Simulate error conditions to validate logging\n3. Verify all critical metrics are captured accurately\n4. Test dashboard visibility and usability\n5. Ensure alerts are actionable and provide sufficient context",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Conduct Production Launch Readiness Review",
+        "description": "Perform a comprehensive review of all system components and processes to verify readiness for production launch.",
+        "details": "1. Verify all critical issues from the PRD are resolved\n2. Confirm TaskMaster format issue is fixed and documented\n3. Verify no hardcoded industry-specific logic remains\n4. Test the complete N8N to frontend workflow across multiple industries\n5. Verify all environment variables in the production Vercel deployment\n6. Confirm domain detection works across all environments\n7. Test error handling and fallback scenarios\n8. Review system performance metrics\n9. Verify documentation is complete and accurate\n10. Conduct a final security review\n11. Create a rollback plan in case of production issues\n12. Prepare a launch checklist and schedule",
+        "testStrategy": "1. Conduct a formal review meeting with all stakeholders\n2. Use a checklist to verify all requirements are met\n3. Perform end-to-end testing in the production environment\n4. Verify all success criteria from the PRD are satisfied\n5. Conduct a simulated launch to identify any remaining issues",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-22T01:57:35.907Z",
+      "updated": "2025-07-22T02:01:53.559Z",
+      "description": "Tasks for master context"
+    }
   }
 }

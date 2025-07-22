@@ -27,8 +27,25 @@ export async function POST(request: NextRequest) {
     let finalAssistantId = assistantId;
     if (!finalAssistantId && company) {
       try {
-        finalAssistantId = await redis.get(`company:${company}`);
-        console.log(`Retrieved assistant ID ${finalAssistantId} for company ${company}`);
+        const companyData = await redis.get(`company:${company}`);
+        console.log(`Retrieved company data for ${company}:`, companyData);
+        
+        // Handle both old format (just assistant ID) and new format (JSON object)
+        if (typeof companyData === 'string' && companyData.startsWith('asst_')) {
+          // Legacy format - just assistant ID
+          finalAssistantId = companyData;
+        } else if (typeof companyData === 'string' && companyData.startsWith('{')) {
+          // New format - JSON object
+          const parsed = JSON.parse(companyData);
+          finalAssistantId = parsed.assistantId;
+        } else if (companyData && typeof companyData === 'object') {
+          // Already parsed object
+          finalAssistantId = companyData.assistantId;
+        } else {
+          finalAssistantId = companyData;
+        }
+        
+        console.log(`Final assistant ID for company ${company}:`, finalAssistantId);
       } catch (error) {
         console.error('Error retrieving assistant from Redis:', error);
       }

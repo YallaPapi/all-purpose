@@ -237,8 +237,16 @@ export async function POST(request: NextRequest) {
         token: process.env.KV_REST_API_TOKEN!,
       });
       
-      await redis.set(`company:${companySlug}`, assistant.id);
-      console.log(`Successfully stored assistant ${assistant.id} for company ${companySlug} in Redis`);
+      // Store both assistant ID and industry data
+      const companyData = {
+        assistantId: assistant.id,
+        industry: validatedIndustry,
+        companyName: organization_name,
+        createdAt: new Date().toISOString()
+      };
+      
+      await redis.set(`company:${companySlug}`, JSON.stringify(companyData));
+      console.log(`Successfully stored assistant ${assistant.id} and industry ${validatedIndustry} for company ${companySlug} in Redis`);
     } catch (error) {
       console.log('Warning: Could not store assistant mapping:', error);
       // Don't fail the whole request if storage fails

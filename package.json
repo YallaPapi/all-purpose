@@ -12,6 +12,7 @@
   "dependencies": {
     "@itseasy21/mcp-knowledge-graph": "^1.0.7",
     "@upstash/redis": "^1.35.1",
+    "mustache": "^4.2.0",
     "next": "15.4.1",
     "openai": "^5.10.1",
     "react": "19.1.0",
