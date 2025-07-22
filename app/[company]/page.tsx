@@ -407,7 +407,7 @@ export default function CompanyPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch min-h-[800px]">
           
           {/* Left Side - Demo Info */}
           <div className="space-y-6">
@@ -442,7 +442,8 @@ export default function CompanyPage() {
                       <div className="text-xs">Response Time</div>
                     </div>
                   </div>
-                  <p className="text-blue-800 text-xs mt-2">SMS is 5x more effective than email with 98% open rates vs 20% for email</p>
+                  <p className="text-blue-800 text-xs mt-2">SMS is 5x more effective than email with 98% open rates vs 20% for email*</p>
+                  <p className="text-blue-700 text-xs mt-1">*Source: SimpleTexting, TextDrip, Constant Contact 2024 studies</p>
                 </div>
 
                 {/* How It Works Section */}
@@ -511,22 +512,14 @@ export default function CompanyPage() {
                   <p className="text-orange-800 text-sm mb-3">
                     Ready to get your own AI SMS agent that converts prospects into booked calls?
                   </p>
-                  <div className="space-y-2">
+                  <div>
                     <a 
                       href="https://calendly.com/solar-bookers-demo" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="block w-full bg-orange-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors"
+                      className="block w-full bg-orange-600 text-white text-center py-3 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors"
                     >
                       📅 Book Your Demo Call
-                    </a>
-                    <a 
-                      href="https://forms.gle/demo-request" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block w-full bg-white border border-orange-600 text-orange-600 text-center py-2 px-4 rounded-lg font-medium hover:bg-orange-50 transition-colors"
-                    >
-                      📝 Fill Out Request Form
                     </a>
                   </div>
                   <p className="text-orange-700 text-xs mt-2 text-center">
@@ -538,8 +531,8 @@ export default function CompanyPage() {
           </div>
 
           {/* Right Side - iPhone Demo */}
-          <div className="flex justify-center">
-            <div className="relative bg-black rounded-[3rem] p-2 shadow-2xl" style={{ width: '375px', height: '812px' }}>
+          <div className="flex justify-center items-start">
+            <div className="relative bg-black rounded-[3rem] p-2 shadow-2xl w-full max-w-[375px] h-[812px]">
               {/* iPhone Screen */}
               <div className="bg-black rounded-[2.5rem] overflow-hidden relative h-full">
                 {/* Notch */}
