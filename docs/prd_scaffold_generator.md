@@ -1,53 +1,61 @@
 # PRD: Scaffold Generator Agent
 
 ## Overview
-
-The Scaffold Generator Agent creates consistent directory structures and base files for new agents, implementing standardized templates and automated file generation based on TaskMaster task specifications.
+Create an agent that generates consistent directory structures and base files for new agents based on parsed task lists from the PRD-Parser.
 
 ## Requirements
 
-### Core Functionality
+### Core Features
+- Take parsed task lists as input from PRD-Parser
+- Create appropriate `src/<agent-name>/` directories  
+- Generate standard files (main.js, README.md, package.json)
+- Update CHANGELOG.md with new agent entries
+- Follow established naming conventions and patterns
 
-- **Must** generate directory structures for new agents based on task specifications
-- **Must** create standardized base files (main.js, README.md, package.json) using templates
-- **Should** update CHANGELOG.md with new agent entries automatically
-- **Must** follow established naming conventions and project patterns
+### Technical Specifications
+- Use Node.js with file system operations
+- Implement template engine for standard files
+- Build CHANGELOG updater functionality
+- Add validation for naming conventions
+- Ensure proper linking to existing documentation
+- Support multiple agent types and patterns
 
-### Template System
+### File Structure Generation
+```
+src/<agent-name>/
+  ├── main.js
+  ├── README.md  
+  ├── package.json
+  ├── config/
+  │   └── default.json
+  ├── templates/
+  └── tests/
+```
 
-- **Must** implement template engine for dynamic file generation
-- **Should** support multiple template types (JavaScript, TypeScript, documentation)
-- **Must** provide variable substitution in templates (agent name, description, etc.)
-- **Could** support custom template directories for specialized agents
+### Template Engine Requirements
+- Dynamic template rendering based on agent specifications
+- Support for variable substitution in templates
+- Template validation and error handling
+- Standard template library for common patterns
 
-### Integration Requirements
+### Integration Requirements  
+- Integrate with PRD-Parser output format
+- Support TaskMaster task list input
+- Generate appropriate Git commit messages
+- Update project documentation automatically
 
-- **Must** integrate with existing TaskMaster workflow and task specifications
-- **Should** coordinate with other meta-agents in the factory system
-- **Must** validate generated structures against project standards
-- **Should** provide rollback capabilities for failed generations
+### Performance Goals
+- Process agent scaffolding in under 30 seconds
+- Support concurrent scaffold generation
+- Memory-efficient template processing
+- Reliable file system operations
 
-### Quality Assurance
+## Implementation Notes
+This agent should follow the All-Purpose Pattern, working for ANY agent domain with no hardcoded limitations. It should use the established meta-agent factory methodologies and integrate with the 5-Document Framework.
 
-- **Must** validate naming conventions and directory structures
-- **Should** perform syntax checking on generated files
-- **Must** ensure proper linking to existing project documentation
-- **Could** provide automated testing of generated scaffolds
-
-## Architecture
-
-The Scaffold Generator follows the meta-agent pattern with modular components:
-
-1. **Directory Builder**: Creates consistent directory structures
-2. **Template Engine**: Processes templates with variable substitution  
-3. **File Generator**: Creates standardized base files
-4. **Validation Engine**: Ensures generated structures meet standards
-5. **Integration Manager**: Coordinates with TaskMaster and other agents
-
-## Implementation Strategy
-
-Use research-backed development to identify current best practices for:
-- Node.js project scaffolding patterns
-- Template engine selection and configuration
-- Automated code generation techniques
-- Project structure standardization approaches
+## Testing Strategy
+- Unit tests for directory creation and file generation
+- Template rendering tests with various inputs  
+- CHANGELOG update verification
+- Integration test with sample agent specifications
+- Validation against existing agent structures for consistency

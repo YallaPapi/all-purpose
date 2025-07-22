@@ -3,8 +3,13 @@
   "verbose": true,
   "permissions": {
     "allow": [
-      "Bash(git add:*)"
+      "Bash(where task-master)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "knowledge-graph",
+    "task-master-ai"
+  ],
+  "enableAllProjectMcpServers": true
 }

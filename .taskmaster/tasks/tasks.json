@@ -150,162 +150,140 @@
   "master": {
     "tasks": [
       {
-        "id": 26,
-        "title": "Implement PRD-Parser & Research Agent",
-        "description": "Create an agent that automatically parses PRD specifications and generates research-backed task lists",
-        "details": "Build a Node.js module that:\n1. Watches for new `docs/prd_<agent>.md` files\n2. Parses the PRD content using NLP techniques to extract requirements\n3. Generates TaskMaster task lists with proper dependencies\n4. Formulates research questions for each requirement\n5. Commits generated task lists to Git\n\nImplementation steps:\n- Create a file watcher for the docs directory\n- Implement markdown parser to extract sections and requirements\n- Build a task generator that follows TaskMaster format\n- Integrate with Git using simple-git or similar library\n- Add event emission for observability\n\nFile structure:\n```\nsrc/meta-agents/prd-parser/\n  ├── main.js\n  ├── parser.js\n  ├── research-generator.js\n  ├── task-formatter.js\n  └── git-integration.js\n```",
-        "testStrategy": "1. Unit tests for each component (parser, research generator, task formatter)\n2. Integration test with sample PRD files\n3. Git integration tests with mock repository\n4. End-to-end test verifying complete workflow\n5. Validation that output matches TaskMaster expected format",
+        "id": 48,
+        "title": "Setup Project Structure",
+        "description": "Create the initial project structure for the Scaffold Generator Agent with necessary dependencies and configuration files.",
+        "details": "1. Initialize a new Node.js project\n2. Create the following directory structure:\n```\nscaffold-generator/\n  ├── src/\n  │   └── index.js\n  ├── lib/\n  ├── templates/\n  ├── tests/\n  └── config/\n```\n3. Install required dependencies:\n```bash\nnpm init -y\nnpm install --save fs-extra handlebars chalk commander\nnpm install --save-dev jest eslint\n```\n4. Configure package.json with appropriate scripts:\n```json\n{\n  \"scripts\": {\n    \"start\": \"node src/index.js\",\n    \"test\": \"jest\",\n    \"lint\": \"eslint .\"\n  }\n}\n```\n5. Setup basic ESLint configuration",
+        "testStrategy": "Verify the project structure is created correctly by checking that all directories and files exist. Run npm test to ensure the testing framework is properly configured.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 27,
-        "title": "Implement Scaffold-Generator Agent",
-        "description": "Create an agent that generates consistent directory structures and base files for new agents",
-        "details": "Build a Node.js module that:\n1. Takes parsed task lists as input\n2. Creates appropriate `src/<agent-name>/` directories\n3. Generates standard files (main.js, README.md, package.json)\n4. Updates CHANGELOG.md with new agent entries\n5. Follows established naming conventions\n\nImplementation steps:\n- Create directory structure generator\n- Implement template engine for standard files\n- Build CHANGELOG updater\n- Add validation for naming conventions\n- Ensure proper linking to existing documentation\n\nFile structure:\n```\nsrc/meta-agents/scaffold-generator/\n  ├── main.js\n  ├── directory-builder.js\n  ├── template-engine.js\n  ├── changelog-updater.js\n  └── templates/\n      ├── main.js.template\n      ├── README.md.template\n      └── package.json.template\n```",
-        "testStrategy": "1. Unit tests for directory creation and file generation\n2. Template rendering tests with various inputs\n3. CHANGELOG update verification\n4. Integration test with sample agent specifications\n5. Validation against existing agent structures for consistency",
+        "id": 49,
+        "title": "Implement Input Parser for PRD-Parser Output",
+        "description": "Create a module to parse and validate the task list input from the PRD-Parser.",
+        "details": "Create a module in lib/inputParser.js that:\n\n1. Accepts JSON input from PRD-Parser\n2. Validates the structure of the input\n3. Extracts agent name, description, and requirements\n4. Normalizes agent name for directory creation\n\n```javascript\n// lib/inputParser.js\nconst validateInput = (input) => {\n  // Validate input has required fields\n  if (!input.agentName || !input.tasks || !Array.isArray(input.tasks)) {\n    throw new Error('Invalid input: missing required fields');\n  }\n  \n  return true;\n};\n\nconst parseInput = (input) => {\n  validateInput(input);\n  \n  // Normalize agent name for directory (lowercase, hyphens instead of spaces)\n  const normalizedAgentName = input.agentName.toLowerCase().replace(/\\s+/g, '-');\n  \n  return {\n    agentName: input.agentName,\n    normalizedAgentName,\n    description: input.description || '',\n    tasks: input.tasks,\n    // Extract other relevant metadata\n    metadata: input.metadata || {}\n  };\n};\n\nmodule.exports = { parseInput, validateInput };\n```",
+        "testStrategy": "Write unit tests to verify the parser correctly validates input, rejects invalid input, and normalizes agent names properly. Test with various input formats including edge cases like special characters in agent names.",
         "priority": "high",
         "dependencies": [
-          26
+          48
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 28,
-        "title": "Implement Code-Stub Builder Agent",
-        "description": "Create an agent that generates initial code structure with proper interfaces based on agent specifications",
-        "details": "Build a Node.js module that:\n1. Takes scaffold structure and task specifications as input\n2. Creates function signatures based on PARAMETER_MAPPING.md\n3. Adds TODO markers for implementation points\n4. Pre-wires sendEvent() hooks for observability\n5. Implements standard error handling patterns\n\nImplementation steps:\n- Parse PARAMETER_MAPPING.md to extract interface requirements\n- Create code template generator with proper TypeScript interfaces\n- Implement function signature generator\n- Add standard error handling templates\n- Ensure observability hooks are properly placed\n\nFile structure:\n```\nsrc/meta-agents/code-stub-builder/\n  ├── main.js\n  ├── interface-parser.js\n  ├── function-generator.js\n  ├── error-handler-templates.js\n  └── observability-hooks.js\n```",
-        "testStrategy": "1. Unit tests for interface parsing and function generation\n2. Validation of generated code against TypeScript compiler\n3. Integration tests with sample agent specifications\n4. Verification of error handling patterns\n5. Tests for observability hook placement",
+        "id": 50,
+        "title": "Develop Template Engine",
+        "description": "Create a template engine that supports variable substitution and renders templates for standard files.",
+        "details": "Implement a template engine in lib/templateEngine.js using Handlebars:\n\n```javascript\n// lib/templateEngine.js\nconst fs = require('fs-extra');\nconst path = require('path');\nconst Handlebars = require('handlebars');\n\nclass TemplateEngine {\n  constructor(templatesDir) {\n    this.templatesDir = templatesDir || path.join(__dirname, '../templates');\n    this.registerHelpers();\n  }\n\n  registerHelpers() {\n    // Register custom Handlebars helpers\n    Handlebars.registerHelper('lowercase', (str) => str.toLowerCase());\n    Handlebars.registerHelper('capitalize', (str) => {\n      return str.charAt(0).toUpperCase() + str.slice(1);\n    });\n    // Add more helpers as needed\n  }\n\n  async loadTemplate(templateName) {\n    const templatePath = path.join(this.templatesDir, `${templateName}.hbs`);\n    try {\n      const templateContent = await fs.readFile(templatePath, 'utf8');\n      return Handlebars.compile(templateContent);\n    } catch (error) {\n      throw new Error(`Failed to load template ${templateName}: ${error.message}`);\n    }\n  }\n\n  async render(templateName, data) {\n    try {\n      const template = await this.loadTemplate(templateName);\n      return template(data);\n    } catch (error) {\n      throw new Error(`Failed to render template ${templateName}: ${error.message}`);\n    }\n  }\n}\n\nmodule.exports = TemplateEngine;\n```\n\nCreate standard templates in the templates directory:\n- main.js.hbs\n- README.md.hbs\n- package.json.hbs\n- config/default.json.hbs",
+        "testStrategy": "Test the template engine with various templates and data inputs. Verify that variable substitution works correctly and that templates are rendered as expected. Test error handling for missing or invalid templates.",
         "priority": "high",
         "dependencies": [
-          27
+          48
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 29,
-        "title": "Implement Test-Case Generator Agent",
-        "description": "Create an agent that generates comprehensive test suites for each agent based on specifications",
-        "details": "Build a Node.js module that:\n1. Takes code stubs and agent specifications as input\n2. Generates test files under the `tests/` directory\n3. Creates both unit and integration tests\n4. Includes smoke tests for basic functionality\n5. Sets up test data and mocks\n\nImplementation steps:\n- Parse code stubs to identify testable functions\n- Create test template generator for different test types\n- Implement mock data generator\n- Follow patterns from DEBUGGING_GUIDE.md\n- Generate test runner configurations\n\nFile structure:\n```\nsrc/meta-agents/test-case-generator/\n  ├── main.js\n  ├── code-analyzer.js\n  ├── test-template-generator.js\n  ├── mock-data-generator.js\n  └── test-runner-config.js\n```",
-        "testStrategy": "1. Unit tests for code analysis and test generation\n2. Validation that generated tests follow best practices\n3. Integration tests with sample agent code\n4. Meta-tests that verify generated tests can run\n5. Verification against DEBUGGING_GUIDE.md patterns",
+        "id": 51,
+        "title": "Create Standard File Templates",
+        "description": "Develop the standard file templates for main.js, README.md, package.json, and config files.",
+        "details": "Create the following template files in the templates directory:\n\n1. main.js.hbs:\n```handlebars\n/**\n * {{agentName}}\n * {{description}}\n */\n\nclass {{capitalize agentName}}Agent {\n  constructor(config) {\n    this.config = config;\n  }\n\n  async initialize() {\n    // Initialization logic\n    console.log('{{capitalize agentName}} agent initialized');\n  }\n\n  async process(input) {\n    // Processing logic\n    return { result: 'Processed by {{agentName}}' };\n  }\n}\n\nmodule.exports = {{capitalize agentName}}Agent;\n```\n\n2. README.md.hbs:\n```handlebars\n# {{agentName}}\n\n{{description}}\n\n## Installation\n\n```bash\nnpm install\n```\n\n## Usage\n\n```javascript\nconst {{capitalize agentName}}Agent = require('./main');\n\nconst agent = new {{capitalize agentName}}Agent();\nawait agent.initialize();\nconst result = await agent.process(input);\n```\n\n## Configuration\n\nSee `config/default.json` for configuration options.\n```\n\n3. package.json.hbs:\n```handlebars\n{\n  \"name\": \"{{lowercase agentName}}\",\n  \"version\": \"1.0.0\",\n  \"description\": \"{{description}}\",\n  \"main\": \"main.js\",\n  \"scripts\": {\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n  },\n  \"devDependencies\": {\n    \"jest\": \"^29.0.0\"\n  }\n}\n```\n\n4. config/default.json.hbs:\n```handlebars\n{\n  \"{{lowercase agentName}}\": {\n    \"enabled\": true,\n    \"logLevel\": \"info\"\n  }\n}\n```",
+        "testStrategy": "Verify that each template renders correctly with sample data. Check that the templates follow the established patterns and conventions. Test with various agent names and descriptions to ensure proper formatting.",
         "priority": "medium",
         "dependencies": [
-          28
+          50
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 30,
-        "title": "Implement Doc-Maintainer Agent",
-        "description": "Create an agent that keeps all documentation synchronized with new agents and updates",
-        "details": "Build a Node.js module that:\n1. Takes agent specifications and generated code as input\n2. Updates ENVIRONMENT_SETUP.md with new env variables\n3. Registers schemas in DOCUMENTATION_FRAMEWORK_SETUP.md\n4. Adds entries to CHANGELOG.md\n5. Updates PARAMETER_MAPPING.md with new interfaces\n\nImplementation steps:\n- Create parsers for each documentation file type\n- Implement documentation updaters that preserve existing content\n- Build cross-reference manager for documentation links\n- Add validation to ensure documentation consistency\n- Implement Git integration for documentation commits\n\nFile structure:\n```\nsrc/meta-agents/doc-maintainer/\n  ├── main.js\n  ├── doc-parsers/\n  │   ├── environment-setup-parser.js\n  │   ├── parameter-mapping-parser.js\n  │   ├── changelog-parser.js\n  │   └── framework-setup-parser.js\n  ├── doc-updaters/\n  │   ├── environment-setup-updater.js\n  │   ├── parameter-mapping-updater.js\n  │   ├── changelog-updater.js\n  │   └── framework-setup-updater.js\n  └── cross-reference-manager.js\n```",
-        "testStrategy": "1. Unit tests for each document parser and updater\n2. Integration tests with sample documentation files\n3. Cross-reference validation tests\n4. Git integration tests\n5. End-to-end tests with sample agent specifications",
-        "priority": "medium",
-        "dependencies": [
-          27,
-          28
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 31,
-        "title": "Implement CI/CD-Configurer Agent",
-        "description": "Create an agent that automatically configures deployment pipelines for new agents",
-        "details": "Build a Node.js module that:\n1. Takes agent structure and requirements as input\n2. Updates GitHub Actions workflows\n3. Configures Vercel deployment settings\n4. Sets up environment variable requirements\n5. Creates deployment verification tests\n\nImplementation steps:\n- Create GitHub Actions workflow generator\n- Implement Vercel configuration generator\n- Build environment variable manager\n- Create deployment verification test generator\n- Implement monitoring and alerting configuration\n\nFile structure:\n```\nsrc/meta-agents/cicd-configurer/\n  ├── main.js\n  ├── github-actions-generator.js\n  ├── vercel-config-generator.js\n  ├── env-var-manager.js\n  ├── verification-test-generator.js\n  └── monitoring-config-generator.js\n```",
-        "testStrategy": "1. Unit tests for each configuration generator\n2. Validation of generated GitHub Actions workflows\n3. Verification of Vercel configuration format\n4. Integration tests with sample agent requirements\n5. End-to-end tests with mock deployment",
-        "priority": "medium",
-        "dependencies": [
-          28,
-          29
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 32,
-        "title": "Implement TaskMaster-Bootstrapping Agent",
-        "description": "Create an agent that queues follow-up implementation tasks in TaskMaster for development",
-        "details": "Build a Node.js module that:\n1. Takes generated agent structure as input\n2. Creates detailed implementation tasks\n3. Sets up task dependencies and priorities\n4. Generates research-backed implementation guidance\n5. Integrates with existing TaskMaster workflows\n\nImplementation steps:\n- Create task generator for implementation steps\n- Implement dependency analyzer for proper task ordering\n- Build priority assignment algorithm\n- Create research integration for implementation guidance\n- Implement TaskMaster API integration\n\nFile structure:\n```\nsrc/meta-agents/taskmaster-bootstrapper/\n  ├── main.js\n  ├── task-generator.js\n  ├── dependency-analyzer.js\n  ├── priority-assigner.js\n  ├── research-integrator.js\n  └── taskmaster-api.js\n```",
-        "testStrategy": "1. Unit tests for task generation and dependency analysis\n2. Priority assignment algorithm tests\n3. Research integration tests\n4. TaskMaster API integration tests\n5. End-to-end tests with sample agent structure",
-        "priority": "medium",
-        "dependencies": [
-          26,
-          27,
-          28
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 33,
-        "title": "Implement Prospector Agent",
-        "description": "Create a specialist agent for automated lead discovery and collection using headless browser automation",
-        "details": "Build a Node.js module that:\n1. Uses Playwright/Puppeteer for headless browser automation\n2. Scrapes Google Maps and business directories for lead data\n3. Implements geo-targeted search capabilities\n4. Detects and removes duplicates\n5. Scores and ranks lead quality\n\nImplementation steps:\n- Set up Playwright/Puppeteer with stealth plugins\n- Create scrapers for different data sources\n- Implement geo-targeting functionality\n- Build duplicate detection algorithm\n- Create quality scoring system\n- Add rate limiting and export functionality\n\nFile structure:\n```\nsrc/specialist-agents/prospector/\n  ├── main.js\n  ├── browser-manager.js\n  ├── scrapers/\n  │   ├── google-maps.js\n  │   └── business-directories.js\n  ├── geo-targeting.js\n  ├── duplicate-detector.js\n  ├── quality-scorer.js\n  └── data-exporter.js\n```",
-        "testStrategy": "1. Unit tests for each scraper component\n2. Browser automation tests with mock websites\n3. Duplicate detection algorithm tests\n4. Quality scoring validation\n5. End-to-end tests with sample search queries\n6. Rate limiting and stealth tests",
+        "id": 52,
+        "title": "Implement Directory and File Generator",
+        "description": "Create a module to generate the directory structure and files for a new agent based on templates.",
+        "details": "Implement a file generator in lib/fileGenerator.js:\n\n```javascript\n// lib/fileGenerator.js\nconst fs = require('fs-extra');\nconst path = require('path');\nconst TemplateEngine = require('./templateEngine');\n\nclass FileGenerator {\n  constructor(baseDir) {\n    this.baseDir = baseDir || 'src';\n    this.templateEngine = new TemplateEngine();\n  }\n\n  async createDirectoryStructure(agentName) {\n    const agentDir = path.join(this.baseDir, agentName);\n    \n    // Create main directory and subdirectories\n    await fs.ensureDir(agentDir);\n    await fs.ensureDir(path.join(agentDir, 'config'));\n    await fs.ensureDir(path.join(agentDir, 'templates'));\n    await fs.ensureDir(path.join(agentDir, 'tests'));\n    \n    return agentDir;\n  }\n\n  async generateFile(agentDir, fileName, templateName, data) {\n    try {\n      const content = await this.templateEngine.render(templateName, data);\n      const filePath = path.join(agentDir, fileName);\n      await fs.writeFile(filePath, content, 'utf8');\n      return filePath;\n    } catch (error) {\n      throw new Error(`Failed to generate ${fileName}: ${error.message}`);\n    }\n  }\n\n  async generateAgentFiles(agentData) {\n    const { normalizedAgentName } = agentData;\n    const agentDir = await this.createDirectoryStructure(normalizedAgentName);\n    \n    // Generate standard files\n    await this.generateFile(agentDir, 'main.js', 'main.js', agentData);\n    await this.generateFile(agentDir, 'README.md', 'README.md', agentData);\n    await this.generateFile(agentDir, 'package.json', 'package.json', agentData);\n    await this.generateFile(path.join(agentDir, 'config'), 'default.json', 'config/default.json', agentData);\n    \n    return agentDir;\n  }\n}\n\nmodule.exports = FileGenerator;\n```",
+        "testStrategy": "Test the file generator by creating a temporary directory and verifying that all files and directories are created correctly. Check that the content of generated files matches the expected output from templates. Test error handling for file system operations.",
         "priority": "high",
         "dependencies": [
-          26,
-          27,
-          28,
-          29
+          50,
+          51
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 34,
-        "title": "Implement Enrichment & Validation Agent",
-        "description": "Create a specialist agent that cleans, validates, and enriches lead data from the Prospector Agent",
-        "details": "Build a Node.js module that:\n1. Takes raw lead lists from Prospector as input\n2. Validates email deliverability\n3. Enriches company information\n4. Detects contact titles/roles\n5. Scores data quality and flags bad data\n\nImplementation steps:\n- Integrate with email validation APIs\n- Create web scraping module for company enrichment\n- Implement contact role detection algorithm\n- Build data quality scoring system\n- Create bad data flagging and removal system\n\nFile structure:\n```\nsrc/specialist-agents/enrichment/\n  ├── main.js\n  ├── email-validator.js\n  ├── company-enricher.js\n  ├── contact-analyzer.js\n  ├── quality-scorer.js\n  └── data-cleaner.js\n```",
-        "testStrategy": "1. Unit tests for each validation and enrichment component\n2. API integration tests with mock responses\n3. Data quality scoring algorithm tests\n4. Bad data detection tests\n5. End-to-end tests with sample lead data\n6. Performance tests for processing speed",
-        "priority": "high",
-        "dependencies": [
-          33
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 35,
-        "title": "Implement Loader Agent",
-        "description": "Create a specialist agent for automated data loading into campaign systems using Instantly.ai API",
-        "details": "Build a Node.js module that:\n1. Takes validated lead lists as input\n2. Integrates with Instantly.ai API for bulk imports\n3. Manages field mapping and transformation\n4. Handles campaign list management\n5. Implements error handling and retry logic\n\nImplementation steps:\n- Create Instantly.ai API client\n- Implement field mapping system\n- Build campaign list manager\n- Create error handling and retry system\n- Implement import status reporting\n\nFile structure:\n```\nsrc/specialist-agents/loader/\n  ├── main.js\n  ├── instantly-api.js\n  ├── field-mapper.js\n  ├── campaign-manager.js\n  ├── error-handler.js\n  └── status-reporter.js\n```",
-        "testStrategy": "1. Unit tests for field mapping and transformation\n2. API integration tests with mock responses\n3. Error handling and retry logic tests\n4. Campaign management tests\n5. End-to-end tests with sample lead data\n6. Status reporting validation",
-        "priority": "high",
-        "dependencies": [
-          34
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 36,
-        "title": "Implement Cold-Open Copywriter Agent",
-        "description": "Create a specialist agent that generates personalized email copy variations using LLM API integration",
-        "details": "Build a Node.js module that:\n1. Integrates with OpenAI/Claude APIs\n2. Generates multiple subject line variants\n3. Creates personalized icebreakers\n4. Optimizes calls-to-action\n5. Generates industry-specific messaging\n\nImplementation steps:\n- Create LLM API client (OpenAI/Claude)\n- Implement subject line generator\n- Build icebreaker personalization system\n- Create call-to-action optimizer\n- Implement industry-specific template system\n- Add A/B test variant creator\n\nFile structure:\n```\nsrc/specialist-agents/copywriter/\n  ├── main.js\n  ├── llm-client.js\n  ├── subject-generator.js\n  ├── icebreaker-personalizer.js\n  ├── cta-optimizer.js\n  ├── industry-templates.js\n  └── ab-variant-creator.js\n```",
-        "testStrategy": "1. Unit tests for each generation component\n2. LLM API integration tests with mock responses\n3. Personalization algorithm tests\n4. Industry-specific template tests\n5. A/B variant creation tests\n6. End-to-end tests with sample lead data\n7. Performance and cost optimization tests",
+        "id": 53,
+        "title": "Implement CHANGELOG Updater",
+        "description": "Create functionality to update the project's CHANGELOG.md with new agent entries.",
+        "details": "Implement a CHANGELOG updater in lib/changelogUpdater.js:\n\n```javascript\n// lib/changelogUpdater.js\nconst fs = require('fs-extra');\nconst path = require('path');\n\nclass ChangelogUpdater {\n  constructor(changelogPath) {\n    this.changelogPath = changelogPath || path.join(process.cwd(), 'CHANGELOG.md');\n  }\n\n  async readChangelog() {\n    try {\n      if (await fs.pathExists(this.changelogPath)) {\n        return await fs.readFile(this.changelogPath, 'utf8');\n      }\n      return '# Changelog\\n\\nAll notable changes to this project will be documented in this file.\\n';\n    } catch (error) {\n      throw new Error(`Failed to read changelog: ${error.message}`);\n    }\n  }\n\n  async updateChangelog(agentData) {\n    try {\n      let changelog = await this.readChangelog();\n      \n      // Get current date in YYYY-MM-DD format\n      const date = new Date().toISOString().split('T')[0];\n      \n      // Create new entry\n      const newEntry = `\\n## [${agentData.agentName}] - ${date}\\n\\n### Added\\n- Initial scaffold for ${agentData.agentName} agent\\n- Basic functionality and configuration\\n`;\n      \n      // Find position to insert (after the header)\n      const headerEndPos = changelog.indexOf('\\n\\n');\n      if (headerEndPos !== -1) {\n        changelog = changelog.substring(0, headerEndPos + 2) + newEntry + changelog.substring(headerEndPos + 2);\n      } else {\n        changelog += newEntry;\n      }\n      \n      // Write updated changelog\n      await fs.writeFile(this.changelogPath, changelog, 'utf8');\n      return true;\n    } catch (error) {\n      throw new Error(`Failed to update changelog: ${error.message}`);\n    }\n  }\n}\n\nmodule.exports = ChangelogUpdater;\n```",
+        "testStrategy": "Test the CHANGELOG updater with a sample CHANGELOG.md file. Verify that new entries are added correctly and that the format is maintained. Test with both existing and non-existing CHANGELOG files.",
         "priority": "medium",
         "dependencies": [
-          35
+          48
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 37,
-        "title": "Implement Campaign Optimizer Agent",
-        "description": "Create a specialist agent for automated campaign performance optimization using statistical analysis",
-        "details": "Build a Node.js module that:\n1. Tracks performance metrics for campaigns\n2. Automatically promotes/pauses variants based on performance\n3. Monitors bounce rates and deliverability\n4. Generates performance reports\n5. Alerts on deliverability issues\n\nImplementation steps:\n- Create performance metric tracker\n- Implement statistical analysis engine\n- Build variant promotion/pausing system\n- Create bounce rate monitoring system\n- Implement deliverability alerting\n- Add performance reporting generator\n\nFile structure:\n```\nsrc/specialist-agents/optimizer/\n  ├── main.js\n  ├── metric-tracker.js\n  ├── statistical-analyzer.js\n  ├── variant-manager.js\n  ├── bounce-monitor.js\n  ├── alert-system.js\n  └── report-generator.js\n```",
-        "testStrategy": "1. Unit tests for statistical analysis algorithms\n2. Metric tracking validation tests\n3. Variant management decision tests\n4. Bounce rate monitoring tests\n5. Alert system integration tests\n6. Report generation validation\n7. End-to-end tests with sample campaign data",
+        "id": 54,
+        "title": "Implement Naming Convention Validator",
+        "description": "Create a module to validate agent names and ensure they follow established naming conventions.",
+        "details": "Implement a naming convention validator in lib/namingValidator.js:\n\n```javascript\n// lib/namingValidator.js\nclass NamingValidator {\n  constructor(options = {}) {\n    this.options = {\n      allowedPrefixes: options.allowedPrefixes || [],\n      allowedSuffixes: options.allowedSuffixes || ['Agent', 'Service', 'Manager'],\n      minLength: options.minLength || 3,\n      maxLength: options.maxLength || 50,\n      pattern: options.pattern || /^[a-zA-Z][a-zA-Z0-9-]*$/\n    };\n  }\n\n  validateAgentName(name) {\n    const errors = [];\n    \n    // Check length\n    if (name.length < this.options.minLength) {\n      errors.push(`Name is too short (minimum ${this.options.minLength} characters)`);\n    }\n    \n    if (name.length > this.options.maxLength) {\n      errors.push(`Name is too long (maximum ${this.options.maxLength} characters)`);\n    }\n    \n    // Check pattern\n    if (!this.options.pattern.test(name)) {\n      errors.push('Name contains invalid characters (use letters, numbers, and hyphens only)');\n    }\n    \n    // Check prefixes if specified\n    if (this.options.allowedPrefixes.length > 0) {\n      const hasValidPrefix = this.options.allowedPrefixes.some(prefix => name.startsWith(prefix));\n      if (!hasValidPrefix) {\n        errors.push(`Name must start with one of: ${this.options.allowedPrefixes.join(', ')}`);\n      }\n    }\n    \n    // Check suffixes if specified\n    if (this.options.allowedSuffixes.length > 0) {\n      const hasValidSuffix = this.options.allowedSuffixes.some(suffix => name.endsWith(suffix));\n      if (!hasValidSuffix) {\n        errors.push(`Name must end with one of: ${this.options.allowedSuffixes.join(', ')}`);\n      }\n    }\n    \n    return {\n      isValid: errors.length === 0,\n      errors\n    };\n  }\n\n  suggestValidName(name) {\n    // If name doesn't end with a valid suffix, add the first allowed suffix\n    if (this.options.allowedSuffixes.length > 0) {\n      const hasValidSuffix = this.options.allowedSuffixes.some(suffix => name.endsWith(suffix));\n      if (!hasValidSuffix) {\n        return `${name}${this.options.allowedSuffixes[0]}`;\n      }\n    }\n    \n    return name;\n  }\n}\n\nmodule.exports = NamingValidator;\n```",
+        "testStrategy": "Test the naming validator with various agent names, including valid and invalid names. Verify that the validator correctly identifies naming convention violations and provides appropriate error messages. Test the name suggestion functionality.",
         "priority": "medium",
         "dependencies": [
-          36
+          48
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 55,
+        "title": "Create Main Application Logic",
+        "description": "Implement the main application logic that orchestrates the scaffold generation process.",
+        "details": "Implement the main application logic in src/index.js:\n\n```javascript\n// src/index.js\nconst fs = require('fs-extra');\nconst path = require('path');\nconst { Command } = require('commander');\nconst chalk = require('chalk');\n\nconst { parseInput } = require('../lib/inputParser');\nconst FileGenerator = require('../lib/fileGenerator');\nconst ChangelogUpdater = require('../lib/changelogUpdater');\nconst NamingValidator = require('../lib/namingValidator');\n\nclass ScaffoldGenerator {\n  constructor(options = {}) {\n    this.baseDir = options.baseDir || 'src';\n    this.fileGenerator = new FileGenerator(this.baseDir);\n    this.changelogUpdater = new ChangelogUpdater(options.changelogPath);\n    this.namingValidator = new NamingValidator();\n  }\n\n  async generateScaffold(input) {\n    try {\n      console.log(chalk.blue('Parsing input...'));\n      const agentData = parseInput(input);\n      \n      // Validate agent name\n      const nameValidation = this.namingValidator.validateAgentName(agentData.agentName);\n      if (!nameValidation.isValid) {\n        console.warn(chalk.yellow('Warning: Agent name has issues:'));\n        nameValidation.errors.forEach(error => console.warn(chalk.yellow(`- ${error}`)));\n        \n        const suggestedName = this.namingValidator.suggestValidName(agentData.agentName);\n        console.log(chalk.yellow(`Suggested name: ${suggestedName}`));\n        \n        // Ask for confirmation or use suggested name\n        // For now, we'll proceed with the original name\n      }\n      \n      console.log(chalk.blue(`Generating scaffold for ${agentData.agentName}...`));\n      \n      // Generate files and directories\n      const agentDir = await this.fileGenerator.generateAgentFiles(agentData);\n      console.log(chalk.green(`Agent scaffold created at: ${agentDir}`));\n      \n      // Update changelog\n      await this.changelogUpdater.updateChangelog(agentData);\n      console.log(chalk.green('CHANGELOG.md updated'));\n      \n      return {\n        success: true,\n        agentDir,\n        agentName: agentData.agentName\n      };\n    } catch (error) {\n      console.error(chalk.red(`Error generating scaffold: ${error.message}`));\n      return {\n        success: false,\n        error: error.message\n      };\n    }\n  }\n}\n\n// CLI interface\nconst program = new Command();\n\nprogram\n  .name('scaffold-generator')\n  .description('Generate agent scaffolding based on PRD-Parser output')\n  .version('1.0.0');\n\nprogram\n  .command('generate')\n  .description('Generate agent scaffold')\n  .option('-i, --input <path>', 'Path to PRD-Parser output JSON')\n  .option('-b, --base-dir <path>', 'Base directory for agent creation', 'src')\n  .action(async (options) => {\n    try {\n      if (!options.input) {\n        console.error(chalk.red('Error: Input file is required'));\n        process.exit(1);\n      }\n      \n      const inputPath = path.resolve(options.input);\n      const inputData = await fs.readJson(inputPath);\n      \n      const generator = new ScaffoldGenerator({\n        baseDir: options.baseDir\n      });\n      \n      const result = await generator.generateScaffold(inputData);\n      \n      if (result.success) {\n        console.log(chalk.green('\\nScaffold generation completed successfully!'));\n      } else {\n        console.error(chalk.red('\\nScaffold generation failed.'));\n        process.exit(1);\n      }\n    } catch (error) {\n      console.error(chalk.red(`\\nError: ${error.message}`));\n      process.exit(1);\n    }\n  });\n\n// Export for programmatic usage\nmodule.exports = ScaffoldGenerator;\n\n// Run CLI if called directly\nif (require.main === module) {\n  program.parse(process.argv);\n}\n```",
+        "testStrategy": "Test the main application logic with various inputs, including valid and invalid inputs. Verify that the scaffold generation process works end-to-end. Test error handling and edge cases. Create integration tests that simulate the entire process from input parsing to file generation.",
+        "priority": "high",
+        "dependencies": [
+          49,
+          52,
+          53,
+          54
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 56,
+        "title": "Implement Git Integration",
+        "description": "Add functionality to generate appropriate Git commit messages and handle Git operations.",
+        "details": "Implement Git integration in lib/gitIntegration.js:\n\n```javascript\n// lib/gitIntegration.js\nconst { execSync } = require('child_process');\nconst path = require('path');\n\nclass GitIntegration {\n  constructor(options = {}) {\n    this.options = {\n      commitMessage: options.commitMessage || 'feat: Generate scaffold for {agentName}',\n      autoCommit: options.autoCommit !== undefined ? options.autoCommit : true\n    };\n  }\n\n  isGitRepository() {\n    try {\n      execSync('git rev-parse --is-inside-work-tree', { stdio: 'ignore' });\n      return true;\n    } catch (error) {\n      return false;\n    }\n  }\n\n  getGitStatus() {\n    try {\n      return execSync('git status --porcelain').toString().trim();\n    } catch (error) {\n      throw new Error(`Failed to get Git status: ${error.message}`);\n    }\n  }\n\n  addFiles(agentDir) {\n    try {\n      execSync(`git add ${agentDir}`, { stdio: 'ignore' });\n      // Also add CHANGELOG.md if it exists\n      execSync('git add CHANGELOG.md', { stdio: 'ignore' });\n      return true;\n    } catch (error) {\n      throw new Error(`Failed to add files to Git: ${error.message}`);\n    }\n  }\n\n  commit(agentData) {\n    try {\n      const message = this.options.commitMessage.replace('{agentName}', agentData.agentName);\n      execSync(`git commit -m \"${message}\"`, { stdio: 'ignore' });\n      return true;\n    } catch (error) {\n      throw new Error(`Failed to commit changes: ${error.message}`);\n    }\n  }\n\n  async handleGitOperations(agentData, agentDir) {\n    if (!this.isGitRepository()) {\n      console.log('Not a Git repository, skipping Git operations');\n      return false;\n    }\n\n    const status = this.getGitStatus();\n    if (!status) {\n      console.log('No changes to commit');\n      return false;\n    }\n\n    this.addFiles(agentDir);\n    \n    if (this.options.autoCommit) {\n      this.commit(agentData);\n      console.log(`Changes committed with message: ${this.options.commitMessage.replace('{agentName}', agentData.agentName)}`);\n    } else {\n      console.log('Changes staged for commit');\n    }\n\n    return true;\n  }\n}\n\nmodule.exports = GitIntegration;\n```\n\nUpdate src/index.js to include Git integration:\n\n```javascript\n// In src/index.js, add:\nconst GitIntegration = require('../lib/gitIntegration');\n\n// In the ScaffoldGenerator constructor:\nthis.gitIntegration = new GitIntegration(options.git);\n\n// In the generateScaffold method, after updating the changelog:\n// Handle Git operations\nif (options.git?.enabled !== false) {\n  try {\n    await this.gitIntegration.handleGitOperations(agentData, agentDir);\n  } catch (error) {\n    console.warn(chalk.yellow(`Git operations failed: ${error.message}`));\n  }\n}\n```\n\nUpdate the CLI options in src/index.js:\n\n```javascript\nprogram\n  .command('generate')\n  .description('Generate agent scaffold')\n  .option('-i, --input <path>', 'Path to PRD-Parser output JSON')\n  .option('-b, --base-dir <path>', 'Base directory for agent creation', 'src')\n  .option('--no-git', 'Disable Git operations')\n  .option('--no-auto-commit', 'Stage files but do not commit')\n  .action(async (options) => {\n    // ...\n    \n    const generator = new ScaffoldGenerator({\n      baseDir: options.baseDir,\n      git: {\n        enabled: options.git,\n        autoCommit: options.autoCommit\n      }\n    });\n    \n    // ...\n  });\n```",
+        "testStrategy": "Test Git integration by creating a temporary Git repository and verifying that files are correctly added and committed. Test with various options (auto-commit enabled/disabled). Mock Git commands for unit testing to avoid actual Git operations during tests.",
+        "priority": "low",
+        "dependencies": [
+          55
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 57,
+        "title": "Create Comprehensive Test Suite",
+        "description": "Develop a comprehensive test suite for all components of the Scaffold Generator Agent.",
+        "details": "Create the following test files:\n\n1. tests/inputParser.test.js:\n```javascript\nconst { parseInput, validateInput } = require('../lib/inputParser');\n\ndescribe('Input Parser', () => {\n  test('validates valid input', () => {\n    const input = {\n      agentName: 'TestAgent',\n      tasks: []\n    };\n    expect(validateInput(input)).toBe(true);\n  });\n\n  test('throws error for invalid input', () => {\n    const input = {\n      agentName: 'TestAgent'\n      // Missing tasks\n    };\n    expect(() => validateInput(input)).toThrow();\n  });\n\n  test('normalizes agent name', () => {\n    const input = {\n      agentName: 'Test Agent Name',\n      tasks: []\n    };\n    const result = parseInput(input);\n    expect(result.normalizedAgentName).toBe('test-agent-name');\n  });\n});\n```\n\n2. tests/templateEngine.test.js:\n```javascript\nconst TemplateEngine = require('../lib/templateEngine');\nconst fs = require('fs-extra');\nconst path = require('path');\n\n// Mock fs-extra\njest.mock('fs-extra');\n\ndescribe('Template Engine', () => {\n  let templateEngine;\n  \n  beforeEach(() => {\n    templateEngine = new TemplateEngine('templates');\n    // Mock file system\n    fs.readFile.mockResolvedValue('Hello {{name}}!');\n  });\n\n  test('renders template with variables', async () => {\n    const result = await templateEngine.render('test', { name: 'World' });\n    expect(result).toBe('Hello World!');\n  });\n\n  test('throws error for missing template', async () => {\n    fs.readFile.mockRejectedValue(new Error('File not found'));\n    await expect(templateEngine.render('missing', {})).rejects.toThrow();\n  });\n});\n```\n\n3. tests/fileGenerator.test.js:\n```javascript\nconst FileGenerator = require('../lib/fileGenerator');\nconst fs = require('fs-extra');\nconst path = require('path');\n\n// Mock fs-extra and templateEngine\njest.mock('fs-extra');\njest.mock('../lib/templateEngine');\n\ndescribe('File Generator', () => {\n  let fileGenerator;\n  \n  beforeEach(() => {\n    fileGenerator = new FileGenerator('src');\n    // Mock file system operations\n    fs.ensureDir.mockResolvedValue();\n    fs.writeFile.mockResolvedValue();\n    // Mock template engine\n    fileGenerator.templateEngine.render = jest.fn().mockResolvedValue('rendered content');\n  });\n\n  test('creates directory structure', async () => {\n    await fileGenerator.createDirectoryStructure('test-agent');\n    expect(fs.ensureDir).toHaveBeenCalledWith('src/test-agent');\n    expect(fs.ensureDir).toHaveBeenCalledWith('src/test-agent/config');\n    expect(fs.ensureDir).toHaveBeenCalledWith('src/test-agent/templates');\n    expect(fs.ensureDir).toHaveBeenCalledWith('src/test-agent/tests');\n  });\n\n  test('generates agent files', async () => {\n    const agentData = {\n      agentName: 'Test Agent',\n      normalizedAgentName: 'test-agent',\n      description: 'A test agent'\n    };\n    \n    await fileGenerator.generateAgentFiles(agentData);\n    \n    expect(fs.writeFile).toHaveBeenCalledTimes(4); // main.js, README.md, package.json, config/default.json\n  });\n});\n```\n\n4. tests/integration.test.js:\n```javascript\nconst ScaffoldGenerator = require('../src/index');\nconst fs = require('fs-extra');\nconst path = require('path');\n\n// Use actual file system for integration tests\nconst testDir = path.join(__dirname, 'temp-test-dir');\n\ndescribe('Integration Tests', () => {\n  beforeAll(async () => {\n    // Create test directory\n    await fs.ensureDir(testDir);\n  });\n\n  afterAll(async () => {\n    // Clean up test directory\n    await fs.remove(testDir);\n  });\n\n  test('generates complete agent scaffold', async () => {\n    const generator = new ScaffoldGenerator({\n      baseDir: testDir,\n      git: { enabled: false } // Disable git for testing\n    });\n    \n    const input = {\n      agentName: 'TestAgent',\n      description: 'A test agent for integration testing',\n      tasks: [\n        { id: 1, title: 'Task 1', description: 'Test task' }\n      ]\n    };\n    \n    const result = await generator.generateScaffold(input);\n    \n    expect(result.success).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent'))).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent', 'main.js'))).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent', 'README.md'))).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent', 'package.json'))).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent', 'config', 'default.json'))).toBe(true);\n  });\n});\n```\n\nUpdate package.json to include test configuration:\n```json\n{\n  \"scripts\": {\n    \"test\": \"jest\",\n    \"test:watch\": \"jest --watch\",\n    \"test:coverage\": \"jest --coverage\"\n  },\n  \"jest\": {\n    \"testEnvironment\": \"node\",\n    \"collectCoverageFrom\": [\n      \"lib/**/*.js\",\n      \"src/**/*.js\"\n    ],\n    \"coverageThreshold\": {\n      \"global\": {\n        \"branches\": 80,\n        \"functions\": 80,\n        \"lines\": 80\n      }\n    }\n  }\n}\n```",
+        "testStrategy": "Run the test suite with npm test and verify that all tests pass. Check code coverage to ensure adequate test coverage for all components. Test both success and failure scenarios for each component.",
+        "priority": "medium",
+        "dependencies": [
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56
         ],
         "status": "pending",
         "subtasks": []
@@ -313,7 +291,7 @@
     ],
     "metadata": {
       "created": "2025-07-22T01:57:35.907Z",
-      "updated": "2025-07-22T03:39:48.530Z",
+      "updated": "2025-07-22T19:19:35.870Z",
       "description": "Tasks for master context"
     }
   },

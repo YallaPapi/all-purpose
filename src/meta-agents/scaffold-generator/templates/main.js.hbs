@@ -1,0 +1,144 @@
+#!/usr/bin/env node
+
+/**
+ * {{agentName}} Agent
+ * 
+ * {{description}}
+ * Generated on {{formatDate "YYYY-MM-DD HH:mm:ss"}}
+ */
+
+const fs = require('fs-extra');
+const path = require('path');
+const chalk = require('chalk');
+
+/**
+ * {{pascalCase agentName}} Agent Class
+ * Implements the core functionality for {{lowercase agentName}} operations
+ */
+class {{pascalCase agentName}}Agent {
+  constructor(config = {}) {
+    this.config = {
+      logLevel: config.logLevel || 'info',
+      timeout: config.timeout || 30000,
+      ...config
+    };
+    
+    this.isInitialized = false;
+  }
+
+  /**
+   * Initialize the {{agentName}} agent
+   * @returns {Promise<void>}
+   */
+  async initialize() {
+    try {
+      console.log(chalk.blue(`🚀 Initializing ${this.config.name || '{{agentName}}'} agent...`));
+      
+      // TODO: Add initialization logic here
+      {{#each tasks}}
+      // Task {{id}}: {{title}}
+      // {{description}}
+      {{/each}}
+      
+      this.isInitialized = true;
+      console.log(chalk.green(`✅ {{capitalize agentName}} agent initialized successfully`));
+    } catch (error) {
+      console.error(chalk.red(`❌ Failed to initialize {{agentName}} agent: ${error.message}`));
+      throw error;
+    }
+  }
+
+  /**
+   * Process input data
+   * @param {Object} input - Input data to process
+   * @returns {Promise<Object>} - Processing result
+   */
+  async process(input = {}) {
+    if (!this.isInitialized) {
+      throw new Error('Agent not initialized. Call initialize() first.');
+    }
+
+    try {
+      console.log(chalk.blue(`🔄 Processing input for ${this.config.name || '{{agentName}}'}`));
+      
+      // TODO: Implement main processing logic
+      const result = {
+        success: true,
+        message: `Successfully processed by {{agentName}} agent`,
+        data: input,
+        processedAt: new Date().toISOString()
+      };
+      
+      console.log(chalk.green(`✅ Processing completed successfully`));
+      return result;
+    } catch (error) {
+      console.error(chalk.red(`❌ Processing failed: ${error.message}`));
+      throw error;
+    }
+  }
+
+  /**
+   * Cleanup resources
+   * @returns {Promise<void>}
+   */
+  async cleanup() {
+    try {
+      console.log(chalk.blue(`🧹 Cleaning up {{agentName}} agent...`));
+      
+      // TODO: Add cleanup logic here
+      
+      this.isInitialized = false;
+      console.log(chalk.green(`✅ Cleanup completed`));
+    } catch (error) {
+      console.error(chalk.red(`❌ Cleanup failed: ${error.message}`));
+      throw error;
+    }
+  }
+
+  /**
+   * Get agent status
+   * @returns {Object} - Current agent status
+   */
+  getStatus() {
+    return {
+      name: '{{agentName}}',
+      initialized: this.isInitialized,
+      config: this.config,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
+/**
+ * Main execution function
+ * @param {Object} options - Runtime options
+ * @returns {Promise<Object>} - Execution result
+ */
+async function main(options = {}) {
+  const agent = new {{pascalCase agentName}}Agent(options);
+  
+  try {
+    await agent.initialize();
+    const result = await agent.process(options.input);
+    return result;
+  } catch (error) {
+    console.error(chalk.red(`❌ {{capitalize agentName}} agent execution failed: ${error.message}`));
+    throw error;
+  } finally {
+    await agent.cleanup();
+  }
+}
+
+// Export for programmatic usage
+module.exports = {
+  {{pascalCase agentName}}Agent,
+  main
+};
+
+// Execute if run directly
+if (require.main === module) {
+  main(process.env).catch(error => {
+    console.error(chalk.red(`❌ Fatal error: ${error.message}`));
+    process.exit(1);
+  });
+}

@@ -1,3 +1,35 @@
+# Task Master Usage Guide (Explicit, Correct Workflow)
+
+## 1. Parse the PRD (DO NOT use --research here)
+
+    task-master parse-prd <prd-file>
+
+- This generates tasks in tasks.json or the specified output file.
+
+## 2. Research for Each Task (Separate Step)
+
+    task-master research "<prompt>" --id=<taskId>
+
+- Run this for each task that needs research.
+- The prompt should be specific to the task (e.g., "Best practices for directory structure in Node.js agents").
+- This attaches research findings to the specified task.
+
+## 3. (Optional) Update Task with Research Findings
+
+    task-master update-task --id=<taskId> --prompt="Incorporate research: [findings]"
+
+- Use this to explicitly update the task details with research results if needed.
+
+## 4. Generate Individual Task Files (Optional)
+
+    task-master generate
+
+- This creates individual task files for easier reference.
+
+## 5. Never combine --research with parse-prd. Always run research as a separate command.
+
+---
+
 # Task Master
 
 ### by [@eyaltoledano](https://x.com/eyaltoledano)
