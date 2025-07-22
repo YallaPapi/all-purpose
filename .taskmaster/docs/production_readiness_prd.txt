@@ -1,0 +1,136 @@
+# All-Purpose Lead System - Production Readiness PRD
+
+## Executive Summary
+Complete the transformation of the all-purpose lead generation system to full production readiness by resolving the TaskMaster format issue and eliminating all hardcoded industry-specific logic to achieve true dynamic AI-driven adaptation.
+
+## Current System Status (v2.1.0)
+- ✅ Multi-industry support (11+ industries tested)
+- ✅ Dynamic AI assistant creation with industry-specific prompts
+- ✅ iPhone Messages UI with authentic device mockup
+- ✅ Complete API ecosystem (chat, create-prototype, debug)
+- ✅ Redis storage and domain detection
+- ✅ N8N workflow integration with industry parameter support
+- ❌ TaskMaster format issue blocking workflow validation
+- ❌ Hardcoded sample responses violating all-purpose architecture
+
+## Critical Problems to Solve
+
+### Problem 1: TaskMaster Format Issue (BLOCKER)
+**Impact**: Prevents end-to-end workflow testing and production launch
+**Root Cause**: Unknown TaskMaster configuration format preventing task parsing/execution
+**Business Impact**: Cannot validate complete N8N → API → Frontend workflow
+
+### Problem 2: Hardcoded Sample Responses (ARCHITECTURAL VIOLATION)
+**Impact**: Violates core "all-purpose" principle of dynamic AI adaptation
+**Location**: app/[company]/page.tsx lines 251-339 generateSpecificResponses function
+**Current State**: Contains hardcoded industry mappings like:
+```typescript
+if (companyName.includes('implant')) {
+  return [...baseResponses, '"How much do dental implants cost?"', '"Tell me about All-on-4 procedures"'];
+}
+```
+**Business Impact**: System is not truly industry-agnostic as promised
+
+### Problem 3: Production Workflow Validation Gap
+**Impact**: No end-to-end validation of complete system under production conditions
+**Missing**: Live N8N workflow testing with real industry variations
+**Risk**: Deployment issues not caught in testing
+
+## Requirements
+
+### R1: TaskMaster Format Resolution (CRITICAL)
+- Identify and fix TaskMaster configuration format issue
+- Enable full TaskMaster workflow (parse PRD → analyze complexity → expand tasks → implement)
+- Restore TaskMaster MCP tool functionality for systematic development
+- Document solution for future reference
+
+### R2: Dynamic Sample Response Generation (HIGH)
+- Replace all hardcoded sample responses with AI-generated ones
+- Use organization_short_description parameter for business context
+- Generate 4 relevant sample responses per business type dynamically
+- Maintain existing UI structure and response format
+- Ensure zero additional API calls that impact page load performance
+- Cost-effective implementation (minimal token usage)
+
+### R3: Complete Production Workflow Validation (HIGH)
+- Test full N8N → create-prototype API → chat interface workflow
+- Validate across multiple industries (dental, automotive, legal, chiropractic, business funding)
+- Verify industry parameter processing end-to-end
+- Confirm dynamic AI adaptation for each industry type
+- Load test production endpoints under realistic conditions
+
+### R4: Architecture Compliance Audit (MEDIUM)
+- Scan entire codebase for remaining hardcoded industry logic
+- Ensure all components follow "dynamic AI adaptation" principle
+- Validate parameter mappings across all integration points
+- Confirm no industry-specific code paths exist
+
+### R5: Production Launch Readiness (MEDIUM)
+- Update all documentation with current system state
+- Verify environment variables in production Vercel deployment
+- Confirm domain detection working across all environments
+- Test error handling and fallback scenarios
+- Monitor system performance and API usage patterns
+
+## Technical Constraints
+- Must maintain existing Next.js/TypeScript architecture
+- Cannot break existing N8N workflow integration
+- Must preserve iPhone Messages UI functionality and performance
+- OpenAI API rate limits and cost considerations
+- Redis storage patterns must remain consistent
+- Vercel deployment pipeline must not be disrupted
+
+## Success Criteria
+
+### TaskMaster Resolution Success:
+- [ ] TaskMaster commands execute without format errors
+- [ ] Full workflow: parse PRD → analyze complexity → expand tasks → implement
+- [ ] MCP tools functional in Cursor environment
+- [ ] Documentation updated with working TaskMaster setup
+
+### Dynamic Response Success:
+- [ ] Zero hardcoded industry-specific logic in frontend code
+- [ ] Sample responses contextually relevant to business type
+- [ ] System generates appropriate responses for industries not previously considered
+- [ ] Page load performance maintained (< 3 second load time)
+- [ ] UI/UX unchanged from user perspective
+
+### Production Workflow Success:
+- [ ] Complete N8N workflow validation for 5+ different industries
+- [ ] Industry parameter correctly drives AI behavior end-to-end
+- [ ] Error handling graceful for edge cases and malformed inputs
+- [ ] System scales to handle multiple concurrent demo creations
+- [ ] Monitoring and logging provide clear system health visibility
+
+## Business Value
+- **Revolutionary Product**: First truly industry-agnostic lead generation platform
+- **Infinite Scalability**: Single system serves unlimited industries without code changes
+- **Cost Efficiency**: One system replaces need for industry-specific implementations
+- **Competitive Advantage**: AI-powered dynamic adaptation vs hardcoded competitors
+- **Market Expansion**: Can enter any B2B industry immediately
+
+## Priority: CRITICAL
+This PRD represents the final milestone for production launch of a revolutionary all-purpose lead generation system that transforms how businesses create industry-specific demos through AI intelligence rather than code multiplication.
+
+## Timeline
+- TaskMaster format resolution: Immediate (blocking all other work)
+- Dynamic response implementation: 1-2 development sessions
+- Production workflow validation: 1 development session
+- Architecture audit and cleanup: 1 development session
+- Production launch readiness: 1 development session
+
+## Dependencies
+- TaskMaster MCP server functionality
+- OpenAI API access and rate limits
+- Vercel production environment stability
+- N8N workflow configuration access
+- Redis/Upstash service availability
+
+## Risk Mitigation
+- TaskMaster format: Research multiple configuration approaches
+- Performance impact: Implement response caching if needed
+- API failures: Graceful fallbacks to base responses
+- Production issues: Comprehensive testing before launch
+- Scope creep: Focus only on production-blocking issues
+
+This PRD addresses the core blockers preventing production launch of a truly revolutionary all-purpose lead generation system.

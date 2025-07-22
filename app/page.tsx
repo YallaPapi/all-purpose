@@ -13,7 +13,7 @@ export default function Home() {
       const response = await fetch('/api/quick-demo');
       if (response.ok) {
         // The quick-demo endpoint returns HTML, let's get the demo URL from it
-        const demoUrl = `${window.location.origin}/quick-demo-solar`;
+        const demoUrl = `${window.location.origin}/quick-demo-business`;
         setDemoUrl(demoUrl);
         window.open(demoUrl, '_blank');
       } else {
@@ -28,7 +28,7 @@ export default function Home() {
   };
 
   const openTestDemo = () => {
-    window.open(`${window.location.origin}/quick-demo-solar`, '_blank');
+    window.open(`${window.location.origin}/quick-demo-business`, '_blank');
   };
 
   return (
@@ -40,17 +40,17 @@ export default function Home() {
             <Image
               className="dark:invert"
               src="/next.svg"
-              alt="Solar Lead System"
+              alt="Business Lead System"
               width={240}
               height={50}
               priority
             />
           </div>
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Solar Lead Generation System
+            All-Purpose Lead Generation System
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            AI-powered solar lead qualification and chat demo. Experience personalized solar consultations 
+            AI-powered lead qualification and chat demo. Experience personalized business consultations 
             with our intelligent assistant that qualifies prospects and schedules appointments.
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function Home() {
                 Try the Live Demo
               </h2>
               <p className="text-blue-100">
-                Experience our AI solar assistant in action
+                Experience our AI business assistant in action
               </p>
             </div>
 
@@ -90,9 +90,9 @@ export default function Home() {
 
                   <div className="bg-green-50 p-4 rounded-lg">
                     <p className="text-sm text-green-800">
-                      <strong>Demo Company:</strong> Quick Demo Solar Co<br/>
+                      <strong>Demo Company:</strong> Quick Demo Business Co<br/>
                       <strong>Location:</strong> Austin, TX<br/>
-                      <strong>Service:</strong> Database Reactivation
+                      <strong>Service:</strong> Business Consulting
                     </p>
                   </div>
                 </div>
@@ -147,7 +147,7 @@ export default function Home() {
                     <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
                       <li>Click "Launch Quick Demo" button</li>
                       <li>Wait for the AI assistant's first message</li>
-                      <li>Respond as if you're interested in solar</li>
+                      <li>Respond as if you're interested in business services</li>
                       <li>Experience the qualification process</li>
                       <li>Test the calendar booking flow</li>
                     </ol>
@@ -155,9 +155,9 @@ export default function Home() {
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Expected Behavior:</h4>
                     <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                      <li>AI introduces as "Sarah from Solar Bookers"</li>
-                      <li>Asks about previous solar quotes</li>
-                      <li>Qualifies based on utility bills</li>
+                      <li>AI introduces as "Sarah from Business Lead Pro"</li>
+                      <li>Asks about previous business consulting inquiries</li>
+                      <li>Qualifies based on business needs</li>
                       <li>Offers calendar booking for interested leads</li>
                       <li>Handles objections intelligently</li>
                     </ul>

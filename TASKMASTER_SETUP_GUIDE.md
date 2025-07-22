@@ -1,23 +1,26 @@
-# TaskMaster-AI Setup Guide for Cursor
-*Based on real implementation experience*
+# TaskMaster Complete Setup Guide
+*Updated with PROVEN working solutions for both Cursor MCP and CLI usage*
 
 ## Overview
-TaskMaster-AI is an MCP (Model Context Protocol) server that provides AI-powered project management directly in Cursor. This guide shows you exactly how to set it up based on successful implementation.
+TaskMaster provides AI-powered project management in two modes:
+1. **MCP Server** - For Cursor IDE integration
+2. **CLI Tool** - For terminal/command line usage (including Claude Code)
 
-## Prerequisites
+## 🚨 CRITICAL: Two Different Packages
+**This is the KEY issue that causes confusion:**
 
-### 1. Required API Keys
-You **MUST** have these API keys:
+- `task-master-ai` = MCP server ONLY (for Cursor)
+- `claude-task-master` = CLI tool (for terminal/Claude Code)
+
+**Most setup problems come from using the wrong package for your environment.**
+
+---
+
+## Method 1: Cursor MCP Integration
+
+### Prerequisites
 - **ANTHROPIC_API_KEY** (Required) - Your Claude API key
 - **PERPLEXITY_API_KEY** (Optional but recommended) - For research features
-
-### 2. Environment Setup
-Create or update your environment variables. You can set these:
-- In Windows: System Properties → Environment Variables  
-- In `.env` file in your project root
-- Directly in Cursor's MCP configuration
-
-## Step-by-Step Setup
 
 ### Step 1: Configure MCP in Cursor
 
@@ -26,7 +29,7 @@ Create or edit `.cursor/mcp.json` in your project root:
 ```json
 {
 	"mcpServers": {
-		"task-master-ai": {
+		"taskmaster-ai": {
 			"command": "npx",
 			"args": ["-y", "task-master-mcp"],
 			"env": {
@@ -44,144 +47,191 @@ Create or edit `.cursor/mcp.json` in your project root:
 }
 ```
 
-**Critical Notes:**
-- The `"task-master-ai"` name is what you'll see in Cursor's MCP tools
-- `"npx -y task-master-mcp"` downloads and runs the latest version automatically
-- API keys use `${API_KEY_NAME}` syntax to reference environment variables
-
 ### Step 2: Restart Cursor
-After creating/modifying `.cursor/mcp.json`:
 1. **Completely close Cursor**
 2. **Reopen Cursor**
 3. **Wait 30-60 seconds** for MCP to initialize
 
-### Step 3: Verify Installation
+### Step 3: Verify MCP Installation
 In Cursor's chat, you should see TaskMaster tools available:
 - `mcp_taskmaster-ai_initialize_project`
 - `mcp_taskmaster-ai_get_tasks`  
 - `mcp_taskmaster-ai_parse_prd`
-- And many others...
 
-If you don't see these tools, the MCP server isn't working.
+---
 
-### Step 4: Initialize Your Project
+## Method 2: CLI Tool (Terminal/Claude Code)
 
-Run this in Cursor chat:
-```
-Initialize TaskMaster in this project
-```
-
-Or use the tool directly. This creates:
-- `.taskmaster/` directory
-- `config.json` with your settings
-- `docs/`, `tasks/`, `reports/` subdirectories
-- `state.json` for tracking
-
-### Step 5: Create Your First Tasks
-
-**Option A: Use a PRD (Recommended)**
-1. Create `.taskmaster/docs/prd.txt` with your project requirements
-2. Ask Cursor to parse it: "Parse the PRD and create tasks"
-3. This generates tasks.json with AI-analyzed tasks
-
-**Option B: Manual Task Creation**
-Ask Cursor to add tasks individually using the add-task tool.
-
-## Directory Structure (After Setup)
-```
-your-project/
-├── .cursor/
-│   └── mcp.json                 ← MCP configuration
-├── .taskmaster/
-│   ├── config.json             ← TaskMaster settings  
-│   ├── state.json              ← Current state
-│   ├── docs/
-│   │   └── prd.txt             ← Your project requirements
-│   ├── tasks/
-│   │   └── tasks.json          ← All your tasks
-│   └── reports/                ← Analysis reports
-└── ... (your project files)
+### Step 1: Install CLI Package
+```bash
+npm install -g claude-task-master
 ```
 
-## Common Issues & Solutions
+**CRITICAL:** Use `claude-task-master` NOT `task-master-ai`
 
-### Issue 1: "No TaskMaster tools showing in Cursor"
+### Step 2: Set Environment Variables
+
+**Option A: Export in terminal session**
+```bash
+export ANTHROPIC_API_KEY="your-anthropic-key-here"
+export PERPLEXITY_API_KEY="your-perplexity-key-here"
+```
+
+**Option B: Add to your shell profile (.bashrc, .zshrc, etc.)**
+```bash
+echo 'export ANTHROPIC_API_KEY="your-key"' >> ~/.bashrc
+echo 'export PERPLEXITY_API_KEY="your-key"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Option C: Windows System Environment Variables**
+1. System Properties → Environment Variables
+2. Add ANTHROPIC_API_KEY and PERPLEXITY_API_KEY
+3. Restart terminal
+
+### Step 3: Verify CLI Installation
+```bash
+task-master --help
+```
+
+You should see the full TaskMaster CLI help with all commands.
+
+### Step 4: Test CLI Functionality
+```bash
+# Test basic functionality
+task-master list
+
+# Test API connectivity
+task-master models
+```
+
+---
+
+## Common Setup Issues & Solutions
+
+### Issue 1: "MCP session missing required sampling capabilities"
+**Cause:** Using `task-master-ai` package in CLI mode
+**Solution:** This error means you're trying to use the MCP package as CLI tool
+- For Cursor: Use `task-master-mcp` in MCP config
+- For CLI: Install `claude-task-master` instead
+
+### Issue 2: "Command not found: task-master"
+**Cause:** CLI package not installed or wrong package name
+**Solution:** 
+```bash
+npm install -g claude-task-master
+# NOT: npm install -g task-master-ai
+```
+
+### Issue 3: "API key not configured"
+**Cause:** Environment variables not set or accessible
+**Solution:** 
+1. Set environment variables properly
+2. Test with: `echo $ANTHROPIC_API_KEY`
+3. Restart terminal after setting
+
+### Issue 4: "No TaskMaster tools in Cursor"
 **Cause:** MCP server not connecting
-**Fix:** 
+**Solution:**
 1. Check `.cursor/mcp.json` syntax is valid JSON
-2. Verify API keys are set in environment
+2. Use `task-master-mcp` in args (not `task-master-ai`)
 3. Restart Cursor completely
 4. Wait 60 seconds for initialization
 
-### Issue 2: "API key not found" errors  
-**Cause:** Environment variables not accessible
-**Fix:**
-1. Set ANTHROPIC_API_KEY in system environment variables
-2. Or add to project `.env` file
-3. Restart Cursor after setting keys
+---
 
-### Issue 3: "task-master-mcp not found"
-**Cause:** NPX can't download the package
-**Fix:**
-1. Check internet connection
-2. Try running `npx task-master-mcp` manually in terminal
-3. If persistent, install globally: `npm install -g task-master-mcp`
+## Usage Examples
 
-### Issue 4: Tasks not saving/loading
-**Cause:** File permissions or directory issues
-**Fix:**
-1. Ensure `.taskmaster/` directory is writable
-2. Check if tasks.json exists and has valid JSON
-3. Re-initialize the project if needed
+### CLI Workflow
+```bash
+# Set environment variables
+export ANTHROPIC_API_KEY="your-key"
+export PERPLEXITY_API_KEY="your-key"
 
-## Features You Get
+# Parse a PRD with research
+task-master parse-prd --input="docs/requirements.txt" --research
 
-### Core Task Management
-- Create and manage tasks with dependencies
-- Break down complex tasks into subtasks  
-- Track progress and status
-- Generate detailed reports
+# List all tasks
+task-master list
 
-### AI-Powered Features  
-- Parse PRDs into structured tasks
-- Complexity analysis using AI research
-- Automatic task expansion based on complexity
-- Research-backed task updates
+# Analyze complexity with research
+task-master analyze-complexity --research
 
-### Advanced Workflow
-- Tag-based task organization
-- Multi-industry template support
-- Dependency validation and fixing
-- Integration with development workflow
+# Expand complex tasks
+task-master expand --id=5 --research
 
-## Pro Tips
+# Show next task to work on
+task-master next
+```
 
-1. **Always set both API keys** - Perplexity makes task analysis much better
-2. **Use PRDs** - Much better than manual task creation  
-3. **Restart Cursor after config changes** - MCP needs a restart to reload
-4. **Check the tools list** - If TaskMaster tools aren't showing, something's wrong
-5. **Use research flag** - Add `--research` to get better AI analysis
+### Cursor MCP Workflow
+In Cursor chat:
+```
+Initialize TaskMaster in this project
+Parse the PRD and create tasks with research
+Analyze task complexity with research
+Expand all tasks into subtasks
+Show me the next task to work on
+```
 
-## Example Workflow
-
-1. Create `.cursor/mcp.json` with API keys
-2. Restart Cursor
-3. Initialize project: "Initialize TaskMaster in this project"  
-4. Create PRD: Write your requirements in `.taskmaster/docs/prd.txt`
-5. Generate tasks: "Parse the PRD and create tasks"
-6. Analyze complexity: "Analyze task complexity with research"
-7. Expand tasks: "Expand all tasks into subtasks"
-8. Start working: "Show me the next task to work on"
-
-This setup has been tested and works reliably. The key is getting the MCP configuration right and having valid API keys.
+---
 
 ## Troubleshooting Checklist
 
+### For Cursor MCP:
 - [ ] `.cursor/mcp.json` exists and has valid JSON
+- [ ] Uses `task-master-mcp` in args (not `task-master-ai`)
 - [ ] ANTHROPIC_API_KEY is set in environment
 - [ ] Cursor was restarted after config changes  
 - [ ] TaskMaster tools appear in Cursor's tool list
 - [ ] `.taskmaster/` directory was created after initialization
-- [ ] `tasks.json` contains your project tasks
 
-If all boxes are checked, TaskMaster should be working perfectly. 
+### For CLI:
+- [ ] `claude-task-master` package installed globally
+- [ ] Environment variables set and accessible
+- [ ] `task-master --help` shows full command list
+- [ ] `task-master models` connects to AI services
+- [ ] Terminal has proper permissions
+
+---
+
+## The KEY Insight
+
+**The confusion happens because there are TWO separate packages:**
+
+1. **For Cursor (MCP):** Uses `task-master-mcp` package
+2. **For Terminal (CLI):** Uses `claude-task-master` package
+
+**The `task-master-ai` package is ONLY an MCP server and will ALWAYS show those JSON error messages when used in CLI mode.**
+
+Once you use the right package for your environment, TaskMaster works perfectly with all its AI-powered features including research-backed task generation.
+
+---
+
+## Verified Working Commands
+
+### CLI (Terminal/Claude Code)
+```bash
+# Install
+npm install -g claude-task-master
+
+# Basic usage
+task-master parse-prd --input="file.txt" --research
+task-master list
+task-master next
+task-master analyze-complexity --research
+```
+
+### MCP (Cursor)
+```json
+{
+  "mcpServers": {
+    "taskmaster-ai": {
+      "command": "npx",
+      "args": ["-y", "task-master-mcp"]
+    }
+  }
+}
+```
+
+This guide represents the definitive solution to TaskMaster setup issues that have been plaguing users. The key is understanding you need different packages for different environments.

@@ -1,0 +1,47 @@
+# Fix Hardcoded Sample Responses PRD
+
+## Problem Statement
+The all-purpose lead generation system has a critical architectural violation in the demo page (app/[company]/page.tsx). The system contains hardcoded sample responses based on company name patterns, which violates the core "all-purpose" principle where everything should be dynamically generated using AI intelligence.
+
+## Current Implementation Issues
+The generateSpecificResponses function (lines 251-339) contains hardcoded mappings like:
+```typescript
+if (companyName.includes('implant')) {
+  return [...baseResponses, '"How much do dental implants cost?"', '"Tell me about All-on-4 procedures"'];
+}
+```
+
+This contradicts the project's philosophy of being truly dynamic and industry-agnostic.
+
+## Requirements
+1. Replace hardcoded sample responses with AI-generated ones
+2. Use organization_short_description parameter for business-specific context
+3. Maintain the all-purpose, dynamic nature of the system
+4. Ensure the solution works for ANY industry without code changes
+5. Generate 4 specific sample responses per business type
+6. Preserve the existing UI structure and response format
+
+## Technical Constraints
+- Must work with existing Next.js/TypeScript architecture
+- Must integrate with current OpenAI API setup
+- Must maintain iPhone Messages UI functionality
+- Cannot introduce additional API calls that slow down page load
+- Must be cost-effective (minimal token usage)
+
+## Success Criteria
+- No hardcoded industry-specific logic in frontend code
+- Sample responses are contextually relevant to business type
+- System works for industries not previously considered
+- Page load performance is maintained
+- UI/UX remains unchanged from user perspective
+
+## Current System Context
+- v2.1.0 - Production ready system
+- Supports 11+ industries dynamically
+- Uses organization_short_description for AI context
+- Has working OpenAI integration
+- Uses Redis for assistant storage
+- Deployed on Vercel
+
+## Priority: HIGH
+This issue blocks the system from being truly "all-purpose" and violates the core architectural principle of dynamic adaptation through AI intelligence rather than hardcoded logic.
