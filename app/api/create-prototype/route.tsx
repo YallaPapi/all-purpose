@@ -2,19 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { PromptTemplateManager, PromptTemplateVariables } from '../../../lib/prompt-template-manager';
 
-// Supported industries type definition
-type SupportedIndustry = 
-  | 'solar' 
-  | 'dental' 
-  | 'automotive' 
-  | 'legal' 
-  | 'chiropractic' 
-  | 'business-funding' 
-  | 'insurance' 
-  | 'fitness' 
-  | 'real-estate' 
-  | 'healthcare' 
-  | 'business-services';
+// All industries are supported - no hardcoded restrictions
 
 // Request body interface
 interface CreatePrototypeRequest {
@@ -42,41 +30,12 @@ interface CreatePrototypeRequest {
   domain?: string;
 }
 
-// Validate and normalize industry parameter
+// Accept ANY industry - no validation or mapping needed
 function validateIndustry(industry?: string): string {
   if (!industry) return 'business-services';
   
-  const normalizedIndustry = industry.toLowerCase().trim();
-  
-  // Map common variations to supported industries
-  const industryMappings: Record<string, string> = {
-    'solar': 'solar',
-    'dental': 'dental',
-    'dentist': 'dental',
-    'automotive': 'automotive',
-    'auto': 'automotive',
-    'car': 'automotive',
-    'legal': 'legal',
-    'law': 'legal',
-    'lawyer': 'legal',
-    'chiropractic': 'chiropractic',
-    'chiropractor': 'chiropractic',
-    'business-funding': 'business-funding',
-    'business funding': 'business-funding',
-    'funding': 'business-funding',
-    'loans': 'business-funding',
-    'insurance': 'insurance',
-    'fitness': 'fitness',
-    'gym': 'fitness',
-    'health': 'fitness',
-    'real-estate': 'real-estate',
-    'real estate': 'real-estate',
-    'property': 'real-estate',
-    'healthcare': 'healthcare',
-    'medical': 'healthcare'
-  };
-  
-  return industryMappings[normalizedIndustry] || 'business-services';
+  // Return the industry as-is, normalized
+  return industry.toLowerCase().trim();
 }
 
 // FIXED: Use exact same slug generator as n8n workflow

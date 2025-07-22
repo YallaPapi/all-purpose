@@ -56,104 +56,18 @@ export default function CompanyPage() {
     }
   }, [company]);
 
-  // Get industry-specific sample responses based on industry type
+  // Generate completely dynamic industry responses for ANY industry
   const getIndustryResponses = (industryType: string) => {
-    const responses: Record<string, any> = {
-      'plumbing': {
-        name: 'Plumbing',
-        service: 'plumbing services',
-        responses: [
-          '"Yes I need plumbing help"',
-          '"Not interested"',
-          '"What services do you offer?"',
-          '"How much does it cost?"'
-        ]
-      },
-      'dental': {
-        name: 'Dental',
-        service: 'dental services', 
-        responses: [
-          '"Yes I need dental work"',
-          '"Not interested"',
-          '"What services do you provide?"',
-          '"How much does it cost?"'
-        ]
-      },
-      'legal': {
-        name: 'Legal',
-        service: 'legal services',
-        responses: [
-          '"Yes I need legal help"',
-          '"Not interested"',
-          '"What cases do you handle?"',
-          '"How much does it cost?"'
-        ]
-      },
-      'fitness': {
-        name: 'Fitness',
-        service: 'fitness services',
-        responses: [
-          '"Yes I want to get in shape"',
-          '"Not interested"',
-          '"What programs do you have?"',
-          '"How much does it cost?"'
-        ]
-      },
-      'automotive': {
-        name: 'Automotive',
-        service: 'automotive services',
-        responses: [
-          '"Yes I need car help"',
-          '"Not interested"',
-          '"What services do you offer?"',
-          '"How much does it cost?"'
-        ]
-      },
-      'chiropractic': {
-        name: 'Chiropractic',
-        service: 'chiropractic services',
-        responses: [
-          '"Yes I have back pain"',
-          '"Not interested"',
-          '"What treatments do you offer?"',
-          '"How much does it cost?"'
-        ]
-      },
-      'real-estate': {
-        name: 'Real Estate',
-        service: 'real estate services',
-        responses: [
-          '"Yes I want to buy/sell"',
-          '"Not interested"',
-          '"What properties do you have?"',
-          '"How much does it cost?"'
-        ]
-      },
-      'healthcare': {
-        name: 'Healthcare',
-        service: 'healthcare services',
-        responses: [
-          '"Yes I need medical care"',
-          '"Not interested"',
-          '"What services do you provide?"',
-          '"How much does it cost?"'
-        ]
-      },
-      'solar': {
-        name: 'Solar',
-        service: 'solar services',
-        responses: [
-          '"Yes I want solar panels"',
-          '"Not interested"',
-          '"How much do panels cost?"',
-          '"Tell me more about solar"'
-        ]
-      }
-    };
+    // Capitalize industry name for display
+    const capitalizedIndustry = industryType
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
     
-    return responses[industryType] || {
-      name: 'Business Services',
-      service: 'business services',
+    // Return dynamic, industry-agnostic responses that work for ALL industries
+    return {
+      name: capitalizedIndustry,
+      service: `${industryType} services`,
       responses: [
         '"Yes I\'m interested"',
         '"Not interested"',

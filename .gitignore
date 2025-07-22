@@ -47,3 +47,5 @@ next-env.d.ts
 
 # Test files with sensitive data
 test-*-api.json 
+.cursor/mcp.json
+.cursor/mcp.json
