@@ -150,147 +150,162 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
-        "title": "Investigate and Fix TaskMaster Format Issue",
-        "description": "Identify and resolve the TaskMaster configuration format issue that is currently blocking workflow validation and production launch.",
-        "details": "1. Review current TaskMaster configuration files and error logs\n2. Compare against documentation for expected format\n3. Test different configuration formats until finding the correct one\n4. Verify that TaskMaster can properly parse PRDs and generate tasks\n5. Ensure the full workflow (parse PRD → analyze complexity → expand tasks → implement) is functional\n6. Restore MCP tool functionality in the Cursor environment\n7. Document the solution for future reference with examples of correct format",
-        "testStrategy": "1. Run TaskMaster commands against sample PRDs to verify format acceptance\n2. Validate that all stages of the TaskMaster workflow execute without errors\n3. Confirm MCP tools are functional in Cursor environment\n4. Have another team member verify the solution works on their setup",
+        "id": 26,
+        "title": "Implement PRD-Parser & Research Agent",
+        "description": "Create an agent that automatically parses PRD specifications and generates research-backed task lists",
+        "details": "Build a Node.js module that:\n1. Watches for new `docs/prd_<agent>.md` files\n2. Parses the PRD content using NLP techniques to extract requirements\n3. Generates TaskMaster task lists with proper dependencies\n4. Formulates research questions for each requirement\n5. Commits generated task lists to Git\n\nImplementation steps:\n- Create a file watcher for the docs directory\n- Implement markdown parser to extract sections and requirements\n- Build a task generator that follows TaskMaster format\n- Integrate with Git using simple-git or similar library\n- Add event emission for observability\n\nFile structure:\n```\nsrc/meta-agents/prd-parser/\n  ├── main.js\n  ├── parser.js\n  ├── research-generator.js\n  ├── task-formatter.js\n  └── git-integration.js\n```",
+        "testStrategy": "1. Unit tests for each component (parser, research generator, task formatter)\n2. Integration test with sample PRD files\n3. Git integration tests with mock repository\n4. End-to-end test verifying complete workflow\n5. Validation that output matches TaskMaster expected format",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 2,
-        "title": "Implement Dynamic Sample Response Generation",
-        "description": "Replace all hardcoded industry-specific sample responses with dynamically generated AI responses based on the business context.",
-        "details": "1. Refactor the generateSpecificResponses function in app/[company]/page.tsx (lines 251-339)\n2. Remove all hardcoded industry mappings and conditional logic\n3. Implement a function that uses the organization_short_description parameter to generate contextually relevant responses\n4. Ensure the function generates exactly 4 sample responses per business type\n5. Optimize implementation to avoid additional API calls during page load\n6. Consider implementing a caching mechanism to reduce token usage\n7. Sample implementation:\n```typescript\nasync function generateSpecificResponses(organizationDescription: string) {\n  // Use existing API context or cached responses if available\n  // Generate responses based on description without industry-specific hardcoding\n  const baseResponses = [\"Hi, I'm interested in your services\", \"Do you offer free consultations?\"];\n  \n  // Generate additional contextual responses or use cached ones\n  const contextualResponses = await getContextualResponses(organizationDescription);\n  \n  return [...baseResponses, ...contextualResponses];\n}\n```",
-        "testStrategy": "1. Test function with various industry descriptions (dental, automotive, legal, etc.)\n2. Verify responses are contextually relevant to each industry\n3. Measure page load performance to ensure it remains under 3 seconds\n4. Test with previously unseen industry types to confirm adaptability\n5. Monitor token usage to ensure cost-effectiveness",
-        "priority": "high",
-        "dependencies": [],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 3,
-        "title": "Implement Response Caching Mechanism",
-        "description": "Create a caching system for dynamically generated responses to maintain performance and reduce API costs.",
-        "details": "1. Design a Redis-based caching mechanism for sample responses\n2. Create a cache key based on organization description or industry type\n3. Set appropriate TTL (time-to-live) for cached responses (e.g., 24 hours)\n4. Implement cache check before generating new responses\n5. Add cache update logic for new organization types\n6. Sample implementation:\n```typescript\nasync function getCachedOrGenerateResponses(organizationDescription: string) {\n  const cacheKey = `sample_responses:${createHash(organizationDescription)}`;\n  \n  // Try to get from cache first\n  const cachedResponses = await redis.get(cacheKey);\n  if (cachedResponses) return JSON.parse(cachedResponses);\n  \n  // Generate new responses if not in cache\n  const generatedResponses = await generateAIResponses(organizationDescription);\n  \n  // Cache the new responses\n  await redis.set(cacheKey, JSON.stringify(generatedResponses), 'EX', 86400); // 24 hours\n  \n  return generatedResponses;\n}\n```",
-        "testStrategy": "1. Verify cache hits and misses with different organization descriptions\n2. Measure response time difference between cached and non-cached requests\n3. Test cache expiration and refresh functionality\n4. Validate that cached responses maintain relevance to the industry\n5. Monitor Redis memory usage under load",
-        "priority": "medium",
-        "dependencies": [
-          2
-        ],
-        "status": "in-progress",
-        "subtasks": []
-      },
-      {
-        "id": 4,
-        "title": "Validate Complete N8N to Frontend Workflow",
-        "description": "Test and validate the full production workflow from N8N through the API to the frontend interface across multiple industries.",
-        "details": "1. Set up test cases for at least 5 different industries (dental, automotive, legal, chiropractic, business funding)\n2. Configure N8N workflows with appropriate industry parameters\n3. Trace request flow from N8N trigger through create-prototype API\n4. Verify industry parameter is correctly passed and processed at each step\n5. Confirm chat interface dynamically adapts to each industry\n6. Test concurrent demo creations to validate system scalability\n7. Document the complete workflow with sequence diagrams\n8. Verify error handling at each integration point",
-        "testStrategy": "1. Create end-to-end test scripts for each industry\n2. Monitor API responses and error rates during testing\n3. Validate that AI responses are appropriate for each industry\n4. Test edge cases with unusual industry descriptions\n5. Measure end-to-end response times and system performance\n6. Verify all components maintain expected behavior under load",
+        "id": 27,
+        "title": "Implement Scaffold-Generator Agent",
+        "description": "Create an agent that generates consistent directory structures and base files for new agents",
+        "details": "Build a Node.js module that:\n1. Takes parsed task lists as input\n2. Creates appropriate `src/<agent-name>/` directories\n3. Generates standard files (main.js, README.md, package.json)\n4. Updates CHANGELOG.md with new agent entries\n5. Follows established naming conventions\n\nImplementation steps:\n- Create directory structure generator\n- Implement template engine for standard files\n- Build CHANGELOG updater\n- Add validation for naming conventions\n- Ensure proper linking to existing documentation\n\nFile structure:\n```\nsrc/meta-agents/scaffold-generator/\n  ├── main.js\n  ├── directory-builder.js\n  ├── template-engine.js\n  ├── changelog-updater.js\n  └── templates/\n      ├── main.js.template\n      ├── README.md.template\n      └── package.json.template\n```",
+        "testStrategy": "1. Unit tests for directory creation and file generation\n2. Template rendering tests with various inputs\n3. CHANGELOG update verification\n4. Integration test with sample agent specifications\n5. Validation against existing agent structures for consistency",
         "priority": "high",
         "dependencies": [
-          1,
-          2,
-          3
+          26
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 5,
-        "title": "Perform Architecture Compliance Audit",
-        "description": "Scan the entire codebase to identify and remove any remaining hardcoded industry-specific logic to ensure true industry-agnostic functionality.",
-        "details": "1. Create a list of patterns to search for that might indicate hardcoded industry logic\n2. Scan all frontend and backend code files for these patterns\n3. Pay special attention to conditional logic based on industry or company names\n4. Review all prompt templates for industry-specific language\n5. Check API parameter mappings across all integration points\n6. Verify that all components follow the 'dynamic AI adaptation' principle\n7. Document any found violations and their remediation plan\n8. Patterns to search for include:\n   - Industry-specific terms (dental, legal, automotive, etc.)\n   - Conditional logic based on company names\n   - Hardcoded response templates\n   - Industry-specific UI elements or styling",
-        "testStrategy": "1. Use automated code scanning tools to identify potential issues\n2. Manually review flagged code sections\n3. Create test cases for each identified issue to verify resolution\n4. Validate system behavior before and after changes\n5. Perform regression testing to ensure no new issues are introduced",
-        "priority": "medium",
-        "dependencies": [
-          2
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 6,
-        "title": "Implement Graceful Fallback Mechanism",
-        "description": "Create a robust fallback system for handling API failures or edge cases to ensure the system remains functional even under adverse conditions.",
-        "details": "1. Identify potential failure points in the system\n2. Design fallback responses for API failures\n3. Implement error boundary components in the React frontend\n4. Create a set of generic industry-agnostic responses as ultimate fallbacks\n5. Add logging for all fallback activations to monitor frequency\n6. Implement progressive degradation rather than complete failure\n7. Sample implementation:\n```typescript\nasync function getSampleResponses(organizationDescription: string) {\n  try {\n    // Primary path - dynamic AI-generated responses\n    return await getCachedOrGenerateResponses(organizationDescription);\n  } catch (error) {\n    // Log the error\n    console.error('Failed to generate dynamic responses:', error);\n    \n    // Fallback to generic responses\n    return [\n      \"Hi, I'm interested in learning more about your services\",\n      \"Do you offer consultations?\",\n      \"What makes your company different from competitors?\",\n      \"How can I schedule an appointment?\"\n    ];\n  }\n}\n```",
-        "testStrategy": "1. Simulate API failures to verify fallback behavior\n2. Test with various error conditions (timeouts, rate limits, malformed responses)\n3. Verify user experience remains acceptable with fallbacks\n4. Ensure all fallback activations are properly logged\n5. Test recovery from fallback to normal operation",
-        "priority": "medium",
-        "dependencies": [
-          2,
-          3
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 7,
-        "title": "Optimize System Performance",
-        "description": "Analyze and optimize the system performance to ensure fast page loads and efficient API usage under production conditions.",
-        "details": "1. Profile page load performance across different components\n2. Identify bottlenecks in API calls and data processing\n3. Implement lazy loading for non-critical components\n4. Optimize Redis queries and caching strategies\n5. Review and optimize OpenAI API usage patterns\n6. Consider implementing streaming responses where appropriate\n7. Ensure all images and assets are properly optimized\n8. Add performance monitoring instrumentation\n9. Optimize React component rendering and state management\n10. Consider implementing server-side rendering for critical paths",
-        "testStrategy": "1. Measure page load times before and after optimizations\n2. Use Lighthouse and Web Vitals to quantify performance improvements\n3. Test performance across different device types and network conditions\n4. Monitor API response times under various load conditions\n5. Verify performance meets the < 3 second load time requirement",
-        "priority": "medium",
-        "dependencies": [
-          2,
-          3,
-          6
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 8,
-        "title": "Update System Documentation",
-        "description": "Create comprehensive documentation covering the current system state, architecture, and operational procedures for production readiness.",
-        "details": "1. Document the resolved TaskMaster configuration format\n2. Create architecture diagrams showing all system components\n3. Document the N8N workflow integration process\n4. Update API documentation with current endpoints and parameters\n5. Create troubleshooting guides for common issues\n6. Document the Redis schema and caching strategy\n7. Create operational runbooks for production monitoring\n8. Document the dynamic response generation mechanism\n9. Update environment variable requirements for all environments\n10. Create a system overview for new team members",
-        "testStrategy": "1. Have team members review documentation for clarity and completeness\n2. Verify all procedures can be followed successfully by different team members\n3. Test documentation against the actual system behavior\n4. Ensure all configuration parameters are accurately documented\n5. Validate that troubleshooting guides address common failure modes",
-        "priority": "medium",
-        "dependencies": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 9,
-        "title": "Implement Production Monitoring",
-        "description": "Set up comprehensive monitoring and alerting for the production system to ensure visibility into system health and performance.",
-        "details": "1. Implement logging for all critical system components\n2. Set up error tracking and alerting\n3. Create dashboards for key performance metrics\n4. Monitor API usage and rate limits\n5. Track Redis performance and memory usage\n6. Set up alerts for abnormal system behavior\n7. Implement user experience monitoring\n8. Track industry distribution and adaptation success\n9. Monitor cache hit rates and effectiveness\n10. Create regular performance reports\n11. Consider tools like Datadog, New Relic, or custom Vercel integrations",
-        "testStrategy": "1. Trigger test alerts to verify notification systems\n2. Simulate error conditions to validate logging\n3. Verify all critical metrics are captured accurately\n4. Test dashboard visibility and usability\n5. Ensure alerts are actionable and provide sufficient context",
-        "priority": "medium",
-        "dependencies": [
-          4,
-          7
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 10,
-        "title": "Conduct Production Launch Readiness Review",
-        "description": "Perform a comprehensive review of all system components and processes to verify readiness for production launch.",
-        "details": "1. Verify all critical issues from the PRD are resolved\n2. Confirm TaskMaster format issue is fixed and documented\n3. Verify no hardcoded industry-specific logic remains\n4. Test the complete N8N to frontend workflow across multiple industries\n5. Verify all environment variables in the production Vercel deployment\n6. Confirm domain detection works across all environments\n7. Test error handling and fallback scenarios\n8. Review system performance metrics\n9. Verify documentation is complete and accurate\n10. Conduct a final security review\n11. Create a rollback plan in case of production issues\n12. Prepare a launch checklist and schedule",
-        "testStrategy": "1. Conduct a formal review meeting with all stakeholders\n2. Use a checklist to verify all requirements are met\n3. Perform end-to-end testing in the production environment\n4. Verify all success criteria from the PRD are satisfied\n5. Conduct a simulated launch to identify any remaining issues",
+        "id": 28,
+        "title": "Implement Code-Stub Builder Agent",
+        "description": "Create an agent that generates initial code structure with proper interfaces based on agent specifications",
+        "details": "Build a Node.js module that:\n1. Takes scaffold structure and task specifications as input\n2. Creates function signatures based on PARAMETER_MAPPING.md\n3. Adds TODO markers for implementation points\n4. Pre-wires sendEvent() hooks for observability\n5. Implements standard error handling patterns\n\nImplementation steps:\n- Parse PARAMETER_MAPPING.md to extract interface requirements\n- Create code template generator with proper TypeScript interfaces\n- Implement function signature generator\n- Add standard error handling templates\n- Ensure observability hooks are properly placed\n\nFile structure:\n```\nsrc/meta-agents/code-stub-builder/\n  ├── main.js\n  ├── interface-parser.js\n  ├── function-generator.js\n  ├── error-handler-templates.js\n  └── observability-hooks.js\n```",
+        "testStrategy": "1. Unit tests for interface parsing and function generation\n2. Validation of generated code against TypeScript compiler\n3. Integration tests with sample agent specifications\n4. Verification of error handling patterns\n5. Tests for observability hook placement",
         "priority": "high",
         "dependencies": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9
+          27
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 29,
+        "title": "Implement Test-Case Generator Agent",
+        "description": "Create an agent that generates comprehensive test suites for each agent based on specifications",
+        "details": "Build a Node.js module that:\n1. Takes code stubs and agent specifications as input\n2. Generates test files under the `tests/` directory\n3. Creates both unit and integration tests\n4. Includes smoke tests for basic functionality\n5. Sets up test data and mocks\n\nImplementation steps:\n- Parse code stubs to identify testable functions\n- Create test template generator for different test types\n- Implement mock data generator\n- Follow patterns from DEBUGGING_GUIDE.md\n- Generate test runner configurations\n\nFile structure:\n```\nsrc/meta-agents/test-case-generator/\n  ├── main.js\n  ├── code-analyzer.js\n  ├── test-template-generator.js\n  ├── mock-data-generator.js\n  └── test-runner-config.js\n```",
+        "testStrategy": "1. Unit tests for code analysis and test generation\n2. Validation that generated tests follow best practices\n3. Integration tests with sample agent code\n4. Meta-tests that verify generated tests can run\n5. Verification against DEBUGGING_GUIDE.md patterns",
+        "priority": "medium",
+        "dependencies": [
+          28
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 30,
+        "title": "Implement Doc-Maintainer Agent",
+        "description": "Create an agent that keeps all documentation synchronized with new agents and updates",
+        "details": "Build a Node.js module that:\n1. Takes agent specifications and generated code as input\n2. Updates ENVIRONMENT_SETUP.md with new env variables\n3. Registers schemas in DOCUMENTATION_FRAMEWORK_SETUP.md\n4. Adds entries to CHANGELOG.md\n5. Updates PARAMETER_MAPPING.md with new interfaces\n\nImplementation steps:\n- Create parsers for each documentation file type\n- Implement documentation updaters that preserve existing content\n- Build cross-reference manager for documentation links\n- Add validation to ensure documentation consistency\n- Implement Git integration for documentation commits\n\nFile structure:\n```\nsrc/meta-agents/doc-maintainer/\n  ├── main.js\n  ├── doc-parsers/\n  │   ├── environment-setup-parser.js\n  │   ├── parameter-mapping-parser.js\n  │   ├── changelog-parser.js\n  │   └── framework-setup-parser.js\n  ├── doc-updaters/\n  │   ├── environment-setup-updater.js\n  │   ├── parameter-mapping-updater.js\n  │   ├── changelog-updater.js\n  │   └── framework-setup-updater.js\n  └── cross-reference-manager.js\n```",
+        "testStrategy": "1. Unit tests for each document parser and updater\n2. Integration tests with sample documentation files\n3. Cross-reference validation tests\n4. Git integration tests\n5. End-to-end tests with sample agent specifications",
+        "priority": "medium",
+        "dependencies": [
+          27,
+          28
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 31,
+        "title": "Implement CI/CD-Configurer Agent",
+        "description": "Create an agent that automatically configures deployment pipelines for new agents",
+        "details": "Build a Node.js module that:\n1. Takes agent structure and requirements as input\n2. Updates GitHub Actions workflows\n3. Configures Vercel deployment settings\n4. Sets up environment variable requirements\n5. Creates deployment verification tests\n\nImplementation steps:\n- Create GitHub Actions workflow generator\n- Implement Vercel configuration generator\n- Build environment variable manager\n- Create deployment verification test generator\n- Implement monitoring and alerting configuration\n\nFile structure:\n```\nsrc/meta-agents/cicd-configurer/\n  ├── main.js\n  ├── github-actions-generator.js\n  ├── vercel-config-generator.js\n  ├── env-var-manager.js\n  ├── verification-test-generator.js\n  └── monitoring-config-generator.js\n```",
+        "testStrategy": "1. Unit tests for each configuration generator\n2. Validation of generated GitHub Actions workflows\n3. Verification of Vercel configuration format\n4. Integration tests with sample agent requirements\n5. End-to-end tests with mock deployment",
+        "priority": "medium",
+        "dependencies": [
+          28,
+          29
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 32,
+        "title": "Implement TaskMaster-Bootstrapping Agent",
+        "description": "Create an agent that queues follow-up implementation tasks in TaskMaster for development",
+        "details": "Build a Node.js module that:\n1. Takes generated agent structure as input\n2. Creates detailed implementation tasks\n3. Sets up task dependencies and priorities\n4. Generates research-backed implementation guidance\n5. Integrates with existing TaskMaster workflows\n\nImplementation steps:\n- Create task generator for implementation steps\n- Implement dependency analyzer for proper task ordering\n- Build priority assignment algorithm\n- Create research integration for implementation guidance\n- Implement TaskMaster API integration\n\nFile structure:\n```\nsrc/meta-agents/taskmaster-bootstrapper/\n  ├── main.js\n  ├── task-generator.js\n  ├── dependency-analyzer.js\n  ├── priority-assigner.js\n  ├── research-integrator.js\n  └── taskmaster-api.js\n```",
+        "testStrategy": "1. Unit tests for task generation and dependency analysis\n2. Priority assignment algorithm tests\n3. Research integration tests\n4. TaskMaster API integration tests\n5. End-to-end tests with sample agent structure",
+        "priority": "medium",
+        "dependencies": [
+          26,
+          27,
+          28
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 33,
+        "title": "Implement Prospector Agent",
+        "description": "Create a specialist agent for automated lead discovery and collection using headless browser automation",
+        "details": "Build a Node.js module that:\n1. Uses Playwright/Puppeteer for headless browser automation\n2. Scrapes Google Maps and business directories for lead data\n3. Implements geo-targeted search capabilities\n4. Detects and removes duplicates\n5. Scores and ranks lead quality\n\nImplementation steps:\n- Set up Playwright/Puppeteer with stealth plugins\n- Create scrapers for different data sources\n- Implement geo-targeting functionality\n- Build duplicate detection algorithm\n- Create quality scoring system\n- Add rate limiting and export functionality\n\nFile structure:\n```\nsrc/specialist-agents/prospector/\n  ├── main.js\n  ├── browser-manager.js\n  ├── scrapers/\n  │   ├── google-maps.js\n  │   └── business-directories.js\n  ├── geo-targeting.js\n  ├── duplicate-detector.js\n  ├── quality-scorer.js\n  └── data-exporter.js\n```",
+        "testStrategy": "1. Unit tests for each scraper component\n2. Browser automation tests with mock websites\n3. Duplicate detection algorithm tests\n4. Quality scoring validation\n5. End-to-end tests with sample search queries\n6. Rate limiting and stealth tests",
+        "priority": "high",
+        "dependencies": [
+          26,
+          27,
+          28,
+          29
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 34,
+        "title": "Implement Enrichment & Validation Agent",
+        "description": "Create a specialist agent that cleans, validates, and enriches lead data from the Prospector Agent",
+        "details": "Build a Node.js module that:\n1. Takes raw lead lists from Prospector as input\n2. Validates email deliverability\n3. Enriches company information\n4. Detects contact titles/roles\n5. Scores data quality and flags bad data\n\nImplementation steps:\n- Integrate with email validation APIs\n- Create web scraping module for company enrichment\n- Implement contact role detection algorithm\n- Build data quality scoring system\n- Create bad data flagging and removal system\n\nFile structure:\n```\nsrc/specialist-agents/enrichment/\n  ├── main.js\n  ├── email-validator.js\n  ├── company-enricher.js\n  ├── contact-analyzer.js\n  ├── quality-scorer.js\n  └── data-cleaner.js\n```",
+        "testStrategy": "1. Unit tests for each validation and enrichment component\n2. API integration tests with mock responses\n3. Data quality scoring algorithm tests\n4. Bad data detection tests\n5. End-to-end tests with sample lead data\n6. Performance tests for processing speed",
+        "priority": "high",
+        "dependencies": [
+          33
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 35,
+        "title": "Implement Loader Agent",
+        "description": "Create a specialist agent for automated data loading into campaign systems using Instantly.ai API",
+        "details": "Build a Node.js module that:\n1. Takes validated lead lists as input\n2. Integrates with Instantly.ai API for bulk imports\n3. Manages field mapping and transformation\n4. Handles campaign list management\n5. Implements error handling and retry logic\n\nImplementation steps:\n- Create Instantly.ai API client\n- Implement field mapping system\n- Build campaign list manager\n- Create error handling and retry system\n- Implement import status reporting\n\nFile structure:\n```\nsrc/specialist-agents/loader/\n  ├── main.js\n  ├── instantly-api.js\n  ├── field-mapper.js\n  ├── campaign-manager.js\n  ├── error-handler.js\n  └── status-reporter.js\n```",
+        "testStrategy": "1. Unit tests for field mapping and transformation\n2. API integration tests with mock responses\n3. Error handling and retry logic tests\n4. Campaign management tests\n5. End-to-end tests with sample lead data\n6. Status reporting validation",
+        "priority": "high",
+        "dependencies": [
+          34
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 36,
+        "title": "Implement Cold-Open Copywriter Agent",
+        "description": "Create a specialist agent that generates personalized email copy variations using LLM API integration",
+        "details": "Build a Node.js module that:\n1. Integrates with OpenAI/Claude APIs\n2. Generates multiple subject line variants\n3. Creates personalized icebreakers\n4. Optimizes calls-to-action\n5. Generates industry-specific messaging\n\nImplementation steps:\n- Create LLM API client (OpenAI/Claude)\n- Implement subject line generator\n- Build icebreaker personalization system\n- Create call-to-action optimizer\n- Implement industry-specific template system\n- Add A/B test variant creator\n\nFile structure:\n```\nsrc/specialist-agents/copywriter/\n  ├── main.js\n  ├── llm-client.js\n  ├── subject-generator.js\n  ├── icebreaker-personalizer.js\n  ├── cta-optimizer.js\n  ├── industry-templates.js\n  └── ab-variant-creator.js\n```",
+        "testStrategy": "1. Unit tests for each generation component\n2. LLM API integration tests with mock responses\n3. Personalization algorithm tests\n4. Industry-specific template tests\n5. A/B variant creation tests\n6. End-to-end tests with sample lead data\n7. Performance and cost optimization tests",
+        "priority": "medium",
+        "dependencies": [
+          35
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 37,
+        "title": "Implement Campaign Optimizer Agent",
+        "description": "Create a specialist agent for automated campaign performance optimization using statistical analysis",
+        "details": "Build a Node.js module that:\n1. Tracks performance metrics for campaigns\n2. Automatically promotes/pauses variants based on performance\n3. Monitors bounce rates and deliverability\n4. Generates performance reports\n5. Alerts on deliverability issues\n\nImplementation steps:\n- Create performance metric tracker\n- Implement statistical analysis engine\n- Build variant promotion/pausing system\n- Create bounce rate monitoring system\n- Implement deliverability alerting\n- Add performance reporting generator\n\nFile structure:\n```\nsrc/specialist-agents/optimizer/\n  ├── main.js\n  ├── metric-tracker.js\n  ├── statistical-analyzer.js\n  ├── variant-manager.js\n  ├── bounce-monitor.js\n  ├── alert-system.js\n  └── report-generator.js\n```",
+        "testStrategy": "1. Unit tests for statistical analysis algorithms\n2. Metric tracking validation tests\n3. Variant management decision tests\n4. Bounce rate monitoring tests\n5. Alert system integration tests\n6. Report generation validation\n7. End-to-end tests with sample campaign data",
+        "priority": "medium",
+        "dependencies": [
+          36
         ],
         "status": "pending",
         "subtasks": []
@@ -298,8 +313,16 @@
     ],
     "metadata": {
       "created": "2025-07-22T01:57:35.907Z",
-      "updated": "2025-07-22T02:01:53.559Z",
+      "updated": "2025-07-22T03:39:48.530Z",
       "description": "Tasks for master context"
+    }
+  },
+  "meta-agents": {
+    "tasks": [],
+    "metadata": {
+      "created": "2025-07-22T03:52:59.021Z",
+      "updated": "2025-07-22T03:52:59.022Z",
+      "description": "=Meta-Agent Factory System Development"
     }
   }
 }
