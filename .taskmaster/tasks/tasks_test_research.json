@@ -1,6 +1,6 @@
 {
   "agent": "test_research",
-  "generated": "2025-07-22T17:08:22.150Z",
+  "generated": "2025-07-22T17:08:41.247Z",
   "generatedBy": "PRD-Parser-Agent",
   "version": "1.0.0",
   "tasks": [
@@ -22,11 +22,11 @@
       "metadata": {
         "requirementId": 1,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": true,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.246Z"
       }
     },
     {
@@ -46,11 +46,11 @@
       "metadata": {
         "requirementId": 3,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": false,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -68,11 +68,11 @@
       "metadata": {
         "requirementId": 6,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": false,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -90,11 +90,11 @@
       "metadata": {
         "requirementId": 8,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": true,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -115,10 +115,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1002,
-        "generatedAt": "2025-07-22T17:08:22.131Z",
+        "generatedAt": "2025-07-22T17:08:41.219Z",
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -139,10 +139,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1004,
-        "generatedAt": "2025-07-22T17:08:22.131Z",
+        "generatedAt": "2025-07-22T17:08:41.219Z",
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -163,10 +163,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1005,
-        "generatedAt": "2025-07-22T17:08:22.131Z",
+        "generatedAt": "2025-07-22T17:08:41.219Z",
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -187,10 +187,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1006,
-        "generatedAt": "2025-07-22T17:08:22.131Z",
+        "generatedAt": "2025-07-22T17:08:41.219Z",
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -211,10 +211,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1008,
-        "generatedAt": "2025-07-22T17:08:22.131Z",
+        "generatedAt": "2025-07-22T17:08:41.219Z",
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -232,11 +232,11 @@
       "metadata": {
         "requirementId": 2,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": true,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -254,11 +254,11 @@
       "metadata": {
         "requirementId": 5,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": false,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -276,11 +276,11 @@
       "metadata": {
         "requirementId": 7,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": false,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -298,11 +298,11 @@
       "metadata": {
         "requirementId": 10,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": true,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -320,11 +320,11 @@
       "metadata": {
         "requirementId": 9,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:08:22.130Z",
+        "generatedAt": "2025-07-22T17:08:41.218Z",
         "researchSupport": false,
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     },
     {
@@ -353,10 +353,10 @@
       "metadata": {
         "strategy": "supporting_task",
         "taskType": "documentation",
-        "generatedAt": "2025-07-22T17:08:22.131Z",
+        "generatedAt": "2025-07-22T17:08:41.219Z",
         "agentName": "test_research",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:08:22.150Z"
+        "formattedAt": "2025-07-22T17:08:41.247Z"
       }
     }
   ],
