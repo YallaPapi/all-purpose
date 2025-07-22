@@ -1,6 +1,6 @@
 {
   "agent": "test_agent",
-  "generated": "2025-07-22T17:24:18.683Z",
+  "generated": "2025-07-22T18:30:26.617Z",
   "generatedBy": "PRD-Parser-Agent",
   "version": "1.0.0",
   "tasks": [
@@ -21,11 +21,11 @@
         "strategy": "integration",
         "integrationType": "GENERAL",
         "systemName": "External System",
-        "generatedAt": "2025-07-22T17:24:18.674Z",
+        "generatedAt": "2025-07-22T18:30:26.593Z",
         "researchSupport": true,
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -45,11 +45,11 @@
         "strategy": "integration",
         "integrationType": "REST_API",
         "systemName": "RESTful",
-        "generatedAt": "2025-07-22T17:24:18.674Z",
+        "generatedAt": "2025-07-22T18:30:26.593Z",
         "researchSupport": true,
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -70,10 +70,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1000,
-        "generatedAt": "2025-07-22T17:24:18.674Z",
+        "generatedAt": "2025-07-22T18:30:26.594Z",
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -94,10 +94,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1001,
-        "generatedAt": "2025-07-22T17:24:18.674Z",
+        "generatedAt": "2025-07-22T18:30:26.594Z",
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -118,10 +118,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1002,
-        "generatedAt": "2025-07-22T17:24:18.674Z",
+        "generatedAt": "2025-07-22T18:30:26.594Z",
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -142,10 +142,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1003,
-        "generatedAt": "2025-07-22T17:24:18.674Z",
+        "generatedAt": "2025-07-22T18:30:26.594Z",
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -166,10 +166,10 @@
         "strategy": "supporting_task",
         "taskType": "testing",
         "parentTaskId": 1005,
-        "generatedAt": "2025-07-22T17:24:18.674Z",
+        "generatedAt": "2025-07-22T18:30:26.594Z",
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -187,11 +187,11 @@
       "metadata": {
         "requirementId": 2,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:24:18.673Z",
+        "generatedAt": "2025-07-22T18:30:26.592Z",
         "researchSupport": false,
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -209,11 +209,11 @@
       "metadata": {
         "requirementId": 3,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:24:18.673Z",
+        "generatedAt": "2025-07-22T18:30:26.592Z",
         "researchSupport": false,
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -231,11 +231,11 @@
       "metadata": {
         "requirementId": 5,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:24:18.673Z",
+        "generatedAt": "2025-07-22T18:30:26.592Z",
         "researchSupport": false,
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -253,11 +253,11 @@
       "metadata": {
         "requirementId": 6,
         "strategy": "simple",
-        "generatedAt": "2025-07-22T17:24:18.673Z",
+        "generatedAt": "2025-07-22T18:30:26.592Z",
         "researchSupport": false,
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     },
     {
@@ -282,10 +282,10 @@
       "metadata": {
         "strategy": "supporting_task",
         "taskType": "documentation",
-        "generatedAt": "2025-07-22T17:24:18.674Z",
+        "generatedAt": "2025-07-22T18:30:26.594Z",
         "agentName": "test_agent",
         "generatedBy": "PRD-Parser-Agent",
-        "formattedAt": "2025-07-22T17:24:18.683Z"
+        "formattedAt": "2025-07-22T18:30:26.616Z"
       }
     }
   ],
