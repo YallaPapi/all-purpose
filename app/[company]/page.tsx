@@ -421,34 +421,57 @@ export default function CompanyPage() {
               </div>
 
               <div className="space-y-4">
+                {/* Why SMS? Section */}
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <h3 className="font-semibold text-blue-900 mb-2">🤖 How It Works</h3>
-                  <p className="text-blue-800 text-sm leading-relaxed">
-                    {industryData?.howItWorks || 'This SMS agent automatically reaches out to your prospects with personalized messages using their name, company, and context. It engages them in natural conversation and works to book consultations for your business.'}
-                  </p>
+                  <h3 className="font-semibold text-blue-900 mb-3">📱 Why SMS?</h3>
+                  <div className="grid grid-cols-2 gap-3 text-blue-800 text-sm">
+                    <div className="bg-white rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-blue-600">98%</div>
+                      <div className="text-xs">Open Rate</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-blue-600">45%</div>
+                      <div className="text-xs">Response Rate</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-blue-600">30%</div>
+                      <div className="text-xs">Conversion Rate</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-blue-600">3 min</div>
+                      <div className="text-xs">Response Time</div>
+                    </div>
+                  </div>
+                  <p className="text-blue-800 text-xs mt-2">SMS is 5x more effective than email with 98% open rates vs 20% for email</p>
                 </div>
 
+                {/* How It Works Section */}
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                  <h3 className="font-semibold text-green-900 mb-2">💬 Try It Out</h3>
-                  <p className="text-green-800 text-sm leading-relaxed">
-                    <strong>Act like the lead person!</strong> This demo shows a personalized {industryData?.name?.toLowerCase() || 'business'} consultation message for a specific prospect. 
-                    Try different responses to see how the AI handles various scenarios for {industryData?.name?.toLowerCase() || 'business'} services.
-                  </p>
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                  <h3 className="font-semibold text-yellow-900 mb-2">👤 Demo Lead Profile</h3>
-                  <div className="text-yellow-800 text-sm space-y-1">
-                    <div><strong>Name:</strong> {industryData?.leadType || 'Prospect looking for services'}</div>
-                    <div><strong>Type:</strong> Potential client/customer</div>
-                    <div><strong>Interest:</strong> {industryData?.interest || 'Professional services'}</div>
-                    <div><strong>Calendar:</strong> <a href={`https://calendly.com/${company}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Book consultation →</a></div>
+                  <h3 className="font-semibold text-green-900 mb-3">🤖 How It Works</h3>
+                  <div className="space-y-2 text-green-800 text-sm">
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">1</span>
+                      <span>AI sends personalized first message using prospect's name and context</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">2</span>
+                      <span>Asks qualifying questions about their specific needs and goals</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">3</span>
+                      <span>Builds rapport and provides compelling reasons to book a call</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">4</span>
+                      <span>Automatically provides calendar link for instant booking</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4">
-                  <h4 className="font-medium text-gray-900 mb-3">Quick Responses to Try:</h4>
-                                      <div className="space-y-2">
+                {/* Quick Responses Section */}
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                  <h3 className="font-semibold text-purple-900 mb-3">💬 Quick Responses to Try</h3>
+                  <div className="space-y-2">
                     {industryData?.sampleResponses ? (
                       industryData.sampleResponses.map((response, index) => (
                         <div key={index} className="flex items-center space-x-2">
@@ -477,6 +500,38 @@ export default function CompanyPage() {
                       </>
                     )}
                   </div>
+                  <p className="text-purple-800 text-xs mt-2">
+                    <strong>Act like the prospect!</strong> Try different responses to see how the AI adapts to various scenarios.
+                  </p>
+                </div>
+
+                {/* How to Get Started Section */}
+                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                  <h3 className="font-semibold text-orange-900 mb-3">🚀 How to Get Started</h3>
+                  <p className="text-orange-800 text-sm mb-3">
+                    Ready to get your own AI SMS agent that converts prospects into booked calls?
+                  </p>
+                  <div className="space-y-2">
+                    <a 
+                      href="https://calendly.com/solar-bookers-demo" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block w-full bg-orange-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors"
+                    >
+                      📅 Book Your Demo Call
+                    </a>
+                    <a 
+                      href="https://forms.gle/demo-request" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block w-full bg-white border border-orange-600 text-orange-600 text-center py-2 px-4 rounded-lg font-medium hover:bg-orange-50 transition-colors"
+                    >
+                      📝 Fill Out Request Form
+                    </a>
+                  </div>
+                  <p className="text-orange-700 text-xs mt-2 text-center">
+                    Get your AI agent set up in 24 hours ⚡
+                  </p>
                 </div>
               </div>
             </div>
