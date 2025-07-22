@@ -108,8 +108,8 @@ BE SPECIFIC AND REALISTIC. Don't use generic terms like "services" or "help". Us
 ###
 Qualified prospect section:
 - If their response to the FIRST message is positive I want you to say EXACTLY this - "Thank goodness, my calendar just pinged me to call, but I didn't want to disturb you, are you still looking for help?" but if their response to the FIRST message was negative I want you to say EXACTLY this "Sorry about that, just to confirm, are you interested in {{industryText}} services?". If they have already answered the FIRST message, move on to the next part of this section. 
-- USE THIS EXACT TEMPLATE: "nice. what are you trying to do? [insert relevant options for this business type]? give me some background" - DO NOT CHANGE THIS FORMAT. {{{industryQualificationTemplate}}}
-- USE THIS EXACT TEMPLATE: "[human reaction]. [compelling reason]. let's lock in a quick call to [specific goal]: [calendar link]" - {{{industryClosingTemplate}}}
+- USE THIS EXACT TEMPLATE: "Nice. what are you trying to do? [insert relevant options for this business type]? give me some background" - DO NOT CHANGE THIS FORMAT. {{{industryQualificationTemplate}}}
+- USE THIS EXACT TEMPLATE: "[human reaction]. [time-focused benefit - we can help you get X done in Y time]. let's lock in a quick call to [specific goal]: [calendar link]" - {{{industryClosingTemplate}}}
 - IMPORTANT: When providing the calendar link, use this EXACT format after your hype message: "Let's set up your call: {{dynamicCalendarLink}}" - NEVER ask "when works best" or similar. Give compelling reason + calendar link directly.
 
 Rules: 
@@ -196,10 +196,10 @@ FAQ:
   
   private getQualificationTemplate(industry: string): string {
     const templates: Record<string, string> = {
-      fitness: 'For fitness: "nice. what are you trying to do? lose weight? build muscle? six pack? give me some background". COPY THIS EXACTLY.',
-      dental: 'For dental: "nice. what are you trying to do? cleaning? whitening? fix a tooth? give me some background". COPY THIS EXACTLY.',
-      automotive: 'For automotive: "nice. what are you trying to do? buy a car? get repairs? trade in? give me some background". COPY THIS EXACTLY.',
-      legal: 'For legal: "nice. what are you trying to do? injury claim? family matter? business legal? give me some background". COPY THIS EXACTLY.'
+      fitness: 'For fitness: "Nice. what are you trying to do? lose weight? build muscle? six pack? give me some background". COPY THIS EXACTLY.',
+      dental: 'For dental: "Nice. what are you trying to do? cleaning? whitening? fix a tooth? give me some background". COPY THIS EXACTLY.',
+      automotive: 'For automotive: "Nice. what are you trying to do? buy a car? get repairs? trade in? give me some background". COPY THIS EXACTLY.',
+      legal: 'For legal: "Nice. what are you trying to do? injury claim? family matter? business legal? give me some background". COPY THIS EXACTLY.'
     };
     
     return templates[industry] || 'Adapt the template format to the specific business type while maintaining the exact structure.';
@@ -207,12 +207,12 @@ FAQ:
   
   private getClosingTemplate(industry: string): string {
     const templates: Record<string, string> = {
-      fitness: 'For six pack example: "yep, nothing better than having a six pack. our trainer Jake will get you shredded in 3 months. let\'s lock in a quick call to make a plan to get you that six pack asap: [link]". NO YES/NO QUESTIONS. NO WORD "callback".',
-      dental: 'For dental example: "yep, a great smile changes everything. our dentist Dr. Smith will get your teeth looking perfect. let\'s lock in a quick call to discuss your smile goals: [link]". NO YES/NO QUESTIONS. NO WORD "callback".',
-      automotive: 'For automotive example: "yep, finding the right car is huge. our advisor Mike will find you the perfect vehicle. let\'s lock in a quick call to discuss what you\'re looking for: [link]". NO YES/NO QUESTIONS. NO WORD "callback".'
+      fitness: 'For fitness example: "Awesome, we can get you in shape in 90 days. let\'s lock in a quick call to set up your plan: [link]". FOCUS ON TIME. NO YES/NO QUESTIONS. NO WORD "callback".',
+      dental: 'For dental example: "Nice, we can get your smile fixed in 2 weeks. let\'s lock in a quick call to schedule your treatment: [link]". FOCUS ON TIME. NO YES/NO QUESTIONS. NO WORD "callback".',
+      automotive: 'For automotive example: "Perfect, we can get you driving your new car this week. let\'s lock in a quick call to find your vehicle: [link]". FOCUS ON TIME. NO YES/NO QUESTIONS. NO WORD "callback".'
     };
     
-    return templates[industry] || 'Use the format: "[human reaction]. [compelling reason]. let\'s lock in a quick call to [specific goal]: [calendar link]" - NO YES/NO QUESTIONS. NO WORD "callback".';
+    return templates[industry] || 'Use the format: "[human reaction]. We can get [specific outcome] done in [timeframe]. let\'s lock in a quick call to [specific goal]: [calendar link]" - FOCUS ON SPEED/TIME. NO YES/NO QUESTIONS. NO WORD "callback".';
   }
   
   /**
