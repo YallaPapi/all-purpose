@@ -54,12 +54,14 @@ export default function ObservabilityDashboard() {
   const [events, setEvents] = useState<ObservabilityEvent[]>([]);
   const [agents, setAgents] = useState<AgentFlowNode[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'agents' | 'health'>('overview');
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   const fetchData = async () => {
     try {
+      setError(null); // Clear previous errors
       const [metricsRes, eventsRes, flowRes] = await Promise.all([
         fetch('/api/observability?action=metrics'),
         fetch('/api/observability?action=events&limit=100'),
@@ -70,13 +72,32 @@ export default function ObservabilityDashboard() {
       const eventsData = await eventsRes.json();
       const flowData = await flowRes.json();
 
-      if (metricsData.success) setMetrics(metricsData.data);
-      if (eventsData.success) setEvents(eventsData.data);
-      if (flowData.success) setAgents(flowData.data.agents || []);
+      // Check for API errors and log them
+      if (!metricsData.success) {
+        console.error('Metrics API error:', metricsData.error, metricsData.details);
+        setError(`API Error: ${metricsData.error}`);
+      } else {
+        setMetrics(metricsData.data);
+      }
+      
+      if (!eventsData.success) {
+        console.error('Events API error:', eventsData.error, eventsData.details);
+        if (!error) setError(`Events API Error: ${eventsData.error}`);
+      } else {
+        setEvents(eventsData.data);
+      }
+      
+      if (!flowData.success) {
+        console.error('Flow API error:', flowData.error, flowData.details);
+        if (!error) setError(`Flow API Error: ${flowData.error}`);
+      } else {
+        setAgents(flowData.data.agents || []);
+      }
       
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Failed to fetch observability data:', error);
+      setError(`Network Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -129,6 +150,35 @@ export default function ObservabilityDashboard() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading observability data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !metrics) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center max-w-2xl mx-auto p-8">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Observability Dashboard Error</h1>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+            <p className="text-red-700 font-medium mb-2">Error Details:</p>
+            <p className="text-red-600 text-sm font-mono bg-red-100 p-3 rounded">{error}</p>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <p className="text-blue-700 font-medium mb-2">To fix this issue:</p>
+            <ol className="text-blue-600 text-sm text-left list-decimal list-inside space-y-1">
+              <li>Ensure Redis (Upstash KV) environment variables are set in your .env.local file</li>
+              <li>Check that KV_REST_API_URL and KV_REST_API_TOKEN are valid</li>
+              <li>Verify your Upstash Redis instance is running and accessible</li>
+            </ol>
+          </div>
+          <button
+            onClick={fetchData}
+            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Retry Connection
+          </button>
         </div>
       </div>
     );

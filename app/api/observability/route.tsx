@@ -7,10 +7,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
 
-const redis = new Redis({
-  url: process.env.KV_REST_API_URL!,
-  token: process.env.KV_REST_API_TOKEN!,
-});
+// Check for required environment variables
+if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
+  console.error('Missing Redis environment variables:', {
+    KV_REST_API_URL: !!process.env.KV_REST_API_URL,
+    KV_REST_API_TOKEN: !!process.env.KV_REST_API_TOKEN
+  });
+}
+
+const redis = process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN ? 
+  new Redis({
+    url: process.env.KV_REST_API_URL,
+    token: process.env.KV_REST_API_TOKEN,
+  }) : null;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -18,11 +27,31 @@ export async function GET(request: NextRequest) {
   const eventType = searchParams.get('eventType');
   const limit = parseInt(searchParams.get('limit') || '50');
 
+  // Check if Redis is available
+  if (!redis) {
+    return NextResponse.json({
+      success: false,
+      error: 'Redis connection not available. Missing KV_REST_API_URL or KV_REST_API_TOKEN environment variables.',
+      action: action
+    }, { status: 500 });
+  }
+
   try {
     switch (action) {
       case 'metrics':
         const metricsData = await redis.get('observability:metrics:current');
-        let metrics = metricsData ? JSON.parse(metricsData) : null;
+        let metrics = null;
+        
+        if (metricsData) {
+          try {
+            metrics = typeof metricsData === 'string' ? JSON.parse(metricsData) : metricsData;
+          } catch (parseError) {
+            console.error('Failed to parse metrics data:', { metricsData, parseError });
+            // Clear corrupted data
+            await redis.del('observability:metrics:current');
+            metrics = null;
+          }
+        }
         
         // Auto-initialize with sample data if no metrics exist
         if (!metrics) {
@@ -64,7 +93,14 @@ export async function GET(request: NextRequest) {
       case 'events':
         const key = eventType ? `observability:events:${eventType}` : 'observability:events';
         const events = await redis.lrange(key, 0, limit - 1);
-        const parsedEvents = events.map(event => JSON.parse(event)).reverse();
+        const parsedEvents = events.map(event => {
+          try {
+            return typeof event === 'string' ? JSON.parse(event) : event;
+          } catch (parseError) {
+            console.error('Failed to parse event:', { event, parseError });
+            return null;
+          }
+        }).filter(event => event !== null).reverse();
         
         return NextResponse.json({
           success: true,
@@ -74,7 +110,15 @@ export async function GET(request: NextRequest) {
       case 'flow':
         // Get recent events to build flow visualization
         const allEvents = await redis.lrange('observability:events', 0, 199);
-        const flowData = buildFlowVisualization(allEvents.map(e => JSON.parse(e)));
+        const parsedFlowEvents = allEvents.map(e => {
+          try {
+            return typeof e === 'string' ? JSON.parse(e) : e;
+          } catch (parseError) {
+            console.error('Failed to parse flow event:', { e, parseError });
+            return null;
+          }
+        }).filter(e => e !== null);
+        const flowData = buildFlowVisualization(parsedFlowEvents);
         
         return NextResponse.json({
           success: true,
@@ -106,9 +150,20 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('Observability API error:', error);
+    
+    // Handle Redis connection errors specifically
+    if (error instanceof Error && error.message.includes('fetch')) {
+      return NextResponse.json({
+        success: false,
+        error: 'Redis connection failed. Please check KV_REST_API_URL and KV_REST_API_TOKEN environment variables.',
+        details: error.message
+      }, { status: 500 });
+    }
+    
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : String(error),
+      action: action
     }, { status: 500 });
   }
 }
