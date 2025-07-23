@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Thirty-Minute Rule Agent is one of the 7 meta-agents in the Meta-Agent Factory system. It implements systematic debugging with time-bounded problem solving to prevent endless debugging loops that waste development time and reduce productivity.
+The Thirty-Minute Rule Agent is one of the 9 meta-agents in the complete Meta-Agent Factory system. It implements systematic debugging with time-bounded problem solving to prevent endless debugging loops that waste development time and reduce productivity.
 
 ### Core Philosophy
 
