@@ -69,12 +69,22 @@ node setup-observability.js
 ```
 
 ### Step 2: Access the Dashboard
-Open your browser to: **http://localhost:3000/admin/observability**
+Two dashboard options available:
+- **Main Dashboard**: http://localhost:3000/admin/observability
+- **Working Dashboard**: http://localhost:3000/admin/observability/working (Recommended)
 
-### Step 3: See Your System in Action
+### Step 3: Test the API
+You can test the API endpoints directly:
+- **Test Page**: http://localhost:3000/admin/test-api
+- **API Endpoints**:
+  - `GET /api/observability?action=metrics` - System metrics
+  - `GET /api/observability?action=events&limit=20` - Recent events  
+  - `GET /api/observability?action=flow` - Agent flow data
+
+### Step 4: See Your System in Action
 The dashboard will show:
 - ✅ Active agents and their status
-- 📋 Real-time event stream
+- 📋 Real-time event stream  
 - 🤖 Agent network visualization
 - 📊 Performance metrics
 
@@ -93,13 +103,24 @@ The dashboard will show:
    - Uses existing Redis infrastructure
 
 3. **`/app/admin/observability/page.tsx`**
-   - Real-time dashboard with 4 main views:
+   - Full-featured dashboard with 4 main views:
      - **Overview**: Key metrics and system status
      - **Events**: Live event stream
      - **Agents**: Agent network visualization  
      - **Health**: System health monitoring
 
-4. **`setup-observability.js`**
+4. **`/app/admin/observability/working/page.tsx`** (Recommended)
+   - Simplified, bulletproof dashboard implementation
+   - Manual fetch triggers for reliable data loading
+   - Comprehensive error handling and debugging
+   - Proven working pattern based on test-api implementation
+
+5. **`/app/admin/test-api/page.tsx`**
+   - API testing interface for troubleshooting
+   - Direct endpoint testing capabilities
+   - JSON response visualization
+
+6. **`setup-observability.js`**
    - Integration example showing how to connect everything
    - Creates sample agents and tasks for demonstration
    - Handles graceful shutdown
@@ -162,17 +183,52 @@ This system leverages everything you already have:
 
 **No new accounts, services, or dependencies required!**
 
+## ⚙️ Technical Implementation Details
+
+### API Architecture
+The observability system uses a single API route with action-based routing:
+- `/api/observability?action=metrics` - Returns system metrics and agent performance
+- `/api/observability?action=events&limit=N` - Returns recent events with optional limit
+- `/api/observability?action=flow` - Returns agent flow and network data
+
+### Data Storage
+- **Redis Integration**: Uses existing Upstash Redis with `KV_REST_API_URL` and `KV_REST_API_TOKEN`
+- **Structured Data**: Events stored with timestamps, agent IDs, and metadata
+- **Automatic Initialization**: API creates sample data if none exists
+
+### Dashboard Implementations
+- **Main Dashboard** (`/admin/observability`): Full-featured with tabs and auto-refresh
+- **Working Dashboard** (`/admin/observability/working`): Simplified, manual-fetch based on test-api pattern
+- **Test API** (`/admin/test-api`): Direct API testing for troubleshooting
+
+### React Patterns Used
+- Manual fetch triggers instead of automatic useEffect for reliability
+- Comprehensive error handling with detailed logging  
+- Loading states and user feedback
+- JSON debugging sections for development
+
 ## 🔍 Troubleshooting
 
 ### Dashboard Shows No Data
-1. Ensure `setup-observability.js` is running
-2. Check that Redis environment variables are set
-3. Verify agents are registered with the coordinator
+1. **Test the API first**: Visit `/admin/test-api` to verify API endpoints work
+2. **Check Redis variables**: Ensure `KV_REST_API_URL` and `KV_REST_API_TOKEN` are set in `.env`
+3. **Use working dashboard**: Try `/admin/observability/working` if main dashboard fails
+4. **Check browser console**: Look for fetch errors or CORS issues
 
-### Events Not Appearing
-1. Check that ObservabilityCollector is connected to MetaAgentCoordinator
-2. Verify Redis connection in browser dev tools
-3. Look for errors in the Winston logs
+### React Component Issues
+1. **Loading state stuck**: Try the working dashboard which uses manual fetch triggers
+2. **useEffect problems**: The working dashboard avoids automatic useEffect patterns
+3. **Data not updating**: Use manual refresh buttons instead of auto-refresh
+
+### API Troubleshooting
+- **200 but no data**: API creates sample data automatically, check Redis connection
+- **404 errors**: Verify Next.js server is running and API route exists
+- **CORS errors**: Ensure you're accessing via the correct localhost port
+
+### Railway Deployment Notes
+- **Wait 5 minutes**: Always wait full 5 minutes after GitHub push before testing
+- **Test locally first**: Always test locally before deploying to avoid Railway wait times
+- **Check logs**: Use Railway console to view deployment and runtime logs
 
 ### Poor Performance
 1. Redis data is automatically trimmed (last 1000 events)

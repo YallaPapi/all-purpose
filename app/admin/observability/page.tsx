@@ -123,6 +123,7 @@ export default function ObservabilityDashboard() {
   };
 
   useEffect(() => {
+    // Auto-fetch data on component mount
     fetchData();
     
     if (autoRefresh) {
@@ -173,6 +174,7 @@ export default function ObservabilityDashboard() {
       </div>
     );
   }
+
 
   if (error && !metrics) {
     return (
