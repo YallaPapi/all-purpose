@@ -1017,3 +1017,798 @@
 {"attempt":3,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 09:49:24:4924"}
 {"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 09:49:24:4924"}
 {"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Failed to add context","timestamp":"2025-07-23 09:49:24:4924"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:09:21:921"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:09:21:921"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:09:21:921"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:09:21:921"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:09:21:921"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:09:27:927"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:09:27:927"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:09:27:927"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:09:27:927"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:09:27:927"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:18:47:1847"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:18:47:1847"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:18:47:1847"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:18:47:1847"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:18:47:1847"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:18:52:1852"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:18:52:1852"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:18:52:1852"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:18:52:1852"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:18:52:1852"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:19:30:1930"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:19:30:1930"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:19:30:1930"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 13:19:30:1930","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:19:30:1930"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:19:30:1930"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 13:19:30:1930","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"autoEnhancement":true,"level":"info","maxContextLength":4000,"message":"[API] Context API initialized","timestamp":"2025-07-23 13:19:30:1930"}
+{"contentLength":420,"fileName":"meta-agent-development.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 13:19:30:1930"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:30:1930"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:30:1930"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:30:1930"}
+{"estimatedCost":0.0000016600000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:31:1931","totalTokens":83}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:31:1931"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:19:31:1931"}
+{"contentLength":426,"fileName":"5-document-framework.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 13:19:31:1931"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:31:1931"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:31:1931"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:31:1931"}
+{"estimatedCost":0.0000017000000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:32:1932","totalTokens":85}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:32:1932"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:19:32:1932"}
+{"contentLength":384,"fileName":"vercel-architecture.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 13:19:32:1932"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:32:1932"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:32:1932"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:32:1932"}
+{"estimatedCost":0.00000146,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:33:1933","totalTokens":73}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:33:1933"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:19:33:1933"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"How to build meta-agents?...","timestamp":"2025-07-23 13:19:33:1933"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:33:1933"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:33:1933"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:33:1933"}
+{"estimatedCost":1.4e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:33:1933","totalTokens":7}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:33:1933"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:33:1933","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":475,"timestamp":"2025-07-23 13:19:33:1933"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"What documentation is required?...","timestamp":"2025-07-23 13:19:33:1933"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:33:1933"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:33:1933"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:33:1933"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:34:1934","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:34:1934"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:34:1934","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":741,"timestamp":"2025-07-23 13:19:34:1934"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"Vercel deployment patterns...","timestamp":"2025-07-23 13:19:34:1934"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:34:1934"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:34:1934"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:34:1934"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:34:1934","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:34:1934"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:34:1934","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":541,"timestamp":"2025-07-23 13:19:34:1934"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"debugging methodology...","timestamp":"2025-07-23 13:19:34:1934"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:34:1934"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:34:1934"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:34:1934"}
+{"estimatedCost":6.000000000000001e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:36:1936","totalTokens":3}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:36:1936","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":1409,"timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:36:1936"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:36:1936"}
+{"estimatedCost":3.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:36:1936","totalTokens":17}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 13:19:36:1936","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":403,"timestamp":"2025-07-23 13:19:36:1936"}
+{"contextItems":2,"contextLength":236,"enhancementTime":403,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:36:1936"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:36:1936"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:36:1936"}
+{"estimatedCost":2.0000000000000002e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:37:1937","totalTokens":10}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 13:19:37:1937","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":564,"timestamp":"2025-07-23 13:19:37:1937"}
+{"contextItems":2,"contextLength":643,"enhancementTime":565,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:37:1937"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:37:1937"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:37:1937","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 13:19:37:1937","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":234,"timestamp":"2025-07-23 13:19:37:1937"}
+{"contextItems":2,"contextLength":682,"enhancementTime":234,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:37:1937"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:37:1937"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:37:1937"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:38:1938","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:38:1938"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:38:1938","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":593,"timestamp":"2025-07-23 13:19:38:1938"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:19:38:1938"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:38:1938"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:38:1938"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:38:1938"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:38:1938","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:38:1938"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:38:1938","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":265,"timestamp":"2025-07-23 13:19:38:1938"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:19:38:1938"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:38:1938"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:38:1938"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:38:1938"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:39:1939","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:39:1939"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:39:1939","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":736,"timestamp":"2025-07-23 13:19:39:1939"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:19:39:1939"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:39:1939"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:39:1939"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:39:1939"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:48:1948","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:48:1948"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:48:1948","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":9823,"timestamp":"2025-07-23 13:19:48:1948"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:19:48:1948"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:48:1948"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:48:1948"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:48:1948"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:49:1949","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:49:1949"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:19:49:1949","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":356,"timestamp":"2025-07-23 13:19:49:1949"}
+{"level":"info","maxResults":1,"message":"[API] Searching for context","prompt":"...","timestamp":"2025-07-23 13:19:49:1949"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:49:1949"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:49:1949"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:49:1949"}
+{"attempt":1,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 13:19:49:1949"}
+{"attempt":2,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:50:1950"}
+{"attempt":2,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 13:19:50:1950"}
+{"attempt":3,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:52:1952"}
+{"attempt":3,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 13:19:52:1952"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 13:19:52:1952"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 13:19:52:1952"}
+{"level":"info","maxResults":5,"message":"[API] Searching for context","prompt":"nonexistent topic that should not match anything in the knowledge base...","timestamp":"2025-07-23 13:19:52:1952"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:19:52:1952"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:19:52:1952"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:19:52:1952"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:19:53:1953","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:19:53:1953"}
+{"level":"debug","message":"Vector search completed","resultCount":5,"timestamp":"2025-07-23 13:19:53:1953","topK":5}
+{"level":"info","message":"[API] Context search completed","resultsFound":5,"searchTime":392,"timestamp":"2025-07-23 13:19:53:1953"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:28:45:2845"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:28:45:2845"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:28:45:2845"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 13:28:45:2845","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:28:45:2845"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:28:45:2845"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 13:28:45:2845","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"autoEnhancement":true,"level":"info","maxContextLength":4000,"message":"[API] Context API initialized","timestamp":"2025-07-23 13:28:45:2845"}
+{"enableContextInjection":true,"enhancedCommands":5,"level":"info","message":"TaskMaster integration initialized","timestamp":"2025-07-23 13:28:45:2845"}
+{"command":"--help","level":"info","message":"Executing TaskMaster command without enhancement","timestamp":"2025-07-23 13:28:45:2845"}
+{"args":1,"command":"--help","level":"info","message":"Executing TaskMaster command","timestamp":"2025-07-23 13:28:45:2845"}
+{"command":"--help","exitCode":1,"level":"info","message":"TaskMaster command completed","timestamp":"2025-07-23 13:28:45:2845"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:39:31:3931"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:39:31:3931"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:39:31:3931"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 13:39:31:3931","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:39:31:3931"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:39:31:3931"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 13:39:31:3931","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"autoEnhancement":true,"level":"info","maxContextLength":4000,"message":"[API] Context API initialized","timestamp":"2025-07-23 13:39:31:3931"}
+{"contentLength":420,"fileName":"meta-agent-development.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 13:39:31:3931"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:31:3931"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:31:3931"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:31:3931"}
+{"estimatedCost":0.0000016600000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:31:3931","totalTokens":83}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:31:3931"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:39:31:3931"}
+{"contentLength":426,"fileName":"5-document-framework.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 13:39:31:3931"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:31:3931"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:31:3931"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:31:3931"}
+{"estimatedCost":0.0000017000000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:32:3932","totalTokens":85}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:32:3932"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:39:32:3932"}
+{"contentLength":384,"fileName":"vercel-architecture.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 13:39:32:3932"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:32:3932"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:32:3932"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:32:3932"}
+{"estimatedCost":0.00000146,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:32:3932","totalTokens":73}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:32:3932"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:39:32:3932"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"How to build meta-agents?...","timestamp":"2025-07-23 13:39:32:3932"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:32:3932"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:32:3932"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:32:3932"}
+{"estimatedCost":1.4e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:33:3933","totalTokens":7}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:33:3933","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":316,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"What documentation is required?...","timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:33:3933"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:33:3933"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:33:3933","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:33:3933","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":307,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"Vercel deployment patterns...","timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:33:3933"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:33:3933"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:33:3933","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:33:3933","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":265,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"debugging methodology...","timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:33:3933"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:33:3933"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:33:3933"}
+{"estimatedCost":6.000000000000001e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:35:3935","totalTokens":3}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:35:3935","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":1673,"timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:35:3935"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:35:3935"}
+{"estimatedCost":3.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:35:3935","totalTokens":17}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 13:39:35:3935","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":404,"timestamp":"2025-07-23 13:39:35:3935"}
+{"contextItems":2,"contextLength":236,"enhancementTime":405,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:35:3935"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:35:3935"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:35:3935"}
+{"estimatedCost":2.0000000000000002e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:36:3936","totalTokens":10}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 13:39:36:3936","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":438,"timestamp":"2025-07-23 13:39:36:3936"}
+{"contextItems":2,"contextLength":643,"enhancementTime":438,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:36:3936"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:36:3936"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:36:3936","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 13:39:36:3936","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":310,"timestamp":"2025-07-23 13:39:36:3936"}
+{"contextItems":2,"contextLength":682,"enhancementTime":310,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:36:3936"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:36:3936"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:36:3936","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:36:3936","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":221,"timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:36:3936"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:36:3936"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:36:3936"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:37:3937","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:37:3937"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:37:3937","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":349,"timestamp":"2025-07-23 13:39:37:3937"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:39:37:3937"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:37:3937"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:37:3937"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:37:3937"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:37:3937","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:37:3937"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:37:3937","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":552,"timestamp":"2025-07-23 13:39:37:3937"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:39:37:3937"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:37:3937"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:37:3937"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:37:3937"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:38:3938","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:38:3938"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:38:3938","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":370,"timestamp":"2025-07-23 13:39:38:3938"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 13:39:38:3938"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:38:3938"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:38:3938"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:38:3938"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:38:3938","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:38:3938"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 13:39:38:3938","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":296,"timestamp":"2025-07-23 13:39:38:3938"}
+{"level":"info","maxResults":1,"message":"[API] Searching for context","prompt":"...","timestamp":"2025-07-23 13:39:38:3938"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:38:3938"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:38:3938"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:38:3938"}
+{"attempt":1,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 13:39:38:3938"}
+{"attempt":2,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:39:3939"}
+{"attempt":2,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 13:39:40:3940"}
+{"attempt":3,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:42:3942"}
+{"attempt":3,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 13:39:42:3942"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 13:39:42:3942"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 13:39:42:3942"}
+{"level":"info","maxResults":5,"message":"[API] Searching for context","prompt":"nonexistent topic that should not match anything in the knowledge base...","timestamp":"2025-07-23 13:39:42:3942"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 13:39:42:3942"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 13:39:42:3942"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 13:39:42:3942"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 13:39:42:3942","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 13:39:42:3942"}
+{"level":"debug","message":"Vector search completed","resultCount":5,"timestamp":"2025-07-23 13:39:42:3942","topK":5}
+{"level":"info","message":"[API] Context search completed","resultsFound":5,"searchTime":362,"timestamp":"2025-07-23 13:39:42:3942"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:40:55:4055"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 13:40:55:4055"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 13:40:55:4055"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 13:40:55:4055","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"chunkSize":500,"filePatterns":3,"level":"info","message":"[PROCESSING] Document processor initialized","sourceDir":"C:\\Users\\Stuart\\Desktop\\Projects\\allpurp","timestamp":"2025-07-23 13:40:55:4055"}
+{"level":"info","message":"[PROCESSING] Starting document processing","timestamp":"2025-07-23 13:40:55:4055"}
+{"level":"info","message":"[PROCESSING] Discovered 3 files for processing","timestamp":"2025-07-23 13:40:55:4055"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:17:58:1758"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:17:58:1758"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 14:17:58:1758"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 14:17:58:1758","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:17:58:1758"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 14:17:58:1758"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 14:17:58:1758","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"autoEnhancement":true,"level":"info","maxContextLength":4000,"message":"[API] Context API initialized","timestamp":"2025-07-23 14:17:58:1758"}
+{"contentLength":420,"fileName":"meta-agent-development.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:17:58:1758"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:17:58:1758"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:17:58:1758"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:17:58:1758"}
+{"estimatedCost":0.0000016600000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:17:58:1758","totalTokens":83}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:17:58:1758"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 14:17:58:1758"}
+{"contentLength":426,"fileName":"5-document-framework.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:17:58:1758"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:17:58:1758"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:17:58:1758"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:17:58:1758"}
+{"estimatedCost":0.0000017000000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:17:59:1759","totalTokens":85}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:17:59:1759"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 14:17:59:1759"}
+{"contentLength":384,"fileName":"vercel-architecture.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:17:59:1759"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:17:59:1759"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:17:59:1759"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:17:59:1759"}
+{"estimatedCost":0.00000146,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:17:59:1759","totalTokens":73}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:17:59:1759"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 14:17:59:1759"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"How to build meta-agents?...","timestamp":"2025-07-23 14:17:59:1759"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:17:59:1759"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:17:59:1759"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:17:59:1759"}
+{"estimatedCost":1.4e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:00:180","totalTokens":7}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:00:180"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:00:180","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":324,"timestamp":"2025-07-23 14:18:00:180"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"What documentation is required?...","timestamp":"2025-07-23 14:18:00:180"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:00:180"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:00:180"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:00:180"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:00:180","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:00:180"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:00:180","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":604,"timestamp":"2025-07-23 14:18:00:180"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"Vercel deployment patterns...","timestamp":"2025-07-23 14:18:00:180"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:00:180"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:00:180"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:00:180"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:01:181","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:01:181","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":309,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"debugging methodology...","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:01:181"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:01:181"}
+{"estimatedCost":6.000000000000001e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:01:181","totalTokens":3}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:01:181","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":186,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:01:181"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:01:181"}
+{"estimatedCost":3.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:01:181","totalTokens":17}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:18:01:181","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":283,"timestamp":"2025-07-23 14:18:01:181"}
+{"contextItems":2,"contextLength":236,"enhancementTime":284,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:01:181"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:01:181"}
+{"estimatedCost":2.0000000000000002e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:01:181","totalTokens":10}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:18:01:181","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":377,"timestamp":"2025-07-23 14:18:01:181"}
+{"contextItems":2,"contextLength":643,"enhancementTime":377,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:01:181"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:01:181"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:01:181"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:02:182","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:18:02:182","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":361,"timestamp":"2025-07-23 14:18:02:182"}
+{"contextItems":2,"contextLength":682,"enhancementTime":362,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:02:182"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:02:182"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:02:182","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:02:182","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":196,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:02:182"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:02:182"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:02:182","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:02:182","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":252,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:02:182"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:02:182"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:02:182","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:02:182"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:03:183","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":291,"timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:03:183"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:03:183"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:03:183","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:03:183"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:03:183","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":249,"timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:03:183"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:03:183"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:03:183","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:03:183"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:18:03:183","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":350,"timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","maxResults":1,"message":"[API] Searching for context","prompt":"...","timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:03:183"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:03:183"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:03:183"}
+{"attempt":1,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:18:03:183"}
+{"attempt":2,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:04:184"}
+{"attempt":2,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:18:05:185"}
+{"attempt":3,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:07:187"}
+{"attempt":3,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:18:07:187"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 14:18:07:187"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 14:18:07:187"}
+{"level":"info","maxResults":5,"message":"[API] Searching for context","prompt":"nonexistent topic that should not match anything in the knowledge base...","timestamp":"2025-07-23 14:18:07:187"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:18:07:187"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:18:07:187"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:18:07:187"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:18:07:187","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:18:07:187"}
+{"level":"debug","message":"Vector search completed","resultCount":5,"timestamp":"2025-07-23 14:18:07:187","topK":5}
+{"level":"info","message":"[API] Context search completed","resultsFound":5,"searchTime":409,"timestamp":"2025-07-23 14:18:07:187"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:26:04:264"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:26:04:264"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 14:26:04:264"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 14:26:04:264","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:26:04:264"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 14:26:04:264"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 14:26:04:264","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"autoEnhancement":true,"level":"info","maxContextLength":4000,"message":"[API] Context API initialized","timestamp":"2025-07-23 14:26:04:264"}
+{"contentLength":420,"fileName":"meta-agent-development.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:26:04:264"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:04:264"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:04:264"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:04:264"}
+{"estimatedCost":0.0000016600000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:05:265","totalTokens":83}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:05:265"}
+{"count":1,"level":"info","message":"Vectors upserted successfully","timestamp":"2025-07-23 14:26:05:265"}
+{"fileName":"meta-agent-development.md","id":"ctx-48b439af05b7e399","level":"info","message":"[API] Context added successfully","timestamp":"2025-07-23 14:26:05:265"}
+{"contentLength":426,"fileName":"5-document-framework.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:26:05:265"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:05:265"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:05:265"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:05:265"}
+{"estimatedCost":0.0000017000000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:05:265","totalTokens":85}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:05:265"}
+{"count":1,"level":"info","message":"Vectors upserted successfully","timestamp":"2025-07-23 14:26:05:265"}
+{"fileName":"5-document-framework.md","id":"ctx-75ac80fbc2b608ec","level":"info","message":"[API] Context added successfully","timestamp":"2025-07-23 14:26:05:265"}
+{"contentLength":384,"fileName":"vercel-architecture.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:26:05:265"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:05:265"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:05:265"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:05:265"}
+{"estimatedCost":0.00000146,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:06:266","totalTokens":73}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:06:266"}
+{"count":1,"level":"info","message":"Vectors upserted successfully","timestamp":"2025-07-23 14:26:06:266"}
+{"fileName":"vercel-architecture.md","id":"ctx-9a6e553875b46306","level":"info","message":"[API] Context added successfully","timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"How to build meta-agents?...","timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:06:266"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:06:266"}
+{"estimatedCost":1.4e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:06:266","totalTokens":7}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:06:266"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:06:266","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":216,"timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"What documentation is required?...","timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:06:266"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:06:266"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:06:266","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:06:266"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:06:266","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":308,"timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"Vercel deployment patterns...","timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:06:266"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:06:266"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:06:266"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:07:267","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:07:267"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:07:267","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":573,"timestamp":"2025-07-23 14:26:07:267"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"debugging methodology...","timestamp":"2025-07-23 14:26:07:267"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:07:267"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:07:267"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:07:267"}
+{"estimatedCost":6.000000000000001e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:08:268","totalTokens":3}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:08:268"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:08:268","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":610,"timestamp":"2025-07-23 14:26:08:268"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 14:26:08:268"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 14:26:08:268"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:08:268"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:08:268"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:08:268"}
+{"estimatedCost":3.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:08:268","totalTokens":17}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:08:268"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:26:08:268","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":413,"timestamp":"2025-07-23 14:26:08:268"}
+{"contextItems":2,"contextLength":236,"enhancementTime":415,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:26:08:268"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 14:26:08:268"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 14:26:08:268"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:08:268"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:08:268"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:08:268"}
+{"estimatedCost":2.0000000000000002e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:09:269","totalTokens":10}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:09:269"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:26:09:269","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":739,"timestamp":"2025-07-23 14:26:09:269"}
+{"contextItems":2,"contextLength":643,"enhancementTime":740,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:26:09:269"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 14:26:09:269"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 14:26:09:269"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:09:269"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:09:269"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:09:269"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:09:269","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:09:269"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:26:09:269","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":517,"timestamp":"2025-07-23 14:26:09:269"}
+{"contextItems":2,"contextLength":682,"enhancementTime":518,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:26:09:269"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:26:09:269"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:09:269"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:09:269"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:09:269"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:09:269","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:10:2610","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":280,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:10:2610"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:10:2610"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:10:2610","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:10:2610","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":325,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:10:2610"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:10:2610"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:10:2610","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:10:2610","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":295,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:10:2610"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:10:2610"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:10:2610","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:10:2610","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":219,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:10:2610"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:10:2610"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:10:2610"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:11:2611","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:11:2611"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:26:11:2611","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":430,"timestamp":"2025-07-23 14:26:11:2611"}
+{"level":"info","maxResults":1,"message":"[API] Searching for context","prompt":"...","timestamp":"2025-07-23 14:26:11:2611"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:11:2611"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:11:2611"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:11:2611"}
+{"attempt":1,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:26:11:2611"}
+{"attempt":2,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:12:2612"}
+{"attempt":2,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:26:12:2612"}
+{"attempt":3,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:14:2614"}
+{"attempt":3,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:26:15:2615"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 14:26:15:2615"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 14:26:15:2615"}
+{"level":"info","maxResults":5,"message":"[API] Searching for context","prompt":"nonexistent topic that should not match anything in the knowledge base...","timestamp":"2025-07-23 14:26:15:2615"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:26:15:2615"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:26:15:2615"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:26:15:2615"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:26:15:2615","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:26:15:2615"}
+{"level":"debug","message":"Vector search completed","resultCount":5,"timestamp":"2025-07-23 14:26:15:2615","topK":5}
+{"level":"info","message":"[API] Context search completed","resultsFound":5,"searchTime":255,"timestamp":"2025-07-23 14:26:15:2615"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:27:47:2747"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:27:47:2747"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 14:27:47:2747"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 14:27:47:2747","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-23 14:27:47:2747"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-23 14:27:47:2747"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-23 14:27:47:2747","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"autoEnhancement":true,"level":"info","maxContextLength":4000,"message":"[API] Context API initialized","timestamp":"2025-07-23 14:27:47:2747"}
+{"contentLength":420,"fileName":"meta-agent-development.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:27:47:2747"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:47:2747"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:47:2747"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:47:2747"}
+{"estimatedCost":0.0000016600000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:47:2747","totalTokens":83}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:47:2747"}
+{"count":1,"level":"info","message":"Vectors upserted successfully","timestamp":"2025-07-23 14:27:48:2748"}
+{"fileName":"meta-agent-development.md","id":"ctx-48b439af05b7e399","level":"info","message":"[API] Context added successfully","timestamp":"2025-07-23 14:27:48:2748"}
+{"contentLength":426,"fileName":"5-document-framework.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:48:2748"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:48:2748"}
+{"estimatedCost":0.0000017000000000000002,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:48:2748","totalTokens":85}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:48:2748"}
+{"count":1,"level":"info","message":"Vectors upserted successfully","timestamp":"2025-07-23 14:27:48:2748"}
+{"fileName":"5-document-framework.md","id":"ctx-75ac80fbc2b608ec","level":"info","message":"[API] Context added successfully","timestamp":"2025-07-23 14:27:48:2748"}
+{"contentLength":384,"fileName":"vercel-architecture.md","level":"info","message":"[API] Adding context to knowledge base","timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:48:2748"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:48:2748"}
+{"estimatedCost":0.00000146,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:48:2748","totalTokens":73}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:48:2748"}
+{"count":1,"level":"info","message":"Vectors upserted successfully","timestamp":"2025-07-23 14:27:48:2748"}
+{"fileName":"vercel-architecture.md","id":"ctx-9a6e553875b46306","level":"info","message":"[API] Context added successfully","timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"How to build meta-agents?...","timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:48:2748"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:48:2748"}
+{"estimatedCost":1.4e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:48:2748","totalTokens":7}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:48:2748","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":316,"timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"What documentation is required?...","timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:48:2748"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:48:2748"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:48:2748"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:49:2749","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:49:2749","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":213,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"Vercel deployment patterns...","timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:49:2749"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:49:2749"}
+{"estimatedCost":1.0000000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:49:2749","totalTokens":5}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:49:2749","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":254,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"debugging methodology...","timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:49:2749"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:49:2749"}
+{"estimatedCost":6.000000000000001e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:49:2749","totalTokens":3}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:49:2749","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":292,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"I need to build a new agent that processes files. What patterns should I follow?...","timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:49:2749"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:49:2749"}
+{"estimatedCost":3.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:49:2749","totalTokens":17}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:27:49:2749","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":241,"timestamp":"2025-07-23 14:27:49:2749"}
+{"contextItems":2,"contextLength":236,"enhancementTime":241,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"How should I structure documentation for a new component?...","timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:49:2749"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:49:2749"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:49:2749"}
+{"estimatedCost":2.0000000000000002e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:50:2750","totalTokens":10}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:27:50:2750","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":236,"timestamp":"2025-07-23 14:27:50:2750"}
+{"contextItems":2,"contextLength":643,"enhancementTime":236,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","maxResults":2,"message":"[API] Searching for context","prompt":"What architecture should I use for a Vercel deployment?...","timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:50:2750"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:50:2750"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:50:2750","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"debug","message":"Vector search completed","resultCount":2,"timestamp":"2025-07-23 14:27:50:2750","topK":2}
+{"level":"info","message":"[API] Context search completed","resultsFound":2,"searchTime":246,"timestamp":"2025-07-23 14:27:50:2750"}
+{"contextItems":2,"contextLength":682,"enhancementTime":246,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:50:2750"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:50:2750"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:50:2750","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:50:2750","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":261,"timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:50:2750"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:50:2750"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:50:2750","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:50:2750"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:51:2751","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":289,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:51:2751"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:51:2751"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:51:2751","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:51:2751","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":404,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:51:2751"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:51:2751"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:51:2751","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:51:2751","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":286,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"all-purpose pattern methodology...","timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:51:2751"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:51:2751"}
+{"estimatedCost":8e-8,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:51:2751","totalTokens":4}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-23 14:27:51:2751","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":194,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","maxResults":1,"message":"[API] Searching for context","prompt":"...","timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:51:2751"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:51:2751"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:51:2751"}
+{"attempt":1,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:27:52:2752"}
+{"attempt":2,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:53:2753"}
+{"attempt":2,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:27:53:2753"}
+{"attempt":3,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:55:2755"}
+{"attempt":3,"batchSize":1,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"warn","message":"[EMBEDDING] Embedding batch failed, retrying","timestamp":"2025-07-23 14:27:55:2755"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 14:27:55:2755"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 14:27:55:2755"}
+{"level":"info","maxResults":5,"message":"[API] Searching for context","prompt":"nonexistent topic that should not match anything in the knowledge base...","timestamp":"2025-07-23 14:27:55:2755"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-23 14:27:55:2755"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-23 14:27:55:2755"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-23 14:27:55:2755"}
+{"estimatedCost":2.4000000000000003e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-23 14:27:55:2755","totalTokens":12}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-23 14:27:55:2755"}
+{"level":"debug","message":"Vector search completed","resultCount":5,"timestamp":"2025-07-23 14:27:55:2755","topK":5}
+{"level":"info","message":"[API] Context search completed","resultsFound":5,"searchTime":313,"timestamp":"2025-07-23 14:27:55:2755"}

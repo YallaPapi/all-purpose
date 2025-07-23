@@ -17,3 +17,22 @@
 {"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Failed to add context","timestamp":"2025-07-23 09:49:19:4919"}
 {"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 09:49:24:4924"}
 {"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Failed to add context","timestamp":"2025-07-23 09:49:24:4924"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:19:31:1931"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:19:32:1932"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:19:33:1933"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 13:19:52:1952"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 13:19:52:1952"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:39:31:3931"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:39:32:3932"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 13:39:32:3932"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 13:39:42:3942"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 13:39:42:3942"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 14:17:58:1758"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 14:17:59:1759"}
+{"count":1,"error":"Forbidden: /upsert is not allowed","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-23 14:17:59:1759"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 14:18:07:187"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 14:18:07:187"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 14:26:15:2615"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 14:26:15:2615"}
+{"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-23 14:27:55:2755"}
+{"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-23 14:27:55:2755"}
