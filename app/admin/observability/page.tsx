@@ -62,21 +62,38 @@ export default function ObservabilityDashboard() {
   const fetchData = async () => {
     try {
       setError(null); // Clear previous errors
+      console.log('Starting observability data fetch...');
+      
       const [metricsRes, eventsRes, flowRes] = await Promise.all([
         fetch('/api/observability?action=metrics'),
         fetch('/api/observability?action=events&limit=100'),
         fetch('/api/observability?action=flow')
       ]);
 
+      console.log('Fetch responses received:', {
+        metricsStatus: metricsRes.status,
+        eventsStatus: eventsRes.status,
+        flowStatus: flowRes.status
+      });
+
       const metricsData = await metricsRes.json();
       const eventsData = await eventsRes.json();
       const flowData = await flowRes.json();
+
+      console.log('API responses parsed:', {
+        metricsSuccess: metricsData.success,
+        eventsSuccess: eventsData.success,
+        flowSuccess: flowData.success,
+        metricsDataType: typeof metricsData.data,
+        hasMetricsData: !!metricsData.data
+      });
 
       // Check for API errors and log them
       if (!metricsData.success) {
         console.error('Metrics API error:', metricsData.error, metricsData.details);
         setError(`API Error: ${metricsData.error}`);
       } else {
+        console.log('Setting metrics data:', metricsData.data);
         setMetrics(metricsData.data);
       }
       
@@ -95,10 +112,12 @@ export default function ObservabilityDashboard() {
       }
       
       setLastUpdated(new Date());
+      console.log('Fetch completed successfully');
     } catch (error) {
       console.error('Failed to fetch observability data:', error);
       setError(`Network Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
