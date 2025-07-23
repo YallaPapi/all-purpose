@@ -73,10 +73,10 @@ export class ObservabilityCollector extends EventEmitter {
   constructor() {
     super();
     
-    // Initialize Redis connection using existing Upstash setup
+    // Initialize Redis connection using existing KV setup
     this.redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      url: process.env.KV_REST_API_URL!,
+      token: process.env.KV_REST_API_TOKEN!,
     });
 
     observabilityLogger.info('ObservabilityCollector initialized');
