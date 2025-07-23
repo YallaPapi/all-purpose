@@ -98,6 +98,10 @@ const SAMPLE_AGENTS = [
   }
 ];
 
+export async function GET(request: NextRequest) {
+  return POST(request);
+}
+
 export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action') || 'full';
