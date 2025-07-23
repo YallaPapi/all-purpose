@@ -1,0 +1,33 @@
+{
+  "id": "configurable-constant",
+  "name": "Configurable Constant",
+  "description": "Replaces hardcoded limitation constants with configuration-driven alternatives",
+  "category": "limitation-constant",
+  "version": "1.0.0",
+  "author": "All-Purpose Meta-Agent Factory",
+  "created": "2025-07-23T03:00:00.000Z",
+  "updated": "2025-07-23T03:00:00.000Z",
+  "tags": ["constant", "configuration", "limitation", "business-rules", "all-purpose-pattern"],
+  "examples": [
+    {
+      "name": "User Limit Replacement",
+      "description": "Replace hardcoded user limit with config-driven approach",
+      "context": {
+        "config": {
+          "constantName": "MAX_USERS",
+          "configPath": "config.limits",
+          "configKey": "maxUsers",
+          "defaultValue": 100,
+          "expectedType": "number",
+          "minValue": 1,
+          "maxValue": 10000,
+          "enableValidation": true,
+          "description": "Maximum number of users allowed in the system"
+        },
+        "project": {
+          "language": "typescript"
+        }
+      }
+    }
+  ]
+}

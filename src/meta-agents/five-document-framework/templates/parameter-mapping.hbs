@@ -1,0 +1,752 @@
+# Parameter Mapping Reference - {{project.name}}
+
+> **Master Integration Reference for {{project.name}}**  
+> **Last Updated**: {{helpers.formatDate timestamp}}  
+> **Complete System Parameter Documentation**
+
+---
+
+## 🎯 **Overview**
+
+This document provides the authoritative reference for all parameter mappings, data transformations, and integration points in {{project.name}}. It serves as the single source of truth for understanding how data flows through the system.
+
+{{#if project.description}}
+**Project Context**: {{project.description}}
+{{/if}}
+
+**Architecture Pattern**: All-Purpose Pattern - NO hardcoded limitations, UNLIMITED scalability
+
+---
+
+## 📊 **System Architecture Map**
+
+```
+{{#if project.technologies.frontend}}
+Frontend ({{joinArray project.technologies.frontend}})
+    ↓ User Input Parameters
+{{/if}}
+Backend API ({{#if project.technologies.backend}}{{joinArray project.technologies.backend}}{{else}}Node.js{{/if}})
+    ↓ Processed Parameters
+{{#if project.technologies.database}}
+Database ({{joinArray project.technologies.database}})
+    ↓ Stored Data
+{{/if}}
+{{#if project.integrations.apis}}
+External APIs ({{project.integrations.apis.length}} integrations)
+{{/if}}
+```
+
+---
+
+## 🔄 **Core Parameter Flow**
+
+{{#if project.technologies.frontend}}
+### Frontend → Backend Parameters
+
+#### User Input Parameters
+{{#if computed.hasEnvironments}}
+**Environment-Aware Configuration**:
+```typescript
+interface UserInputParams {
+  // Core user data - UNLIMITED fields
+  [key: string]: any;
+  
+  // Environment context
+  environment?: '{{joinArray computed.environmentList "' | '"}}';
+  
+  // Dynamic configuration
+  config?: {
+    [configKey: string]: any; // UNLIMITED configuration
+  };
+}
+```
+{{else}}
+**User Input Structure**:
+```typescript
+interface UserInputParams {
+  // All-Purpose Pattern: UNLIMITED user input fields
+  [key: string]: any;
+  
+  // Common patterns (but not hardcoded limits)
+  id?: string;
+  name?: string;
+  email?: string;
+  preferences?: Record<string, any>;
+}
+```
+{{/if}}
+
+#### API Request Format
+```typescript
+// Frontend to Backend API calls
+POST /api/endpoint
+{
+  "userInput": UserInputParams,
+  "context": {
+    "timestamp": "{{timestamp}}",
+    "sessionId": "string",
+    "clientInfo": Record<string, any>
+  },
+  "metadata": {
+    "source": "frontend",
+    "version": "{{project.version}}",
+    // UNLIMITED metadata fields
+    [key: string]: any
+  }
+}
+```
+
+#### Response Format
+```typescript
+// Backend to Frontend responses  
+{
+  "success": boolean,
+  "data": {
+    // UNLIMITED response data structure
+    [key: string]: any
+  },
+  "meta": {
+    "timestamp": "string",
+    "processingTime": number,
+    "dataSource": "string"
+  },
+  "errors": Array<{
+    field?: string,
+    message: string,
+    code?: string
+  }>
+}
+```
+{{/if}}
+
+{{#if project.technologies.database}}
+### Backend → Database Parameters
+
+{{#each project.technologies.database}}
+{{#ifEquals this "MongoDB"}}
+#### MongoDB Document Structure
+```typescript
+// All-Purpose Pattern: UNLIMITED document fields
+interface DatabaseDocument {
+  _id: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Dynamic content - NO limitations
+  [key: string]: any;
+  
+  // Metadata for tracking
+  metadata: {
+    source: string;
+    version: string;
+    // UNLIMITED metadata
+    [key: string]: any;
+  };
+}
+```
+{{/ifEquals}}
+
+{{#ifEquals this "PostgreSQL"}}
+#### PostgreSQL Table Mapping
+```sql
+-- All-Purpose Pattern: JSONB for unlimited flexibility
+CREATE TABLE main_data (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  
+  -- UNLIMITED structured data
+  data JSONB NOT NULL,
+  
+  -- Metadata for queries
+  metadata JSONB DEFAULT '{}',
+  
+  -- Indexes for performance (not limitations)
+  CONSTRAINT valid_data CHECK (data IS NOT NULL)
+);
+
+-- Dynamic indexes based on usage patterns
+CREATE INDEX idx_data_gin ON main_data USING gin(data);
+CREATE INDEX idx_metadata_gin ON main_data USING gin(metadata);
+```
+{{/ifEquals}}
+{{/each}}
+
+#### Data Transformation Rules
+```typescript
+// Frontend input → Database storage
+const transformForStorage = (userInput: any): DatabaseDocument => {
+  return {
+    // Preserve ALL user data - NO filtering
+    ...userInput,
+    
+    // Add system metadata
+    metadata: {
+      source: 'user_input',
+      timestamp: new Date().toISOString(),
+      version: '{{project.version}}',
+      // Preserve any existing metadata
+      ...userInput.metadata
+    },
+    
+    // Validation without limitations
+    _validated: validateInput(userInput) // Returns boolean
+  };
+};
+```
+{{/if}}
+
+{{#if project.integrations.apis}}
+### Backend → External APIs
+
+{{#each project.integrations.apis}}
+#### {{this.name}} Integration
+
+{{#if this.endpoints}}
+**Endpoints**:
+{{#each this.endpoints}}
+- `{{this}}` - {{#if @first}}Primary endpoint{{else}}Secondary endpoint{{/if}}
+{{/each}}
+{{/if}}
+
+**Parameter Mapping**:
+```typescript
+// Internal → {{this.name}} API format
+const transform{{this.name}}Params = (internalData: any) => {
+  return {
+    // Map internal fields to API requirements
+    // All-Purpose Pattern: Dynamic mapping based on API needs
+    ...mapFieldsForAPI(internalData, '{{this.name}}'),
+    
+    // API-specific metadata
+    apiVersion: '{{#if this.version}}{{this.version}}{{else}}latest{{/if}}',
+    clientId: process.env.{{this.name}}_CLIENT_ID,
+    
+    // Preserve unmapped fields for flexibility
+    customFields: extractUnmappedFields(internalData)
+  };
+};
+```
+
+**Response Handling**:
+```typescript
+// {{this.name}} API → Internal format
+const process{{this.name}}Response = (apiResponse: any) => {
+  return {
+    // Extract relevant data
+    data: apiResponse.data || apiResponse,
+    
+    // Preserve API metadata
+    apiMeta: {
+      source: '{{this.name}}',
+      responseTime: apiResponse.metadata?.responseTime,
+      // UNLIMITED API metadata
+      ...apiResponse.metadata
+    },
+    
+    // Error handling
+    errors: apiResponse.errors || [],
+    success: !apiResponse.errors?.length
+  };
+};
+```
+
+{{/each}}
+{{/if}}
+
+---
+
+## 🔧 **Environment-Specific Parameters**
+
+{{#if computed.hasEnvironments}}
+{{#each project.environments}}
+### {{capitalize @key}} Environment
+
+{{#if this.variables}}
+**Environment Variables**:
+```bash
+{{#each this.variables}}
+{{@key}}={{this}}
+{{/each}}
+```
+{{/if}}
+
+**Parameter Transformations**:
+```typescript
+// Environment-specific parameter handling
+const {{@key}}Config = {
+  // Database configuration
+  {{#if ../project.technologies.database}}
+  database: {
+    connectionString: process.env.DATABASE_URL,
+    // UNLIMITED connection options
+    options: parseConnectionOptions(process.env.DB_OPTIONS)
+  },
+  {{/if}}
+  
+  // API configurations
+  {{#if ../project.integrations.apis}}
+  apis: {
+    {{#each ../project.integrations.apis}}
+    {{this.name}}: {
+      baseUrl: process.env.{{this.name}}_BASE_URL,
+      apiKey: process.env.{{this.name}}_API_KEY,
+      // UNLIMITED API-specific config
+      ...parseApiConfig(process.env.{{this.name}}_CONFIG)
+    },
+    {{/each}}
+  },
+  {{/if}}
+  
+  // All-Purpose Pattern: UNLIMITED environment config
+  [key: string]: any
+};
+```
+
+{{/each}}
+{{else}}
+### Default Environment Configuration
+
+```typescript
+// Environment-agnostic parameter handling
+const getEnvironmentConfig = () => {
+  const env = process.env.NODE_ENV || 'development';
+  
+  return {
+    environment: env,
+    
+    // Database config (if applicable)
+    {{#if project.technologies.database}}
+    database: {
+      url: process.env.DATABASE_URL || 'default_connection',
+      options: parseConnectionString(process.env.DATABASE_URL)
+    },
+    {{/if}}
+    
+    // API configurations (dynamic)
+    apis: Object.keys(process.env)
+      .filter(key => key.endsWith('_API_KEY'))
+      .reduce((acc, key) => {
+        const serviceName = key.replace('_API_KEY', '');
+        acc[serviceName] = {
+          apiKey: process.env[key],
+          baseUrl: process.env[`${serviceName}_BASE_URL`]
+        };
+        return acc;
+      }, {} as Record<string, any>),
+    
+    // All-Purpose Pattern: UNLIMITED environment variables
+    custom: Object.keys(process.env)
+      .filter(key => key.startsWith('CUSTOM_'))
+      .reduce((acc, key) => {
+        acc[key] = process.env[key];
+        return acc;
+      }, {} as Record<string, string>)
+  };
+};
+```
+{{/if}}
+
+---
+
+## 🔍 **Parameter Validation & Transformation**
+
+### Input Validation Rules
+```typescript
+// All-Purpose Pattern: Validation without limitations
+interface ValidationRule {
+  field?: string; // Optional - validates all fields if omitted
+  type?: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'any';
+  required?: boolean;
+  min?: number;
+  max?: number; // Use sparingly - avoid hardcoded limits
+  pattern?: RegExp;
+  custom?: (value: any) => boolean | string;
+  // UNLIMITED validation rules
+  [key: string]: any;
+}
+
+const validationRules: ValidationRule[] = [
+  // Core validations (not limitations)
+  {
+    field: 'email',
+    type: 'string',
+    pattern: /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/,
+    required: true
+  },
+  
+  // Dynamic validation based on business logic
+  {
+    custom: (data) => {
+      // All-Purpose Pattern: Context-aware validation
+      return validateBasedOnContext(data);
+    }
+  }
+];
+```
+
+### Data Transformation Pipeline
+```typescript
+// Multi-stage transformation pipeline
+const transformationPipeline = [
+  // Stage 1: Input sanitization
+  (data: any) => sanitizeInput(data),
+  
+  // Stage 2: Field mapping
+  (data: any) => mapFields(data, getFieldMappingConfig()),
+  
+  // Stage 3: Type conversion
+  (data: any) => convertTypes(data),
+  
+  // Stage 4: Business logic application
+  (data: any) => applyBusinessRules(data),
+  
+  // Stage 5: Output formatting
+  (data: any) => formatForDestination(data),
+  
+  // All-Purpose Pattern: UNLIMITED transformation stages
+];
+
+const processData = (input: any, destination: string) => {
+  return transformationPipeline.reduce(
+    (data, transform) => transform(data, destination),
+    input
+  );
+};
+```
+
+---
+
+## 🔗 **Integration Point Reference**
+
+{{#if project.integrations}}
+### Current Integrations
+
+{{#if project.integrations.apis}}
+#### API Integrations ({{project.integrations.apis.length}} total)
+{{#each project.integrations.apis}}
+**{{this.name}}** ({{this.type}})
+- **Version**: {{#if this.version}}{{this.version}}{{else}}Latest{{/if}}
+- **Authentication**: {{#if this.authentication}}{{this.authentication}}{{else}}API Key{{/if}}
+{{#if this.endpoints}}
+- **Endpoints**: {{joinArray this.endpoints}}
+{{/if}}
+- **Rate Limits**: {{#if this.rateLimits}}{{this.rateLimits}}{{else}}Standard{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{#if project.integrations.databases}}
+#### Database Integrations ({{project.integrations.databases.length}} total)
+{{#each project.integrations.databases}}
+**{{this.name}}** ({{this.type}})
+- **Connection**: {{#if this.connectionString}}Configured{{else}}Environment Variable{{/if}}
+{{#if this.migrations}}
+- **Migrations**: Enabled
+{{/if}}
+{{#if this.backup}}
+- **Backup**: Configured
+{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{#if project.integrations.services}}
+#### Service Integrations ({{project.integrations.services.length}} total)
+{{#each project.integrations.services}}
+**{{this.name}}** ({{this.type}})
+{{#if this.region}}
+- **Region**: {{this.region}}
+{{/if}}
+{{#if this.scaling}}
+- **Scaling**: Configured
+{{/if}}
+{{#if this.monitoring}}
+- **Monitoring**: Enabled
+{{/if}}
+
+{{/each}}
+{{/if}}
+{{/if}}
+
+### Parameter Flow Diagram
+```
+User Input
+    ↓ [Validation & Sanitization]
+Frontend State
+    ↓ [API Request Transform]
+Backend Processing
+    ↓ [Business Logic Application]
+{{#if project.technologies.database}}
+Database Storage
+    ↓ [Query & Retrieval]
+{{/if}}
+{{#if project.integrations.apis}}
+External API Calls
+    ↓ [Response Processing]
+{{/if}}
+Final Response
+    ↓ [Frontend Update]
+UI Display
+```
+
+---
+
+## 📝 **Data Schema Documentation**
+
+### Core Data Types
+```typescript
+// All-Purpose Pattern: Flexible, unlimited data types
+interface CoreDataTypes {
+  // Primitive types
+  StringField: string;
+  NumberField: number;
+  BooleanField: boolean;
+  DateField: Date;
+  
+  // Complex types  
+  ObjectField: Record<string, any>;
+  ArrayField: any[];
+  
+  // Dynamic types based on context
+  DynamicField: any; // Type determined at runtime
+  
+  // Metadata wrapper
+  MetadataWrapper<T = any>: {
+    data: T;
+    metadata: {
+      source: string;
+      timestamp: string;
+      version: string;
+      // UNLIMITED metadata fields
+      [key: string]: any;
+    };
+  };
+}
+```
+
+### Field Naming Conventions
+```typescript
+// Consistent naming across all systems
+const fieldNamingRules = {
+  // Use camelCase for JavaScript/TypeScript
+  frontend: 'camelCase', // userId, firstName, lastLoginDate
+  
+  // Use snake_case for database fields
+  database: 'snake_case', // user_id, first_name, last_login_date
+  
+  // Use kebab-case for API endpoints
+  api: 'kebab-case', // /api/user-profile, /api/login-history
+  
+  // Preserve external API conventions
+  external: 'preserve', // Keep original field names from external APIs
+  
+  // All-Purpose Pattern: Support any naming convention
+  dynamic: 'context-aware' // Adapt based on integration requirements
+};
+```
+
+---
+
+## 🚨 **Error Handling & Validation**
+
+### Error Response Format
+```typescript
+interface StandardError {
+  code: string;
+  message: string;
+  field?: string; // For field-specific errors
+  details?: any; // Additional error context
+  timestamp: string;
+  requestId?: string;
+  
+  // All-Purpose Pattern: UNLIMITED error metadata
+  [key: string]: any;
+}
+
+// Error categories
+type ErrorCategory = 
+  | 'validation' 
+  | 'authentication' 
+  | 'authorization'
+  | 'rate_limit'
+  | 'server_error'
+  | 'integration_error'
+  | string; // UNLIMITED error categories
+```
+
+### Parameter Validation Errors
+```typescript
+// Comprehensive validation error handling
+const handleValidationError = (field: string, value: any, rule: ValidationRule): StandardError => {
+  return {
+    code: 'VALIDATION_ERROR',
+    message: generateValidationMessage(field, rule),
+    field,
+    details: {
+      value,
+      rule: rule.type || 'custom',
+      constraint: rule.max || rule.min || rule.pattern?.toString()
+    },
+    timestamp: new Date().toISOString()
+  };
+};
+```
+
+---
+
+## 📊 **Performance & Monitoring**
+
+### Parameter Flow Metrics
+```typescript
+// Track parameter processing performance
+interface ParameterMetrics {
+  endpoint: string;
+  processingTime: number;
+  inputSize: number;
+  outputSize: number;
+  transformationSteps: number;
+  cacheHit?: boolean;
+  errors: number;
+  
+  // All-Purpose Pattern: UNLIMITED metrics
+  [metricName: string]: any;
+}
+
+// Performance monitoring
+const monitorParameterFlow = (request: any, response: any, metadata: any) => {
+  // Log performance metrics for analysis
+  console.log('Parameter Flow Metrics:', {
+    endpoint: metadata.endpoint,
+    duration: metadata.processingTime,
+    inputComplexity: calculateComplexity(request),
+    transformations: metadata.transformationCount,
+    // UNLIMITED monitoring data
+    ...metadata.customMetrics
+  });
+};
+```
+
+---
+
+## 🔧 **Testing Parameter Mappings**
+
+### Unit Test Examples
+```typescript
+// Test parameter transformations
+describe('Parameter Mapping Tests', () => {
+  test('Frontend to Backend transformation', () => {
+    const frontendInput = {
+      userName: 'testUser',
+      userEmail: 'test@example.com',
+      customField: 'customValue'
+    };
+    
+    const expectedBackend = {
+      user_name: 'testUser',
+      user_email: 'test@example.com',
+      custom_field: 'customValue',
+      metadata: expect.any(Object)
+    };
+    
+    const result = transformFrontendToBackend(frontendInput);
+    expect(result).toMatchObject(expectedBackend);
+  });
+  
+  // All-Purpose Pattern: Test unlimited field variations
+  test('Handles unlimited custom fields', () => {
+    const dynamicInput = generateRandomFields(100); // 100 random fields
+    const result = transformFrontendToBackend(dynamicInput);
+    
+    // Should handle any number of fields without issues
+    expect(result).toBeDefined();
+    expect(Object.keys(result).length).toBeGreaterThan(100);
+  });
+});
+```
+
+### Integration Test Procedures
+```bash
+# Test complete parameter flow
+npm run test:integration
+
+# Test specific integration points
+npm run test:api-mapping
+npm run test:database-transforms
+npm run test:external-apis
+
+# Load test parameter handling
+npm run test:load-parameters
+```
+
+---
+
+## 📚 **Reference Documentation**
+
+### API Documentation
+{{#if project.integrations.apis}}
+{{#each project.integrations.apis}}
+- [{{this.name}} API Documentation]({{#if this.url}}{{this.url}}{{else}}#{{/if}})
+{{/each}}
+{{else}}
+- [Internal API Documentation](/api/docs)
+- [OpenAPI Specification](/api/openapi.json)
+{{/if}}
+
+### Database Schema
+{{#if project.technologies.database}}
+- Database schema documentation: `/docs/database-schema.md`
+- Migration history: `/migrations/`
+{{#each project.technologies.database}}
+- [{{this}} Documentation]({{#ifEquals this "MongoDB"}}https://docs.mongodb.com/{{else}}{{#ifEquals this "PostgreSQL"}}https://www.postgresql.org/docs/{{else}}#{{/ifEquals}}{{/ifEquals}})
+{{/each}}
+{{/if}}
+
+### Related Documents
+- [Environment Setup](ENVIRONMENT_SETUP.md) - Configuration requirements
+- [Debugging Guide](DEBUGGING_GUIDE.md) - Troubleshooting parameter issues
+- [TaskMaster Guide](README-task-master.md) - Development workflow
+
+---
+
+## 🔄 **Change Management**
+
+### Parameter Schema Versioning
+```typescript
+// Version all parameter schemas
+interface VersionedSchema {
+  version: string; // Semantic versioning
+  schema: any; // The actual parameter schema
+  migrations: {
+    from: string;
+    to: string;
+    transform: (oldData: any) => any;
+  }[];
+  deprecated?: string[]; // Fields being phased out
+  added?: string[]; // New fields in this version
+}
+
+// Backward compatibility handling
+const migrateParameterSchema = (data: any, fromVersion: string, toVersion: string) => {
+  // Find migration path and apply transformations
+  const migrationPath = findMigrationPath(fromVersion, toVersion);
+  return migrationPath.reduce((currentData, migration) => 
+    migration.transform(currentData), data
+  );
+};
+```
+
+### Documentation Updates
+- **Automatic**: Parameter documentation updates with code changes
+- **Manual Review**: Complex transformations require documentation review
+- **Version Control**: All parameter changes tracked in git
+- **Notification**: Team notifications for breaking parameter changes
+
+---
+
+**All-Purpose Pattern Compliance**: ✅ NO hardcoded limitations on parameter types, quantities, or transformations. This system supports UNLIMITED parameter complexity and integration scenarios.
+
+---
+
+*This parameter mapping reference is automatically maintained by the Five Document Framework Agent*  
+*Following All-Purpose Pattern: Universal, unlimited, and configuration-driven parameter handling*

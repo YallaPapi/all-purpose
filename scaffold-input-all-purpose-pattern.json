@@ -1,0 +1,51 @@
+{
+  "agentName": "All-Purpose Pattern Agent",
+  "agentSlug": "all-purpose-pattern",
+  "description": "Meta-agent that systematically transforms hardcoded systems into universal, industry-agnostic systems with NO limitations",
+  "metadata": {
+    "projectName": "All-Purpose Pattern Agent",
+    "version": "1.0.0",
+    "type": "meta-agent",
+    "created": "2025-07-22"
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Setup Node.js Project with AST Parsing",
+      "description": "Initialize the Node.js project structure with necessary dependencies for AST parsing and code analysis capabilities.",
+      "details": "Create Node.js project with TypeScript support. Install @babel/parser, @babel/traverse, @babel/types, handlebars, typescript. Setup project structure with /src/analyzers, /transformers, /templates, /validators, /utils directories.",
+      "priority": "high"
+    },
+    {
+      "id": 2,
+      "title": "Implement Code Analysis System",
+      "description": "Build a system that analyzes existing code to identify hardcoded elements, including industry lists, location restrictions, and business type limitations.",
+      "details": "Create AST-based code analyzer that can parse JavaScript and TypeScript files. Implement pattern detection for hardcoded arrays, numeric limitations, conditional logic, API endpoints, and UI text.",
+      "priority": "high"
+    },
+    {
+      "id": 3,
+      "title": "Develop Transformation System",
+      "description": "Create a system that transforms hardcoded elements into dynamic, configuration-driven code following the All-Purpose Pattern methodology.",
+      "details": "Implement AST transformation utilities to replace hardcoded elements with dynamic configuration references. Transform arrays, limits, conditions, and messaging to use userInput configuration.",
+      "priority": "high"
+    },
+    {
+      "id": 4,
+      "title": "Build Template Generation System",
+      "description": "Develop a Handlebars-based template generation system that creates universal templates for any context without hardcoded limitations.",
+      "details": "Create template engine integration for generating dynamic prompt templates, API handlers, UI components, and configuration schemas using Handlebars.",
+      "priority": "medium"
+    },
+    {
+      "id": 5,
+      "title": "Implement Validation System",
+      "description": "Create a comprehensive validation system that ensures no hardcoded limitations remain in generated code and verifies unlimited scalability.",
+      "details": "Implement validation checks for hardcoded industries, location limitations, business type restrictions, numeric limits, and configuration-driven behavior.",
+      "priority": "high"
+    }
+  ],
+  "type": "meta-agent",
+  "integrations": ["TaskMaster", "Context7", "PRD-Parser", "Scaffold-Generator"],
+  "technologies": ["Node.js", "TypeScript", "@babel/parser", "@babel/traverse", "handlebars", "AST"]
+}

@@ -1,0 +1,78 @@
+# All-Purpose Pattern Agent (The Universal Transformer)
+
+## Overview
+Takes any hardcoded system and makes it truly industry/context-agnostic by identifying and converting hardcoded elements into dynamic, configuration-driven behavior.
+
+## Core Methodology
+Apply the breakthrough from the all-purpose project: Convert static logic to dynamic template systems that adapt based on context rather than hardcoded responses.
+
+## Requirements
+
+### Task 1: Hardcoded Element Detection
+Analyze any codebase and identify ALL hardcoded elements that should be parameters:
+- Hardcoded strings (industry names, business types, locations)
+- Static arrays and lists (industry lists, location restrictions)
+- Fixed business logic (hardcoded messaging, responses)
+- Configuration values that should be dynamic
+- API endpoints and URLs that should be configurable
+- Database schemas with fixed constraints
+
+### Task 2: Dynamic Parameter Conversion
+Convert identified hardcoded elements to dynamic systems:
+- Replace hardcoded values with template variables (${industry}, ${location})
+- Convert static arrays to user-configurable parameters  
+- Transform fixed logic into context-aware AI adaptation
+- Create configuration-driven behavior patterns
+- Implement unlimited scalability with zero hardcoded constraints
+
+### Task 3: Template System Generation
+Create dynamic template systems for universal applicability:
+- Generate universal search templates: `${industry} in ${location}`
+- Create dynamic messaging templates for ANY persona/industry
+- Build configurable demo flows for ANY business type
+- Ensure UNLIMITED industry/location/business type support
+- Remove ALL hardcoded limitations and restrictions
+
+### Task 4: Context-Aware AI Integration
+Ensure AI systems adapt based on context rather than hardcoded responses:
+- Industry-specific questioning (dental asks about pain, automotive about vehicles)
+- Dynamic conversation flows based on business type
+- Context-aware content generation
+- Intelligent adaptation without predefined limits
+- Zero hardcoded industry/persona/business constraints
+
+### Task 5: Configuration Architecture
+Build configuration-driven behavior systems:
+- User-configurable industry parameters (UNLIMITED)
+- Dynamic location targeting (UNLIMITED)
+- Flexible business type support (UNLIMITED)  
+- Runtime configuration without code changes
+- Universal applicability across all domains
+
+### Task 6: Validation and Testing
+Validate universal applicability:
+- Test with multiple industries (dental, automotive, legal, etc.)
+- Verify unlimited location support
+- Confirm zero hardcoded limitations remain
+- Validate AI adaptation across contexts
+- Ensure configuration-driven behavior works
+
+## Success Criteria
+- System works for ANY industry without code changes
+- UNLIMITED scalability with NO hardcoded constraints
+- AI adapts intelligently based on context/configuration
+- Zero predefined limits on industries, locations, or business types
+- Complete elimination of hardcoded elements
+
+## Integration Requirements
+- Use Context7 for current best practices and documentation
+- Apply TaskMaster workflow for systematic development
+- Follow existing meta-agent factory patterns
+- Integrate with PRD-Parser and Scaffold-Generator outputs
+
+## Technical Stack
+- Node.js with TypeScript for type safety
+- AST parsing for code analysis
+- Template engines for dynamic content
+- Configuration management systems
+- AI integration for context-aware adaptation

@@ -1,0 +1,51 @@
+{
+  "taskFileMappings": {
+    "task-5-project-context": {
+      "taskId": "task-5-project-context",
+      "files": [
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\rag-system\\**\\*.ts",
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\rag-system\\**\\*.js",
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\rag-system\\test-*.js"
+      ],
+      "lastModified": "2025-07-23T02:39:45.444Z",
+      "status": "pending",
+      "description": "Project Context Awareness - Task tracking and file change detection",
+      "metadata": {
+        "description": "Project Context Awareness - Task tracking and file change detection",
+        "category": "rag-system"
+      }
+    },
+    "task-meta-agents": {
+      "taskId": "task-meta-agents",
+      "files": [
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\src\\meta-agents\\**\\*.ts",
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\src\\meta-agents\\**\\*.js",
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\docs-consolidated\\prd_*.md",
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\docs-consolidated\\meta_agent_factory.md"
+      ],
+      "lastModified": "2025-07-23T02:39:45.455Z",
+      "status": "pending",
+      "description": "Meta-Agent Factory development",
+      "metadata": {
+        "description": "Meta-Agent Factory development",
+        "category": "meta-agents"
+      }
+    },
+    "task-documentation": {
+      "taskId": "task-documentation",
+      "files": [
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\docs-consolidated\\*.md",
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\README.md",
+        "C:\\Users\\stuar\\Desktop\\Projects\\all-purpose\\rag-system\\COMPREHENSIVE_PROJECT_STATUS.md"
+      ],
+      "lastModified": "2025-07-23T02:39:45.459Z",
+      "status": "pending",
+      "description": "Project documentation and consolidation",
+      "metadata": {
+        "description": "Project documentation and consolidation",
+        "category": "documentation"
+      }
+    }
+  },
+  "lastUpdated": "2025-07-23T02:39:47.535Z"
+}

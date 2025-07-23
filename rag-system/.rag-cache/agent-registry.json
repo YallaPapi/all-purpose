@@ -1,0 +1,64 @@
+{
+  "coordinatorId": "coordinator-2943d105",
+  "lastUpdated": "2025-07-23T02:45:44.138Z",
+  "agents": {
+    "prd-parser-001": {
+      "agentId": "prd-parser-001",
+      "agentName": "PRD Parser Agent",
+      "agentType": "prd-parser",
+      "capabilities": [
+        "prd-analysis",
+        "task-generation",
+        "requirements-parsing"
+      ],
+      "status": "idle",
+      "metadata": {
+        "version": "1.0.0",
+        "location": "src/meta-agents/prd-parser/",
+        "outputs": [
+          "tasks",
+          "analysis"
+        ],
+        "currentTask": "865f0639-0f53-44d7-9ed2-d4f11dd9f8ea",
+        "progress": "analyzing-requirements"
+      },
+      "lastSeen": "2025-07-23T02:45:44.137Z"
+    },
+    "scaffold-gen-001": {
+      "agentId": "scaffold-gen-001",
+      "agentName": "Scaffold Generator Agent",
+      "agentType": "scaffold-generator",
+      "capabilities": [
+        "code-generation",
+        "directory-structure",
+        "template-processing"
+      ],
+      "status": "idle",
+      "metadata": {
+        "version": "1.0.0",
+        "location": "src/meta-agents/scaffold-generator/",
+        "outputs": [
+          "code",
+          "structure"
+        ]
+      },
+      "lastSeen": "2025-07-23T02:45:43.111Z"
+    },
+    "test-agent-001": {
+      "agentId": "test-agent-001",
+      "agentName": "Test Coordination Agent",
+      "agentType": "custom",
+      "capabilities": [
+        "testing",
+        "validation",
+        "coordination-testing"
+      ],
+      "status": "idle",
+      "metadata": {
+        "version": "1.0.0",
+        "purpose": "testing-coordination"
+      },
+      "lastSeen": "2025-07-23T02:45:43.112Z"
+    }
+  }
+}

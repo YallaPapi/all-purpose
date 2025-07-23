@@ -1,0 +1,335 @@
+# Environment Setup Guide
+
+> **Complete configuration guide for {{project.name}}**  
+> **Last Updated**: {{helpers.formatDate timestamp}}  
+> **Project Type**: {{capitalize project.type}}
+
+---
+
+## 🎯 **Overview**
+
+This guide provides complete environment setup for {{project.name}}, following All-Purpose Pattern principles for unlimited scalability and zero hardcoded limitations.
+
+{{#if project.description}}
+**Project Description**: {{project.description}}
+{{/if}}
+
+{{#if computed.technologyList}}
+**Technology Stack**: {{joinArray computed.technologyList}}
+{{/if}}
+
+---
+
+## 📋 **Prerequisites**
+
+### Required Software
+- Node.js (>=18.0.0)
+{{#if project.technologies.frontend}}
+  {{#each project.technologies.frontend}}
+- {{this}} (latest stable version)
+  {{/each}}
+{{/if}}
+{{#if project.technologies.database}}
+  {{#each project.technologies.database}}
+- {{this}} database server
+  {{/each}}
+{{/if}}
+
+### Development Tools
+- Git for version control
+- Code editor (VS Code recommended)
+{{#if project.technologies.testing}}
+- Testing framework: {{joinArray project.technologies.testing}}
+{{/if}}
+
+---
+
+## 🚀 **Quick Start**
+
+### 1. Clone Repository
+```bash
+git clone <repository-url>
+cd {{project.name}}
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+# or
+yarn install
+```
+
+### 3. Environment Configuration
+Copy environment template and configure:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+### 4. {{#if project.technologies.database}}Database Setup{{else}}Initial Setup{{/if}}
+{{#if project.technologies.database}}
+```bash
+# Database initialization
+npm run db:migrate
+npm run db:seed
+```
+{{else}}
+```bash
+# Project initialization
+npm run build
+```
+{{/if}}
+
+### 5. Start Development
+```bash
+npm run dev
+```
+
+---
+
+## 🔧 **Environment Variables**
+
+{{#if computed.hasEnvironments}}
+{{#each project.environments}}
+### {{capitalize @key}} Environment
+{{#each this.variables}}
+- **{{@key}}**: {{this}}
+{{/each}}
+{{/each}}
+{{else}}
+### Core Variables
+Required environment variables for this project:
+
+```env
+# Application Configuration
+NODE_ENV=development
+PORT=3000
+{{#if project.technologies.database}}
+
+# Database Configuration  
+DATABASE_URL=your_database_connection_string
+{{/if}}
+{{#if project.integrations.apis}}
+
+# API Integrations
+{{#each project.integrations.apis}}
+{{#if this.name}}
+{{this.name}}_API_KEY=your_api_key
+{{/if}}
+{{/each}}
+{{/if}}
+```
+{{/if}}
+
+### Variable Descriptions
+
+{{#if computed.hasEnvironments}}
+{{#each project.environments}}
+#### {{capitalize @key}}
+{{#each this.variables}}
+- **{{@key}}**: {{#if this.description}}{{this.description}}{{else}}Configuration value for {{@key}}{{/if}}
+{{/each}}
+{{/each}}
+{{else}}
+- **NODE_ENV**: Application environment (development/staging/production)
+- **PORT**: Application server port
+{{#if project.technologies.database}}
+- **DATABASE_URL**: Database connection string
+{{/if}}
+{{#if project.integrations.apis}}
+{{#each project.integrations.apis}}
+{{#if this.name}}
+- **{{this.name}}_API_KEY**: API key for {{this.name}} integration
+{{/if}}
+{{/each}}
+{{/if}}
+{{/if}}
+
+---
+
+## 🌍 **Environment-Specific Setup**
+
+{{#if computed.hasEnvironments}}
+{{#each project.environments}}
+### {{capitalize @key}} Environment
+
+{{#if this.url}}
+**URL**: {{this.url}}
+{{/if}}
+
+{{#if this.setupSteps}}
+**Setup Steps**:
+{{#each this.setupSteps}}
+{{add @index 1}}. {{this}}
+{{/each}}
+{{/if}}
+
+{{#if this.verificationSteps}}
+**Verification Steps**:
+{{#each this.verificationSteps}}
+{{add @index 1}}. {{this}}
+{{/each}}
+{{/if}}
+
+{{#if this.requirements}}
+**Requirements**:
+{{#each this.requirements}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+---
+
+{{/each}}
+{{else}}
+### Development Environment
+1. Copy `.env.example` to `.env`
+2. Configure all required variables
+3. Run `npm run dev` to start development server
+4. Verify setup by accessing `http://localhost:3000`
+
+### Production Environment
+1. Set all production environment variables in your hosting platform
+2. Configure database connections and API keys
+3. Run `npm run build` to create production build
+4. Deploy using your preferred hosting solution
+{{#if project.technologies.deployment}}
+   - Supported platforms: {{joinArray project.technologies.deployment}}
+{{/if}}
+
+---
+{{/if}}
+
+## 🔍 **Verification Procedures**
+
+### Health Check Endpoints
+{{#if project.integrations.apis}}
+{{#each project.integrations.apis}}
+{{#if this.endpoints}}
+{{#each this.endpoints}}
+- `GET {{this}}` - {{#if @first}}Primary API health check{{else}}{{this}} status{{/if}}
+{{/each}}
+{{/if}}
+{{/each}}
+{{else}}
+- `GET /api/health` - Application health check
+- `GET /api/debug` - System debug information
+{{/if}}
+
+### Manual Verification
+1. **Dependencies**: `npm ls` should show no vulnerabilities
+{{#if project.technologies.database}}
+2. **Database**: Connection test should succeed
+{{/if}}
+3. **Environment**: All required variables should be set
+4. **Build**: `npm run build` should complete without errors
+{{#if project.technologies.testing}}
+5. **Tests**: `npm test` should pass all test suites
+{{/if}}
+
+---
+
+## 🚨 **Troubleshooting**
+
+### Common Issues
+
+#### Port Already in Use
+```bash
+# Find process using port
+lsof -ti:3000
+# Kill process
+kill -9 $(lsof -ti:3000)
+```
+
+{{#if project.technologies.database}}
+#### Database Connection Issues
+1. Verify database server is running
+2. Check connection string format
+3. Confirm database credentials
+4. Test network connectivity
+{{/if}}
+
+#### Environment Variables Not Loading
+1. Check `.env` file exists in project root
+2. Verify variable names match exactly
+3. Restart development server
+4. Check for syntax errors in `.env`
+
+#### Build Failures
+1. Clear cache: `npm run clean` or `rm -rf node_modules && npm install`
+2. Check Node.js version compatibility
+3. Verify all dependencies are installed
+4. Review error messages for specific issues
+
+### Emergency Recovery
+If development environment is completely broken:
+
+```bash
+# Full reset
+rm -rf node_modules package-lock.json .next dist build
+npm install
+npm run build
+```
+
+### Getting Help
+1. Check project documentation
+2. Review error logs carefully
+3. Search existing issues in repository
+4. Create detailed bug report if needed
+
+---
+
+## 📚 **Additional Resources**
+
+### Documentation Links
+{{#if project.documentation.existingDocs}}
+{{#each project.documentation.existingDocs}}
+- [{{this}}]({{this}})
+{{/each}}
+{{else}}
+- [README](README.md) - Project overview
+- [DEBUGGING_GUIDE](DEBUGGING_GUIDE.md) - Systematic debugging procedures
+- [PARAMETER_MAPPING](PARAMETER_MAPPING.md) - Integration reference
+{{/if}}
+
+### Technology Documentation
+{{#if computed.technologyList}}
+{{#each computed.technologyList}}
+- [{{this}} Documentation]({{#if (equals this "Next.js")}}https://nextjs.org/docs{{else}}{{#if (equals this "React")}}https://reactjs.org/docs{{else}}{{#if (equals this "TypeScript")}}https://www.typescriptlang.org/docs{{else}}#{{/if}}{{/if}}{{/if}})
+{{/each}}
+{{/if}}
+
+### All-Purpose Pattern Resources
+- No hardcoded limitations in environment setup
+- Unlimited scalability for any project type
+- Configuration-driven setup process
+
+---
+
+## 🔐 **Security Considerations**
+
+### Environment Variable Security
+- **NEVER** commit `.env` files to version control
+- Use secure key management for production
+- Rotate API keys regularly
+- Limit environment variable access
+
+### Network Security
+{{#if project.integrations.apis}}
+- Configure API rate limiting
+- Use HTTPS for all external API calls
+- Validate all external service connections
+{{/if}}
+- Secure database connections
+- Enable appropriate CORS settings
+
+---
+
+**Status**: ✅ Production-ready environment configuration  
+**All-Purpose Pattern**: Unlimited project types and technologies supported  
+**Last Verified**: {{helpers.formatDate timestamp}}
+
+---
+
+*This setup guide is automatically maintained by the Five Document Framework Agent*  
+*Following All-Purpose Pattern: Universal, unlimited, and configuration-driven*

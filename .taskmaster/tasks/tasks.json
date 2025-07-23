@@ -1,140 +1,25 @@
 {
   "tasks": [
     {
-      "id": 1,
-      "title": "Update N8N Workflow to Pass Industry Field",
-      "description": "Modify the N8N workflow file 'AI SDR (direct approach)(3).json' to include the 'industry' field in the API payload sent to the create-prototype endpoint.",
-      "details": "Locate the 'Build Instantly payload' node (around line 170) in the N8N workflow. Update the payload to add an 'industry' field, sourcing its value from '$json.body?.industry'. Ensure the field is correctly mapped and passed in all relevant API calls. Validate that the workflow does not break existing solar-specific flows and that the new field is optional for backward compatibility. Use N8N v1.24+ for best stability and JSONPath support.",
-      "testStrategy": "Test the workflow by triggering it with payloads for multiple industries (solar, business funding, insurance, real estate). Confirm that the 'industry' field is present in the outgoing API request. Validate that the workflow still functions for solar-only payloads.",
+      "id": 68,
+      "title": "Setup Node.js Project with AST Parsing",
+      "description": "Initialize the Node.js project structure with necessary dependencies for AST parsing and code analysis capabilities.",
+      "details": "Create a new Node.js project with the following structure:\n\n```\n/src\n  /core\n  /patterns\n  /templates\n  /validation\n  /integration\n/tests\n/config\n```\n\nInstall required dependencies:\n- @babel/parser for AST generation\n- @babel/traverse for AST traversal\n- handlebars for template generation\n- typescript and ts-node for TypeScript support\n\nCreate basic configuration files:\n- tsconfig.json for TypeScript configuration\n- jest.config.js for testing setup\n- .eslintrc for code quality\n\nImplement a basic AST parsing utility that can load JavaScript/TypeScript files and generate ASTs for further analysis.",
+      "testStrategy": "Write unit tests to verify:\n1. Project structure is correctly initialized\n2. AST parsing utility correctly parses JavaScript and TypeScript files\n3. Basic traversal of ASTs works as expected\n4. Configuration files are properly set up",
       "priority": "high",
       "dependencies": [],
-      "status": "done",
-      "subtasks": []
-    },
-    {
-      "id": 2,
-      "title": "Refactor Create-Prototype API to Accept Industry Parameter",
-      "description": "Update the create-prototype API (app/api/create-prototype/route.tsx) to accept and utilize the 'industry' parameter from the request payload.",
-      "details": "In the API route, extract the 'industry' parameter from the incoming request body. Ensure type safety using TypeScript (v5.4+). Validate the parameter and provide a default fallback (e.g., 'solar') if not present. Refactor all downstream logic to use the dynamic industry value. Maintain all existing API endpoints, Redis storage, and error handling as per current architecture.",
-      "testStrategy": "Send POST requests to the API with and without the 'industry' parameter. Confirm that the parameter is correctly parsed and available for prompt generation. Ensure API responses remain unchanged except for industry-specific content.",
-      "priority": "high",
-      "dependencies": [
-        1
-      ],
-      "status": "done",
-      "subtasks": []
-    },
-    {
-      "id": 3,
-      "title": "Implement Dynamic Industry-Aware Prompt Generation",
-      "description": "Replace hardcoded solar prompts in the assistant instruction section with dynamic, industry-specific prompt templates.",
-      "details": "Create a prompt template system using a modern templating library (e.g., mustache@4.2.0 or handlebars@4.7.8) to generate prompts based on the 'industry' parameter. Store prompt templates for supported industries (solar, business funding, insurance, real estate, etc.) in a dedicated directory or as constants. Ensure the system falls back to a generic template if an industry is not recognized. Maintain UK idiom/British dialect consistency in all templates. Update the FAQ, training, and qualification flows to use the selected template. Avoid any changes to the overall conversation flow or architecture.",
-      "testStrategy": "Unit test the prompt generator with various industry inputs. Validate that the correct template is selected and rendered. Perform integration tests to ensure the assistant's first message, FAQ, and qualification flows are industry-appropriate. Regression test solar prompts for unchanged behavior.",
-      "priority": "high",
-      "dependencies": [
-        2
-      ],
-      "status": "pending",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Select and Integrate a Templating Library",
-          "description": "Research, choose, and install a modern templating library (e.g., mustache@4.2.0 or handlebars@4.7.8) suitable for dynamic prompt generation. Integrate the library into the codebase, ensuring compatibility with the existing prompt generation system.",
-          "dependencies": [],
-          "details": "Evaluate templating libraries for features, performance, and maintainability. Add the chosen library to project dependencies and create a basic integration point for rendering prompt templates.\n<info added on 2025-07-22T02:08:33.289Z>\nSelected Mustache@4.2.0 as the templating library after evaluation of features, performance, and maintainability. Integrated the library into project dependencies and created a PromptTemplateManager class with support for industry-specific templates. Successfully replaced hardcoded instructions in the create-prototype API with the new dynamic template system. All compilation errors have been resolved, and the template system is now fully operational. The implementation is ready for expansion with additional industry-specific templates.\n</info added on 2025-07-22T02:08:33.289Z>",
-          "status": "pending",
-          "testStrategy": ""
-        },
-        {
-          "id": 2,
-          "title": "Design the Prompt Template Directory/Structure",
-          "description": "Define and implement a directory structure for storing industry-specific prompt templates. Ensure the structure supports easy addition and maintenance of templates for new industries.",
-          "dependencies": [
-            1
-          ],
-          "details": "Create a dedicated directory (e.g., /prompts or /templates) with subfolders or files for each supported industry. Document naming conventions and organization for consistency.",
-          "status": "pending",
-          "testStrategy": ""
-        },
-        {
-          "id": 3,
-          "title": "Create Templates for Each Supported Industry",
-          "description": "Develop prompt templates for all currently supported industries (solar, business funding, insurance, real estate, etc.) using the selected templating library and directory structure.",
-          "dependencies": [
-            2
-          ],
-          "details": "Write and test templates for each industry, ensuring they cover all required assistant flows (instruction, FAQ, training, qualification). Use placeholders for dynamic content as needed.",
-          "status": "pending",
-          "testStrategy": ""
-        },
-        {
-          "id": 4,
-          "title": "Implement Fallback Logic for Unrecognized Industries",
-          "description": "Add logic to the prompt generation system to detect unrecognized industries and fall back to a generic template when necessary.",
-          "dependencies": [
-            3
-          ],
-          "details": "Ensure that if the 'industry' parameter does not match a supported template, the system uses a default generic prompt. Log or handle unknown industries for future template expansion.",
-          "status": "pending",
-          "testStrategy": ""
-        },
-        {
-          "id": 5,
-          "title": "Enforce UK Idiom/British Dialect Consistency",
-          "description": "Review and update all templates to ensure consistent use of UK idioms and British English spelling and phrasing.",
-          "dependencies": [
-            3
-          ],
-          "details": "Audit all prompt templates for language consistency. Update wording, spelling, and idiomatic expressions to align with British English standards.",
-          "status": "pending",
-          "testStrategy": ""
-        },
-        {
-          "id": 6,
-          "title": "Update FAQ, Training, and Qualification Flows to Use Dynamic Templates",
-          "description": "Refactor the assistant's FAQ, training, and qualification flows to utilize the new dynamic, industry-aware prompt templates.",
-          "dependencies": [
-            3,
-            4,
-            5
-          ],
-          "details": "Replace hardcoded prompts in these flows with calls to the dynamic template system, ensuring correct template selection based on the 'industry' parameter.",
-          "status": "pending",
-          "testStrategy": ""
-        },
-        {
-          "id": 7,
-          "title": "Write Unit and Integration Tests for Prompt Selection and Rendering",
-          "description": "Develop comprehensive unit and integration tests to validate correct template selection, rendering, and fallback behavior for all supported industries.",
-          "dependencies": [],
-          "details": "Test prompt generation with various industry inputs, including edge cases and unknown industries. Ensure rendered prompts are accurate, contextually appropriate, and linguistically consistent.",
-          "status": "pending",
-          "testStrategy": ""
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "title": "Update Documentation for Industry-Agnostic Functionality",
-      "description": "Revise internal and external documentation to reflect the new industry-agnostic capabilities and usage instructions.",
-      "details": "Update README, API docs, and workflow documentation to describe the new 'industry' parameter, supported industries, and prompt customization process. Include example payloads and instructions for extending industry support. Ensure documentation is clear for both technical and non-technical users. Use Markdown and follow current documentation best practices (e.g., using Docusaurus or MkDocs for static docs).",
-      "testStrategy": "Review documentation for completeness and accuracy. Have a team member unfamiliar with the changes follow the docs to implement a new industry template. Address any gaps or ambiguities.",
-      "priority": "medium",
-      "dependencies": [
-        3
-      ],
       "status": "pending",
       "subtasks": []
     },
     {
-      "id": 5,
-      "title": "Comprehensive Multi-Industry Testing and Validation",
-      "description": "Test the entire lead generation system end-to-end for all supported industries, ensuring no regressions or loss of functionality.",
-      "details": "Develop automated integration tests using Jest (v29+) and Playwright (v1.44+) to simulate the full workflow for each industry. Manually verify demo link generation, assistant creation, and email delivery for edge cases. Confirm that Redis storage, domain detection, calendly integration, and error handling remain intact. Document all test cases and results.",
-      "testStrategy": "Run automated and manual tests for each supported industry. Validate that all success criteria from the PRD are met, including unchanged solar functionality and correct industry-specific prompt behavior. Log and resolve any issues found.",
+      "id": 69,
+      "title": "Implement Anti-Pattern Detection System",
+      "description": "Create a comprehensive system to detect common hardcoding anti-patterns in source code, including industry lists, location restrictions, and business type limitations.",
+      "details": "Develop a pattern detection module with the following components:\n\n1. Create pattern detectors for each anti-pattern type:\n   - HardcodedArrayDetector: Finds hardcoded arrays of values (industries, locations, etc.)\n   - LimitationConstantDetector: Identifies constants that impose limits (maxItems, etc.)\n   - ConditionalLogicDetector: Detects if/switch statements based on hardcoded values\n   - HardcodedEndpointDetector: Locates hardcoded API endpoints\n   - HardcodedUITextDetector: Finds hardcoded UI messages\n\n2. Implement a PatternRegistry to manage all detectors\n\n3. Create a unified detection API:\n\n```typescript\nclass PatternDetectionEngine {\n  constructor(detectors: PatternDetector[]) {}\n  \n  async analyzeFile(filePath: string): Promise<DetectionResult[]> {}\n  async analyzeDirectory(dirPath: string): Promise<Record<string, DetectionResult[]>> {}\n  async analyzeCodebase(rootPath: string): Promise<AnalysisReport> {}\n}\n```\n\n4. Implement result classification to categorize findings by severity and type",
+      "testStrategy": "Create a comprehensive test suite with:\n1. Unit tests for each individual detector with sample code snippets\n2. Integration tests with small sample codebases containing known anti-patterns\n3. Performance tests with larger codebases\n4. False positive/negative analysis\n5. Test against the example anti-patterns provided in the PRD",
       "priority": "high",
       "dependencies": [
-        4
+        68
       ],
       "status": "pending",
       "subtasks": []
@@ -150,140 +35,137 @@
   "master": {
     "tasks": [
       {
-        "id": 48,
-        "title": "Setup Project Structure",
-        "description": "Create the initial project structure for the Scaffold Generator Agent with necessary dependencies and configuration files.",
-        "details": "1. Initialize a new Node.js project\n2. Create the following directory structure:\n```\nscaffold-generator/\n  ├── src/\n  │   └── index.js\n  ├── lib/\n  ├── templates/\n  ├── tests/\n  └── config/\n```\n3. Install required dependencies:\n```bash\nnpm init -y\nnpm install --save fs-extra handlebars chalk commander\nnpm install --save-dev jest eslint\n```\n4. Configure package.json with appropriate scripts:\n```json\n{\n  \"scripts\": {\n    \"start\": \"node src/index.js\",\n    \"test\": \"jest\",\n    \"lint\": \"eslint .\"\n  }\n}\n```\n5. Setup basic ESLint configuration",
-        "testStrategy": "Verify the project structure is created correctly by checking that all directories and files exist. Run npm test to ensure the testing framework is properly configured.",
+        "id": 68,
+        "title": "Setup Node.js Project with AST Parsing",
+        "description": "Initialize the Node.js project structure with necessary dependencies for AST parsing and code analysis capabilities.",
+        "details": "Create a new Node.js project with the following structure:\n\n```\n/src\n  /core\n  /patterns\n  /templates\n  /validation\n  /integration\n/tests\n/config\n```\n\nInstall required dependencies:\n- @babel/parser for AST generation\n- @babel/traverse for AST traversal\n- handlebars for template generation\n- typescript and ts-node for TypeScript support\n\nCreate basic configuration files:\n- tsconfig.json for TypeScript configuration\n- jest.config.js for testing setup\n- .eslintrc for code quality\n\nImplement a basic AST parsing utility that can load JavaScript/TypeScript files and generate ASTs for further analysis.",
+        "testStrategy": "Write unit tests to verify:\n1. Project structure is correctly initialized\n2. AST parsing utility correctly parses JavaScript and TypeScript files\n3. Basic traversal of ASTs works as expected\n4. Configuration files are properly set up",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
-        "id": 49,
-        "title": "Implement Input Parser for PRD-Parser Output",
-        "description": "Create a module to parse and validate the task list input from the PRD-Parser.",
-        "details": "Create a module in lib/inputParser.js that:\n\n1. Accepts JSON input from PRD-Parser\n2. Validates the structure of the input\n3. Extracts agent name, description, and requirements\n4. Normalizes agent name for directory creation\n\n```javascript\n// lib/inputParser.js\nconst validateInput = (input) => {\n  // Validate input has required fields\n  if (!input.agentName || !input.tasks || !Array.isArray(input.tasks)) {\n    throw new Error('Invalid input: missing required fields');\n  }\n  \n  return true;\n};\n\nconst parseInput = (input) => {\n  validateInput(input);\n  \n  // Normalize agent name for directory (lowercase, hyphens instead of spaces)\n  const normalizedAgentName = input.agentName.toLowerCase().replace(/\\s+/g, '-');\n  \n  return {\n    agentName: input.agentName,\n    normalizedAgentName,\n    description: input.description || '',\n    tasks: input.tasks,\n    // Extract other relevant metadata\n    metadata: input.metadata || {}\n  };\n};\n\nmodule.exports = { parseInput, validateInput };\n```",
-        "testStrategy": "Write unit tests to verify the parser correctly validates input, rejects invalid input, and normalizes agent names properly. Test with various input formats including edge cases like special characters in agent names.",
+        "id": 69,
+        "title": "Implement Hardcoded Pattern Detection System",
+        "description": "Create a comprehensive system to detect common hardcoding anti-patterns in source code, including industry lists, location restrictions, and business type limitations.",
+        "details": "Develop a pattern detection module with the following components:\n\n1. Create pattern detectors for each anti-pattern type:\n   - HardcodedArrayDetector: Finds hardcoded arrays of values (industries, locations, etc.)\n   - LimitationConstantDetector: Identifies constants that impose limits (maxItems, etc.)\n   - ConditionalLogicDetector: Detects if/switch statements based on hardcoded values\n   - HardcodedEndpointDetector: Locates hardcoded API endpoints\n   - HardcodedUITextDetector: Finds hardcoded UI messages\n\n2. Implement a PatternRegistry to manage all detectors\n\n3. Create a unified detection API:\n\n```typescript\nclass PatternDetectionEngine {\n  constructor(detectors: PatternDetector[]) {}\n  \n  async analyzeFile(filePath: string): Promise<DetectionResult[]> {}\n  async analyzeDirectory(dirPath: string): Promise<Record<string, DetectionResult[]>> {}\n  async analyzeCodebase(rootPath: string): Promise<AnalysisReport> {}\n}\n```\n\n4. Implement result classification to categorize findings by severity and type",
+        "testStrategy": "Create a comprehensive test suite with:\n1. Unit tests for each individual detector with sample code snippets\n2. Integration tests with small sample codebases containing known anti-patterns\n3. Performance tests with larger codebases\n4. False positive/negative analysis\n5. Test against the example anti-patterns provided in the PRD",
         "priority": "high",
         "dependencies": [
-          48
+          68
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 70,
+        "title": "Build Universal Template Generation System",
+        "description": "Develop a Handlebars-based template generation system that can create universal, configuration-driven code to replace hardcoded implementations.",
+        "details": "Create a template generation system with these components:\n\n1. Template Registry:\n```typescript\nclass TemplateRegistry {\n  registerTemplate(patternType: string, template: string): void {}\n  getTemplate(patternType: string): HandlebarsTemplateDelegate {}\n}\n```\n\n2. Implement core templates for common patterns:\n   - Dynamic prompt templates (similar to lib/prompt-template-manager.ts)\n   - Universal API parameter handling\n   - Configuration-driven behavior systems\n   - Industry-agnostic UI components\n   - Fallback and validation patterns\n\n3. Create a TemplateEngine class:\n```typescript\nclass TemplateEngine {\n  constructor(registry: TemplateRegistry) {}\n  \n  generateCode(patternType: string, context: Record<string, any>): string {}\n  generateReplacementForNode(node: ASTNode, patternType: string): string {}\n}\n```\n\n4. Implement Handlebars helpers for common transformations:\n   - dynamicParameter - converts hardcoded values to config references\n   - configPath - generates proper config path references\n   - userInput - creates user input references",
+        "testStrategy": "Test the template system with:\n1. Unit tests for each template type\n2. Verification that generated code follows the All-Purpose Pattern\n3. Tests comparing original hardcoded snippets with their universal replacements\n4. Integration tests generating complete modules\n5. Validation that templates work with the example patterns from the PRD",
+        "priority": "high",
+        "dependencies": [
+          68
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 50,
-        "title": "Develop Template Engine",
-        "description": "Create a template engine that supports variable substitution and renders templates for standard files.",
-        "details": "Implement a template engine in lib/templateEngine.js using Handlebars:\n\n```javascript\n// lib/templateEngine.js\nconst fs = require('fs-extra');\nconst path = require('path');\nconst Handlebars = require('handlebars');\n\nclass TemplateEngine {\n  constructor(templatesDir) {\n    this.templatesDir = templatesDir || path.join(__dirname, '../templates');\n    this.registerHelpers();\n  }\n\n  registerHelpers() {\n    // Register custom Handlebars helpers\n    Handlebars.registerHelper('lowercase', (str) => str.toLowerCase());\n    Handlebars.registerHelper('capitalize', (str) => {\n      return str.charAt(0).toUpperCase() + str.slice(1);\n    });\n    // Add more helpers as needed\n  }\n\n  async loadTemplate(templateName) {\n    const templatePath = path.join(this.templatesDir, `${templateName}.hbs`);\n    try {\n      const templateContent = await fs.readFile(templatePath, 'utf8');\n      return Handlebars.compile(templateContent);\n    } catch (error) {\n      throw new Error(`Failed to load template ${templateName}: ${error.message}`);\n    }\n  }\n\n  async render(templateName, data) {\n    try {\n      const template = await this.loadTemplate(templateName);\n      return template(data);\n    } catch (error) {\n      throw new Error(`Failed to render template ${templateName}: ${error.message}`);\n    }\n  }\n}\n\nmodule.exports = TemplateEngine;\n```\n\nCreate standard templates in the templates directory:\n- main.js.hbs\n- README.md.hbs\n- package.json.hbs\n- config/default.json.hbs",
-        "testStrategy": "Test the template engine with various templates and data inputs. Verify that variable substitution works correctly and that templates are rendered as expected. Test error handling for missing or invalid templates.",
+        "id": 71,
+        "title": "Develop Code Transformation Engine",
+        "description": "Create a transformation engine that can replace detected hardcoded patterns with universal template-based implementations.",
+        "details": "Build a code transformation system with these components:\n\n1. TransformationEngine class:\n```typescript\nclass TransformationEngine {\n  constructor(\n    private detector: PatternDetectionEngine,\n    private templateEngine: TemplateEngine\n  ) {}\n  \n  async transformFile(filePath: string): Promise<TransformationResult> {}\n  async transformDirectory(dirPath: string): Promise<Record<string, TransformationResult>> {}\n  async transformCodebase(rootPath: string): Promise<TransformationReport> {}\n}\n```\n\n2. Implement transformation strategies:\n   - InPlaceTransformation: Modifies files directly\n   - NewFileTransformation: Creates new versions alongside originals\n   - DiffGeneration: Produces diffs for manual review\n\n3. Create AST-based transformation utilities:\n   - replaceNode: Replaces a node with generated code\n   - insertImports: Adds necessary imports for universal patterns\n   - updateReferences: Updates references to transformed code\n\n4. Implement a transformation pipeline:\n   - Detection → Analysis → Template Selection → Code Generation → Replacement",
+        "testStrategy": "Test the transformation engine with:\n1. Unit tests for each transformation strategy\n2. Integration tests transforming sample files with known patterns\n3. End-to-end tests transforming small sample projects\n4. Verification that transformed code maintains original functionality\n5. Tests against the example anti-patterns in the PRD",
         "priority": "high",
         "dependencies": [
-          48
+          69,
+          70
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 51,
-        "title": "Create Standard File Templates",
-        "description": "Develop the standard file templates for main.js, README.md, package.json, and config files.",
-        "details": "Create the following template files in the templates directory:\n\n1. main.js.hbs:\n```handlebars\n/**\n * {{agentName}}\n * {{description}}\n */\n\nclass {{capitalize agentName}}Agent {\n  constructor(config) {\n    this.config = config;\n  }\n\n  async initialize() {\n    // Initialization logic\n    console.log('{{capitalize agentName}} agent initialized');\n  }\n\n  async process(input) {\n    // Processing logic\n    return { result: 'Processed by {{agentName}}' };\n  }\n}\n\nmodule.exports = {{capitalize agentName}}Agent;\n```\n\n2. README.md.hbs:\n```handlebars\n# {{agentName}}\n\n{{description}}\n\n## Installation\n\n```bash\nnpm install\n```\n\n## Usage\n\n```javascript\nconst {{capitalize agentName}}Agent = require('./main');\n\nconst agent = new {{capitalize agentName}}Agent();\nawait agent.initialize();\nconst result = await agent.process(input);\n```\n\n## Configuration\n\nSee `config/default.json` for configuration options.\n```\n\n3. package.json.hbs:\n```handlebars\n{\n  \"name\": \"{{lowercase agentName}}\",\n  \"version\": \"1.0.0\",\n  \"description\": \"{{description}}\",\n  \"main\": \"main.js\",\n  \"scripts\": {\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n  },\n  \"devDependencies\": {\n    \"jest\": \"^29.0.0\"\n  }\n}\n```\n\n4. config/default.json.hbs:\n```handlebars\n{\n  \"{{lowercase agentName}}\": {\n    \"enabled\": true,\n    \"logLevel\": \"info\"\n  }\n}\n```",
-        "testStrategy": "Verify that each template renders correctly with sample data. Check that the templates follow the established patterns and conventions. Test with various agent names and descriptions to ensure proper formatting.",
+        "id": 72,
+        "title": "Implement Validation System",
+        "description": "Create a comprehensive validation system to ensure no hardcoded limitations remain in transformed code.",
+        "details": "Develop a validation system with these components:\n\n1. ValidationEngine class:\n```typescript\nclass ValidationEngine {\n  constructor(private detector: PatternDetectionEngine) {}\n  \n  async validateFile(filePath: string): Promise<ValidationResult> {}\n  async validateDirectory(dirPath: string): Promise<Record<string, ValidationResult>> {}\n  async validateCodebase(rootPath: string): Promise<ValidationReport> {}\n}\n```\n\n2. Implement validation rules:\n   - NoHardcodedIndustriesRule: Ensures no hardcoded industry lists exist\n   - NoLocationLimitationsRule: Verifies no location restrictions remain\n   - NoBusinessTypeRestrictionsRule: Confirms no business type limitations\n   - UnlimitedScalabilityRule: Validates system can scale without limits\n   - ConfigurationDrivenRule: Ensures behavior comes from user configuration\n\n3. Create a reporting system that provides:\n   - Detailed validation failures\n   - Suggestions for fixing remaining issues\n   - Compliance score for transformed code\n   - Visual reports highlighting problem areas",
+        "testStrategy": "Test the validation system with:\n1. Unit tests for each validation rule\n2. Tests with intentionally non-compliant code\n3. Integration tests validating transformed codebases\n4. False positive/negative analysis\n5. Tests against the example patterns in the PRD\n6. Verification that validation catches subtle hardcoding patterns",
         "priority": "medium",
         "dependencies": [
-          50
+          69
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 52,
-        "title": "Implement Directory and File Generator",
-        "description": "Create a module to generate the directory structure and files for a new agent based on templates.",
-        "details": "Implement a file generator in lib/fileGenerator.js:\n\n```javascript\n// lib/fileGenerator.js\nconst fs = require('fs-extra');\nconst path = require('path');\nconst TemplateEngine = require('./templateEngine');\n\nclass FileGenerator {\n  constructor(baseDir) {\n    this.baseDir = baseDir || 'src';\n    this.templateEngine = new TemplateEngine();\n  }\n\n  async createDirectoryStructure(agentName) {\n    const agentDir = path.join(this.baseDir, agentName);\n    \n    // Create main directory and subdirectories\n    await fs.ensureDir(agentDir);\n    await fs.ensureDir(path.join(agentDir, 'config'));\n    await fs.ensureDir(path.join(agentDir, 'templates'));\n    await fs.ensureDir(path.join(agentDir, 'tests'));\n    \n    return agentDir;\n  }\n\n  async generateFile(agentDir, fileName, templateName, data) {\n    try {\n      const content = await this.templateEngine.render(templateName, data);\n      const filePath = path.join(agentDir, fileName);\n      await fs.writeFile(filePath, content, 'utf8');\n      return filePath;\n    } catch (error) {\n      throw new Error(`Failed to generate ${fileName}: ${error.message}`);\n    }\n  }\n\n  async generateAgentFiles(agentData) {\n    const { normalizedAgentName } = agentData;\n    const agentDir = await this.createDirectoryStructure(normalizedAgentName);\n    \n    // Generate standard files\n    await this.generateFile(agentDir, 'main.js', 'main.js', agentData);\n    await this.generateFile(agentDir, 'README.md', 'README.md', agentData);\n    await this.generateFile(agentDir, 'package.json', 'package.json', agentData);\n    await this.generateFile(path.join(agentDir, 'config'), 'default.json', 'config/default.json', agentData);\n    \n    return agentDir;\n  }\n}\n\nmodule.exports = FileGenerator;\n```",
-        "testStrategy": "Test the file generator by creating a temporary directory and verifying that all files and directories are created correctly. Check that the content of generated files matches the expected output from templates. Test error handling for file system operations.",
-        "priority": "high",
-        "dependencies": [
-          50,
-          51
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 53,
-        "title": "Implement CHANGELOG Updater",
-        "description": "Create functionality to update the project's CHANGELOG.md with new agent entries.",
-        "details": "Implement a CHANGELOG updater in lib/changelogUpdater.js:\n\n```javascript\n// lib/changelogUpdater.js\nconst fs = require('fs-extra');\nconst path = require('path');\n\nclass ChangelogUpdater {\n  constructor(changelogPath) {\n    this.changelogPath = changelogPath || path.join(process.cwd(), 'CHANGELOG.md');\n  }\n\n  async readChangelog() {\n    try {\n      if (await fs.pathExists(this.changelogPath)) {\n        return await fs.readFile(this.changelogPath, 'utf8');\n      }\n      return '# Changelog\\n\\nAll notable changes to this project will be documented in this file.\\n';\n    } catch (error) {\n      throw new Error(`Failed to read changelog: ${error.message}`);\n    }\n  }\n\n  async updateChangelog(agentData) {\n    try {\n      let changelog = await this.readChangelog();\n      \n      // Get current date in YYYY-MM-DD format\n      const date = new Date().toISOString().split('T')[0];\n      \n      // Create new entry\n      const newEntry = `\\n## [${agentData.agentName}] - ${date}\\n\\n### Added\\n- Initial scaffold for ${agentData.agentName} agent\\n- Basic functionality and configuration\\n`;\n      \n      // Find position to insert (after the header)\n      const headerEndPos = changelog.indexOf('\\n\\n');\n      if (headerEndPos !== -1) {\n        changelog = changelog.substring(0, headerEndPos + 2) + newEntry + changelog.substring(headerEndPos + 2);\n      } else {\n        changelog += newEntry;\n      }\n      \n      // Write updated changelog\n      await fs.writeFile(this.changelogPath, changelog, 'utf8');\n      return true;\n    } catch (error) {\n      throw new Error(`Failed to update changelog: ${error.message}`);\n    }\n  }\n}\n\nmodule.exports = ChangelogUpdater;\n```",
-        "testStrategy": "Test the CHANGELOG updater with a sample CHANGELOG.md file. Verify that new entries are added correctly and that the format is maintained. Test with both existing and non-existing CHANGELOG files.",
+        "id": 73,
+        "title": "Develop Agent-Driven Development Integration",
+        "description": "Integrate the All-Purpose Pattern methodology with agent-driven development, Context7, and the 30-Minute Rule as specified in the PRD.",
+        "details": "Create an integration layer with these components:\n\n1. AgentDrivenDevelopmentIntegration class:\n```typescript\nclass AgentDrivenDevelopmentIntegration {\n  applyMethodology(transformationResult: TransformationResult): EnhancedResult {}\n  generateFrameworkDocuments(project: Project): DocumentSet {}\n  applyContext7Patterns(code: string): string {}\n  applyThirtyMinuteRule(issue: Issue): ResolutionStrategy[] {}\n}\n```\n\n2. Implement the 5-document framework generator:\n   - System Overview Document\n   - Technical Architecture Document\n   - Implementation Guide\n   - Testing Strategy\n   - Maintenance Plan\n\n3. Create Context7 integration utilities:\n   - Pattern library based on current best practices\n   - Code enhancement with Context7 patterns\n   - Documentation generation with Context7 insights\n\n4. Implement Vercel-native architecture patterns:\n   - Serverless function templates\n   - Edge function templates\n   - Next.js integration patterns",
+        "testStrategy": "Test the integration with:\n1. Unit tests for each integration component\n2. Verification that generated documents follow the 5-document framework\n3. Tests confirming Context7 patterns are correctly applied\n4. Validation of Vercel-native architecture patterns\n5. Integration tests with the full transformation pipeline",
         "priority": "medium",
         "dependencies": [
-          48
+          71
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 54,
-        "title": "Implement Naming Convention Validator",
-        "description": "Create a module to validate agent names and ensure they follow established naming conventions.",
-        "details": "Implement a naming convention validator in lib/namingValidator.js:\n\n```javascript\n// lib/namingValidator.js\nclass NamingValidator {\n  constructor(options = {}) {\n    this.options = {\n      allowedPrefixes: options.allowedPrefixes || [],\n      allowedSuffixes: options.allowedSuffixes || ['Agent', 'Service', 'Manager'],\n      minLength: options.minLength || 3,\n      maxLength: options.maxLength || 50,\n      pattern: options.pattern || /^[a-zA-Z][a-zA-Z0-9-]*$/\n    };\n  }\n\n  validateAgentName(name) {\n    const errors = [];\n    \n    // Check length\n    if (name.length < this.options.minLength) {\n      errors.push(`Name is too short (minimum ${this.options.minLength} characters)`);\n    }\n    \n    if (name.length > this.options.maxLength) {\n      errors.push(`Name is too long (maximum ${this.options.maxLength} characters)`);\n    }\n    \n    // Check pattern\n    if (!this.options.pattern.test(name)) {\n      errors.push('Name contains invalid characters (use letters, numbers, and hyphens only)');\n    }\n    \n    // Check prefixes if specified\n    if (this.options.allowedPrefixes.length > 0) {\n      const hasValidPrefix = this.options.allowedPrefixes.some(prefix => name.startsWith(prefix));\n      if (!hasValidPrefix) {\n        errors.push(`Name must start with one of: ${this.options.allowedPrefixes.join(', ')}`);\n      }\n    }\n    \n    // Check suffixes if specified\n    if (this.options.allowedSuffixes.length > 0) {\n      const hasValidSuffix = this.options.allowedSuffixes.some(suffix => name.endsWith(suffix));\n      if (!hasValidSuffix) {\n        errors.push(`Name must end with one of: ${this.options.allowedSuffixes.join(', ')}`);\n      }\n    }\n    \n    return {\n      isValid: errors.length === 0,\n      errors\n    };\n  }\n\n  suggestValidName(name) {\n    // If name doesn't end with a valid suffix, add the first allowed suffix\n    if (this.options.allowedSuffixes.length > 0) {\n      const hasValidSuffix = this.options.allowedSuffixes.some(suffix => name.endsWith(suffix));\n      if (!hasValidSuffix) {\n        return `${name}${this.options.allowedSuffixes[0]}`;\n      }\n    }\n    \n    return name;\n  }\n}\n\nmodule.exports = NamingValidator;\n```",
-        "testStrategy": "Test the naming validator with various agent names, including valid and invalid names. Verify that the validator correctly identifies naming convention violations and provides appropriate error messages. Test the name suggestion functionality.",
+        "id": 74,
+        "title": "Implement Meta-Agent Factory Integration",
+        "description": "Create integration points with existing PRD-Parser, Scaffold-Generator, TaskMaster, and other meta-agents as specified in the PRD.",
+        "details": "Develop a meta-agent integration system with these components:\n\n1. MetaAgentIntegration class:\n```typescript\nclass MetaAgentIntegration {\n  constructor(private transformationEngine: TransformationEngine) {}\n  \n  integratePRDParser(parser: PRDParser): IntegratedAgent {}\n  integrateScaffoldGenerator(generator: ScaffoldGenerator): IntegratedAgent {}\n  integrateTaskMaster(taskMaster: TaskMaster): IntegratedAgent {}\n  generateMetaAgentOutput(result: TransformationResult): MetaAgentOutput {}\n}\n```\n\n2. Implement standard interfaces for agent communication:\n   - AgentInput and AgentOutput interfaces\n   - Standardized message formats\n   - Event-based communication system\n\n3. Create adapters for each integration point:\n   - PRDParserAdapter\n   - ScaffoldGeneratorAdapter\n   - TaskMasterAdapter\n   - Context7Adapter\n\n4. Implement the meta-agent factory architecture:\n   - Agent registration system\n   - Pipeline configuration\n   - Execution orchestration",
+        "testStrategy": "Test the meta-agent integration with:\n1. Unit tests for each adapter\n2. Mock tests simulating interaction with other agents\n3. Integration tests with actual agent implementations if available\n4. End-to-end tests of complete agent pipelines\n5. Verification that output can be consumed by other meta-agents",
         "priority": "medium",
         "dependencies": [
-          48
+          71,
+          73
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 55,
-        "title": "Create Main Application Logic",
-        "description": "Implement the main application logic that orchestrates the scaffold generation process.",
-        "details": "Implement the main application logic in src/index.js:\n\n```javascript\n// src/index.js\nconst fs = require('fs-extra');\nconst path = require('path');\nconst { Command } = require('commander');\nconst chalk = require('chalk');\n\nconst { parseInput } = require('../lib/inputParser');\nconst FileGenerator = require('../lib/fileGenerator');\nconst ChangelogUpdater = require('../lib/changelogUpdater');\nconst NamingValidator = require('../lib/namingValidator');\n\nclass ScaffoldGenerator {\n  constructor(options = {}) {\n    this.baseDir = options.baseDir || 'src';\n    this.fileGenerator = new FileGenerator(this.baseDir);\n    this.changelogUpdater = new ChangelogUpdater(options.changelogPath);\n    this.namingValidator = new NamingValidator();\n  }\n\n  async generateScaffold(input) {\n    try {\n      console.log(chalk.blue('Parsing input...'));\n      const agentData = parseInput(input);\n      \n      // Validate agent name\n      const nameValidation = this.namingValidator.validateAgentName(agentData.agentName);\n      if (!nameValidation.isValid) {\n        console.warn(chalk.yellow('Warning: Agent name has issues:'));\n        nameValidation.errors.forEach(error => console.warn(chalk.yellow(`- ${error}`)));\n        \n        const suggestedName = this.namingValidator.suggestValidName(agentData.agentName);\n        console.log(chalk.yellow(`Suggested name: ${suggestedName}`));\n        \n        // Ask for confirmation or use suggested name\n        // For now, we'll proceed with the original name\n      }\n      \n      console.log(chalk.blue(`Generating scaffold for ${agentData.agentName}...`));\n      \n      // Generate files and directories\n      const agentDir = await this.fileGenerator.generateAgentFiles(agentData);\n      console.log(chalk.green(`Agent scaffold created at: ${agentDir}`));\n      \n      // Update changelog\n      await this.changelogUpdater.updateChangelog(agentData);\n      console.log(chalk.green('CHANGELOG.md updated'));\n      \n      return {\n        success: true,\n        agentDir,\n        agentName: agentData.agentName\n      };\n    } catch (error) {\n      console.error(chalk.red(`Error generating scaffold: ${error.message}`));\n      return {\n        success: false,\n        error: error.message\n      };\n    }\n  }\n}\n\n// CLI interface\nconst program = new Command();\n\nprogram\n  .name('scaffold-generator')\n  .description('Generate agent scaffolding based on PRD-Parser output')\n  .version('1.0.0');\n\nprogram\n  .command('generate')\n  .description('Generate agent scaffold')\n  .option('-i, --input <path>', 'Path to PRD-Parser output JSON')\n  .option('-b, --base-dir <path>', 'Base directory for agent creation', 'src')\n  .action(async (options) => {\n    try {\n      if (!options.input) {\n        console.error(chalk.red('Error: Input file is required'));\n        process.exit(1);\n      }\n      \n      const inputPath = path.resolve(options.input);\n      const inputData = await fs.readJson(inputPath);\n      \n      const generator = new ScaffoldGenerator({\n        baseDir: options.baseDir\n      });\n      \n      const result = await generator.generateScaffold(inputData);\n      \n      if (result.success) {\n        console.log(chalk.green('\\nScaffold generation completed successfully!'));\n      } else {\n        console.error(chalk.red('\\nScaffold generation failed.'));\n        process.exit(1);\n      }\n    } catch (error) {\n      console.error(chalk.red(`\\nError: ${error.message}`));\n      process.exit(1);\n    }\n  });\n\n// Export for programmatic usage\nmodule.exports = ScaffoldGenerator;\n\n// Run CLI if called directly\nif (require.main === module) {\n  program.parse(process.argv);\n}\n```",
-        "testStrategy": "Test the main application logic with various inputs, including valid and invalid inputs. Verify that the scaffold generation process works end-to-end. Test error handling and edge cases. Create integration tests that simulate the entire process from input parsing to file generation.",
-        "priority": "high",
+        "id": 75,
+        "title": "Build Performance Optimization System",
+        "description": "Implement performance optimizations to meet the PRD goals of efficiently analyzing large codebases and transforming systems quickly.",
+        "details": "Create a performance optimization system with these components:\n\n1. PerformanceOptimizer class:\n```typescript\nclass PerformanceOptimizer {\n  optimizeDetection(detector: PatternDetectionEngine): OptimizedDetector {}\n  optimizeTransformation(transformer: TransformationEngine): OptimizedTransformer {}\n  enableConcurrentProcessing(engine: BaseEngine, concurrencyLevel: number): void {}\n  implementCaching(engine: BaseEngine, cacheStrategy: CacheStrategy): void {}\n}\n```\n\n2. Implement optimization strategies:\n   - Parallel file processing\n   - Incremental analysis\n   - AST caching\n   - Selective transformation\n   - Worker thread distribution\n\n3. Create monitoring and profiling tools:\n   - Performance metrics collection\n   - Bottleneck identification\n   - Optimization suggestions\n\n4. Implement adaptive optimization:\n   - Resource usage monitoring\n   - Dynamic concurrency adjustment\n   - Priority-based processing",
+        "testStrategy": "Test the performance system with:\n1. Benchmark tests with codebases of various sizes\n2. Comparison tests between optimized and non-optimized versions\n3. Stress tests with 10,000+ file codebases\n4. Verification that performance goals from the PRD are met\n5. Resource utilization tests\n6. Concurrent transformation tests",
+        "priority": "medium",
         "dependencies": [
-          49,
-          52,
-          53,
-          54
+          71
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 56,
-        "title": "Implement Git Integration",
-        "description": "Add functionality to generate appropriate Git commit messages and handle Git operations.",
-        "details": "Implement Git integration in lib/gitIntegration.js:\n\n```javascript\n// lib/gitIntegration.js\nconst { execSync } = require('child_process');\nconst path = require('path');\n\nclass GitIntegration {\n  constructor(options = {}) {\n    this.options = {\n      commitMessage: options.commitMessage || 'feat: Generate scaffold for {agentName}',\n      autoCommit: options.autoCommit !== undefined ? options.autoCommit : true\n    };\n  }\n\n  isGitRepository() {\n    try {\n      execSync('git rev-parse --is-inside-work-tree', { stdio: 'ignore' });\n      return true;\n    } catch (error) {\n      return false;\n    }\n  }\n\n  getGitStatus() {\n    try {\n      return execSync('git status --porcelain').toString().trim();\n    } catch (error) {\n      throw new Error(`Failed to get Git status: ${error.message}`);\n    }\n  }\n\n  addFiles(agentDir) {\n    try {\n      execSync(`git add ${agentDir}`, { stdio: 'ignore' });\n      // Also add CHANGELOG.md if it exists\n      execSync('git add CHANGELOG.md', { stdio: 'ignore' });\n      return true;\n    } catch (error) {\n      throw new Error(`Failed to add files to Git: ${error.message}`);\n    }\n  }\n\n  commit(agentData) {\n    try {\n      const message = this.options.commitMessage.replace('{agentName}', agentData.agentName);\n      execSync(`git commit -m \"${message}\"`, { stdio: 'ignore' });\n      return true;\n    } catch (error) {\n      throw new Error(`Failed to commit changes: ${error.message}`);\n    }\n  }\n\n  async handleGitOperations(agentData, agentDir) {\n    if (!this.isGitRepository()) {\n      console.log('Not a Git repository, skipping Git operations');\n      return false;\n    }\n\n    const status = this.getGitStatus();\n    if (!status) {\n      console.log('No changes to commit');\n      return false;\n    }\n\n    this.addFiles(agentDir);\n    \n    if (this.options.autoCommit) {\n      this.commit(agentData);\n      console.log(`Changes committed with message: ${this.options.commitMessage.replace('{agentName}', agentData.agentName)}`);\n    } else {\n      console.log('Changes staged for commit');\n    }\n\n    return true;\n  }\n}\n\nmodule.exports = GitIntegration;\n```\n\nUpdate src/index.js to include Git integration:\n\n```javascript\n// In src/index.js, add:\nconst GitIntegration = require('../lib/gitIntegration');\n\n// In the ScaffoldGenerator constructor:\nthis.gitIntegration = new GitIntegration(options.git);\n\n// In the generateScaffold method, after updating the changelog:\n// Handle Git operations\nif (options.git?.enabled !== false) {\n  try {\n    await this.gitIntegration.handleGitOperations(agentData, agentDir);\n  } catch (error) {\n    console.warn(chalk.yellow(`Git operations failed: ${error.message}`));\n  }\n}\n```\n\nUpdate the CLI options in src/index.js:\n\n```javascript\nprogram\n  .command('generate')\n  .description('Generate agent scaffold')\n  .option('-i, --input <path>', 'Path to PRD-Parser output JSON')\n  .option('-b, --base-dir <path>', 'Base directory for agent creation', 'src')\n  .option('--no-git', 'Disable Git operations')\n  .option('--no-auto-commit', 'Stage files but do not commit')\n  .action(async (options) => {\n    // ...\n    \n    const generator = new ScaffoldGenerator({\n      baseDir: options.baseDir,\n      git: {\n        enabled: options.git,\n        autoCommit: options.autoCommit\n      }\n    });\n    \n    // ...\n  });\n```",
-        "testStrategy": "Test Git integration by creating a temporary Git repository and verifying that files are correctly added and committed. Test with various options (auto-commit enabled/disabled). Mock Git commands for unit testing to avoid actual Git operations during tests.",
+        "id": 76,
+        "title": "Create CLI and API Interfaces",
+        "description": "Develop command-line and programmatic API interfaces for the All-Purpose Pattern Agent.",
+        "details": "Build interface systems with these components:\n\n1. CLI Interface:\n```typescript\nclass PatternAgentCLI {\n  constructor(private engine: AllPurposePatternEngine) {}\n  \n  parseArguments(args: string[]): CommandOptions {}\n  executeCommand(command: string, options: CommandOptions): Promise<void> {}\n  displayResults(results: any): void {}\n  generateReports(results: any, format: ReportFormat): void {}\n}\n```\n\nImplement these commands:\n- `analyze`: Detect hardcoded patterns\n- `transform`: Transform hardcoded code to universal patterns\n- `validate`: Verify no hardcoded limitations remain\n- `generate`: Create new universal templates\n\n2. Programmatic API:\n```typescript\nclass PatternAgentAPI {\n  constructor(private engine: AllPurposePatternEngine) {}\n  \n  async analyze(options: AnalyzeOptions): Promise<AnalysisResult> {}\n  async transform(options: TransformOptions): Promise<TransformationResult> {}\n  async validate(options: ValidateOptions): Promise<ValidationResult> {}\n  async generate(options: GenerateOptions): Promise<GenerationResult> {}\n}\n```\n\n3. Create documentation for both interfaces:\n   - API reference\n   - CLI usage guide\n   - Example workflows\n   - Integration examples",
+        "testStrategy": "Test the interfaces with:\n1. Unit tests for CLI argument parsing\n2. Integration tests for each command\n3. API contract tests\n4. End-to-end tests of complete workflows\n5. Documentation accuracy tests\n6. Usability testing with sample projects",
+        "priority": "medium",
+        "dependencies": [
+          71,
+          72
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 77,
+        "title": "Implement End-to-End Testing and Documentation",
+        "description": "Create comprehensive end-to-end tests and documentation for the All-Purpose Pattern Agent.",
+        "details": "Develop testing and documentation with these components:\n\n1. End-to-End Test Suite:\n```typescript\nclass E2ETestSuite {\n  constructor(private agent: PatternAgentAPI) {}\n  \n  async testFullTransformation(sampleProject: string): Promise<TestResult> {}\n  async testPatternCoverage(patterns: Pattern[]): Promise<CoverageResult> {}\n  async benchmarkPerformance(projectSizes: ProjectSize[]): Promise<BenchmarkResult> {}\n  async validateOutputQuality(transformedProjects: string[]): Promise<QualityResult> {}\n}\n```\n\n2. Create sample projects for testing:\n   - Small project with basic hardcoded patterns\n   - Medium project with mixed patterns\n   - Large project with complex patterns\n   - Real-world project samples\n\n3. Develop comprehensive documentation:\n   - User guide\n   - Developer documentation\n   - Architecture overview\n   - Pattern catalog\n   - Best practices guide\n   - Integration guide\n\n4. Implement continuous integration:\n   - Automated test pipeline\n   - Quality metrics collection\n   - Documentation generation",
+        "testStrategy": "Validate the testing and documentation with:\n1. Meta-tests verifying test coverage\n2. Documentation accuracy reviews\n3. User testing with documentation\n4. CI pipeline verification\n5. Cross-reference with PRD requirements\n6. Verification that all PRD testing strategies are implemented",
         "priority": "low",
         "dependencies": [
-          55
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 57,
-        "title": "Create Comprehensive Test Suite",
-        "description": "Develop a comprehensive test suite for all components of the Scaffold Generator Agent.",
-        "details": "Create the following test files:\n\n1. tests/inputParser.test.js:\n```javascript\nconst { parseInput, validateInput } = require('../lib/inputParser');\n\ndescribe('Input Parser', () => {\n  test('validates valid input', () => {\n    const input = {\n      agentName: 'TestAgent',\n      tasks: []\n    };\n    expect(validateInput(input)).toBe(true);\n  });\n\n  test('throws error for invalid input', () => {\n    const input = {\n      agentName: 'TestAgent'\n      // Missing tasks\n    };\n    expect(() => validateInput(input)).toThrow();\n  });\n\n  test('normalizes agent name', () => {\n    const input = {\n      agentName: 'Test Agent Name',\n      tasks: []\n    };\n    const result = parseInput(input);\n    expect(result.normalizedAgentName).toBe('test-agent-name');\n  });\n});\n```\n\n2. tests/templateEngine.test.js:\n```javascript\nconst TemplateEngine = require('../lib/templateEngine');\nconst fs = require('fs-extra');\nconst path = require('path');\n\n// Mock fs-extra\njest.mock('fs-extra');\n\ndescribe('Template Engine', () => {\n  let templateEngine;\n  \n  beforeEach(() => {\n    templateEngine = new TemplateEngine('templates');\n    // Mock file system\n    fs.readFile.mockResolvedValue('Hello {{name}}!');\n  });\n\n  test('renders template with variables', async () => {\n    const result = await templateEngine.render('test', { name: 'World' });\n    expect(result).toBe('Hello World!');\n  });\n\n  test('throws error for missing template', async () => {\n    fs.readFile.mockRejectedValue(new Error('File not found'));\n    await expect(templateEngine.render('missing', {})).rejects.toThrow();\n  });\n});\n```\n\n3. tests/fileGenerator.test.js:\n```javascript\nconst FileGenerator = require('../lib/fileGenerator');\nconst fs = require('fs-extra');\nconst path = require('path');\n\n// Mock fs-extra and templateEngine\njest.mock('fs-extra');\njest.mock('../lib/templateEngine');\n\ndescribe('File Generator', () => {\n  let fileGenerator;\n  \n  beforeEach(() => {\n    fileGenerator = new FileGenerator('src');\n    // Mock file system operations\n    fs.ensureDir.mockResolvedValue();\n    fs.writeFile.mockResolvedValue();\n    // Mock template engine\n    fileGenerator.templateEngine.render = jest.fn().mockResolvedValue('rendered content');\n  });\n\n  test('creates directory structure', async () => {\n    await fileGenerator.createDirectoryStructure('test-agent');\n    expect(fs.ensureDir).toHaveBeenCalledWith('src/test-agent');\n    expect(fs.ensureDir).toHaveBeenCalledWith('src/test-agent/config');\n    expect(fs.ensureDir).toHaveBeenCalledWith('src/test-agent/templates');\n    expect(fs.ensureDir).toHaveBeenCalledWith('src/test-agent/tests');\n  });\n\n  test('generates agent files', async () => {\n    const agentData = {\n      agentName: 'Test Agent',\n      normalizedAgentName: 'test-agent',\n      description: 'A test agent'\n    };\n    \n    await fileGenerator.generateAgentFiles(agentData);\n    \n    expect(fs.writeFile).toHaveBeenCalledTimes(4); // main.js, README.md, package.json, config/default.json\n  });\n});\n```\n\n4. tests/integration.test.js:\n```javascript\nconst ScaffoldGenerator = require('../src/index');\nconst fs = require('fs-extra');\nconst path = require('path');\n\n// Use actual file system for integration tests\nconst testDir = path.join(__dirname, 'temp-test-dir');\n\ndescribe('Integration Tests', () => {\n  beforeAll(async () => {\n    // Create test directory\n    await fs.ensureDir(testDir);\n  });\n\n  afterAll(async () => {\n    // Clean up test directory\n    await fs.remove(testDir);\n  });\n\n  test('generates complete agent scaffold', async () => {\n    const generator = new ScaffoldGenerator({\n      baseDir: testDir,\n      git: { enabled: false } // Disable git for testing\n    });\n    \n    const input = {\n      agentName: 'TestAgent',\n      description: 'A test agent for integration testing',\n      tasks: [\n        { id: 1, title: 'Task 1', description: 'Test task' }\n      ]\n    };\n    \n    const result = await generator.generateScaffold(input);\n    \n    expect(result.success).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent'))).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent', 'main.js'))).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent', 'README.md'))).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent', 'package.json'))).toBe(true);\n    expect(await fs.pathExists(path.join(testDir, 'test-agent', 'config', 'default.json'))).toBe(true);\n  });\n});\n```\n\nUpdate package.json to include test configuration:\n```json\n{\n  \"scripts\": {\n    \"test\": \"jest\",\n    \"test:watch\": \"jest --watch\",\n    \"test:coverage\": \"jest --coverage\"\n  },\n  \"jest\": {\n    \"testEnvironment\": \"node\",\n    \"collectCoverageFrom\": [\n      \"lib/**/*.js\",\n      \"src/**/*.js\"\n    ],\n    \"coverageThreshold\": {\n      \"global\": {\n        \"branches\": 80,\n        \"functions\": 80,\n        \"lines\": 80\n      }\n    }\n  }\n}\n```",
-        "testStrategy": "Run the test suite with npm test and verify that all tests pass. Check code coverage to ensure adequate test coverage for all components. Test both success and failure scenarios for each component.",
-        "priority": "medium",
-        "dependencies": [
-          49,
-          50,
-          51,
-          52,
-          53,
-          54,
-          55,
-          56
+          71,
+          72,
+          73,
+          74,
+          75,
+          76
         ],
         "status": "pending",
         "subtasks": []
@@ -291,7 +173,7 @@
     ],
     "metadata": {
       "created": "2025-07-22T01:57:35.907Z",
-      "updated": "2025-07-22T19:19:35.870Z",
+      "updated": "2025-07-23T03:17:19.082Z",
       "description": "Tasks for master context"
     }
   },
@@ -301,6 +183,160 @@
       "created": "2025-07-22T03:52:59.021Z",
       "updated": "2025-07-22T03:52:59.022Z",
       "description": "=Meta-Agent Factory System Development"
+    }
+  },
+  "rag-system": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Qdrant Vector Database",
+        "description": "Configure and deploy Qdrant vector database in a Docker container for local development with appropriate collections for documentation, code, conversations, and tasks.",
+        "details": "1. Install Docker if not already available\n2. Create a docker-compose.yml file for Qdrant:\n```yaml\nversion: '3'\nservices:\n  qdrant:\n    image: qdrant/qdrant:latest\n    ports:\n      - \"6333:6333\"\n      - \"6334:6334\"\n    volumes:\n      - ./qdrant_data:/qdrant/storage\n```\n3. Create the following collections with appropriate schemas:\n   - project_docs: for documentation\n   - code_snippets: for code documentation\n   - chat_history: for conversation memory\n   - task_context: for task tracking\n4. Configure each collection with the appropriate vector dimensions (3072 for text-embedding-3-large)\n5. Set up metadata filtering for file_path, content_type, timestamp, and project_context\n6. Implement basic health check endpoint to verify database connectivity\n7. Create initialization script to ensure collections exist on startup",
+        "testStrategy": "1. Verify Docker container starts successfully\n2. Confirm all collections are created with correct schemas\n3. Test basic vector insertion and retrieval operations\n4. Benchmark query performance with sample vectors\n5. Validate metadata filtering functionality\n6. Test persistence across container restarts",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Document Processing Pipeline",
+        "description": "Create a pipeline for discovering, processing, chunking, and embedding documents from various project sources for storage in the vector database.",
+        "details": "1. Implement file discovery system using fs-extra and chokidar:\n```typescript\nimport * as fs from 'fs-extra';\nimport * as chokidar from 'chokidar';\n\nconst watchDirectories = config.processing.watchDirectories;\nconst watcher = chokidar.watch(watchDirectories, {\n  ignored: config.processing.excludePatterns,\n  persistent: true\n});\n\nwatcher.on('add', path => processFile(path));\nwatcher.on('change', path => processFile(path));\n```\n\n2. Create document chunking logic with configurable chunk size and overlap:\n```typescript\nfunction chunkDocument(text: string, chunkSize: number, overlap: number): string[] {\n  const chunks = [];\n  let i = 0;\n  while (i < text.length) {\n    chunks.push(text.slice(i, i + chunkSize));\n    i += chunkSize - overlap;\n  }\n  return chunks;\n}\n```\n\n3. Implement metadata extraction for different file types:\n   - Extract file path, content type, last modified timestamp\n   - Parse frontmatter from markdown files\n   - Extract code language and function names from code files\n\n4. Create embedding generation service using OpenAI API:\n```typescript\nimport { OpenAI } from 'openai';\n\nconst openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\nasync function generateEmbedding(text: string): Promise<number[]> {\n  const response = await openai.embeddings.create({\n    model: 'text-embedding-3-large',\n    input: text,\n  });\n  return response.data[0].embedding;\n}\n```\n\n5. Implement incremental update mechanism to avoid reprocessing unchanged files\n6. Create batch processing queue for efficient API usage",
+        "testStrategy": "1. Test file discovery across all specified directories\n2. Verify correct chunking with various document sizes\n3. Validate metadata extraction for different file types\n4. Test embedding generation with sample documents\n5. Verify incremental updates only process changed files\n6. Benchmark processing pipeline performance with large document sets",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Develop Basic Retrieval System",
+        "description": "Create a semantic search API that can query the vector database, rank results by relevance, and apply filters based on metadata.",
+        "details": "1. Implement query embedding function to convert natural language queries to vectors:\n```typescript\nasync function embedQuery(query: string): Promise<number[]> {\n  return generateEmbedding(query); // Reuse embedding function from document processing\n}\n```\n\n2. Create vector search function using Qdrant client:\n```typescript\nimport { QdrantClient } from '@qdrant/js-client-rest';\n\nconst client = new QdrantClient({ host: config.vectorDb.host, port: config.vectorDb.port });\n\nasync function searchVectors(collection: string, queryVector: number[], limit: number = 5, filter?: any) {\n  return client.search(collection, {\n    vector: queryVector,\n    limit: limit,\n    filter: filter,\n    with_payload: true\n  });\n}\n```\n\n3. Implement context ranking algorithm:\n   - Score by vector similarity\n   - Boost by recency and relevance to current task\n   - Apply metadata-based filtering\n\n4. Create query expansion logic to improve search results:\n```typescript\nfunction expandQuery(query: string): string[] {\n  // Generate variations of the query to improve recall\n  return [\n    query,\n    `information about ${query}`,\n    `how to ${query}`,\n    `${query} example`,\n    `${query} documentation`\n  ];\n}\n```\n\n5. Implement API endpoints for retrieval:\n```typescript\napp.post('/api/search', async (req, res) => {\n  const { query, filters, limit } = req.body;\n  const queryEmbedding = await embedQuery(query);\n  const results = await searchVectors('project_docs', queryEmbedding, limit, filters);\n  res.json(results);\n});\n```\n\n6. Add result post-processing to format and enhance retrieved content",
+        "testStrategy": "1. Test query embedding with various input types\n2. Verify vector search returns relevant results\n3. Validate context ranking with known document sets\n4. Test query expansion improves recall\n5. Benchmark API response times under load\n6. Verify metadata filtering correctly narrows results\n7. Test with real project documentation to ensure relevance",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement Conversation Memory Store",
+        "description": "Create a system for storing, retrieving, and managing conversation history across AI agent sessions to provide persistent context.",
+        "details": "1. Design conversation memory schema:\n```typescript\ninterface ConversationMemory {\n  sessionId: string;\n  timestamp: Date;\n  messages: {\n    role: 'user' | 'assistant';\n    content: string;\n    timestamp: Date;\n  }[];\n  metadata: {\n    projectContext: string;\n    activeTasks: string[];\n    relevantFiles: string[];\n  };\n}\n```\n\n2. Implement session management:\n```typescript\nclass SessionManager {\n  private sessions: Map<string, ConversationMemory> = new Map();\n  \n  createSession(projectContext: string): string {\n    const sessionId = uuidv4();\n    this.sessions.set(sessionId, {\n      sessionId,\n      timestamp: new Date(),\n      messages: [],\n      metadata: { projectContext, activeTasks: [], relevantFiles: [] }\n    });\n    return sessionId;\n  }\n  \n  getSession(sessionId: string): ConversationMemory | undefined {\n    return this.sessions.get(sessionId);\n  }\n  \n  addMessage(sessionId: string, role: 'user' | 'assistant', content: string): void {\n    const session = this.getSession(sessionId);\n    if (session) {\n      session.messages.push({\n        role,\n        content,\n        timestamp: new Date()\n      });\n    }\n  }\n  \n  // Additional methods for persistence, retrieval, etc.\n}\n```\n\n3. Implement vector storage for conversation history:\n   - Embed and store important conversation segments\n   - Index key decisions and context\n   - Link conversations to relevant documentation\n\n4. Create API endpoints for session management:\n```typescript\napp.post('/api/session/create', (req, res) => {\n  const { projectContext } = req.body;\n  const sessionId = sessionManager.createSession(projectContext);\n  res.json({ sessionId });\n});\n\napp.post('/api/session/:sessionId/message', (req, res) => {\n  const { sessionId } = req.params;\n  const { role, content } = req.body;\n  sessionManager.addMessage(sessionId, role, content);\n  res.json({ success: true });\n});\n```\n\n5. Implement persistence mechanism to save sessions to disk/database\n6. Create session retrieval and context loading functionality",
+        "testStrategy": "1. Test session creation and management\n2. Verify message storage and retrieval\n3. Test persistence across server restarts\n4. Validate context loading from previous sessions\n5. Benchmark memory usage with large conversation histories\n6. Test vector search of conversation history\n7. Verify session isolation between different projects",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Develop Project Context Awareness",
+        "description": "Implement a system to track current tasks, detect file changes, and dynamically update context based on project state.",
+        "details": "1. Create task tracking system:\n```typescript\ninterface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: 'pending' | 'in-progress' | 'completed';\n  files: string[];\n  created: Date;\n  updated: Date;\n}\n\nclass TaskTracker {\n  private tasks: Map<string, Task> = new Map();\n  \n  addTask(task: Task): void {\n    this.tasks.set(task.id, task);\n  }\n  \n  updateTaskStatus(id: string, status: 'pending' | 'in-progress' | 'completed'): void {\n    const task = this.tasks.get(id);\n    if (task) {\n      task.status = status;\n      task.updated = new Date();\n    }\n  }\n  \n  getActiveTasks(): Task[] {\n    return Array.from(this.tasks.values())\n      .filter(task => task.status === 'in-progress')\n      .sort((a, b) => b.updated.getTime() - a.updated.getTime());\n  }\n}\n```\n\n2. Implement file change detection:\n```typescript\nconst fileWatcher = chokidar.watch(config.processing.watchDirectories, {\n  ignored: config.processing.excludePatterns,\n  persistent: true\n});\n\nconst changedFiles = new Set<string>();\n\nfileWatcher.on('change', path => {\n  changedFiles.add(path);\n  // Trigger reindexing of changed file\n  processFile(path);\n});\n\nfunction getRecentlyChangedFiles(since: Date): string[] {\n  return Array.from(changedFiles).filter(file => {\n    const stats = fs.statSync(file);\n    return stats.mtime > since;\n  });\n}\n```\n\n3. Create dynamic context update mechanism:\n   - Monitor active tasks and changed files\n   - Update vector database with new information\n   - Adjust relevance scoring based on current context\n\n4. Implement project state tracking:\n```typescript\ninterface ProjectState {\n  activeTasks: string[];\n  recentFiles: string[];\n  currentDirectory: string;\n  lastCommand: string;\n  lastCommandResult: string;\n}\n\nclass ProjectStateTracker {\n  private state: ProjectState = {\n    activeTasks: [],\n    recentFiles: [],\n    currentDirectory: '',\n    lastCommand: '',\n    lastCommandResult: ''\n  };\n  \n  updateState(partial: Partial<ProjectState>): void {\n    this.state = { ...this.state, ...partial };\n  }\n  \n  getState(): ProjectState {\n    return this.state;\n  }\n}\n```\n\n5. Create context-aware query enhancement:\n   - Augment queries with current project state\n   - Prioritize results relevant to active tasks",
+        "testStrategy": "1. Test task tracking with sample project tasks\n2. Verify file change detection across project directories\n3. Validate dynamic context updates when files change\n4. Test project state tracking across different scenarios\n5. Verify context-aware query enhancement improves results\n6. Test integration with conversation memory system\n7. Benchmark performance impact of context tracking",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Smart Context Injection",
+        "description": "Create a system that automatically retrieves relevant documentation and enhances AI prompts with contextual information.",
+        "details": "1. Design context injection system:\n```typescript\ninterface ContextInjection {\n  relevantDocs: {\n    content: string;\n    source: string;\n    relevance: number;\n  }[];\n  conversationHistory: string;\n  projectState: ProjectState;\n  taskContext: Task[];\n}\n\nasync function generateEnhancedPrompt(basePrompt: string): Promise<string> {\n  // Get current project context\n  const projectState = projectStateTracker.getState();\n  const activeTasks = taskTracker.getActiveTasks();\n  \n  // Retrieve relevant documentation\n  const queryEmbedding = await embedQuery(basePrompt);\n  const relevantDocs = await searchVectors('project_docs', queryEmbedding, 3, {\n    must: [\n      {\n        key: 'content_type',\n        match: {\n          value: 'documentation'\n        }\n      }\n    ]\n  });\n  \n  // Format context injection\n  const contextInjection: ContextInjection = {\n    relevantDocs: relevantDocs.map(doc => ({\n      content: doc.payload.content,\n      source: doc.payload.file_path,\n      relevance: doc.score\n    })),\n    conversationHistory: getRecentConversation(5), // Last 5 exchanges\n    projectState,\n    taskContext: activeTasks\n  };\n  \n  // Construct enhanced prompt\n  return `\n    Context Information:\n    ${contextInjection.relevantDocs.map(doc => `From ${doc.source}: ${doc.content}`).join('\\n\\n')}\n    \n    Current Tasks:\n    ${contextInjection.taskContext.map(task => `- ${task.title}: ${task.description}`).join('\\n')}\n    \n    Recent Conversation:\n    ${contextInjection.conversationHistory}\n    \n    User Query: ${basePrompt}\n  `;\n}\n```\n\n2. Implement automated documentation retrieval:\n   - Analyze user queries for documentation needs\n   - Retrieve most relevant documentation chunks\n   - Filter by current project context\n\n3. Create contextual prompt enhancement:\n   - Add relevant documentation snippets\n   - Include current task context\n   - Add recent conversation history\n\n4. Implement relevance scoring algorithm:\n```typescript\nfunction scoreRelevance(doc: any, query: string, projectState: ProjectState): number {\n  let score = doc.score; // Base vector similarity score\n  \n  // Boost for recency\n  const docAge = Date.now() - new Date(doc.payload.timestamp).getTime();\n  const recencyBoost = Math.max(0, 1 - (docAge / (7 * 24 * 60 * 60 * 1000))); // Boost for docs less than a week old\n  \n  // Boost for task relevance\n  const taskRelevance = projectState.activeTasks.some(taskId => {\n    const task = taskTracker.getTask(taskId);\n    return task && task.files.includes(doc.payload.file_path);\n  }) ? 1.5 : 1;\n  \n  return score * (1 + recencyBoost) * taskRelevance;\n}\n```\n\n5. Create API for context injection:\n```typescript\napp.post('/api/context/enhance', async (req, res) => {\n  const { prompt } = req.body;\n  const enhancedPrompt = await generateEnhancedPrompt(prompt);\n  res.json({ enhancedPrompt });\n});\n```",
+        "testStrategy": "1. Test automated documentation retrieval with various queries\n2. Verify contextual prompt enhancement improves AI responses\n3. Validate relevance scoring with known document sets\n4. Test integration with conversation memory and project state\n5. Benchmark response times for context injection\n6. Conduct A/B testing with and without context injection\n7. Verify context injection correctly prioritizes task-relevant documentation",
+        "priority": "high",
+        "dependencies": [
+          3,
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Integrate with TaskMaster CLI",
+        "description": "Enhance TaskMaster CLI with context-aware features including pre-command context lookup, usage pattern learning, and error prevention.",
+        "details": "1. Implement pre-command context lookup:\n```typescript\nasync function enhanceTaskMasterCommand(command: string): Promise<string> {\n  // Extract command type\n  const commandType = command.split(' ')[0];\n  \n  // Get relevant documentation for this command type\n  const queryEmbedding = await embedQuery(`TaskMaster ${commandType} command usage`);\n  const relevantDocs = await searchVectors('project_docs', queryEmbedding, 2, {\n    must: [\n      {\n        key: 'content_type',\n        match: {\n          value: 'taskmaster_documentation'\n        }\n      }\n    ]\n  });\n  \n  // Check for potential errors\n  const potentialIssues = validateTaskMasterCommand(command, relevantDocs);\n  \n  if (potentialIssues.length > 0) {\n    return `Warning: Potential issues with command '${command}':\\n${potentialIssues.join('\\n')}\\n\\nRelevant documentation:\\n${relevantDocs.map(doc => doc.payload.content).join('\\n')}`;  \n  }\n  \n  return command; // Return original command if no issues\n}\n\nfunction validateTaskMasterCommand(command: string, docs: any[]): string[] {\n  const issues = [];\n  const commandParts = command.split(' ');\n  const commandType = commandParts[0];\n  \n  // Common error patterns based on documentation\n  if (commandType === 'create' && commandParts.length < 3) {\n    issues.push('Create command requires a task title');\n  }\n  \n  if (commandType === 'assign' && !/^\\d+$/.test(commandParts[1])) {\n    issues.push('Assign command requires a numeric task ID');\n  }\n  \n  // More validation rules based on documentation...\n  \n  return issues;\n}\n```\n\n2. Implement usage pattern learning:\n   - Track successful and failed TaskMaster commands\n   - Analyze patterns of errors and corrections\n   - Build usage model to suggest improvements\n\n3. Create TaskMaster command interceptor:\n```typescript\napp.post('/api/taskmaster/intercept', async (req, res) => {\n  const { command } = req.body;\n  const enhancedCommand = await enhanceTaskMasterCommand(command);\n  res.json({ enhancedCommand });\n});\n```\n\n4. Implement error prevention system:\n   - Validate commands against documentation\n   - Suggest corrections for common mistakes\n   - Provide relevant examples from documentation\n\n5. Create command suggestion system:\n```typescript\nasync function suggestTaskMasterCommand(context: string): Promise<string[]> {\n  const queryEmbedding = await embedQuery(context);\n  const relevantCommands = await searchVectors('task_context', queryEmbedding, 3);\n  \n  return relevantCommands.map(result => result.payload.command_example);\n}\n```",
+        "testStrategy": "1. Test pre-command context lookup with various TaskMaster commands\n2. Verify error detection for common TaskMaster mistakes\n3. Validate command suggestions in different contexts\n4. Test integration with main RAG system\n5. Benchmark performance impact on TaskMaster workflow\n6. Conduct user testing to measure error reduction\n7. Verify documentation retrieval accuracy for TaskMaster commands",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Meta-Agent Coordination",
+        "description": "Create a shared knowledge base and context sharing system for meta-agents to coordinate their work and share project context.",
+        "details": "1. Design meta-agent coordination system:\n```typescript\ninterface MetaAgentContext {\n  agentId: string;\n  specialization: string;\n  currentTask: string;\n  knowledgeBase: {\n    key: string;\n    value: any;\n    timestamp: Date;\n  }[];\n}\n\nclass MetaAgentCoordinator {\n  private agents: Map<string, MetaAgentContext> = new Map();\n  \n  registerAgent(agentId: string, specialization: string): void {\n    this.agents.set(agentId, {\n      agentId,\n      specialization,\n      currentTask: '',\n      knowledgeBase: []\n    });\n  }\n  \n  updateAgentTask(agentId: string, task: string): void {\n    const agent = this.agents.get(agentId);\n    if (agent) {\n      agent.currentTask = task;\n    }\n  }\n  \n  shareKnowledge(agentId: string, key: string, value: any): void {\n    const agent = this.agents.get(agentId);\n    if (agent) {\n      const existingIndex = agent.knowledgeBase.findIndex(item => item.key === key);\n      if (existingIndex >= 0) {\n        agent.knowledgeBase[existingIndex] = { key, value, timestamp: new Date() };\n      } else {\n        agent.knowledgeBase.push({ key, value, timestamp: new Date() });\n      }\n    }\n  }\n  \n  getSharedKnowledge(key: string): any[] {\n    return Array.from(this.agents.values())\n      .flatMap(agent => agent.knowledgeBase)\n      .filter(item => item.key === key)\n      .map(item => item.value);\n  }\n  \n  getAgentContext(agentId: string): MetaAgentContext | undefined {\n    return this.agents.get(agentId);\n  }\n  \n  getActiveAgents(): MetaAgentContext[] {\n    return Array.from(this.agents.values());\n  }\n}\n```\n\n2. Implement shared knowledge base:\n   - Create central repository for agent knowledge\n   - Implement versioning and conflict resolution\n   - Add metadata for knowledge source and confidence\n\n3. Create cross-agent context sharing:\n```typescript\napp.post('/api/agents/:agentId/context', (req, res) => {\n  const { agentId } = req.params;\n  const { task } = req.body;\n  metaAgentCoordinator.updateAgentTask(agentId, task);\n  res.json({ success: true });\n});\n\napp.post('/api/agents/:agentId/knowledge', (req, res) => {\n  const { agentId } = req.params;\n  const { key, value } = req.body;\n  metaAgentCoordinator.shareKnowledge(agentId, key, value);\n  res.json({ success: true });\n});\n\napp.get('/api/knowledge/:key', (req, res) => {\n  const { key } = req.params;\n  const knowledge = metaAgentCoordinator.getSharedKnowledge(key);\n  res.json({ knowledge });\n});\n```\n\n4. Implement workflow optimization:\n   - Track agent dependencies and handoffs\n   - Optimize task allocation based on context\n   - Reduce redundant context loading\n\n5. Create specialized context providers for different meta-agents:\n   - PRD-Parser context provider\n   - Scaffold-Generator context provider\n   - All-Purpose Pattern Agent context provider",
+        "testStrategy": "1. Test agent registration and task updates\n2. Verify knowledge sharing between agents\n3. Validate context retrieval for different agent types\n4. Test workflow optimization with multiple agents\n5. Benchmark performance with increasing number of agents\n6. Verify conflict resolution in shared knowledge\n7. Test integration with main RAG system",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Create Development Tools and Utilities",
+        "description": "Build development tools for documentation queries, code context lookup, and decision history tracking to enhance the development workflow.",
+        "details": "1. Implement documentation query tool:\n```typescript\nasync function queryDocumentation(query: string, filters: any = {}): Promise<any[]> {\n  const queryEmbedding = await embedQuery(query);\n  return searchVectors('project_docs', queryEmbedding, 5, filters);\n}\n\napp.post('/api/docs/query', async (req, res) => {\n  const { query, filters } = req.body;\n  const results = await queryDocumentation(query, filters);\n  res.json({ results });\n});\n```\n\n2. Create code context lookup tool:\n```typescript\nasync function getCodeContext(filePath: string, lineNumber: number): Promise<any> {\n  // Get file content\n  const fileContent = await fs.readFile(filePath, 'utf8');\n  const lines = fileContent.split('\\n');\n  \n  // Extract context around the specified line\n  const contextStart = Math.max(0, lineNumber - 10);\n  const contextEnd = Math.min(lines.length, lineNumber + 10);\n  const codeContext = lines.slice(contextStart, contextEnd).join('\\n');\n  \n  // Get related documentation\n  const queryEmbedding = await embedQuery(codeContext);\n  const relatedDocs = await searchVectors('code_snippets', queryEmbedding, 3, {\n    must: [\n      {\n        key: 'file_path',\n        match: {\n          value: filePath\n        }\n      }\n    ]\n  });\n  \n  return {\n    codeContext,\n    lineNumber,\n    filePath,\n    relatedDocs\n  };\n}\n\napp.get('/api/code/context', async (req, res) => {\n  const { filePath, lineNumber } = req.query;\n  const context = await getCodeContext(filePath as string, parseInt(lineNumber as string));\n  res.json(context);\n});\n```\n\n3. Implement decision history tracking:\n```typescript\ninterface Decision {\n  id: string;\n  timestamp: Date;\n  context: string;\n  options: string[];\n  selectedOption: string;\n  rationale: string;\n  outcome?: string;\n}\n\nclass DecisionTracker {\n  private decisions: Decision[] = [];\n  \n  recordDecision(decision: Omit<Decision, 'id' | 'timestamp'>): string {\n    const id = uuidv4();\n    const newDecision: Decision = {\n      ...decision,\n      id,\n      timestamp: new Date()\n    };\n    this.decisions.push(newDecision);\n    return id;\n  }\n  \n  updateOutcome(id: string, outcome: string): void {\n    const decision = this.decisions.find(d => d.id === id);\n    if (decision) {\n      decision.outcome = outcome;\n    }\n  }\n  \n  getDecisionHistory(): Decision[] {\n    return [...this.decisions].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());\n  }\n  \n  searchDecisions(query: string): Promise<Decision[]> {\n    // Use vector search to find relevant decisions\n    // Implementation depends on how decisions are stored in vector DB\n  }\n}\n```\n\n4. Create CLI tools for developers:\n```typescript\n#!/usr/bin/env node\nimport * as yargs from 'yargs';\nimport axios from 'axios';\n\nyargs\n  .command('docs <query>', 'Search project documentation', {}, async (argv) => {\n    const response = await axios.post('http://localhost:3000/api/docs/query', {\n      query: argv.query\n    });\n    console.table(response.data.results.map(r => ({\n      Source: r.payload.file_path,\n      Relevance: r.score.toFixed(2),\n      Preview: r.payload.content.substring(0, 100) + '...'\n    })));\n  })\n  .command('code <file> <line>', 'Get code context', {}, async (argv) => {\n    const response = await axios.get('http://localhost:3000/api/code/context', {\n      params: {\n        filePath: argv.file,\n        lineNumber: argv.line\n      }\n    });\n    console.log('Code Context:\\n', response.data.codeContext);\n    console.log('\\nRelated Documentation:');\n    response.data.relatedDocs.forEach(doc => {\n      console.log(`- ${doc.payload.file_path}: ${doc.payload.content.substring(0, 100)}...`);\n    });\n  })\n  .help()\n  .argv;\n```\n\n5. Implement web-based dashboard for project insights",
+        "testStrategy": "1. Test documentation query tool with various queries\n2. Verify code context lookup with different file types\n3. Validate decision history tracking and retrieval\n4. Test CLI tools in development environment\n5. Benchmark tool performance under load\n6. Verify integration with main RAG system\n7. Conduct user testing to measure productivity impact",
+        "priority": "low",
+        "dependencies": [
+          3,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement Monitoring and Observability",
+        "description": "Create a comprehensive monitoring system for tracking query analytics, performance metrics, accuracy, system health, and usage patterns.",
+        "details": "1. Implement query analytics tracking:\n```typescript\ninterface QueryAnalytics {\n  query: string;\n  timestamp: Date;\n  results: number;\n  executionTimeMs: number;\n  userFeedback?: 'relevant' | 'not_relevant';\n}\n\nclass AnalyticsTracker {\n  private queries: QueryAnalytics[] = [];\n  \n  trackQuery(query: string, results: number, executionTimeMs: number): void {\n    this.queries.push({\n      query,\n      timestamp: new Date(),\n      results,\n      executionTimeMs\n    });\n  }\n  \n  recordFeedback(query: string, feedback: 'relevant' | 'not_relevant'): void {\n    const recentQuery = this.queries\n      .filter(q => q.query === query)\n      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];\n      \n    if (recentQuery) {\n      recentQuery.userFeedback = feedback;\n    }\n  }\n  \n  getQueryStats(timeframe: 'day' | 'week' | 'month'): any {\n    const now = new Date().getTime();\n    const timeframeMs = {\n      day: 24 * 60 * 60 * 1000,\n      week: 7 * 24 * 60 * 60 * 1000,\n      month: 30 * 24 * 60 * 60 * 1000\n    }[timeframe];\n    \n    const relevantQueries = this.queries.filter(q => \n      now - q.timestamp.getTime() < timeframeMs\n    );\n    \n    return {\n      totalQueries: relevantQueries.length,\n      averageExecutionTime: relevantQueries.reduce((sum, q) => sum + q.executionTimeMs, 0) / relevantQueries.length,\n      feedbackStats: {\n        relevant: relevantQueries.filter(q => q.userFeedback === 'relevant').length,\n        notRelevant: relevantQueries.filter(q => q.userFeedback === 'not_relevant').length,\n        noFeedback: relevantQueries.filter(q => !q.userFeedback).length\n      },\n      popularQueries: this.getPopularQueries(relevantQueries)\n    };\n  }\n  \n  private getPopularQueries(queries: QueryAnalytics[]): {query: string, count: number}[] {\n    const queryCounts = queries.reduce((counts, q) => {\n      counts[q.query] = (counts[q.query] || 0) + 1;\n      return counts;\n    }, {} as Record<string, number>);\n    \n    return Object.entries(queryCounts)\n      .map(([query, count]) => ({ query, count }))\n      .sort((a, b) => b.count - a.count)\n      .slice(0, 10);\n  }\n}\n```\n\n2. Implement performance metrics tracking:\n```typescript\nclass PerformanceTracker {\n  private metrics: {\n    operation: string;\n    timestamp: Date;\n    durationMs: number;\n    resourceUsage?: {\n      cpu?: number;\n      memory?: number;\n    };\n  }[] = [];\n  \n  trackOperation(operation: string, durationMs: number, resourceUsage?: {cpu?: number, memory?: number}): void {\n    this.metrics.push({\n      operation,\n      timestamp: new Date(),\n      durationMs,\n      resourceUsage\n    });\n  }\n  \n  getPerformanceStats(): any {\n    // Group by operation\n    const operationStats = {};\n    \n    this.metrics.forEach(metric => {\n      if (!operationStats[metric.operation]) {\n        operationStats[metric.operation] = {\n          count: 0,\n          totalDuration: 0,\n          maxDuration: 0,\n          minDuration: Infinity\n        };\n      }\n      \n      const stats = operationStats[metric.operation];\n      stats.count++;\n      stats.totalDuration += metric.durationMs;\n      stats.maxDuration = Math.max(stats.maxDuration, metric.durationMs);\n      stats.minDuration = Math.min(stats.minDuration, metric.durationMs);\n    });\n    \n    // Calculate averages\n    Object.values(operationStats).forEach((stats: any) => {\n      stats.avgDuration = stats.totalDuration / stats.count;\n    });\n    \n    return operationStats;\n  }\n}\n```\n\n3. Implement accuracy tracking:\n```typescript\nclass AccuracyTracker {\n  private relevanceScores: {\n    query: string;\n    results: {\n      documentId: string;\n      relevanceScore: number;\n      userFeedback?: boolean;\n    }[];\n  }[] = [];\n  \n  recordQueryResults(query: string, results: any[]): void {\n    this.relevanceScores.push({\n      query,\n      results: results.map(r => ({\n        documentId: r.id,\n        relevanceScore: r.score\n      }))\n    });\n  }\n  \n  recordUserFeedback(query: string, documentId: string, relevant: boolean): void {\n    const queryRecord = this.relevanceScores.find(r => r.query === query);\n    if (queryRecord) {\n      const result = queryRecord.results.find(r => r.documentId === documentId);\n      if (result) {\n        result.userFeedback = relevant;\n      }\n    }\n  }\n  \n  calculateAccuracyMetrics(): any {\n    const resultsWithFeedback = this.relevanceScores\n      .flatMap(r => r.results)\n      .filter(r => r.userFeedback !== undefined);\n    \n    if (resultsWithFeedback.length === 0) {\n      return { precision: null, recall: null, f1Score: null };\n    }\n    \n    const truePositives = resultsWithFeedback.filter(r => r.userFeedback === true).length;\n    const falsePositives = resultsWithFeedback.filter(r => r.userFeedback === false).length;\n    \n    const precision = truePositives / (truePositives + falsePositives);\n    \n    // Note: Recall requires knowing all relevant documents, which is difficult\n    // This is a simplified calculation\n    const recall = 0.8; // Placeholder\n    \n    const f1Score = 2 * (precision * recall) / (precision + recall);\n    \n    return { precision, recall, f1Score };\n  }\n}\n```\n\n4. Implement system health monitoring:\n```typescript\nclass SystemHealthMonitor {\n  async checkVectorDbHealth(): Promise<boolean> {\n    try {\n      const client = new QdrantClient({ host: config.vectorDb.host, port: config.vectorDb.port });\n      await client.healthCheck();\n      return true;\n    } catch (error) {\n      console.error('Vector DB health check failed:', error);\n      return false;\n    }\n  }\n  \n  async checkEmbeddingService(): Promise<boolean> {\n    try {\n      await generateEmbedding('test query');\n      return true;\n    } catch (error) {\n      console.error('Embedding service check failed:', error);\n      return false;\n    }\n  }\n  \n  async getSystemStatus(): Promise<any> {\n    const vectorDbStatus = await this.checkVectorDbHealth();\n    const embeddingServiceStatus = await this.checkEmbeddingService();\n    \n    return {\n      status: vectorDbStatus && embeddingServiceStatus ? 'healthy' : 'degraded',\n      components: {\n        vectorDb: vectorDbStatus ? 'healthy' : 'unhealthy',\n        embeddingService: embeddingServiceStatus ? 'healthy' : 'unhealthy'\n      },\n      timestamp: new Date()\n    };\n  }\n}\n```\n\n5. Create dashboard for monitoring metrics:\n```typescript\napp.get('/api/monitoring/dashboard', async (req, res) => {\n  const queryStats = analyticsTracker.getQueryStats('week');\n  const performanceStats = performanceTracker.getPerformanceStats();\n  const accuracyMetrics = accuracyTracker.calculateAccuracyMetrics();\n  const systemStatus = await systemHealthMonitor.getSystemStatus();\n  \n  res.json({\n    queryStats,\n    performanceStats,\n    accuracyMetrics,\n    systemStatus\n  });\n});\n```",
+        "testStrategy": "1. Test query analytics tracking with sample queries\n2. Verify performance metrics collection and reporting\n3. Validate accuracy tracking with simulated user feedback\n4. Test system health monitoring with various system states\n5. Verify dashboard data aggregation and presentation\n6. Benchmark monitoring system overhead\n7. Test alerting functionality for system degradation",
+        "priority": "low",
+        "dependencies": [
+          3,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-23T00:32:42.430Z",
+      "updated": "2025-07-23T00:32:42.430Z",
+      "description": "Tasks for rag-system context"
+    }
+  },
+  "rag-memory-system": {
+    "tasks": [],
+    "metadata": {
+      "created": "2025-07-23T00:32:49.048Z",
+      "updated": "2025-07-23T00:32:49.049Z",
+      "description": "Tag created on 7/22/2025"
     }
   }
 }

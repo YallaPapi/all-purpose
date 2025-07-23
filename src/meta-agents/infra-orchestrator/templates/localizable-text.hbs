@@ -1,0 +1,134 @@
+{{!-- 
+Localizable Text Template
+Replaces hardcoded UI text with localization-ready alternatives
+Following All-Purpose Pattern: Eliminates hardcoded user-facing content
+--}}
+
+{{#if config.useI18nLibrary}}
+{{!-- Using i18n library (react-i18next, vue-i18n, etc.) --}}
+{{#ifEquals config.framework "react"}}
+import { useTranslation } from 'react-i18next';
+
+// Inside your component
+const { t } = useTranslation('{{config.namespace}}');
+const {{config.textVariable}} = t('{{config.textKey}}', {{#if config.interpolation}}{ {{config.interpolation}} }{{/if}});
+{{/ifEquals}}
+
+{{#ifEquals config.framework "vue"}}
+// Using vue-i18n
+const {{config.textVariable}} = this.$t('{{config.namespace}}.{{config.textKey}}'{{#if config.interpolation}}, { {{config.interpolation}} }{{/if}});
+{{/ifEquals}}
+
+{{#ifEquals config.framework "angular"}}
+// Using Angular i18n
+{{config.textVariable}} = this.translateService.get('{{config.namespace}}.{{config.textKey}}'{{#if config.interpolation}}, { {{config.interpolation}} }{{/if}});
+{{/ifEquals}}
+
+{{#ifEquals config.framework "vanilla"}}
+// Using custom i18n function
+const {{config.textVariable}} = i18n.t('{{config.namespace}}.{{config.textKey}}'{{#if config.interpolation}}, { {{config.interpolation}} }{{/if}});
+{{/ifEquals}}
+{{else}}
+{{!-- Simple config-based approach --}}
+// Config-driven text retrieval
+const textConfig = {{config.configPath}}?.{{config.configKey}} || {};
+const currentLocale = {{config.configPath}}?.locale || 'en';
+
+const {{config.textVariable}} = textConfig[currentLocale]?.{{config.textKey}} || 
+                                textConfig['en']?.{{config.textKey}} || 
+                                '{{config.fallbackText}}';
+
+{{#if config.enableInterpolation}}
+// Support for text interpolation
+function interpolateText(template: string, values: Record<string, any>): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    return values[key] || match;
+  });
+}
+
+{{#if config.interpolation}}
+const interpolatedText = interpolateText({{config.textVariable}}, { {{config.interpolation}} });
+{{/if}}
+{{/if}}
+{{/if}}
+
+{{!-- Add validation and fallback handling --}}
+{{#if config.enableValidation}}
+// Validation and fallback handling
+if (!{{config.textVariable}} || {{config.textVariable}}.trim() === '') {
+  console.warn('Missing translation for key: {{config.textKey}}');
+  {{config.textVariable}} = '{{config.fallbackText}}';
+}
+{{/if}}
+
+{{!-- Add type definitions for TypeScript --}}
+{{#ifEquals project.language "typescript"}}
+// Type definitions for text configuration
+interface LocalizationConfig {
+  locale: string;
+  {{config.configKey}}: {
+    [locale: string]: {
+      {{config.textKey}}: string;
+    };
+  };
+}
+
+{{#if config.enableInterpolation}}
+interface InterpolationValues {
+  {{#each config.interpolationKeys}}
+  {{this}}: string | number;
+  {{/each}}
+}
+{{/if}}
+{{/ifEquals}}
+
+{{!-- Generate JSX if React component --}}
+{{#ifEquals config.context "jsx"}}
+// JSX usage
+<{{config.elementType}}{{#if config.className}} className="{{config.className}}"{{/if}}>
+  {{{config.textVariable}}}
+</{{config.elementType}}>
+{{/ifEquals}}
+
+{{!-- Generate template if Vue component --}}
+{{#ifEquals config.context "vue-template"}}
+<!-- Vue template usage -->
+<{{config.elementType}}{{#if config.className}} class="{{config.className}}"{{/if}}>
+  {{ {{config.textVariable}} }}
+</{{config.elementType}}>
+{{/ifEquals}}
+
+/**
+ * Localizable text implementation
+ * 
+ * Add to your localization files:
+ * 
+ * en.json:
+ * {
+ *   "{{config.namespace}}": {
+ *     "{{config.textKey}}": "{{config.fallbackText}}"
+ *   }
+ * }
+ * 
+ * es.json:
+ * {
+ *   "{{config.namespace}}": {
+ *     "{{config.textKey}}": "[Spanish translation]"
+ *   }
+ * }
+ * 
+ * Or add to your config file (config.json):
+ * {
+ *   "locale": "en",
+ *   "{{config.configKey}}": {
+ *     "en": {
+ *       "{{config.textKey}}": "{{config.fallbackText}}"
+ *     },
+ *     "es": {
+ *       "{{config.textKey}}": "[Spanish translation]"
+ *     }
+ *   }
+ * }
+ * 
+ * This enables internationalization and follows All-Purpose Pattern
+ */

@@ -38,6 +38,7 @@ next-env.d.ts
 # API Keys and sensitive config
 .cursor/mcp.json
 .env*
+.claude/anthropic_key.*
 
 # TaskMaster reports and temp files
 .taskmaster/reports/*

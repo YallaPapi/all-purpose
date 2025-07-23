@@ -1,0 +1,72 @@
+{
+  "archived": "2025-07-22T23:15:00.000Z",
+  "description": "Archived lead generation system tasks - completed production system",
+  "note": "These tasks were for improving the existing lead generation system. The system is now production-ready and industry-agnostic. These tasks are archived to focus on meta-agent development.",
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Update N8N Workflow to Pass Industry Field",
+      "description": "Modify the N8N workflow file 'AI SDR (direct approach)(3).json' to include the 'industry' field in the API payload sent to the create-prototype endpoint.",
+      "details": "Locate the 'Build Instantly payload' node (around line 170) in the N8N workflow. Update the payload to add an 'industry' field, sourcing its value from '$json.body?.industry'. Ensure the field is correctly mapped and passed in all relevant API calls. Validate that the workflow does not break existing solar-specific flows and that the new field is optional for backward compatibility. Use N8N v1.24+ for best stability and JSONPath support.",
+      "testStrategy": "Test the workflow by triggering it with payloads for multiple industries (solar, business funding, insurance, real estate). Confirm that the 'industry' field is present in the outgoing API request. Validate that the workflow still functions for solar-only payloads.",
+      "priority": "high",
+      "dependencies": [],
+      "status": "done",
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Refactor Create-Prototype API to Accept Industry Parameter",
+      "description": "Update the create-prototype API (app/api/create-prototype/route.tsx) to accept and utilize the 'industry' parameter from the request payload.",
+      "details": "In the API route, extract the 'industry' parameter from the incoming request body. Ensure type safety using TypeScript (v5.4+). Validate the parameter and provide a default fallback (e.g., 'solar') if not present. Refactor all downstream logic to use the dynamic industry value. Maintain all existing API endpoints, Redis storage, and error handling as per current architecture.",
+      "testStrategy": "Send POST requests to the API with and without the 'industry' parameter. Confirm that the parameter is correctly parsed and available for prompt generation. Ensure API responses remain unchanged except for industry-specific content.",
+      "priority": "high",
+      "dependencies": [1],
+      "status": "done",
+      "subtasks": []
+    },
+    {
+      "id": 3,
+      "title": "Implement Dynamic Industry-Aware Prompt Generation",
+      "description": "Replace hardcoded solar prompts in the assistant instruction section with dynamic, industry-specific prompt templates.",
+      "details": "Create a prompt template system using a modern templating library (e.g., mustache@4.2.0 or handlebars@4.7.8) to generate prompts based on the 'industry' parameter. Store prompt templates for supported industries (solar, business funding, insurance, real estate, etc.) in a dedicated directory or as constants. Ensure the system falls back to a generic template if an industry is not recognized. Maintain UK idiom/British dialect consistency in all templates. Update the FAQ, training, and qualification flows to use the selected template. Avoid any changes to the overall conversation flow or architecture.",
+      "testStrategy": "Unit test the prompt generator with various industry inputs. Validate that the correct template is selected and rendered. Perform integration tests to ensure the assistant's first message, FAQ, and qualification flows are industry-appropriate. Regression test solar prompts for unchanged behavior.",
+      "priority": "high",
+      "dependencies": [2],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Select and Integrate a Templating Library",
+          "description": "Research, choose, and install a modern templating library (e.g., mustache@4.2.0 or handlebars@4.7.8) suitable for dynamic prompt generation. Integrate the library into the codebase, ensuring compatibility with the existing prompt generation system.",
+          "dependencies": [],
+          "details": "Evaluate templating libraries for features, performance, and maintainability. Add the chosen library to project dependencies and create a basic integration point for rendering prompt templates.\n<info added on 2025-07-22T02:08:33.289Z>\nSelected Mustache@4.2.0 as the templating library after evaluation of features, performance, and maintainability. Integrated the library into project dependencies and created a PromptTemplateManager class with support for industry-specific templates. Successfully replaced hardcoded instructions in the create-prototype API with the new dynamic template system. All compilation errors have been resolved, and the template system is now fully operational. The implementation is ready for expansion with additional industry-specific templates.\n</info added on 2025-07-22T02:08:33.289Z>",
+          "status": "pending",
+          "testStrategy": ""
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Update Documentation for Industry-Agnostic Functionality",
+      "description": "Revise internal and external documentation to reflect the new industry-agnostic capabilities and usage instructions.",
+      "details": "Update README, API docs, and workflow documentation to describe the new 'industry' parameter, supported industries, and prompt customization process. Include example payloads and instructions for extending industry support. Ensure documentation is clear for both technical and non-technical users. Use Markdown and follow current documentation best practices (e.g., using Docusaurus or MkDocs for static docs).",
+      "testStrategy": "Review documentation for completeness and accuracy. Have a team member unfamiliar with the changes follow the docs to implement a new industry template. Address any gaps or ambiguities.",
+      "priority": "medium",
+      "dependencies": [3],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 5,
+      "title": "Comprehensive Multi-Industry Testing and Validation",
+      "description": "Test the entire lead generation system end-to-end for all supported industries, ensuring no regressions or loss of functionality.",
+      "details": "Develop automated integration tests using Jest (v29+) and Playwright (v1.44+) to simulate the full workflow for each industry. Manually verify demo link generation, assistant creation, and email delivery for edge cases. Confirm that Redis storage, domain detection, calendly integration, and error handling remain intact. Document all test cases and results.",
+      "testStrategy": "Run automated and manual tests for each supported industry. Validate that all success criteria from the PRD are met, including unchanged solar functionality and correct industry-specific prompt behavior. Log and resolve any issues found.",
+      "priority": "high",
+      "dependencies": [4],
+      "status": "pending",
+      "subtasks": []
+    }
+  ]
+}

@@ -11,5 +11,6 @@
     "knowledge-graph",
     "task-master-ai"
   ],
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
+  "apiKeyHelper": "~/.claude/anthropic_key.sh"
 }
