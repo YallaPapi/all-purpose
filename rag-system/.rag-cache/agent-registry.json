@@ -1,6 +1,6 @@
 {
-  "coordinatorId": "coordinator-2943d105",
-  "lastUpdated": "2025-07-23T02:45:44.138Z",
+  "coordinatorId": "coordinator-789768bb",
+  "lastUpdated": "2025-07-24T01:56:45.963Z",
   "agents": {
     "prd-parser-001": {
       "agentId": "prd-parser-001",
@@ -11,18 +11,16 @@
         "task-generation",
         "requirements-parsing"
       ],
-      "status": "idle",
+      "status": "offline",
       "metadata": {
         "version": "1.0.0",
         "location": "src/meta-agents/prd-parser/",
         "outputs": [
           "tasks",
           "analysis"
-        ],
-        "currentTask": "865f0639-0f53-44d7-9ed2-d4f11dd9f8ea",
-        "progress": "analyzing-requirements"
+        ]
       },
-      "lastSeen": "2025-07-23T02:45:44.137Z"
+      "lastSeen": "2025-07-24T01:56:35.945Z"
     },
     "scaffold-gen-001": {
       "agentId": "scaffold-gen-001",
@@ -33,7 +31,7 @@
         "directory-structure",
         "template-processing"
       ],
-      "status": "idle",
+      "status": "offline",
       "metadata": {
         "version": "1.0.0",
         "location": "src/meta-agents/scaffold-generator/",
@@ -42,7 +40,7 @@
           "structure"
         ]
       },
-      "lastSeen": "2025-07-23T02:45:43.111Z"
+      "lastSeen": "2025-07-24T01:56:35.947Z"
     },
     "test-agent-001": {
       "agentId": "test-agent-001",
@@ -53,12 +51,12 @@
         "validation",
         "coordination-testing"
       ],
-      "status": "idle",
+      "status": "offline",
       "metadata": {
         "version": "1.0.0",
         "purpose": "testing-coordination"
       },
-      "lastSeen": "2025-07-23T02:45:43.112Z"
+      "lastSeen": "2025-07-24T01:56:35.948Z"
     }
   }
 }

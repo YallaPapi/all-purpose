@@ -1,0 +1,128 @@
+{
+  "agentName": "YouTube GitHub Cross-Reference System",
+  "description": "System that scrapes YouTube for Claude Code tutorials, extracts transcripts, and cross-references with GitHub repositories using semantic search",
+  "type": "web-application",
+  "framework": "Next.js",
+  "language": "TypeScript",
+  "features": [
+    "YouTube video scraping and transcript extraction",
+    "GitHub repository analysis and indexing", 
+    "Semantic search and cross-referencing",
+    "Web interface for exploration",
+    "Real-time data updates",
+    "API endpoints for programmatic access",
+    "Analytics and monitoring"
+  ],
+  "dependencies": [
+    "@upstash/vector",
+    "@upstash/redis", 
+    "openai",
+    "youtube-transcript",
+    "@octokit/rest",
+    "next",
+    "react",
+    "typescript",
+    "tailwindcss"
+  ],
+  "apiEndpoints": [
+    {
+      "path": "/api/youtube/search",
+      "method": "GET",
+      "description": "Search YouTube content"
+    },
+    {
+      "path": "/api/github/repos", 
+      "method": "GET",
+      "description": "Repository data"
+    },
+    {
+      "path": "/api/search",
+      "method": "POST", 
+      "description": "Combined semantic search"
+    },
+    {
+      "path": "/api/cross-reference",
+      "method": "POST",
+      "description": "Link tutorials to repositories"
+    },
+    {
+      "path": "/api/analytics",
+      "method": "GET",
+      "description": "Usage statistics"
+    }
+  ],
+  "database": {
+    "type": "Upstash Vector + Redis",
+    "collections": ["tutorials", "repositories", "cross_references"]
+  },
+  "deployment": {
+    "platform": "Vercel",
+    "type": "serverless"
+  },
+  "environment": {
+    "YOUTUBE_API_KEY": "required",
+    "GITHUB_TOKEN": "required", 
+    "OPENAI_API_KEY": "required",
+    "UPSTASH_VECTOR_REST_URL": "required",
+    "UPSTASH_VECTOR_REST_TOKEN": "required",
+    "UPSTASH_REDIS_REST_URL": "required",
+    "UPSTASH_REDIS_REST_TOKEN": "required"
+  },
+  "tasks": [
+    {
+      "id": "setup-project",
+      "title": "Set up Next.js project structure",
+      "priority": "high",
+      "description": "Initialize Next.js 15+ project with TypeScript and required dependencies"
+    },
+    {
+      "id": "youtube-scraper",
+      "title": "Implement YouTube scraper service",
+      "priority": "high", 
+      "description": "Build service to search and extract YouTube video data and transcripts"
+    },
+    {
+      "id": "github-analyzer",
+      "title": "Create GitHub repository analyzer",
+      "priority": "high",
+      "description": "Service to index and analyze GitHub repositories"
+    },
+    {
+      "id": "semantic-search",
+      "title": "Build semantic search engine",
+      "priority": "high",
+      "description": "Implement embedding generation and similarity search using OpenAI and Upstash Vector"
+    },
+    {
+      "id": "web-interface",
+      "title": "Develop web interface",
+      "priority": "medium",
+      "description": "Create React components for search, display, and exploration"
+    },
+    {
+      "id": "api-routes",
+      "title": "Implement API endpoints",
+      "priority": "medium", 
+      "description": "Build Next.js API routes for all system functionality"
+    },
+    {
+      "id": "cross-reference-engine",
+      "title": "Build cross-reference matching",
+      "priority": "medium",
+      "description": "Algorithm to match tutorials with relevant repositories"
+    },
+    {
+      "id": "testing-deployment",
+      "title": "Testing and deployment",
+      "priority": "low",
+      "description": "Comprehensive testing and production deployment setup"
+    }
+  ],
+  "metadata": {
+    "projectName": "youtube-github-cross-reference",
+    "generatedBy": "Infrastructure Orchestrator Agent",
+    "projectType": "YouTube Tutorial GitHub Cross-Reference System",
+    "timestamp": "2025-07-24T05:00:00.000Z",
+    "priority": "high"
+  }
+}

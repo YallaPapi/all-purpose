@@ -1,6 +1,6 @@
 {
-  "coordinatorId": "coordinator-2943d105",
-  "lastUpdated": "2025-07-23T02:45:44.139Z",
+  "coordinatorId": "coordinator-789768bb",
+  "lastUpdated": "2025-07-24T01:56:45.963Z",
   "knowledge": {
     "2929569c-2111-4cd6-ae7c-5700e4fba916": {
       "id": "2929569c-2111-4cd6-ae7c-5700e4fba916",
@@ -114,6 +114,75 @@
       "metadata": {
         "test": true
       }
+    },
+    "6f3c11f3-c124-4ce3-bb2a-6a351ee4d182": {
+      "id": "6f3c11f3-c124-4ce3-bb2a-6a351ee4d182",
+      "createdAt": "2025-07-24T01:56:35.950Z",
+      "lastUpdated": "2025-07-24T01:56:35.950Z",
+      "sourceAgentId": "prd-parser-001",
+      "knowledgeType": "pattern",
+      "title": "All-Purpose Pattern Recognition",
+      "content": "When analyzing PRDs, look for hardcoded limitations like arrays of specific industries. Replace with dynamic configuration patterns.",
+      "tags": [
+        "all-purpose-pattern",
+        "prd-analysis",
+        "anti-pattern"
+      ],
+      "relevantAgents": [
+        "scaffold-gen-001",
+        "test-agent-001"
+      ],
+      "confidence": 0.95,
+      "metadata": {
+        "discovered": "2025-07-24T01:56:35.950Z",
+        "applicability": "universal"
+      }
+    },
+    "f17b2b54-1d7b-4be8-b7ed-7c1cd78a5d1f": {
+      "id": "f17b2b54-1d7b-4be8-b7ed-7c1cd78a5d1f",
+      "createdAt": "2025-07-24T01:56:35.951Z",
+      "lastUpdated": "2025-07-24T01:56:35.951Z",
+      "sourceAgentId": "scaffold-gen-001",
+      "knowledgeType": "template",
+      "title": "Meta-Agent Directory Structure",
+      "content": "{\"structure\":{\"src/\":[\"main.ts\",\"config.ts\"],\"tests/\":[\"main.test.ts\"],\"docs/\":[\"README.md\",\"API.md\"]},\"patterns\":[\"TypeScript\",\"Jest\",\"Documentation\"]}",
+      "tags": [
+        "directory-structure",
+        "meta-agent",
+        "template"
+      ],
+      "relevantAgents": [
+        "prd-parser-001",
+        "test-agent-001"
+      ],
+      "confidence": 0.9,
+      "metadata": {
+        "templateVersion": "2.0",
+        "compatibility": "all-meta-agents"
+      }
+    },
+    "1e9d9e1a-e732-4476-8dad-7111e4205670": {
+      "id": "1e9d9e1a-e732-4476-8dad-7111e4205670",
+      "createdAt": "2025-07-24T01:56:35.952Z",
+      "lastUpdated": "2025-07-24T01:56:35.952Z",
+      "sourceAgentId": "test-agent-001",
+      "knowledgeType": "finding",
+      "title": "Coordination Performance Metrics",
+      "content": "Agent coordination performs best with 3-5 concurrent tasks. Higher concurrency leads to resource contention.",
+      "tags": [
+        "performance",
+        "coordination",
+        "optimization"
+      ],
+      "relevantAgents": [
+        "prd-parser-001",
+        "scaffold-gen-001"
+      ],
+      "confidence": 0.85,
+      "metadata": {
+        "testConditions": "local-environment",
+        "sampleSize": 100
+      }
     }
   },
   "tasks": {
@@ -145,9 +214,9 @@
     },
     "c78fdbca-2c4f-4dba-9245-43610593a614": {
       "taskId": "c78fdbca-2c4f-4dba-9245-43610593a614",
-      "status": "assigned",
+      "status": "cancelled",
       "createdAt": "2025-07-23T02:45:43.117Z",
-      "lastUpdated": "2025-07-23T02:45:43.117Z",
+      "lastUpdated": "2025-07-24T01:56:45.962Z",
       "requestingAgentId": "prd-parser-001",
       "taskType": "generation",
       "description": "Generate scaffold for All-Purpose Pattern Agent",
@@ -159,13 +228,14 @@
         "865f0639-0f53-44d7-9ed2-d4f11dd9f8ea"
       ],
       "priority": "medium",
-      "assignedAgentId": "scaffold-gen-001"
+      "assignedAgentId": "scaffold-gen-001",
+      "error": "Agent went offline"
     },
     "c7fe65e6-f902-42a1-b556-d2948cfed2b1": {
       "taskId": "c7fe65e6-f902-42a1-b556-d2948cfed2b1",
-      "status": "assigned",
+      "status": "cancelled",
       "createdAt": "2025-07-23T02:45:43.119Z",
-      "lastUpdated": "2025-07-23T02:45:43.119Z",
+      "lastUpdated": "2025-07-24T01:56:45.962Z",
       "requestingAgentId": "scaffold-gen-001",
       "taskType": "coordination",
       "description": "Coordinate testing of new meta-agent",
@@ -177,7 +247,8 @@
         "c78fdbca-2c4f-4dba-9245-43610593a614"
       ],
       "priority": "low",
-      "assignedAgentId": "test-agent-001"
+      "assignedAgentId": "test-agent-001",
+      "error": "Agent went offline"
     }
   }
 }

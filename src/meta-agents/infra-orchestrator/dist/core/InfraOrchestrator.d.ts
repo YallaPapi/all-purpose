@@ -38,5 +38,13 @@ export declare class InfraOrchestrator {
     private updateRAGKnowledge;
     private coordinateMetaAgents;
     private generateAutomaticTasks;
+    /**
+     * Generate status documentation with Mermaid diagrams
+     */
+    private generateStatusDocumentation;
+    /**
+     * Update environment documentation based on audit findings
+     */
+    private updateEnvironmentDocs;
 }
 //# sourceMappingURL=InfraOrchestrator.d.ts.map
