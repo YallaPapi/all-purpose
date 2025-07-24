@@ -282,7 +282,7 @@ export class ObservabilityCollector extends EventEmitter {
           newState: task.status,
           duration,
           priority: task.priority,
-          relevantAgents: [task.requestingAgentId, task.assignedAgentId].filter(Boolean),
+          relevantAgents: [task.requestingAgentId, task.assignedAgentId].filter(Boolean) as string[],
           tags: ['task', 'update', task.status, task.taskType]
         }
       });
@@ -570,7 +570,9 @@ export class ObservabilityCollector extends EventEmitter {
   async getCurrentMetrics(): Promise<CoordinationMetrics | null> {
     try {
       const metricsData = await this.redis.get('observability:metrics:current');
-      return metricsData ? JSON.parse(metricsData) : null;
+      if (!metricsData) return null;
+      const parsed = typeof metricsData === 'string' ? JSON.parse(metricsData) : metricsData;
+      return parsed && typeof parsed === 'object' && 'totalEvents' in parsed ? parsed as CoordinationMetrics : null;
     } catch (error) {
       observabilityLogger.error('Failed to get current metrics', {
         error: error instanceof Error ? error.message : String(error)

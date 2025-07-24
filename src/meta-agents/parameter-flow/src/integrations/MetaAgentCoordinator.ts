@@ -525,7 +525,7 @@ export class MetaAgentCoordinator extends EventEmitter {
     
     // Additional discovery mechanisms would go here
     // - Network discovery
-    - Service registry lookup
+    // - Service registry lookup
     // - Configuration-based discovery
   }
 

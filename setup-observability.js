@@ -8,10 +8,41 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 
-// Import the coordination system
-const { createMetaAgentCoordinator } = require('./rag-system/src/coordination/metaAgentCoordinator.ts');
-const { createObservabilityCollector } = require('./rag-system/src/observability/ObservabilityCollector.ts');
+// Load environment variables from .env.local
+function loadEnvFile() {
+  try {
+    const envPath = path.join(__dirname, '.env.local');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf8');
+      const lines = envContent.split('\n');
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine && !trimmedLine.startsWith('#')) {
+          const [key, ...valueParts] = trimmedLine.split('=');
+          if (key && valueParts.length > 0) {
+            const value = valueParts.join('=').trim();
+            process.env[key.trim()] = value;
+          }
+        }
+      }
+      console.log('✅ Environment variables loaded from .env.local');
+    } else {
+      console.warn('⚠️  .env.local not found, using existing environment variables');
+    }
+  } catch (error) {
+    console.error('❌ Failed to load .env.local:', error.message);
+  }
+}
+
+// Load environment variables before importing modules
+loadEnvFile();
+
+// Import the coordination system (using compiled JS files)
+const { createMetaAgentCoordinator } = require('./rag-system/dist/coordination/metaAgentCoordinator.js');
+const { createObservabilityCollector } = require('./rag-system/dist/observability/ObservabilityCollector.js');
 
 async function setupObservabilitySystem() {
   try {

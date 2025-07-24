@@ -514,13 +514,13 @@ export class IntegrationArchitectureBuilder extends EventEmitter {
     // Generate component registry
     files.push({
       filePath: 'src/ComponentRegistry.ts',
-      content: await this.generateComponentRegistryCode(topology)
+      content: await this.generateComponentAdapterCode(topology)
     });
     
     // Generate connection manager
     files.push({
       filePath: 'src/ConnectionManager.ts',
-      content: await this.generateConnectionManagerCode(topology)
+      content: await this.generateConnectionHandlerCode(topology)
     });
     
     return files;

@@ -345,9 +345,9 @@ export interface TemplateEngineFactoryCapabilities {
   
   // Performance capabilities - NO limitations
   performance: {
-    maxConcurrentSystems: 'unlimited';
-    maxSystemComplexity: 'unlimited';
-    maxOutputSize: 'unlimited';
+    maxConcurrentSystems: number | 'unlimited';
+    maxSystemComplexity: number | 'unlimited';
+    maxOutputSize: number | 'unlimited';
     scalingSupport: string[];
   };
   

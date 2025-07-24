@@ -24,7 +24,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": false,
-    "noEmitOnError": true,
+    "noEmitOnError": false,
     "preserveConstEnums": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true

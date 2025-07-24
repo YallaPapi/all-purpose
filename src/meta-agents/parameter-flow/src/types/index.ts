@@ -766,9 +766,9 @@ export interface ParameterFlowCapabilities {
   
   // Performance capabilities - NO limitations
   performance: {
-    maxConcurrentIntegrations: 'unlimited';
-    maxDataThroughput: 'unlimited';
-    maxTransformationComplexity: 'unlimited';
+    maxConcurrentIntegrations: number | 'unlimited';
+    maxDataThroughput: number | 'unlimited';
+    maxTransformationComplexity: number | 'unlimited';
     scalingSupport: string[];
   };
   
@@ -1091,7 +1091,7 @@ export interface PerformanceAnalysis {
 
 // Strategy and configuration types
 export interface CachingStrategy {
-  strategyType: 'none' | 'memory' | 'disk' | 'distributed';
+  strategyType: 'none' | 'memory' | 'disk' | 'distributed' | 'custom';
   configuration: Record<string, any>;
   ttl?: number;
   maxSize?: number;

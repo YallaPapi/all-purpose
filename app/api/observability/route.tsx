@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
 
       case 'history':
         const historyData = await redis.lrange('observability:metrics:history', 0, 19);
-        const parsedHistory = historyData.map(h => JSON.parse(h)).reverse();
+        const parsedHistory = historyData.map(h => typeof h === 'string' ? JSON.parse(h) : h).reverse();
         
         return NextResponse.json({
           success: true,
@@ -265,7 +265,7 @@ function groupEventsByTimeWindow(events: any[], windowMs: number) {
 async function getSystemHealth() {
   try {
     const metricsData = await redis.get('observability:metrics:current');
-    const metrics = metricsData ? JSON.parse(metricsData) : null;
+    const metrics = metricsData ? (typeof metricsData === 'string' ? JSON.parse(metricsData) : metricsData) : null;
     
     if (!metrics) {
       return {
