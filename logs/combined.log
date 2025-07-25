@@ -37175,3 +37175,7 @@
 {"activeAgents":0,"level":"debug","message":"[OBSERVABILITY] System metrics collected","systemHealth":"critical","timestamp":"2025-07-24 23:14:34:1434","totalEvents":16}
 {"activeAgents":0,"level":"debug","message":"[OBSERVABILITY] System metrics collected","systemHealth":"critical","timestamp":"2025-07-24 23:14:34:1434","totalEvents":16}
 {"activeAgents":0,"level":"debug","message":"[OBSERVABILITY] System metrics collected","systemHealth":"critical","timestamp":"2025-07-24 23:14:39:1439","totalEvents":16}
+{"activeAgents":0,"level":"debug","message":"[OBSERVABILITY] System metrics collected","systemHealth":"critical","timestamp":"2025-07-24 23:14:43:1443","totalEvents":20}
+{"activeAgents":0,"level":"debug","message":"[OBSERVABILITY] System metrics collected","systemHealth":"critical","timestamp":"2025-07-24 23:14:44:1444","totalEvents":16}
+{"activeAgents":0,"level":"debug","message":"[OBSERVABILITY] System metrics collected","systemHealth":"critical","timestamp":"2025-07-24 23:14:44:1444","totalEvents":16}
+{"activeAgents":0,"level":"debug","message":"[OBSERVABILITY] System metrics collected","systemHealth":"critical","timestamp":"2025-07-24 23:14:49:1449","totalEvents":16}

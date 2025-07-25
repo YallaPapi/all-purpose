@@ -57,6 +57,10 @@ async function updateMetaAgentDocumentation() {
     {
       path: '../meta-agents/thirty-minute-rule/README.md',
       name: '30-Minute Rule Agent - The EFFICIENCY BUILDER'
+    },
+    {
+      path: '../../docs/standards/COMMENTING_GUIDELINES.md',
+      name: 'Commenting Guidelines - Code Standards and Best Practices'
     }
   ];
 
