@@ -1,0 +1,37 @@
+{
+  "id": "configurable-endpoint",
+  "name": "Configurable API Endpoint",
+  "description": "Replaces hardcoded API endpoints with configuration-driven alternatives",
+  "category": "hardcoded-endpoint",
+  "version": "1.0.0",
+  "author": "All-Purpose Meta-Agent Factory",
+  "created": "2025-07-23T03:00:00.000Z",
+  "updated": "2025-07-23T03:00:00.000Z",
+  "tags": ["endpoint", "api", "configuration", "infrastructure", "environment", "all-purpose-pattern"],
+  "examples": [
+    {
+      "name": "API Service Call",
+      "description": "Replace hardcoded API URL with environment-aware configuration",
+      "context": {
+        "config": {
+          "endpointVariable": "apiEndpoint",
+          "configPath": "config.services",
+          "configKey": "paymentApi",
+          "fallbackUrl": "https://api.example.com",
+          "enableValidation": true,
+          "supportEnvironments": true,
+          "generateApiCall": true,
+          "functionName": "processPayment",
+          "parameters": "paymentData: PaymentRequest",
+          "method": "POST",
+          "requiresAuth": true,
+          "hasBody": true,
+          "bodyParameter": "paymentData"
+        },
+        "project": {
+          "language": "typescript"
+        }
+      }
+    }
+  ]
+}

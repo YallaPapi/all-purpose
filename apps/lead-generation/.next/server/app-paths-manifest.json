@@ -1,0 +1,10 @@
+{
+  "/admin/observability/page": "app/admin/observability/page.js",
+  "/admin/observability/working/page": "app/admin/observability/working/page.js",
+  "/api/meta-agent-factory/progress/[requestId]/route": "app/api/meta-agent-factory/progress/[requestId]/route.js",
+  "/api/meta-agent-factory/route": "app/api/meta-agent-factory/route.js",
+  "/api/meta-agent-factory/status/[requestId]/route": "app/api/meta-agent-factory/status/[requestId]/route.js",
+  "/api/observability/route": "app/api/observability/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/meta-agent-factory/page": "app/meta-agent-factory/page.js"
+}

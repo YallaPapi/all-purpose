@@ -1,0 +1,52 @@
+{
+  "name": "scaffold-generator",
+  "version": "1.0.0",
+  "description": "Generate consistent directory structures and base files for new agents based on parsed task lists from the PRD-Parser",
+  "main": "src/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [
+    "scaffold",
+    "generator",
+    "agent",
+    "prd-parser",
+    "meta-agent"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^14.0.0",
+    "fs-extra": "^11.3.0",
+    "handlebars": "^4.7.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "eslint": "^9.31.0",
+    "jest": "^30.0.5"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "lib/**/*.js",
+      "src/**/*.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80
+      }
+    }
+  }
+}

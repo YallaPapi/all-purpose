@@ -1,0 +1,59 @@
+{{!-- 
+Configurable Constant Template
+Replaces hardcoded limitation constants with configuration-driven alternatives
+Following All-Purpose Pattern: Eliminates hardcoded business limits
+--}}
+
+{{!-- Generate config-driven constant access --}}
+const {{config.constantName}} = {{config.configPath}}?.{{config.configKey}} ?? {{config.defaultValue}};
+
+{{!-- Add type validation if needed --}}
+{{#if config.enableValidation}}
+{{#if config.expectedType}}
+if (typeof {{config.constantName}} !== '{{config.expectedType}}') {
+  console.warn('Configuration error: {{config.configKey}} should be {{config.expectedType}}, using default value {{config.defaultValue}}');
+  {{config.constantName}} = {{config.defaultValue}};
+}
+{{/if}}
+
+{{#if config.minValue}}
+if ({{config.constantName}} < {{config.minValue}}) {
+  console.warn('Configuration error: {{config.configKey}} below minimum value {{config.minValue}}, using minimum');
+  {{config.constantName}} = {{config.minValue}};
+}
+{{/if}}
+
+{{#if config.maxValue}}
+if ({{config.constantName}} > {{config.maxValue}}) {
+  console.warn('Configuration error: {{config.configKey}} exceeds maximum value {{config.maxValue}}, using maximum');
+  {{config.constantName}} = {{config.maxValue}};
+}
+{{/if}}
+{{/if}}
+
+{{!-- Add type definition for TypeScript --}}
+{{#ifEquals project.language "typescript"}}
+// Type definition for configuration
+interface {{pascalCase config.constantName}}Config {
+  {{config.configKey}}: {{#if config.expectedType}}{{config.expectedType}}{{else}}number{{/if}};
+}
+{{/ifEquals}}
+
+{{!-- Usage example in comments --}}
+/**
+ * Configuration-driven {{config.constantName}} implementation
+ * 
+ * Add to your config file (config.json, .env, or similar):
+ * {
+ *   "{{config.configKey}}": {{config.defaultValue}}
+ * }
+ * 
+ * {{#if config.description}}
+ * {{config.description}}
+ * {{/if}}
+ * 
+ * This eliminates hardcoded business limitations and follows All-Purpose Pattern
+ * Default: {{config.defaultValue}}
+ * {{#if config.minValue}}Min: {{config.minValue}}{{/if}}
+ * {{#if config.maxValue}}Max: {{config.maxValue}}{{/if}}
+ */

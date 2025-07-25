@@ -1,0 +1,29 @@
+{
+  "id": "dynamic-array-config",
+  "name": "Dynamic Array Configuration",
+  "description": "Replaces hardcoded arrays with configuration-driven alternatives",
+  "category": "hardcoded-array",
+  "version": "1.0.0",
+  "author": "All-Purpose Meta-Agent Factory",
+  "created": "2025-07-23T03:00:00.000Z",
+  "updated": "2025-07-23T03:00:00.000Z",
+  "tags": ["array", "configuration", "dynamic", "all-purpose-pattern"],
+  "examples": [
+    {
+      "name": "Industry List Replacement",
+      "description": "Replace hardcoded industry array with config-driven approach",
+      "context": {
+        "config": {
+          "arrayName": "industries",
+          "configPath": "config.business",
+          "configKey": "allowedIndustries",
+          "enableValidation": true,
+          "fallbackArray": ["technology", "healthcare", "finance"]
+        },
+        "project": {
+          "language": "typescript"
+        }
+      }
+    }
+  ]
+}

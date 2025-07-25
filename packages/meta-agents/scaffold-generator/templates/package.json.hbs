@@ -1,0 +1,70 @@
+{
+  "name": "{{kebabCase agentName}}",
+  "version": "1.0.0",
+  "description": "{{description}}",
+  "main": "main.js",
+  "bin": {
+    "{{kebabCase agentName}}": "./main.js"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "dev": "node main.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [
+    "agent",
+    "{{kebabCase agentName}}",
+    "automation",
+    "scaffold-generated"{{#each metadata.keywords}},
+    "{{this}}"{{/each}}
+  ],
+  "author": "{{#if metadata.author}}{{metadata.author}}{{else}}Scaffold Generator{{/if}}",
+  "license": "{{#if metadata.license}}{{metadata.license}}{{else}}ISC{{/if}}",
+  "dependencies": {
+    "fs-extra": "^11.3.0",
+    "chalk": "^4.1.2"
+  },
+  "devDependencies": {
+    "jest": "^30.0.5",
+    "eslint": "^9.31.0",
+    "@eslint/js": "^9.31.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!jest.config.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  },
+  "files": [
+    "main.js",
+    "config/",
+    "templates/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "{{#if metadata.repository}}{{metadata.repository}}{{else}}# Add your repository URL here{{/if}}"
+  },
+  "bugs": {
+    "url": "{{#if metadata.bugsUrl}}{{metadata.bugsUrl}}{{else}}# Add your issues URL here{{/if}}"
+  },
+  "homepage": "{{#if metadata.homepage}}{{metadata.homepage}}{{else}}# Add your homepage URL here{{/if}}"
+}

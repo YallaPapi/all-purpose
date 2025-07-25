@@ -1,0 +1,59 @@
+{
+  "project": {
+    "name": "YouTube Tutorial GitHub Repo Cross-Reference System",
+    "type": "web-application",
+    "description": "System that scrapes YouTube for Claude Code tutorials, extracts transcripts, and cross-references with GitHub repositories using semantic search",
+    "priority": "high",
+    "requirements": {
+      "framework": "Next.js",
+      "database": "Upstash Vector + Redis",
+      "apis": ["YouTube Data API", "GitHub API"],
+      "deployment": "Vercel",
+      "features": [
+        "YouTube video scraping and transcript extraction",
+        "GitHub repository analysis and indexing",
+        "Semantic search and cross-referencing",
+        "Web interface for exploration",
+        "Real-time data updates"
+      ]
+    }
+  },
+  "orchestration": {
+    "agents": {
+      "prd-parser": {
+        "priority": 1,
+        "task": "Parse and analyze YouTube-GitHub system requirements"
+      },
+      "scaffold-generator": {
+        "priority": 2,
+        "task": "Generate Next.js project structure with API routes"
+      },
+      "template-engine-factory": {
+        "priority": 3,
+        "task": "Create YouTube scraper and GitHub analysis components"
+      },
+      "five-document-framework": {
+        "priority": 4,
+        "task": "Generate comprehensive API documentation"
+      },
+      "parameter-flow": {
+        "priority": 5,
+        "task": "Optimize data flow between YouTube and GitHub services"
+      }
+    }
+  },
+  "compliance": {
+    "dataRetention": "30 days",
+    "apiRateLimits": {
+      "youtube": "10000 requests/day",
+      "github": "5000 requests/hour"
+    },
+    "security": ["API key rotation", "HTTPS only", "Input validation"]
+  },
+  "outputs": {
+    "codeGeneration": true,
+    "documentation": true,
+    "testing": true,
+    "deployment": true
+  }
+}

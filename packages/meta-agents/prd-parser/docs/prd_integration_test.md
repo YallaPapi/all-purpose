@@ -1,0 +1,1 @@
+# Test PRD\n\n## Requirements\n\n- Build a test component\n- Add validation logic\n- Create documentation\n\n## Acceptance Criteria\n\n- Component should handle errors gracefully\n- Documentation should be comprehensive

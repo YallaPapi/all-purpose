@@ -1,0 +1,442 @@
+# Debugging Guide - {{project.name}}
+
+> **Systematic Debugging Methodology for {{project.name}}**  
+> **Last Updated**: {{helpers.formatDate timestamp}}  
+> **30-Minute Rule Implementation**
+
+---
+
+## 🎯 **The 30-Minute Rule**
+
+### Core Principle
+**When debugging any issue for 30 minutes without progress:**
+
+1. ⏰ **Set explicit timer** - don't rely on feeling
+2. ⏰ **Timer expires? STOP immediately** - no "just one more try"  
+3. 🤔 **Ask root question**: "What am I actually trying to achieve?"
+4. 🛤️ **Find alternative path** to same result
+5. 📝 **Document the issue** and chosen alternative
+
+### Why 30 Minutes?
+- Prevents endless debugging loops that destroy productivity
+- Forces systematic thinking instead of random attempts
+- Maintains forward momentum on project goals
+- Builds discipline for scalable development practices
+
+---
+
+## 🚨 **Emergency Debug Endpoints**
+
+{{#if project.integrations.apis}}
+{{#each project.integrations.apis}}
+{{#if this.endpoints}}
+### {{this.name}} Debug Endpoints
+{{#each this.endpoints}}
+- **{{this}}** - {{#if @first}}Primary health check{{else}}Component status{{/if}}
+{{/each}}
+{{/if}}
+{{/each}}
+{{else}}
+### System Debug Endpoints
+- **GET /api/debug** - System health and configuration check
+- **GET /api/health** - Application health status  
+- **GET /api/env** - Environment variables validation (non-sensitive)
+{{/if}}
+
+### Debug Endpoint Usage
+```bash
+# Quick health check
+curl {{#if project.environments.development.url}}{{project.environments.development.url}}{{else}}http://localhost:3000{{/if}}/api/debug
+
+# Get detailed system info
+curl {{#if project.environments.development.url}}{{project.environments.development.url}}{{else}}http://localhost:3000{{/if}}/api/health
+```
+
+---
+
+## 🔧 **Technology-Specific Debugging**
+
+{{#if project.technologies.frontend}}
+### Frontend Debugging ({{joinArray project.technologies.frontend}})
+
+#### React/Next.js Issues
+```bash
+# Clear Next.js cache
+rm -rf .next
+
+# Clear dependency cache
+rm -rf node_modules package-lock.json
+npm install
+
+# Development mode with detailed errors
+npm run dev -- --inspect
+```
+
+#### Common Frontend Issues
+1. **Hydration Errors**: Check server/client rendering differences
+2. **Module Not Found**: Verify import paths and case sensitivity
+3. **Build Failures**: Check TypeScript errors and ESLint issues
+4. **Performance Issues**: Use React DevTools Profiler
+{{/if}}
+
+{{#if project.technologies.backend}}
+### Backend Debugging ({{joinArray project.technologies.backend}})
+
+#### Node.js/Express Issues
+```bash
+# Debug mode with inspector
+node --inspect server.js
+# or
+npm run dev -- --inspect
+
+# Memory usage monitoring  
+node --inspect --max-old-space-size=4096 server.js
+```
+
+#### Common Backend Issues
+1. **Port Already in Use**: `lsof -ti:3000 | xargs kill -9`
+2. **Database Connection**: Check connection strings and network
+3. **Memory Leaks**: Use `--inspect` and Chrome DevTools
+4. **API Response Issues**: Validate request/response middleware
+{{/if}}
+
+{{#if project.technologies.database}}
+### Database Debugging ({{joinArray project.technologies.database}})
+
+{{#each project.technologies.database}}
+{{#ifEquals this "MongoDB"}}
+#### MongoDB Issues
+```bash
+# Check connection
+mongosh {{#if project.environments.development.variables.DATABASE_URL}}{{project.environments.development.variables.DATABASE_URL}}{{else}}"mongodb://localhost:27017/{{project.name}}"{{/if}}
+
+# Check collections and indexes
+db.collection.getIndexes()
+db.stats()
+```
+{{/ifEquals}}
+
+{{#ifEquals this "PostgreSQL"}}
+#### PostgreSQL Issues
+```bash
+# Check connection
+psql {{#if project.environments.development.variables.DATABASE_URL}}{{project.environments.development.variables.DATABASE_URL}}{{else}}"postgresql://localhost:5432/{{project.name}}"{{/if}}
+
+# Check table schemas and indexes
+\dt
+\d table_name
+```
+{{/ifEquals}}
+{{/each}}
+
+#### Common Database Issues
+1. **Connection Timeout**: Verify network and credentials
+2. **Query Performance**: Analyze slow queries and missing indexes  
+3. **Migration Errors**: Check schema versions and rollback procedures
+4. **Lock Issues**: Monitor active connections and long-running queries
+{{/if}}
+
+---
+
+## 🔍 **Systematic Debugging Procedures**
+
+### Step 1: Issue Identification
+1. **Reproduce Consistently**: Can you make it happen reliably?
+2. **Error Message Analysis**: What exactly does the error say?
+3. **Scope Definition**: Is it frontend, backend, database, or integration?
+4. **Environment Check**: Does it happen in all environments?
+
+### Step 2: Information Gathering (Max 10 minutes)
+```bash
+# System information
+node --version
+npm --version
+{{#if project.technologies.database}}
+# Database status
+{{#each project.technologies.database}}
+{{#ifEquals this "MongoDB"}}
+mongosh --eval "db.runCommand({serverStatus: 1})"
+{{/ifEquals}}
+{{#ifEquals this "PostgreSQL"}}  
+psql -c "SELECT version();"
+{{/ifEquals}}
+{{/each}}
+{{/if}}
+
+# Application logs
+{{#if project.technologies.frontend}}
+# Browser console errors
+# Next.js logs: .next/trace
+{{/if}}
+{{#if project.technologies.backend}}
+# Server logs
+npm run logs
+{{/if}}
+```
+
+### Step 3: Isolation Testing (Max 15 minutes)
+1. **Component Isolation**: Test individual parts separately
+2. **Minimal Reproduction**: Create smallest possible failing example
+3. **Environment Variables**: Verify all required variables are set
+4. **Network Connectivity**: Test external API connections
+
+### Step 4: Alternative Approach (Max 5 minutes)
+If 30-minute timer expires:
+1. **Stop current debugging approach immediately**
+2. **Identify core objective**: What were you trying to achieve?
+3. **Find alternative implementation**: Different library, approach, or workaround
+4. **Document the issue** for future investigation
+5. **Proceed with alternative** to maintain momentum
+
+---
+
+## 🔄 **Common Issue Patterns & Solutions**
+
+{{#if project.technologies.frontend}}
+### Frontend Patterns
+
+#### Pattern: "Cannot read property of undefined"
+**Solution Steps**:
+1. Add null checks: `data?.property`
+2. Use optional chaining throughout
+3. Implement loading states
+4. Validate API response structure
+
+#### Pattern: "Module not found" errors
+**Solution Steps**:
+1. Check import path case sensitivity
+2. Verify package.json dependencies
+3. Clear node_modules and reinstall
+4. Check TypeScript path mapping
+{{/if}}
+
+{{#if project.technologies.backend}}
+### Backend Patterns
+
+#### Pattern: "EADDRINUSE" port errors
+**Solution Steps**:
+```bash
+# Find and kill process
+lsof -ti:{{#if project.environments.development.variables.PORT}}{{project.environments.development.variables.PORT}}{{else}}3000{{/if}} | xargs kill -9
+
+# Use different port
+PORT={{#if project.environments.development.variables.PORT}}{{add project.environments.development.variables.PORT 1}}{{else}}3001{{/if}} npm run dev
+```
+
+#### Pattern: Database connection timeouts
+**Solution Steps**:
+1. Verify database service is running
+2. Check connection string format
+3. Test network connectivity: `telnet host port`
+4. Validate credentials and permissions
+{{/if}}
+
+{{#if project.integrations.apis}}
+### Integration Patterns
+
+{{#each project.integrations.apis}}
+#### Pattern: {{this.name}} API Issues
+**Solution Steps**:
+1. Check API key validity and permissions
+2. Verify endpoint URLs and methods
+3. Test with curl/Postman directly
+4. Check rate limiting and quotas
+5. Implement proper error handling and retries
+
+{{/each}}
+{{/if}}
+
+### Universal Patterns
+
+#### Pattern: "It works on my machine"
+**Solution Steps**:
+1. Compare environment variables across environments
+2. Check Node.js/npm versions
+3. Verify database schema versions
+4. Test with fresh environment setup
+
+#### Pattern: Intermittent failures
+**Solution Steps**:
+1. Add comprehensive logging
+2. Implement health checks
+3. Monitor resource usage (CPU, memory)
+4. Check for race conditions and timing issues
+
+---
+
+## 🛠️ **Debug Tools & Commands**
+
+### Essential Debug Commands
+```bash
+# Process monitoring
+ps aux | grep node
+htop
+
+# Network debugging
+netstat -tulpn
+curl -v {{#if project.environments.development.url}}{{project.environments.development.url}}{{else}}http://localhost:3000{{/if}}/api/health
+
+# File system debugging
+ls -la
+pwd
+which node
+
+# Git debugging  
+git status
+git log --oneline -10
+git diff
+```
+
+### Logging Best Practices
+```javascript
+// Structured logging
+console.log('Debug info:', {
+  timestamp: new Date().toISOString(),
+  component: 'componentName',
+  action: 'actionName', 
+  data: relevantData,
+  error: error?.message
+});
+
+// Environment-based logging
+if (process.env.NODE_ENV === 'development') {
+  console.debug('Debug details:', debugInfo);
+}
+```
+
+---
+
+## 🚀 **Recovery Procedures**
+
+### Complete Environment Reset
+```bash
+# Nuclear option - complete reset
+rm -rf node_modules package-lock.json
+{{#if project.technologies.frontend}}
+rm -rf .next dist build
+{{/if}}
+npm install
+npm run build
+```
+
+### Database Recovery
+{{#if project.technologies.database}}
+```bash
+# Backup first!
+{{#each project.technologies.database}}
+{{#ifEquals this "MongoDB"}}
+mongodump --out backup-$(date +%Y%m%d)
+{{/ifEquals}}
+{{#ifEquals this "PostgreSQL"}}
+pg_dump {{project.name}} > backup-$(date +%Y%m%d).sql
+{{/ifEquals}}
+{{/each}}
+
+# Reset development database
+npm run db:reset
+npm run db:migrate
+npm run db:seed
+```
+{{/if}}
+
+### Cache Clearing
+```bash
+# Clear all caches
+npm cache clean --force
+{{#if project.technologies.frontend}}
+rm -rf .next
+{{/if}}
+{{#if project.technologies.backend}}
+rm -rf dist
+{{/if}}
+```
+
+---
+
+## 📚 **Debugging Resources**
+
+### Documentation Links
+{{#if project.documentation.existingDocs}}
+{{#each project.documentation.existingDocs}}
+- [{{this}}]({{this}})
+{{/each}}
+{{else}}
+- [Environment Setup](ENVIRONMENT_SETUP.md) - Configuration verification
+- [Parameter Mapping](PARAMETER_MAPPING.md) - Integration debugging
+- [TaskMaster Guide](README-task-master.md) - Development workflow
+{{/if}}
+
+### Technology-Specific Resources
+{{#if computed.technologyList}}
+{{#each computed.technologyList}}
+- [{{this}} Debugging Guide]({{#ifEquals this "Next.js"}}https://nextjs.org/docs/advanced-features/debugging{{else}}{{#ifEquals this "React"}}https://reactjs.org/docs/debugging.html{{else}}{{#ifEquals this "Node.js"}}https://nodejs.org/en/docs/guides/debugging-getting-started/{{else}}#{{/ifEquals}}{{/ifEquals}}{{/ifEquals}})
+{{/each}}
+{{/if}}
+
+### Community Resources
+- Stack Overflow with project tags
+- GitHub Issues for related libraries
+- Discord/Slack communities for specific technologies
+
+---
+
+## 📊 **Debug Session Template**
+
+Use this template for systematic debugging sessions:
+
+```
+## Debug Session: [Issue Description]
+**Date**: {{helpers.formatDate timestamp}}
+**Timer Set**: [ ] 30 minutes
+**Issue**: Brief description
+**Environment**: Development/Staging/Production
+
+### Investigation Log
+- [ ] Error message documented
+- [ ] Steps to reproduce confirmed  
+- [ ] Relevant logs collected
+- [ ] Component isolation tested
+- [ ] Alternative approaches considered
+
+### 30-Minute Decision Point
+- [ ] Issue resolved ✅
+- [ ] Switch to alternative approach 🔄
+- [ ] Document for future investigation 📝
+
+### Alternative Approach (if needed)
+**Chosen Alternative**: Description
+**Rationale**: Why this approach instead
+**Implementation**: Steps taken
+
+### Resolution/Next Steps
+**Final Solution**: What worked
+**Lessons Learned**: Key insights
+**Prevention**: How to avoid in future
+```
+
+---
+
+## ⚡ **All-Purpose Pattern Debugging**
+
+### Pattern Compliance Check
+When debugging, always verify:
+- ✅ **NO hardcoded limitations** causing the issue
+- ✅ **Configuration-driven behavior** working correctly  
+- ✅ **UNLIMITED scalability** not being constrained by arbitrary limits
+- ✅ **Dynamic adaptation** functioning as expected
+
+### Common Anti-Pattern Issues
+1. **Hardcoded Arrays**: Industry lists, location restrictions
+2. **Limitation Constants**: Max user limits, file size restrictions  
+3. **Conditional Logic**: Hardcoded business rules
+4. **Hardcoded Endpoints**: API URLs that should be configurable
+5. **Hardcoded UI Text**: Messages that should be externalized
+
+---
+
+**Remember**: The 30-minute rule prevents debugging loops, but systematic procedures ensure effective problem resolution. Always prioritize forward progress over perfect solutions.
+
+---
+
+*This debugging guide is automatically maintained by the Five Document Framework Agent*  
+*Following All-Purpose Pattern: Systematic, unlimited, and configuration-driven debugging*

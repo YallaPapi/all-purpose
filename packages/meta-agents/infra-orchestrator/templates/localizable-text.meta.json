@@ -1,0 +1,54 @@
+{
+  "id": "localizable-text",
+  "name": "Localizable Text",
+  "description": "Replaces hardcoded UI text with localization-ready alternatives",
+  "category": "hardcoded-ui-text",
+  "version": "1.0.0",
+  "author": "All-Purpose Meta-Agent Factory",
+  "created": "2025-07-23T03:00:00.000Z",
+  "updated": "2025-07-23T03:00:00.000Z",
+  "tags": ["localization", "i18n", "text", "ui", "internationalization", "all-purpose-pattern"],
+  "examples": [
+    {
+      "name": "React Button Text",
+      "description": "Replace hardcoded button text with i18n-ready solution",
+      "context": {
+        "config": {
+          "useI18nLibrary": true,
+          "framework": "react",
+          "namespace": "common",
+          "textVariable": "buttonText",
+          "textKey": "submitButton",
+          "fallbackText": "Submit",
+          "context": "jsx",
+          "elementType": "button",
+          "className": "btn-primary",
+          "enableValidation": true
+        },
+        "project": {
+          "language": "typescript"
+        }
+      }
+    },
+    {
+      "name": "Config-based Error Message",
+      "description": "Replace hardcoded error message with config-driven approach",
+      "context": {
+        "config": {
+          "useI18nLibrary": false,
+          "configPath": "config.ui",
+          "configKey": "messages",
+          "textVariable": "errorMessage",
+          "textKey": "validationError",
+          "fallbackText": "Please check your input",
+          "enableInterpolation": true,
+          "interpolation": "field: fieldName",
+          "enableValidation": true
+        },
+        "project": {
+          "language": "typescript"
+        }
+      }
+    }
+  ]
+}
