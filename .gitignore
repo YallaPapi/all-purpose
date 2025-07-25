@@ -58,3 +58,22 @@ next-env.d.ts
 test-*-api.json 
 .cursor/mcp.json
 .cursor/mcp.json
+
+# Logs
+logs
+dev-debug.log
+# Dependency directories
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 

@@ -27,6 +27,9 @@ const ResearchGenerator = require('./research-generator');
 const TaskFormatter = require('./task-formatter');
 const GitIntegration = require('./git-integration');
 
+// Working Memory Integration following ADD methodology
+const { createMemoryEnhancedAgent, runAgentTaskWithMemory } = require('../../memory/agentMemoryIntegration');
+
 class PRDParserAgent extends EventEmitter {
     constructor(options = {}) {
         super();
@@ -39,6 +42,8 @@ class PRDParserAgent extends EventEmitter {
             gitEnabled: options.gitEnabled !== false,
             researchEnabled: options.researchEnabled !== false,
             contextEnabled: options.contextEnabled !== false, // Context7 integration
+            memoryEnabled: options.memoryEnabled !== false, // Working memory integration
+            agentId: options.agentId || 'prd-parser-001', // Agent identifier for memory
             ...options
         };
 
@@ -47,6 +52,10 @@ class PRDParserAgent extends EventEmitter {
         this.researchGenerator = new ResearchGenerator(this.config);
         this.taskFormatter = new TaskFormatter(this.config);
         this.gitIntegration = new GitIntegration(this.config);
+        
+        // Working Memory Integration - following ADD methodology
+        this.memoryAgent = this.config.memoryEnabled ? 
+            createMemoryEnhancedAgent(this.config.agentId, this) : null;
         
         // File watcher for real-time PRD processing
         this.watcher = null;
@@ -167,17 +176,42 @@ class PRDParserAgent extends EventEmitter {
     }
 
     /**
-     * Process PRD file using TaskMaster CLI:
+     * Process PRD file using TaskMaster CLI with working memory integration:
      * Step 1: Parse PRD → Step 2: Research (separate) → Step 3: Save output
+     * Enhanced with ADD methodology and memory context
      */
     async processPRDFile(filepath, agentName) {
+        const taskDescription = `Process PRD file: ${path.basename(filepath)} for agent: ${agentName}`;
+        
+        // Use memory-enhanced execution following ADD methodology
+        if (this.memoryAgent) {
+            return await this.memoryAgent.executeWithMemory(
+                taskDescription,
+                async (contextualPrompt, memory) => {
+                    return await this._processPRDFileCore(filepath, agentName, memory);
+                }
+            );
+        } else {
+            return await this._processPRDFileCore(filepath, agentName);
+        }
+    }
+
+    /**
+     * Core PRD processing logic (enhanced with memory context)
+     */
+    async _processPRDFileCore(filepath, agentName, memory = '') {
         const startTime = Date.now();
         try {
             console.log(`📄 Processing PRD: ${path.basename(filepath)} (${agentName})`);
+            if (memory && this.config.memoryEnabled) {
+                console.log(`🧠 Using memory context: ${memory.split('\n\n').length} previous entries`);
+            }
+            
             this.emit('prd:processing_start', {
                 filepath,
                 agentName,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                memoryContext: memory ? true : false
             });
 
             // Ensure output directory exists
@@ -200,6 +234,8 @@ class PRDParserAgent extends EventEmitter {
             } catch (err) {
                 throw new Error(`Failed to read generated tasks file: ${outputPath}`);
             }
+            
+            let successfulResearchCount = 0;
             if (Array.isArray(tasksData.tasks)) {
                 for (const task of tasksData.tasks) {
                     if (task.title && task.id) {
@@ -210,6 +246,7 @@ class PRDParserAgent extends EventEmitter {
                                 'research', prompt, `--id=${task.id}`
                             ]);
                             console.log(researchResult);
+                            successfulResearchCount++;
                         } catch (err) {
                             console.error(`❌ Research failed for task ${task.id}: ${task.title}`, err.message);
                         }
@@ -217,17 +254,25 @@ class PRDParserAgent extends EventEmitter {
                 }
             }
 
-            // Step 3: Log completion
+            // Step 3: Log completion with comprehensive result
             const processingTime = Date.now() - startTime;
+            const result = `Successfully processed PRD for ${agentName}. Generated ${tasksData.tasks?.length || 0} tasks, completed research for ${successfulResearchCount} tasks. Output: ${outputPath}`;
+            
             this.emit('prd:completed', {
                 agentName,
                 filepath,
                 outputPath,
                 processingTime,
-                success: true
+                tasksGenerated: tasksData.tasks?.length || 0,
+                researchCompleted: successfulResearchCount,
+                success: true,
+                memoryContext: memory ? true : false
             });
+            
             console.log(`✅ Completed ${agentName} PRD processing (${processingTime}ms)`);
-            console.log(`📋 Output: ${outputPath}`);
+            console.log(`📋 Tasks: ${tasksData.tasks?.length || 0}, Research: ${successfulResearchCount}`);
+            
+            return result;
         } catch (error) {
             const processingTime = Date.now() - startTime;
             this.emit('prd:error', {

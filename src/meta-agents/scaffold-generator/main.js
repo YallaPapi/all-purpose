@@ -14,6 +14,9 @@ const { Command } = require('commander');
 const { parseInput } = require('./lib/inputParser');
 const FileGenerator = require('./lib/fileGenerator');
 
+// Working Memory Integration following ADD methodology
+const { createMemoryEnhancedAgent } = require('../../memory/agentMemoryIntegration');
+
 class ScaffoldGeneratorAgent {
   constructor(config = {}) {
     this.config = {
@@ -24,11 +27,17 @@ class ScaffoldGeneratorAgent {
       includeTests: config.includeTests !== false, // Default to true
       includeGitignore: config.includeGitignore !== false, // Default to true
       overwrite: config.overwrite || false,
+      memoryEnabled: config.memoryEnabled !== false, // Working memory integration
+      agentId: config.agentId || 'scaffold-generator-001', // Agent identifier for memory
       ...config
     };
     
     this.isInitialized = false;
     this.fileGenerator = null;
+    
+    // Working Memory Integration - following ADD methodology
+    this.memoryAgent = this.config.memoryEnabled ? 
+      createMemoryEnhancedAgent(this.config.agentId, this) : null;
   }
 
   /**
@@ -59,7 +68,7 @@ class ScaffoldGeneratorAgent {
   }
 
   /**
-   * Process PRD-Parser input and generate agent scaffold
+   * Process PRD-Parser input and generate agent scaffold with memory integration
    * @param {Object|string} input - PRD-Parser output or file path
    * @returns {Promise<Object>} - Generation result
    */
@@ -68,8 +77,30 @@ class ScaffoldGeneratorAgent {
       throw new Error('Agent not initialized. Call initialize() first.');
     }
 
+    const taskDescription = `Generate agent scaffold from PRD input: ${typeof input === 'string' ? input : 'object'}`;
+    
+    // Use memory-enhanced execution following ADD methodology
+    if (this.memoryAgent) {
+      return await this.memoryAgent.executeWithMemory(
+        taskDescription,
+        async (contextualPrompt, memory) => {
+          return await this._processCore(input, memory);
+        }
+      );
+    } else {
+      return await this._processCore(input);
+    }
+  }
+
+  /**
+   * Core processing logic (enhanced with memory context)
+   */
+  async _processCore(input, memory = '') {
     try {
       console.log(chalk.blue('🔄 Processing PRD input for agent generation'));
+      if (memory && this.config.memoryEnabled) {
+        console.log(chalk.blue(`🧠 Using memory context: ${memory.split('\n\n').length} previous entries`));
+      }
       
       let prdData;
       
@@ -123,15 +154,18 @@ class ScaffoldGeneratorAgent {
       console.log(chalk.blue(`📁 Output directory: ${result.outputPath}`));
       console.log(chalk.blue(`📄 Generated ${result.files.length} files in ${result.directories.length} directories`));
       
-      return {
+      const processResult = {
         success: true,
         agentName: result.agentName,
         outputPath: result.outputPath,
         files: result.files,
         directories: result.directories,
         summary: result.summary,
-        processedAt: new Date().toISOString()
+        processedAt: new Date().toISOString(),
+        memoryContext: memory ? true : false
       };
+      
+      return `Generated agent scaffold for ${result.agentName}. Created ${result.files.length} files in ${result.directories.length} directories at ${result.outputPath}`;
       
     } catch (error) {
       console.error(chalk.red(`❌ Processing failed: ${error.message}`));

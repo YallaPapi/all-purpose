@@ -1,0 +1,17 @@
+{
+  "agentName": "prospector-agent",
+  "description": "Lead discovery engine for the Lead Generation Machine using Google Places API integration",
+  "features": [
+    "Google Places API (New) integration",
+    "Text Search and Nearby Search endpoints", 
+    "All-Purpose Pattern - zero hardcoded limitations",
+    "Dynamic query generation for unlimited industries/locations",
+    "Redis lead deduplication",
+    "Rate limiting and cost optimization",
+    "Universal lead output format",
+    "Vercel serverless deployment"
+  ],
+  "framework": "node",
+  "includeTests": true,
+  "includeDocumentation": true
+}

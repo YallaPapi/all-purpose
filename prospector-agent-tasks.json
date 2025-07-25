@@ -1,0 +1,110 @@
+{
+    "tasks": [
+        {
+            "id": 1,
+            "title": "Initialize Prospector Agent Project Structure",
+            "description": "Set up the foundational Node.js project structure with TypeScript, environment configuration, and core dependencies.",
+            "details": "Create package.json with Node.js/TypeScript setup. Install dependencies: express, redis, google-maps-api, dotenv, jest. Set up TypeScript config, ESLint, and basic project structure with src/, tests/, and config/ directories.",
+            "testStrategy": "Verify project compiles successfully, all dependencies are installed, and basic structure is in place.",
+            "priority": "high",
+            "dependencies": [],
+            "status": "pending"
+        },
+        {
+            "id": 2,
+            "title": "Create Configuration Management System",
+            "description": "Implement the All-Purpose Pattern configuration system that accepts ANY industry/location combination without hardcoded limitations.",
+            "details": "Create ProspectorConfig interface and validation. Support dynamic industry queries, location parameters, custom search terms, and business types. Use environment variables and JSON configuration files.",
+            "testStrategy": "Unit test configuration validation with various industry/location combinations. Verify no hardcoded limitations exist.",
+            "priority": "high",
+            "dependencies": [1],
+            "status": "pending"
+        },
+        {
+            "id": 3,
+            "title": "Implement Google Places API Integration",
+            "description": "Build the core Google Places API (New) integration with Text Search and Nearby Search endpoints.",
+            "details": "Implement Google Places API client with proper authentication. Support Text Search for keyword-based discovery and Nearby Search for location-based discovery. Handle API responses and error cases.",
+            "testStrategy": "Integration test with real API calls for both search types. Mock API responses for unit testing.",
+            "priority": "high",
+            "dependencies": [2],
+            "status": "pending"
+        },
+        {
+            "id": 4,
+            "title": "Build Dynamic Query Generation Engine",
+            "description": "Create intelligent query generation that adapts to any industry and location without limitations.",
+            "details": "Implement query builder that constructs search terms from industry keywords, location data, and business categories. Support multiple query strategies and optimization based on results.",
+            "testStrategy": "Unit test query generation with diverse industry/location inputs. Verify queries produce relevant results.",
+            "priority": "high",
+            "dependencies": [2, 3],
+            "status": "pending"
+        },
+        {
+            "id": 5,
+            "title": "Implement Redis Lead Deduplication System",
+            "description": "Build Redis-based deduplication to prevent storing duplicate leads and optimize storage.",
+            "details": "Use Redis sets/hashes to track discovered leads by phone, email, or business name. Implement fast lookup and duplicate checking before storage.",
+            "testStrategy": "Unit test deduplication logic with simulated lead discovery to ensure duplicates are not stored and unique leads are persisted.",
+            "priority": "high",
+            "dependencies": [3],
+            "status": "pending"
+        },
+        {
+            "id": 6,
+            "title": "Create Universal Output Manager",
+            "description": "Standardize all discovered leads into the ProspectedLead output format and prepare for downstream integration.",
+            "details": "Implement the ProspectedLead TypeScript interface. Map all source data into this format. Ensure all required fields are populated and output is consistent.",
+            "testStrategy": "Unit test output formatting with sample data from all supported sources. Validate schema compliance.",
+            "priority": "medium",
+            "dependencies": [3,5],
+            "status": "pending"
+        },
+        {
+            "id": 7,
+            "title": "Implement Quality Scoring and Field Masking",
+            "description": "Score leads based on data completeness and optimize API usage with field masking.",
+            "details": "Develop a scoring algorithm that evaluates completeness of contact info and other key fields. Adjust API requests to only fetch necessary fields. Store qualityScore in ProspectedLead.",
+            "testStrategy": "Unit test scoring logic with leads of varying completeness. Verify API requests only include required fields.",
+            "priority": "medium",
+            "dependencies": [3,6],
+            "status": "pending"
+        },
+        {
+            "id": 8,
+            "title": "Add Rate Limiting, Exponential Backoff, and Cost Optimization",
+            "description": "Ensure compliance with Google API rate limits, implement exponential backoff, and monitor API usage for cost control.",
+            "details": "Implement request throttling and exponential backoff for failed requests. Track API usage and enforce 10,000 calls/month limit. Log and alert when nearing quota.",
+            "testStrategy": "Simulate high-volume requests and verify rate limiting, backoff, and quota enforcement. Monitor logs for correct usage tracking.",
+            "priority": "medium",
+            "dependencies": [3],
+            "status": "pending"
+        },
+        {
+            "id": 9,
+            "title": "Integrate Apify Google Maps Actors for High-Volume Fallback",
+            "description": "Automatically switch to Apify actors when Google Places API quota is exceeded or for large-scale operations.",
+            "details": "Detect when API quota is reached. Trigger Apify actor runs via their API. Parse and standardize Apify results into ProspectedLead format. Ensure seamless fallback and recovery.",
+            "testStrategy": "Integration test by simulating quota exhaustion and verifying Apify fallback triggers and results are processed correctly.",
+            "priority": "medium",
+            "dependencies": [3,8],
+            "status": "pending"
+        },
+        {
+            "id": 10,
+            "title": "Implement Scheduler and Monitoring",
+            "description": "Automate discovery cycles using Vercel cron jobs and set up performance monitoring.",
+            "details": "Configure Vercel cron jobs based on user schedule. Monitor uptime, API success rate, processing speed, and deduplication rate. Log metrics for analysis and alert on anomalies.",
+            "testStrategy": "Functional test scheduled runs and verify monitoring metrics are collected and reported as specified.",
+            "priority": "medium",
+            "dependencies": [2,3,5,6,7,8,9],
+            "status": "pending"
+        }
+    ],
+    "metadata": {
+        "projectName": "Prospector Agent",
+        "totalTasks": 10,
+        "sourceFile": "prospector-agent-prd.md",
+        "generatedAt": "2025-07-25"
+    }
+}

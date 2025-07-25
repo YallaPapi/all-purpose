@@ -1,0 +1,110 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Implement Core Protocol Processor Middleware",
+      "description": "Build the central enforcement engine that orchestrates the Universal Execution Protocol flow",
+      "details": "Create ProtocolProcessor class with TypeScript, implement middleware pattern for extensibility, support both agent and human requesters, use dependency injection for adapters",
+      "testStrategy": "Unit test protocol flow with mocked adapters, validate orchestration and error handling",
+      "priority": "high",
+      "dependencies": [],
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "title": "Build Validation Engine",
+      "description": "Develop compliance checker that enforces protocol requirements and fallback logic",
+      "details": "Implement ValidationEngine with Zod schemas, encode fallback logic per validation matrix, integrate with ProtocolProcessor, add audit logging",
+      "testStrategy": "Unit test all validation scenarios including fallbacks and failure cases",
+      "priority": "high", 
+      "dependencies": [1],
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "title": "Integrate Redis Memory Manager",
+      "description": "Extend existing working memory system for UEP persistent memory",
+      "details": "Enhance existing Redis integration, implement relevance scoring, add UEP-specific key schemas, ensure secure access",
+      "testStrategy": "Integration tests for memory storage, retrieval, and relevance scoring",
+      "priority": "high",
+      "dependencies": [1],
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "title": "Create TaskMaster Adapter",
+      "description": "Build adapter to automate task breakdown via TaskMaster for all incoming tasks",
+      "details": "Implement TaskMasterAdapter using child_process to call taskmaster CLI, parse outputs, cache results, handle errors gracefully",
+      "testStrategy": "Mock TaskMaster CLI and test adapter for correct breakdown and caching",
+      "priority": "high",
+      "dependencies": [1],
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "title": "Develop Context7 Scanner Adapter", 
+      "description": "Create adapter for automatic codebase awareness before task execution",
+      "details": "Implement Context7Adapter to scan repository, identify relevant code blocks, detect collision risks, cache scan results",
+      "testStrategy": "Test codebase scanning accuracy and performance with various project structures",
+      "priority": "high",
+      "dependencies": [1],
+      "status": "pending"
+    },
+    {
+      "id": 6,
+      "title": "Build RAG Integration Adapter",
+      "description": "Implement document retrieval system using existing Upstash vector store",
+      "details": "Create RAGAdapter that searches vector store for task-relevant docs, rank results by relevance, handle missing documentation gracefully",
+      "testStrategy": "Test document retrieval accuracy and relevance ranking",
+      "priority": "high", 
+      "dependencies": [1],
+      "status": "pending"
+    },
+    {
+      "id": 7,
+      "title": "Implement Protocol Logic Layer",
+      "description": "Create universal reasoning patterns: Clarify → Research → Plan → Execute → Review → Report",
+      "details": "Build ReasoningProtocol class, implement customizable patterns per agent, add task requirement validation (goal, metrics, fallbacks)",
+      "testStrategy": "Validate reasoning pattern enforcement and customization",
+      "priority": "medium",
+      "dependencies": [2],
+      "status": "pending"
+    },
+    {
+      "id": 8,
+      "title": "Create CLI Wrapper for Human Prompts",
+      "description": "Build command-line interface for human prompt enhancement",
+      "details": "Create uep CLI tool, implement prompt interception, integrate with existing Claude Code workflow, add debug mode",
+      "testStrategy": "Test human prompt enhancement and debug capabilities",
+      "priority": "medium",
+      "dependencies": [7],
+      "status": "pending"
+    },
+    {
+      "id": 9,
+      "title": "Integrate with Meta-Agent Factory",
+      "description": "Update existing meta-agents to use UEP middleware",
+      "details": "Modify PRD Parser, Scaffold Generator, and other agents to route through UEP, update start-all-agents.js, maintain backward compatibility",
+      "testStrategy": "Integration tests with existing agent workflows",
+      "priority": "high",
+      "dependencies": [7],
+      "status": "pending"
+    },
+    {
+      "id": 10,
+      "title": "Build Execution Trace System",
+      "description": "Implement comprehensive logging and monitoring for UEP decisions",
+      "details": "Create ExecutionTracer, log all protocol decisions, implement audit trails, add performance metrics",
+      "testStrategy": "Validate trace completeness and performance monitoring",
+      "priority": "medium",
+      "dependencies": [2],
+      "status": "pending"
+    }
+  ],
+  "metadata": {
+    "projectName": "Universal Execution Protocol",
+    "totalTasks": 10,
+    "sourceFile": "docs/prd_universal_execution_protocol.md",
+    "generatedAt": "2025-07-25"
+  }
+}

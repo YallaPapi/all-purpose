@@ -42,7 +42,7 @@ function loadEnvFile() {
 // Load environment variables
 loadEnvFile();
 
-// Meta-agent configurations
+// Meta-agent configurations - All agents now include working memory integration
 const META_AGENTS = [
   {
     name: 'All-Purpose Pattern Agent',
@@ -50,7 +50,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/all-purpose-pattern',
     type: 'typescript',
     buildRequired: true,
-    startCommand: 'npm start'
+    startCommand: 'npm start',
+    memoryEnabled: true
   },
   {
     name: 'PRD Parser Agent', 
@@ -58,7 +59,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/prd-parser',
     type: 'javascript',
     buildRequired: false,
-    startCommand: 'npm start'
+    startCommand: 'npm start',
+    memoryEnabled: true
   },
   {
     name: 'Scaffold Generator Agent',
@@ -66,7 +68,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/scaffold-generator',
     type: 'typescript',
     buildRequired: true,
-    startCommand: 'npm start'
+    startCommand: 'npm start',
+    memoryEnabled: true
   },
   {
     name: 'Five Document Framework Agent',
@@ -74,7 +77,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/five-document-framework', 
     type: 'typescript',
     buildRequired: true,
-    startCommand: 'npm start'
+    startCommand: 'npm start',
+    memoryEnabled: true
   },
   {
     name: 'Template Engine Factory Agent',
@@ -82,7 +86,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/template-engine-factory',
     type: 'typescript', 
     buildRequired: true,
-    startCommand: 'npm start'
+    startCommand: 'npm start',
+    memoryEnabled: true
   },
   {
     name: 'Parameter Flow Agent',
@@ -90,7 +95,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/parameter-flow',
     type: 'typescript',
     buildRequired: true, 
-    startCommand: 'npm start'
+    startCommand: 'npm start',
+    memoryEnabled: true
   },
   {
     name: 'Thirty Minute Rule Agent',
@@ -98,7 +104,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/thirty-minute-rule',
     type: 'typescript',
     buildRequired: true,
-    startCommand: 'npm start' 
+    startCommand: 'npm start',
+    memoryEnabled: true
   },
   {
     name: 'Vercel Native Architecture Agent',
@@ -106,7 +113,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/vercel-native-architecture', 
     type: 'typescript',
     buildRequired: true,
-    startCommand: 'npm start'
+    startCommand: 'npm start',
+    memoryEnabled: true
   },
   {
     name: 'Infrastructure Orchestrator Agent',
@@ -114,7 +122,8 @@ const META_AGENTS = [
     path: 'src/meta-agents/infra-orchestrator',
     type: 'typescript',
     buildRequired: true,
-    startCommand: 'npm start'
+    startCommand: 'npm start',
+    memoryEnabled: true
   }
 ];
 
