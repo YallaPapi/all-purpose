@@ -14,11 +14,12 @@
  * - Real-time file watching with UEP middleware
  */
 
-const path = require('path');
-const { enhanceAgentWithUEP, createUEPAgentFactory } = require('../uep/agentIntegration');
+import path from 'path';
+import { enhanceAgentWithUEP, createUEPAgentFactory } from '../uep/agentIntegration.js';
+import { createRequire } from 'module';
 
-// Import original PRD Parser
-const OriginalPRDParser = require('./prd-parser/main.js');
+// Import original PRD Parser (ES module)  
+import OriginalPRDParser from './prd-parser/main.js';
 
 /**
  * Enhanced PRD Parser with UEP Integration
@@ -327,7 +328,7 @@ async function createEnhancedPRDParser(options = {}) {
 /**
  * CLI interface for enhanced PRD parser
  */
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const enhancedAgent = new EnhancedPRDParser({
     watchDir: process.env.PRD_WATCH_DIR || 'docs',
     outputDir: process.env.TASKMASTER_OUTPUT_DIR || '.taskmaster/tasks',
@@ -366,5 +367,5 @@ if (require.main === module) {
   });
 }
 
-module.exports = EnhancedPRDParser;
-module.exports.createEnhancedPRDParser = createEnhancedPRDParser;
+export default EnhancedPRDParser;
+export { createEnhancedPRDParser };

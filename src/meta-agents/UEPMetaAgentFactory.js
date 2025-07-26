@@ -17,13 +17,14 @@
  * Following ADD methodology: Zero hardcoded limitations, All-Purpose Pattern compliance
  */
 
-const path = require('path');
-const { EventEmitter } = require('events');
-const { createUEPAgentFactory } = require('../uep/agentIntegration');
+import path from 'path';
+import { EventEmitter } from 'events';
+import { Command } from 'commander';
+import { createUEPAgentFactory } from '../uep/agentIntegration.js';
 
 // Import enhanced agents
-const EnhancedPRDParser = require('./enhanced-prd-parser');
-const { EnhancedScaffoldGenerator } = require('./enhanced-scaffold-generator');
+import EnhancedPRDParser from './enhanced-prd-parser.js';
+import { EnhancedScaffoldGenerator } from './enhanced-scaffold-generator.js';
 
 /**
  * UEP Meta-Agent Factory Configuration
@@ -526,8 +527,7 @@ async function createUEPMetaAgentFactory(config = {}) {
 /**
  * CLI interface for factory management
  */
-async function runFactoryCLI() {
-  const { Command } = require('commander');
+function runFactoryCLI() {
   const program = new Command();
 
   program
@@ -571,7 +571,7 @@ async function runFactoryCLI() {
 }
 
 // Export for usage
-module.exports = {
+export {
   UEPMetaAgentFactory,
   createUEPMetaAgentFactory,
   runFactoryCLI,
@@ -579,7 +579,7 @@ module.exports = {
 };
 
 // Execute CLI if run directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   runFactoryCLI().then(program => program.parse()).catch(error => {
     console.error('CLI failed:', error);
     process.exit(1);

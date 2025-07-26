@@ -15,11 +15,16 @@
  * - Collision risk detection
  */
 
-const path = require('path');
-const { enhanceAgentWithUEP } = require('../uep/agentIntegration');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { enhanceAgentWithUEP } from '../uep/agentIntegration.js';
 
-// Import original Scaffold Generator
-const { ScaffoldGeneratorAgent } = require('./scaffold-generator/main.js');
+// ES modules don't have __dirname, so we need to create it
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Import original Scaffold Generator (ES module with named exports)
+import { ScaffoldGeneratorAgent } from './scaffold-generator/main.js';
 
 /**
  * Enhanced Scaffold Generator with UEP Integration
@@ -211,7 +216,8 @@ class EnhancedScaffoldGenerator extends ScaffoldGeneratorAgent {
       }
       
       // Parse and validate input with enhanced validation
-      const agentData = require('./scaffold-generator/lib/inputParser').parseInput(prdData);
+      const { parseInput } = await import('./scaffold-generator/lib/inputParser.js');
+      const agentData = parseInput(prdData);
       console.log(`✅ Parsed PRD for agent: ${agentData.agentName}`);
       
       // Enhanced collision detection
@@ -233,7 +239,8 @@ class EnhancedScaffoldGenerator extends ScaffoldGeneratorAgent {
         }
       }
       
-      if (await require('fs-extra').pathExists(outputPath) && !this.config.overwrite) {
+      const fs = await import('fs-extra');
+      if (await fs.default.pathExists(outputPath) && !this.config.overwrite) {
         throw new Error(`Agent directory already exists: ${outputPath}. Use --overwrite to replace it.`);
       }
       
@@ -384,8 +391,8 @@ async function main(options = {}) {
 /**
  * CLI setup and command handling with UEP options
  */
-function setupCLI() {
-  const { Command } = require('commander');
+async function setupCLI() {
+  const { Command } = await import('commander');
   const program = new Command();
   
   program
@@ -445,14 +452,14 @@ function setupCLI() {
 }
 
 // Export for programmatic usage
-module.exports = {
+export {
   EnhancedScaffoldGenerator,
   createEnhancedScaffoldGenerator,
   main
 };
 
 // Execute if run directly
-if (require.main === module) {
-  const program = setupCLI();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const program = await setupCLI();
   program.parse();
 }

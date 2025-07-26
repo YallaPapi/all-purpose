@@ -2,129 +2,144 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
-        "title": "Implement Core Protocol Processor Middleware",
-        "description": "Build the central enforcement engine that orchestrates the Universal Execution Protocol flow",
-        "details": "Create ProtocolProcessor class with TypeScript, implement middleware pattern for extensibility, support both agent and human requesters, use dependency injection for adapters",
-        "testStrategy": "Unit test protocol flow with mocked adapters, validate orchestration and error handling",
+        "id": 76,
+        "title": "Setup Dashboard Frontend Framework",
+        "description": "Initialize and configure the React/Next.js frontend framework with responsive design for the Performance Monitoring Dashboard",
+        "details": "1. Create a new Next.js project using `npx create-next-app@latest`\n2. Configure project structure following best practices:\n   - `/components` for reusable UI components\n   - `/pages` for route-based components\n   - `/hooks` for custom React hooks\n   - `/styles` for CSS/SCSS files\n   - `/utils` for helper functions\n   - `/context` for React context providers\n3. Set up responsive design using CSS Grid/Flexbox or a UI library like Chakra UI or Material UI\n4. Configure WebSocket client for real-time updates\n5. Implement basic layout components:\n   - Main navigation\n   - Dashboard grid system\n   - Responsive containers\n6. Set up routing for different dashboard sections\n7. Configure environment variables for API endpoints\n8. Implement basic loading states and error boundaries",
+        "testStrategy": "1. Unit tests for core components using React Testing Library\n2. Responsive design testing across multiple viewport sizes\n3. Performance testing to ensure <3 second load time\n4. WebSocket connection testing\n5. Cross-browser compatibility testing\n6. Accessibility testing using axe or similar tools",
         "priority": "high",
         "dependencies": [],
-        "status": "pending"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": 2,
-        "title": "Build Validation Engine",
-        "description": "Develop compliance checker that enforces protocol requirements and fallback logic",
-        "details": "Implement ValidationEngine with Zod schemas, encode fallback logic per validation matrix, integrate with ProtocolProcessor, add audit logging",
-        "testStrategy": "Unit test all validation scenarios including fallbacks and failure cases",
+        "id": 77,
+        "title": "Implement Express.js Backend with WebSocket Support",
+        "description": "Develop the Express.js backend server with WebSocket support for real-time data transmission",
+        "details": "1. Initialize Express.js project with TypeScript support\n2. Set up project structure:\n   - `/controllers` for request handlers\n   - `/routes` for API endpoints\n   - `/services` for business logic\n   - `/models` for data models\n   - `/middleware` for request processing\n   - `/utils` for helper functions\n3. Implement WebSocket server using Socket.IO or ws library\n4. Create API endpoints for dashboard data:\n   - GET /api/metrics/volume\n   - GET /api/metrics/quality\n   - GET /api/metrics/conversion\n   - GET /api/metrics/stealth\n5. Implement authentication middleware\n6. Set up CORS configuration\n7. Implement error handling middleware\n8. Configure environment variables\n9. Set up logging with Winston or similar\n10. Implement rate limiting for API protection",
+        "testStrategy": "1. Unit tests for controllers and services using Jest\n2. Integration tests for API endpoints\n3. WebSocket connection and event tests\n4. Load testing to ensure handling of 1,000+ requests per minute\n5. Authentication and authorization tests\n6. Error handling tests",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 78,
+        "title": "Set Up Redis for Real-time Data Caching",
+        "description": "Configure Redis as a real-time data cache for the dashboard to ensure <1 second data refresh latency",
+        "details": "1. Set up Redis server (local for development, managed service for production)\n2. Implement Redis client in the backend using ioredis or node-redis\n3. Create data caching strategies:\n   - Set up TTL (Time-To-Live) for different data types\n   - Implement cache invalidation patterns\n   - Configure pub/sub channels for real-time updates\n4. Create cache service with methods:\n   - `setMetricData(key, data, ttl)`\n   - `getMetricData(key)`\n   - `invalidateCache(pattern)`\n   - `publishUpdate(channel, data)`\n   - `subscribeToUpdates(channel, callback)`\n5. Implement cache warming for frequently accessed data\n6. Set up Redis monitoring and health checks\n7. Configure Redis persistence for data recovery\n8. Implement connection pooling for high throughput\n9. Create cache hit/miss metrics for performance monitoring",
+        "testStrategy": "1. Unit tests for cache service methods\n2. Integration tests for Redis operations\n3. Performance testing for cache response times\n4. Load testing with simulated high traffic\n5. Failover and recovery testing\n6. Memory usage monitoring tests",
         "priority": "high",
         "dependencies": [
-          1
+          77
         ],
-        "status": "pending"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": 3,
-        "title": "Integrate Redis Memory Manager",
-        "description": "Extend existing working memory system for UEP persistent memory",
-        "details": "Enhance existing Redis integration, implement relevance scoring, add UEP-specific key schemas, ensure secure access",
-        "testStrategy": "Integration tests for memory storage, retrieval, and relevance scoring",
+        "id": 79,
+        "title": "Implement UEP Meta-Agent Factory Integration",
+        "description": "Develop integration with the existing UEP Meta-Agent Factory to collect real-time event data from agent activities",
+        "details": "1. Create UEP event listener service\n2. Implement event handlers for different agent activities:\n   - Outreach events\n   - Response events\n   - Conversion events\n   - System health events\n3. Set up data transformation layer to normalize UEP events\n4. Implement retry logic for failed event processing\n5. Create data validation schemas using Joi or Zod\n6. Set up error handling and logging for integration issues\n7. Implement connection health monitoring\n8. Create metrics collection service to aggregate agent performance data\n9. Set up agent health monitoring and status tracking\n10. Implement data quality checks and validation\n11. Connect to UEP system at localhost:3000 as specified in PRD",
+        "testStrategy": "1. Integration tests with UEP system mocks\n2. Event processing validation tests\n3. Error handling and retry logic tests\n4. Performance testing for high event volumes (10,000+ events per minute)\n5. Data validation and transformation tests\n6. End-to-end tests with actual UEP system",
         "priority": "high",
         "dependencies": [
-          1
+          77,
+          78
         ],
-        "status": "pending"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": 4,
-        "title": "Create TaskMaster Adapter",
-        "description": "Build adapter to automate task breakdown via TaskMaster for all incoming tasks",
-        "details": "Implement TaskMasterAdapter using child_process to call taskmaster CLI, parse outputs, cache results, handle errors gracefully",
-        "testStrategy": "Mock TaskMaster CLI and test adapter for correct breakdown and caching",
-        "priority": "high",
-        "dependencies": [
-          1
-        ],
-        "status": "pending"
-      },
-      {
-        "id": 5,
-        "title": "Develop Context7 Scanner Adapter",
-        "description": "Create adapter for automatic codebase awareness before task execution",
-        "details": "Implement Context7Adapter to scan repository, identify relevant code blocks, detect collision risks, cache scan results",
-        "testStrategy": "Test codebase scanning accuracy and performance with various project structures",
-        "priority": "high",
-        "dependencies": [
-          1
-        ],
-        "status": "pending"
-      },
-      {
-        "id": 6,
-        "title": "Build RAG Integration Adapter",
-        "description": "Implement document retrieval system using existing Upstash vector store",
-        "details": "Create RAGAdapter that searches vector store for task-relevant docs, rank results by relevance, handle missing documentation gracefully",
-        "testStrategy": "Test document retrieval accuracy and relevance ranking",
-        "priority": "high",
-        "dependencies": [
-          1
-        ],
-        "status": "pending"
-      },
-      {
-        "id": 7,
-        "title": "Implement Protocol Logic Layer",
-        "description": "Create universal reasoning patterns: Clarify → Research → Plan → Execute → Review → Report",
-        "details": "Build ReasoningProtocol class, implement customizable patterns per agent, add task requirement validation (goal, metrics, fallbacks)",
-        "testStrategy": "Validate reasoning pattern enforcement and customization",
+        "id": 80,
+        "title": "Develop Volume Metrics Tracking Components",
+        "description": "Create dashboard components for tracking outreach volume and deliverability metrics across all channels",
+        "details": "1. Implement volume metrics data service\n2. Create reusable metric widget components:\n   - Daily outreach counter with hourly breakdown\n   - Channel-specific deliverability gauges\n   - Platform health indicators with status colors\n   - Historical trend charts with 30-day view\n3. Implement real-time counter widgets using WebSocket updates\n4. Create channel breakdown visualization (email, LinkedIn, Twitter, SMS, voice)\n5. Implement platform safety score components with color-coded indicators\n6. Develop multi-channel reach analysis charts\n7. Create data fetching hooks for volume metrics\n8. Implement data refresh mechanisms\n9. Add export functionality for volume metrics data\n10. Ensure all metrics update in real-time with <1 second latency",
+        "testStrategy": "1. Unit tests for metric components\n2. Integration tests for data services\n3. Visual regression tests for charts and gauges\n4. Performance testing for real-time updates\n5. Accuracy testing for metric calculations\n6. User acceptance testing for readability and usability",
         "priority": "medium",
         "dependencies": [
-          2
+          76,
+          79
         ],
-        "status": "pending"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": 8,
-        "title": "Create CLI Wrapper for Human Prompts",
-        "description": "Build command-line interface for human prompt enhancement",
-        "details": "Create uep CLI tool, implement prompt interception, integrate with existing Claude Code workflow, add debug mode",
-        "testStrategy": "Test human prompt enhancement and debug capabilities",
+        "id": 81,
+        "title": "Implement Quality and Conversion Metrics Dashboards",
+        "description": "Develop dashboard components for tracking campaign performance, engagement, and conversion metrics",
+        "details": "1. Create quality metrics service for data processing\n2. Implement conversion metrics calculation service\n3. Develop interactive chart components:\n   - Engagement trend charts\n   - Conversion funnel visualization\n   - Sentiment analysis display\n   - Personalization scoring visualization\n4. Create pipeline stage tracking components\n   - Meeting attendance rates\n   - Demo-to-proposal conversion rates\n   - Proposal-to-close rates\n   - Sales cycle length analysis\n5. Implement statistical analysis for conversion rates\n   - Confidence interval calculations\n   - Trend analysis\n   - Comparative performance\n6. Develop ROI calculation and projection components\n7. Create drill-down functionality for detailed analysis\n8. Implement date range selectors for historical analysis\n9. Add export functionality for quality and conversion metrics",
+        "testStrategy": "1. Unit tests for metric calculation functions\n2. Integration tests for data services\n3. Visual regression tests for charts and visualizations\n4. Statistical accuracy tests for conversion calculations\n5. Performance testing for interactive components\n6. User acceptance testing for insights and actionability",
         "priority": "medium",
         "dependencies": [
-          7
+          76,
+          79
         ],
-        "status": "pending"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": 9,
-        "title": "Integrate with Meta-Agent Factory",
-        "description": "Update existing meta-agents to use UEP middleware",
-        "details": "Modify PRD Parser, Scaffold Generator, and other agents to route through UEP, update start-all-agents.js, maintain backward compatibility",
-        "testStrategy": "Integration tests with existing agent workflows",
-        "priority": "high",
-        "dependencies": [
-          7
-        ],
-        "status": "pending"
-      },
-      {
-        "id": 10,
-        "title": "Build Execution Trace System",
-        "description": "Implement comprehensive logging and monitoring for UEP decisions",
-        "details": "Create ExecutionTracer, log all protocol decisions, implement audit trails, add performance metrics",
-        "testStrategy": "Validate trace completeness and performance monitoring",
+        "id": 82,
+        "title": "Develop Stealth Metrics Monitoring System",
+        "description": "Implement monitoring for anti-detection and compliance metrics including domain health, account safety, and legal compliance",
+        "details": "1. Create stealth metrics service\n2. Implement domain health API integrations\n3. Develop account safety monitoring components:\n   - Platform-specific safety indicators\n   - Account health tracking\n   - Usage pattern monitoring\n4. Create compliance rule engine:\n   - Jurisdiction-based compliance checks\n   - Regulatory requirement monitoring\n   - Violation detection and alerting\n5. Implement reputation scoring algorithms\n6. Develop visualization components for stealth metrics:\n   - Domain health scorecards\n   - Account safety dashboards\n   - Compliance status indicators\n   - Reputation trend charts\n7. Create alert thresholds for critical stealth metrics\n8. Implement recommendation engine for improving stealth metrics\n9. Add detailed drill-down views for compliance issues",
+        "testStrategy": "1. Unit tests for stealth metric calculations\n2. Integration tests for external API connections\n3. Compliance rule validation tests\n4. Performance testing for real-time monitoring\n5. Alert threshold testing\n6. User acceptance testing for actionable insights",
         "priority": "medium",
         "dependencies": [
-          2
+          76,
+          79
         ],
-        "status": "pending"
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 83,
+        "title": "Implement Alerting and Notification System",
+        "description": "Develop an automated alert system for metrics below targets with email and Slack notifications",
+        "details": "1. Create alert management service\n2. Implement configurable alert thresholds\n3. Develop notification delivery system:\n   - Email integration using SMTP or service like SendGrid\n   - Slack webhook integration\n   - In-app notifications\n4. Create alert history and tracking system\n5. Implement alert suppression and grouping logic\n6. Develop escalation procedures for critical alerts\n7. Create alert resolution workflow tracking\n8. Implement alert dashboard component\n9. Add alert configuration UI\n10. Create notification templates for different alert types\n11. Implement alert testing functionality\n12. Ensure notifications are delivered within 30 seconds of threshold breach",
+        "testStrategy": "1. Unit tests for alert threshold logic\n2. Integration tests for notification delivery\n3. End-to-end tests for alert workflows\n4. Performance testing for notification speed\n5. Alert suppression and grouping tests\n6. User acceptance testing for alert clarity and actionability",
+        "priority": "medium",
+        "dependencies": [
+          80,
+          81,
+          82
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 84,
+        "title": "Develop A/B Testing Analysis Framework",
+        "description": "Implement campaign optimization through A/B testing analysis with statistical significance calculation",
+        "details": "1. Create A/B test framework service\n2. Implement statistical analysis algorithms:\n   - Chi-squared test\n   - T-test for continuous variables\n   - Confidence interval calculations\n3. Develop test variant performance comparison components\n4. Create automated winner determination logic\n5. Implement campaign optimization recommendation engine\n6. Develop A/B test setup and configuration UI\n7. Create test results visualization components:\n   - Comparative performance charts\n   - Statistical significance indicators\n   - Confidence interval visualizations\n8. Implement test history and tracking\n9. Add integration with campaign management system\n10. Create export functionality for test results",
+        "testStrategy": "1. Unit tests for statistical algorithms\n2. Integration tests for A/B test framework\n3. Statistical accuracy validation\n4. Performance testing for large dataset analysis\n5. User acceptance testing for insights and actionability\n6. Validation of winner determination logic",
+        "priority": "medium",
+        "dependencies": [
+          81
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 85,
+        "title": "Implement Export and Reporting Functionality",
+        "description": "Develop data export capabilities and automated reporting functionality with multiple formats and scheduling",
+        "details": "1. Create export service supporting multiple formats:\n   - CSV export\n   - Excel export\n   - PDF reports\n   - JSON data export\n2. Implement automated report generation:\n   - Daily reports\n   - Weekly reports\n   - Monthly summary reports\n3. Develop custom report builder UI:\n   - Drag-and-drop interface\n   - Metric selection\n   - Visualization options\n   - Filtering capabilities\n4. Create report scheduling system\n5. Implement RESTful API for external data access:\n   - Authentication and authorization\n   - Rate limiting\n   - Data filtering\n   - Pagination\n6. Develop email delivery for scheduled reports\n7. Create report templates for common use cases\n8. Implement report history and archiving\n9. Add report preview functionality\n10. Ensure exports complete within 10 seconds for standard reports",
+        "testStrategy": "1. Unit tests for export formatting\n2. Integration tests for report generation\n3. API endpoint testing\n4. Performance testing for large data exports\n5. Scheduled report delivery testing\n6. Data accuracy validation in exported files\n7. User acceptance testing for report usability",
+        "priority": "medium",
+        "dependencies": [
+          80,
+          81,
+          82
+        ],
+        "status": "pending",
+        "subtasks": []
       }
     ],
     "metadata": {
-      "projectName": "Universal Execution Protocol",
-      "totalTasks": 10,
-      "sourceFile": "docs/prd_universal_execution_protocol.md",
-      "generatedAt": "2025-07-25"
+      "created": "2025-07-26T14:11:33.424Z",
+      "updated": "2025-07-26T18:45:54.839Z",
+      "description": "Tasks for master context"
     }
   }
 }

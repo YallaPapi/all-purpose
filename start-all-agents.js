@@ -8,9 +8,14 @@
  * Usage: node start-all-agents.js
  */
 
-const path = require('path');
-const fs = require('fs');
-const { spawn } = require('child_process');
+import path from 'path';
+import fs from 'fs';
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+
+// ES modules don't have __dirname, so we need to create it
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from .env.local
 function loadEnvFile() {
@@ -66,8 +71,8 @@ const META_AGENTS = [
     name: 'Scaffold Generator Agent',
     id: 'scaffold-generator-001', 
     path: 'src/meta-agents/scaffold-generator',
-    type: 'typescript',
-    buildRequired: true,
+    type: 'javascript',
+    buildRequired: false,
     startCommand: 'npm start',
     memoryEnabled: true
   },
