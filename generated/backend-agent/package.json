@@ -1,0 +1,27 @@
+{
+  "name": "@all-purpose/backend-agent",
+  "version": "1.0.0",
+  "description": "Intelligent backend development agent with Context7 integration and UEP coordination",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "test": "node test-backend-agent.js",
+    "dev": "ts-node-esm src/main.ts"
+  },
+  "dependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.11.17",
+    "uuid": "^9.0.1",
+    "@types/uuid": "^9.0.8",
+    "fs-extra": "^11.2.0",
+    "@types/fs-extra": "^11.0.4"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
