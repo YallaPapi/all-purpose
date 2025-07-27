@@ -1,0 +1,414 @@
+
+==============
+# Meta‑Agent Factory Migration Docs
+
+**Last updated:** 2025-07-27 20:37:55
+
+This folder hosts all Product‑Requirements Documents (PRDs) for migrating the Meta‑Agent Factory to a containerised, event‑driven platform.
+
+| File | Purpose |
+|------|---------|
+| **master-prd.md** | Overall vision, KPIs, architecture, roadmap |
+| **phases/** | Sub‑PRDs that can be executed and reviewed independently |
+
+## Phase files
+- phases/phase‑0‑stabilisation.md — codebase cleanup  
+- phases/phase‑1‑mvs-containerisation.md — minimal viable slice in Docker  
+- phases/phase‑2‑messaging-gateway.md — durable bus + Traefik gateway  
+- phases/phase‑3‑service-extraction.md — split heavy agents  
+- phases/phase‑4‑observability-scaling.md — alerts, dashboards, HPAs
+
+**Usage tips**
+
+1. Read `master-prd.md` once to get the big picture.  
+2. Open the phase you are currently working on; ignore future phases.  
+3. Each phase exits only after meeting its checklist.  
+4. Use Perplexity or Context7 with a single phase file to generate daily tasks.
+
+---
+
+---
+
+docs/master-prd.md
+==================
+
+# Product Requirements Document – Meta‑Agent Factory Migration
+**Status:** Draft for Perplexity/Context7 detail expansion  
+**Owner:** Stuart Oden  
+**Last updated:** 2025-07-27 20:37:55
+
+## 1. Executive Summary
+We are migrating the current single‑machine, multi‑script "Meta‑Agent Factory" into a **containerised, event‑driven platform** that is easy to build, deploy, scale and debug.  
+The factory must still take a *Product Requirements Document* (PRD) as input and output a ready‑to‑run software project.  
+
+The guiding idea: **build small first, prove value, then split as needed**.
+
+---
+
+## 2. Global Goals & KPIs  
+
+| ID | Goal | Metric | Target | Notes |
+|----|------|--------|--------|-------|
+| G1 | One‑click build | `curl /api/generate-project` completes | ≤ 2 min for a 1 k‑word PRD | Measures raw throughput |
+| G2 | Platform health | `/health` endpoints green | 100 % of running pods | Uses Prometheus scrape |
+| G3 | Stability | Failed project generations | < 1 % weekly | After Phase 4 load tests |
+
+---
+
+## 3. Pain‑Point Analysis  
+
+1. **Coordination hell** – Agents must be manually started in terminal tabs.  
+2. **CommonJS ⟷ ESM conflict** – Build breaks unpredictably across files.  
+3. **Multiple `package.json` files** – Dependency duplication & version drift.  
+4. **Redis Pub/Sub drops events** – Message loss during restarts.  
+5. **DIY proxy** – No TLS, auth, rate‑limit, or retries.  
+6. **No observability** – Hard to diagnose performance regressions.
+
+---
+
+## 4. Guiding Principles  
+
+1. **Start simple** – three containers (gateway, factory‑core, domain‑agents) before any micro‑split.  
+2. **Stabilise first** – Finish code migration to ESM & single dependency graph before containerisation.  
+3. **Durable messaging** – JetStream/Kafka for workflow events; Redis only as cache.  
+4. **Production gateway** – Traefik/Envoy with TLS 1.3 + JWT.  
+5. **Observability Day 1** – RED metrics, traces, logs visible in Grafana.  
+6. **Iteration gates** – Every phase ends with demo + exit checklist.
+
+---
+
+## 5. Target Architecture
+
+### 5.1 Minimal Viable Slice (MVS)  
+
+| Container | Responsibilities | Ports | Image base |
+|-----------|------------------|-------|------------|
+| api‑gateway | Routing, JWT auth, rate limit, TLS termination | 8080/tcp | `traefik:v3` |
+| factory‑core | 11 meta‑agents, orchestrator, Redis client | 7000‑7011 | `node:18-alpine` |
+| domain‑agents | 5 domain specialists behind an internal router | 7200‑7205 | `node:18-alpine` |
+| nats‑broker | Persistent message bus (JetStream) | 4222,8222 | `nats:2.10-alpine` |
+| observability | Prometheus + Grafana | 9090/3000 | `prom/prometheus`, `grafana/grafana` |
+
+### 5.2 Progressive Decomposition
+When Prometheus shows >70 % CPU or >1 GB memory sustained for a service, extract that agent into its own container with its own scaling policy.
+
+### 5.3 Data Flow (happy path)
+
+```
+Gateway → Orchestrator → PRD Parser → Scaffold Generator → Domain Agents
+       ↘ status events via NATS ↗
+              Prometheus scrapes /metrics
+```
+
+---
+
+## 6. Migration Roadmap Overview  
+
+| Phase | Duration | Objective | Output |
+|-------|----------|-----------|--------|
+| 0 — Stabilise Code | 1 week | Build/tests always green | CI pipeline passing |
+| 1 — Containerise MVS | 2 weeks | Run factory in 3 containers | `docker compose up` demo |
+| 2 — Messaging & Gateway | 1 week | NATS JetStream + Traefik TLS/JWT | Resilient workflows |
+| 3 — Service Extraction | 2 weeks | Split high‑load agents | Independent deploys |
+| 4 — Observability & Scaling | 1 week | Alerting + HPAs + load tests | ≥ 99.9 % uptime |
+
+*(One buffer week added over the original schedule.)*
+
+---
+
+## 7. Risk Register  
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|------------|--------|------------|
+| R1 | Over‑splitting early | High | Slow dev loop | Delay extraction until metrics prove need |
+| R2 | Event loss | Med | Broken builds | Use JetStream ACK + durability |
+| R3 | ESM conversion drag | Med | Blocks Phase 1 | Freeze feature work; pair‑program conversions |
+| R4 | Gateway cert issues | Low | Invalid SSL | Stage LetsEncrypt first |
+
+---
+
+## 8. Next Steps  
+
+1. Approve Phase‑0 PRD.  
+2. Tag existing codebase snapshot (`pre‑migration`).  
+3. Kick off CI conversion sprint.  
+4. Schedule Phase‑0 exit demo.
+
+---
+
+---
+
+docs/phases/phase-0-stabilisation-Codebase Stabilisation.md
+========================================
+# Phase 0-stabilisation PRD — Bring repo to a reliable, green‑build state.
+
+## Purpose
+Bring repo to a reliable, green‑build state.
+
+## Scope
+### In
+- Convert all source to ESM
+- Merge `package.json` files
+- GitHub Actions: lint, test, build
+- Add Jest unit tests
+
+### Out
+- Docker or infra changes
+- New features
+
+## Objectives & KPIs
+| KPI | Target |
+|-----|--------|
+`npm run build` green on CI | 100 %
+Unit test pass rate | 100 %
+Lint errors | 0
+
+## Deliverables
+- Single root `package.json`
+- ESM config (tsconfig/babel)
+- `.github/workflows/ci.yml`
+
+## Milestones
+1. **Day 1–2** — Audit CommonJS imports; create conversion spreadsheet  
+2. **Day 3** — Write codemod script with `jscodeshift`  
+3. **Day 4–5** — Run codemod, fix edge cases  
+4. **Day 6** — Merge dependency graphs; install clean lockfile  
+5. **Day 7** — Push CI pipeline, achieve green run
+
+## Dependencies
+- Node 18+
+- GitHub Actions runner
+
+## Risks & Mitigations
+| Risk | Mitigation |
+|------|------------|
+Dynamic `require()` calls | Identify via `grep -R "require("` and log TODOs
+Library lacks ESM build | Use `esm.sh` shim or fork
+
+## Exit Criteria
+- CI pipeline green on `main`
+- `docker run node:18-alpine npm test` passes
+
+---
+
+docs/phases/phase-1-mvs-containerisation-MVS Containerisation.md
+========================================
+# Phase 1-mvs-containerisation PRD — Containerise minimal slice to prove the architecture.
+
+## Purpose
+Containerise minimal slice to prove the architecture.
+
+## Scope
+### In
+- Dockerfiles for api‑gateway, factory‑core, domain‑agents
+- docker‑compose.yml with nats, observability
+- `/health` endpoints + Prometheus scrape configs
+- Quick‑start README for local run
+
+### Out
+- Kubernetes manifests
+- Autoscaling configs
+- Multi‑arch images
+
+## Objectives & KPIs
+| KPI | Target |
+|-----|--------|
+`docker compose up` time | ≤ 60 s
+Factory builds sample PRD | ≤ 2 min
+Containers healthy | 100 %
+
+## Deliverables
+- 3 Dockerfiles & shared `.dockerignore`
+- Compose file with named networks
+- Prometheus `prometheus.yml`, Grafana dashboard JSON
+
+## Milestones
+1. **Week 1 Day 1‑2** — Base Node 18‑alpine multi‑stage Dockerfile template  
+2. **Day 3** — Image for api‑gateway (Traefik) with dummy config  
+3. **Day 4** — Image for factory‑core bundling all meta‑agents  
+4. **Day 5** — Image for domain‑agents with internal router  
+5. **Week 2 Day 1** — Write docker‑compose.yml; configure networks & volumes  
+6. **Day 2** — Add nats‑broker & observability stack  
+7. **Day 3** — Implement `/health` endpoints and Prometheus scrape  
+8. **Day 4** — Smoke‑test build of sample PRD  
+9. **Day 5** — Demo to team, gather feedback
+
+## Dependencies
+- Phase 0 tag
+- Docker Hub or GHCR push rights
+
+## Risks & Mitigations
+| Risk | Mitigation |
+|------|------------|
+Image size bloats | Use multi‑stage builds & `npm ci --production`
+Port conflicts | Map to high dev ports 5000+
+
+## Exit Criteria
+- `curl localhost:8080/api/generate-project` returns scaffold zip within 2 min
+- Grafana dashboard shows all services green
+
+---
+
+docs/phases/phase-2-messaging-gateway-Resilient Messaging & Gateway.md
+========================================
+# Phase 2-messaging-gateway PRD — Introduce durable event bus and secure gateway.
+
+## Purpose
+Introduce durable event bus and secure gateway.
+
+## Scope
+### In
+- Add NATS JetStream container
+- Migrate factory‑core publish/subscribe to NATS
+- Define shared `ProjectEvent v1` TypeScript interface
+- Deploy Traefik gateway with TLS (LetsEncrypt staging) & JWT middleware
+
+### Out
+- Multi‑region broker clustering
+- Advanced gateway rate‑limiting policies
+
+## Objectives & KPIs
+| KPI | Target |
+|-----|--------|
+Events lost on broker restart | 0
+TLS handshake failures | < 0.1 %
+Auth success ratio | ≥ 95 %
+
+## Deliverables
+- `nats.conf` with JetStream enabled
+- `traefik.yml` static + dynamic config
+- Refactored event client util with ACK handling
+- Integration tests that restart broker mid‑flow
+
+## Milestones
+1. **Week 3 Day 1** — Bring up NATS JetStream, create `factory` stream (subjects `factory.>`)  
+2. **Day 2** — Abstract broker client (`src/shared/broker.ts`); implement ACK + retry  
+3. **Day 3** — Update orchestrator & agents to use broker client; deprecate Redis pub/sub  
+4. **Day 4** — Add Traefik container; configure LetsEncrypt staging cert; plug JWT validation (HS256 key in `.env`)  
+5. **Day 5** — Chaos engineering: restart NATS, ensure in‑flight job resumes; run `wrk` SSL benchmark
+
+## Dependencies
+- Staging DNS `factory.local.dev` pointing to host
+- JWT signing secret in Docker secrets
+
+## Risks & Mitigations
+| Risk | Mitigation |
+|------|------------|
+Broker configuration complex | Start with default config, automate via `nats-cli` script
+Cert renewal fails | Use LetsEncrypt staging first, swap to prod after dry‑run
+
+## Exit Criteria
+- Restart NATS mid‑build; build completes without data loss
+- Gateway serves HTTPS & rejects invalid JWT tokens
+
+---
+
+docs/phases/phase-3-service-extraction-Incremental Service Extraction.md
+========================================
+# Phase 3-service-extraction PRD — Split heavy-load agents based on telemetry.
+
+## Purpose
+Split heavy-load agents based on telemetry.
+
+## Scope
+### In
+- Extract `scaffold-generator` & `docs-writer` into standalone services
+- Provide Helm charts (or Compose overrides) for each service
+- Implement internal DNS names `scaffold-generator.default.svc`
+- CI pipeline per service
+
+### Out
+- Extraction of agents with < 20 % CPU usage
+- Multi‑cluster deployments
+
+## Objectives & KPIs
+| KPI | Target |
+|-----|--------|
+factory‑core CPU | < 70 %
+Project build time | ≤ 2 min post‑extraction
+Independent deploy cadence | Service can deploy without redeploying core
+
+## Deliverables
+- Two new Dockerfiles & build workflows
+- Updated service discovery config
+- Grafana dashboards for each new service
+
+## Milestones
+1. **Week 4 Day 1** — Use Prometheus metrics to identify `scaffold-generator` CPU 85 % → candidate #1  
+2. **Day 2‑3** — Move code to `/services/scaffold-generator/`; create Dockerfile; push to registry  
+3. **Day 4** — Update compose/Helm with new deployment; test DNS call from orchestrator  
+4. **Week 5 Day 1** — Repeat for `docs-writer` service  
+5. **Day 2** — Add contract tests (Pact) between orchestrator and new service  
+6. **Day 3‑4** — Load test new layout; compare latency  
+7. **Day 5** — Document new deployment process
+
+## Dependencies
+- Kubernetes cluster (minikube or dev cluster)
+- Phase 2 images in registry
+
+## Risks & Mitigations
+| Risk | Mitigation |
+|------|------------|
+Network latency increases | Keep pods in same node pool and use HTTP/2
+Version skew | Semantic version tags + contract tests
+
+## Exit Criteria
+- `scaffold-generator` and `docs-writer` run as separate deployments
+- factory‑core CPU reduced by ≥ 30 % under load
+
+---
+
+docs/phases/phase-4-observability-scaling-Observability & Scaling.md
+========================================
+# Phase 4-observability-scaling PRD — Add alerting, dashboards and auto‑scaling, then load‑test.
+
+## Purpose
+Add alerting, dashboards and auto‑scaling, then load‑test.
+
+## Scope
+### In
+- Write Prometheus alert rules (RED metrics)
+- Import Grafana dashboards via JSON provisioning
+- Configure Kubernetes HPA (CPU + custom queue length)
+- Write k6 load tests (baseline 10× expected traffic)
+- Create runbook in `/docs/runbook.md`
+
+### Out
+- Vendor APM tools (Datadog, New Relic)
+- Cross‑region disaster recovery
+
+## Objectives & KPIs
+| KPI | Target |
+|-----|--------|
+Uptime 30 d | ≥ 99.9 %
+Mean time to detect | ≤ 60 s
+Mean time to recover | ≤ 5 min
+
+## Deliverables
+- `alerts.yml` Prometheus ruleset
+- Grafana dashboards committed under `/grafana`
+- `hpa.yaml` for gateway & orchestrator
+- Load test report HTML in CI artifacts
+- Runbook covering common failures
+
+## Milestones
+1. **Week 6 Day 1** — Define RED metrics (`request_rate`, `error_rate`, `latency`) per service  
+2. **Day 2** — Build `alerts.yml` with severity & Slack routing  
+3. **Day 3** — Apply HPA targeting 70 % CPU & queue length 1000 msgs  
+4. **Day 4** — Run k6 test: 200 concurrent builds; capture metrics  
+5. **Day 5** — Tune alert thresholds; write incident runbook; final demo
+
+## Dependencies
+- Slack webhook secret for alertmanager
+- k6 installed in CI runner
+
+## Risks & Mitigations
+| Risk | Mitigation |
+|------|------------|
+Alert fatigue | Start with high‑severity only and refine
+Autoscaler flapping | Use rolling average metrics and cooldown windows
+
+## Exit Criteria
+- Dashboards green under 2× load
+- Alert triggers & resolves during test with MTTR < 5 min
+- Runbook signed off by DevOps & Tech Lead
