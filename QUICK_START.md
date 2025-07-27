@@ -66,6 +66,59 @@ This is a **fully autonomous AI agent factory** that builds complete, production
 
 ---
 
+## 🔄 **UPDATING THE RAG SYSTEM**
+
+**⚡ CRITICAL FOR AI CONTEXT: Keep the RAG system updated with latest documentation ⚡**
+
+The RAG (Retrieval-Augmented Generation) system contains indexed knowledge of all project files and documentation. When you make significant changes to documentation or add new files, you need to update the RAG so AI agents can access the latest information.
+
+### **🚀 Complete RAG Update Command (RECOMMENDED)**
+
+```bash
+# COMPREHENSIVE: Update RAG with ALL project files (998+ files)
+node update-rag-all.cjs
+```
+
+**What this script does:**
+- ✅ Finds ALL project files including hidden directories (998+ files)
+- ✅ Handles large files with smart chunking to avoid metadata size limits
+- ✅ Indexes everything in one complete run with progress tracking
+- ✅ Tests RAG functionality and shows detailed statistics
+- ✅ Can be run repeatedly to keep RAG updated
+
+### **🔄 Quick RAG Update Command (LEGACY)**
+
+```bash
+# BASIC: Update RAG with core meta-agent documentation only
+node update-rag-quick.cjs
+```
+
+### **📋 When to Update RAG**
+
+**Always update RAG after:**
+- Adding new documentation files
+- Modifying existing guides (like this one)
+- Adding new agents or changing agent functionality  
+- Making significant code changes
+- Before starting a new Claude Code session
+
+### **🔧 Troubleshooting RAG Updates**
+
+**If the update fails:**
+1. Check that you're in the project root directory
+2. Verify Node.js dependencies: `npm install`
+3. Check the console output for specific error messages
+4. Ensure API keys are properly configured in `.env`
+5. Try running components individually:
+   ```bash
+   cd rag-system && node update-meta-agents.js
+   cd rag-system && node initialize-cached-rag.js
+   ```
+
+**Expected output:** You should see ✅ checkmarks and "RAG test successful" message.
+
+---
+
 ## 🚀 **THE COMPLETE WORKFLOW (From Idea to Working App)**
 
 ### **Step 1: Create Your Project Description (PRD File)**
