@@ -150,6 +150,9 @@ export class TaskStateManager extends EventEmitter {
     super();
     this.messageSystem = messageSystem;
     
+    // Register this TaskStateManager as a system agent
+    this.registerAsSystemAgent();
+    
     // Listen for message system events
     this.messageSystem.on('task.message', this.handleTaskMessage.bind(this));
     
@@ -157,6 +160,23 @@ export class TaskStateManager extends EventEmitter {
     this.startBackgroundCleanup();
     
     console.log('🗂️ Task State Manager initialized');
+  }
+
+  /**
+   * Register TaskStateManager as a system agent to receive messages
+   */
+  private async registerAsSystemAgent(): Promise<void> {
+    try {
+      await this.messageSystem.registerAgent({
+        agentId: 'task-state-manager',
+        agentType: 'system-task-manager',
+        capabilities: ['task-creation', 'task-state-management', 'task-coordination'],
+        subscribedMessageTypes: ['task.request', 'task.response', 'task.status']
+      });
+      console.log('✅ Task State Manager registered as system agent');
+    } catch (error) {
+      console.warn('⚠️ Failed to register TaskStateManager as agent:', error);
+    }
   }
 
   /**
@@ -569,7 +589,7 @@ export class TaskStateManager extends EventEmitter {
         type: message.payload.type || 'agent-request',
         priority: message.payload.priority || 'medium',
         requesterAgentId: message.from,
-        assignedAgentId: message.payload.assignedAgentId || message.to,
+        assignedAgentId: message.payload.assignedAgentId || (message.to !== 'task-state-manager' ? message.to : undefined),
         input: message.payload.input || message.payload,
         sessionId: message.payload.sessionId || message.correlationId,
         options: message.payload.options || {}
@@ -592,7 +612,11 @@ export class TaskStateManager extends EventEmitter {
       
       await this.messageSystem.sendMessage(response);
       
+      console.log(`📨 Task request processed: ${task.id} for ${message.from}`);
+      
     } catch (error) {
+      console.error(`❌ Task request failed:`, error);
+      
       // Send error response
       const errorResponse: Partial<UEPMessage> = {
         type: 'task.response',

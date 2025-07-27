@@ -58,7 +58,7 @@ import { ServerlessFunctionDeployer } from '../deployers/ServerlessFunctionDeplo
 import { ProductionDeploymentManager } from '../deployers/ProductionDeploymentManager.js';
 import { PerformanceOptimizer } from '../optimizers/PerformanceOptimizer.js';
 import { ProductionMonitor } from '../monitors/ProductionMonitor.js';
-import { MetaAgentIntegrator } from '../integrations/MetaAgentIntegrator.js';
+import { MetaAgentIntegrator } from '../integrators/MetaAgentIntegrator.js';
 
 /**
  * Vercel-Native Architecture Agent - Builds complete production deployment systems
