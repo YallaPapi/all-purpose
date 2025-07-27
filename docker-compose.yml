@@ -1,0 +1,166 @@
+version: '3.8'
+
+services:
+  # API Gateway - Traefik
+  api-gateway:
+    build:
+      context: ./containers/api-gateway
+      dockerfile: Dockerfile
+    container_name: meta-agent-factory-gateway
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/traefik/acme.json:/acme.json
+    networks:
+      - meta-agent-factory
+    depends_on:
+      - factory-core
+      - domain-agents
+      - nats-broker
+      - observability
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+
+  # Factory Core - 11 Meta-Agents
+  factory-core:
+    build:
+      context: .
+      dockerfile: ./containers/factory-core/Dockerfile
+    container_name: meta-agent-factory-core
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-factory-core-secret}
+      - REDIS_URL=redis://redis:6379
+      - NATS_URL=nats://nats-broker:4222
+    volumes:
+      - ./data/factory-core:/app/data
+      - ./logs:/app/logs
+    networks:
+      - meta-agent-factory
+    depends_on:
+      - redis
+      - nats-broker
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.factory.rule=Host(`factory.localhost`)"
+      - "traefik.http.services.factory.loadbalancer.server.port=3000"
+
+  # Domain Agents - 5 Specialists
+  domain-agents:
+    build:
+      context: .
+      dockerfile: ./containers/domain-agents/Dockerfile
+    container_name: meta-agent-domain-agents
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - NATS_URL=nats://nats-broker:4222
+      - FACTORY_CORE_URL=http://factory-core:3000
+    volumes:
+      - ./data/domain-agents:/app/data
+      - ./logs:/app/logs
+    networks:
+      - meta-agent-factory
+    depends_on:
+      - nats-broker
+      - factory-core
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.agents.rule=Host(`agents.localhost`)"
+      - "traefik.http.services.agents.loadbalancer.server.port=3001"
+
+  # NATS Broker - JetStream
+  nats-broker:
+    build:
+      context: ./containers/nats-broker
+      dockerfile: Dockerfile
+    container_name: meta-agent-nats-broker
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+      - "6222:6222"
+    volumes:
+      - ./data/nats:/data
+      - ./logs/nats:/logs
+    networks:
+      - meta-agent-factory
+    restart: unless-stopped
+    command: ["nats-server", "-c", "/etc/nats/nats-server.conf"]
+
+  # Observability - Prometheus + Grafana
+  observability:
+    build:
+      context: ./containers/observability
+      dockerfile: Dockerfile
+    container_name: meta-agent-observability
+    ports:
+      - "9090:9090"  # Prometheus
+      - "3000:3000"  # Grafana (conflicts with factory-core, need to adjust)
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - ./data/prometheus:/prometheus
+      - ./data/grafana:/var/lib/grafana
+    networks:
+      - meta-agent-factory
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.metrics.rule=Host(`metrics.localhost`)"
+      - "traefik.http.services.metrics.loadbalancer.server.port=3000"
+
+  # Supporting Services
+  redis:
+    image: redis:7-alpine
+    container_name: meta-agent-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - meta-agent-factory
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Frontend (optional - can be external)
+  frontend:
+    image: nginx:alpine
+    container_name: meta-agent-frontend
+    ports:
+      - "3002:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
+      - ./frontend/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - meta-agent-factory
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`app.localhost`)"
+      - "traefik.http.services.app.loadbalancer.server.port=80"
+
+networks:
+  meta-agent-factory:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  redis_data:
+  nats_data:

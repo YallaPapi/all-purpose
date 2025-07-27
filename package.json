@@ -25,6 +25,14 @@
     "install:all": "npm install && npm install --workspaces",
     "docker:build": "docker build -t meta-agent-factory .",
     "docker:run": "docker run -p 8080:8080 meta-agent-factory",
+    "docker:build:all": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v --remove-orphans && docker system prune -f",
+    "mvs:start": "docker-compose up -d api-gateway factory-core domain-agents nats-broker observability",
+    "mvs:stop": "docker-compose down",
+    "mvs:status": "docker-compose ps",
     "health": "curl -f http://localhost:8080/health || exit 1"
   },
   "workspaces": [

@@ -1,0 +1,105 @@
+http:
+  routers:
+    factory-core:
+      rule: "Host(`factory.localhost`) || PathPrefix(`/api/factory`)"
+      service: factory-core
+      middlewares:
+        - auth
+        - rate-limit
+        - cors
+      tls:
+        certResolver: letsencrypt
+
+    domain-agents:
+      rule: "Host(`agents.localhost`) || PathPrefix(`/api/agents`)"
+      service: domain-agents
+      middlewares:
+        - auth
+        - rate-limit
+        - cors
+      tls:
+        certResolver: letsencrypt
+
+    frontend:
+      rule: "Host(`app.localhost`) || PathPrefix(`/app`)"
+      service: frontend
+      middlewares:
+        - cors
+      tls:
+        certResolver: letsencrypt
+
+    observability:
+      rule: "Host(`metrics.localhost`) || PathPrefix(`/metrics`)"
+      service: observability
+      middlewares:
+        - auth
+      tls:
+        certResolver: letsencrypt
+
+    messaging:
+      rule: "Host(`nats.localhost`) || PathPrefix(`/nats`)"
+      service: nats-broker
+      middlewares:
+        - auth
+        - rate-limit
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    factory-core:
+      loadBalancer:
+        servers:
+          - url: "http://factory-core:3000"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+
+    domain-agents:
+      loadBalancer:
+        servers:
+          - url: "http://domain-agents:3001"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+
+    frontend:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:3002"
+        healthCheck:
+          path: "/"
+          interval: "30s"
+
+    observability:
+      loadBalancer:
+        servers:
+          - url: "http://observability:3000"
+
+    nats-broker:
+      loadBalancer:
+        servers:
+          - url: "http://nats-broker:4222"
+
+  middlewares:
+    auth:
+      forwardAuth:
+        address: "http://factory-core:3000/auth/validate"
+        trustForwardHeader: true
+
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 200
+
+    cors:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        accessControlAllowOrigins:
+          - "*"
+        accessControlAllowHeaders:
+          - "*"

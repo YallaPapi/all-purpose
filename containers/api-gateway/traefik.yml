@@ -1,0 +1,51 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+api:
+  dashboard: true
+  debug: true
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+  traefik:
+    address: ":8080"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: "meta-agent-factory"
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: admin@meta-agent-factory.com
+      storage: /acme.json
+      httpChallenge:
+        entryPoint: web
+
+log:
+  level: INFO
+  format: json
+
+accessLog:
+  format: json
+
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+
+tracing:
+  jaeger:
+    samplingServerURL: "http://observability:14268/api/sampling"
+    localAgentHostPort: "observability:6832"
