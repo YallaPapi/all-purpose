@@ -5,11 +5,13 @@
  * Provides easy integration for existing agents without requiring TypeScript migration.
  * 
  * Usage:
- *   const { enhanceAgentWithUEP } = require('./uep/agentIntegration');
+ *   import { enhanceAgentWithUEP } from './uep/agentIntegration.js';
  *   const enhancedAgent = await enhanceAgentWithUEP(myAgent, 'my-agent-id');
  */
 
-const path = require('path');
+import path from 'path';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // Dynamic import helper for TypeScript modules
 async function importUEPWrapper() {
@@ -357,7 +359,7 @@ async function integrateExistingAgent(agentPath, agentId, options = {}) {
   }
 }
 
-module.exports = {
+export {
   enhanceAgentWithUEP,
   createUEPAgentFactory,
   integrateExistingAgent,

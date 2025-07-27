@@ -1,6 +1,7 @@
 {
   "name": "@meta-agents/vercel-native-architecture",
   "version": "1.0.0",
+  "type": "module",
   "description": "The PRODUCTION BUILDER - Builds native Vercel production deployment systems with unlimited scalability",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

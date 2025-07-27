@@ -7489,3 +7489,6 @@
 {"error":"Failed to parse URL from /pipeline","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-25 20:03:10:310"}
 {"error":"Failed to parse URL from /pipeline","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-25 20:03:14:314"}
 {"error":"Failed to parse URL from /pipeline","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-25 20:03:24:324"}
+{"error":"fetch failed","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-25 23:32:54:3254"}
+{"error":"fetch failed","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-26 08:44:33:4433"}
+{"error":"fetch failed","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-26 08:44:38:4438"}

@@ -7,7 +7,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const TemplateEngine = require('./templateEngine');
+const TemplateEngine = require('./templateEngine.cjs');
 
 class FileGenerator {
   constructor(outputDir, templatesDir) {

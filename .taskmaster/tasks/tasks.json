@@ -134,11 +134,148 @@
         ],
         "status": "pending",
         "subtasks": []
+      },
+      {
+        "id": 86,
+        "title": "Setup Next.js 14+ Project with TypeScript and Tailwind CSS",
+        "description": "Initialize the frontend project using Next.js 14+ with TypeScript and Tailwind CSS, including dark/light mode support and responsive design configuration.",
+        "details": "1. Create a new Next.js project with TypeScript:\n```bash\nnpx create-next-app@latest --typescript\n```\n2. Install and configure Tailwind CSS:\n```bash\nnpm install -D tailwindcss postcss autoprefixer\nnpx tailwindcss init -p\n```\n3. Configure Tailwind CSS in tailwind.config.js to include dark mode support:\n```javascript\nmodule.exports = {\n  darkMode: 'class',\n  content: [\n    './pages/**/*.{js,ts,jsx,tsx}',\n    './components/**/*.{js,ts,jsx,tsx}',\n    './app/**/*.{js,ts,jsx,tsx}',\n  ],\n  theme: {\n    extend: {},\n  },\n  plugins: [],\n}\n```\n4. Create theme context for dark/light mode toggle functionality\n5. Setup responsive design utilities and breakpoints\n6. Configure project structure with appropriate folders for components, hooks, contexts, and utilities",
+        "testStrategy": "1. Verify Next.js application builds successfully\n2. Test dark/light mode toggle functionality across different screen sizes\n3. Validate responsive design using browser dev tools\n4. Run Lighthouse audit to ensure accessibility and performance standards\n5. Verify TypeScript configuration is working correctly",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 87,
+        "title": "Implement Express.js Backend API with Redis Integration",
+        "description": "Set up the Express.js backend server with Redis integration for real-time coordination data and create RESTful endpoints for historical data retrieval.",
+        "details": "1. Initialize Express.js project with TypeScript:\n```bash\nmkdir backend\ncd backend\nnpm init -y\nnpm install express cors helmet express-rate-limit\nnpm install -D typescript @types/express @types/node ts-node nodemon\n```\n2. Configure TypeScript with tsconfig.json\n3. Set up Redis connection:\n```bash\nnpm install redis\n```\n```typescript\nimport { createClient } from 'redis';\n\nconst redisClient = createClient({\n  url: process.env.REDIS_URL || 'redis://localhost:6379'\n});\n\nredisClient.on('error', (err) => console.log('Redis Client Error', err));\n\nawait redisClient.connect();\n```\n4. Create API routes structure for:\n   - Meta-agent performance data\n   - UEP coordination metrics\n   - Factory operations data\n   - System health indicators\n5. Implement data models and interfaces\n6. Add error handling middleware\n7. Configure CORS and security headers",
+        "testStrategy": "1. Unit tests for each API endpoint using Jest\n2. Integration tests for Redis connection and data retrieval\n3. Load testing with Artillery to ensure performance under load\n4. Test error handling and edge cases\n5. Verify data consistency between Redis and API responses",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 88,
+        "title": "Develop WebSocket Server for Real-time Updates",
+        "description": "Implement a WebSocket server to provide real-time updates for agent status, metrics, and system health to the frontend dashboard.",
+        "details": "1. Install WebSocket libraries:\n```bash\nnpm install ws socket.io\nnpm install -D @types/ws\n```\n2. Set up WebSocket server in the backend:\n```typescript\nimport { Server } from 'socket.io';\nimport http from 'http';\n\nconst server = http.createServer(app);\nconst io = new Server(server, {\n  cors: {\n    origin: process.env.FRONTEND_URL || 'http://localhost:3000',\n    methods: ['GET', 'POST']\n  }\n});\n\nio.on('connection', (socket) => {\n  console.log('Client connected');\n  \n  // Handle subscription to different data channels\n  socket.on('subscribe', (channels) => {\n    channels.forEach(channel => socket.join(channel));\n  });\n  \n  socket.on('disconnect', () => {\n    console.log('Client disconnected');\n  });\n});\n```\n3. Create event emitters for different data types:\n   - Agent status updates\n   - Performance metrics\n   - Coordination events\n   - System health indicators\n4. Implement Redis pub/sub pattern to push updates to WebSocket\n5. Add authentication for WebSocket connections\n6. Implement reconnection logic and error handling",
+        "testStrategy": "1. Test WebSocket connection establishment and maintenance\n2. Verify real-time data transmission with mock data\n3. Test subscription to different channels\n4. Measure latency and performance under load\n5. Test reconnection scenarios and error recovery\n6. Verify authentication and security measures",
+        "priority": "high",
+        "dependencies": [
+          87
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 89,
+        "title": "Create Dashboard Layout and Navigation Components",
+        "description": "Design and implement the main dashboard layout, navigation structure, and core UI components that will be used across the monitoring dashboard.",
+        "details": "1. Create responsive layout components:\n```typescript\n// components/layout/DashboardLayout.tsx\nimport { ReactNode } from 'react';\nimport Sidebar from './Sidebar';\nimport Header from './Header';\n\ntype DashboardLayoutProps = {\n  children: ReactNode;\n};\n\nexport default function DashboardLayout({ children }: DashboardLayoutProps) {\n  return (\n    <div className=\"flex h-screen bg-gray-100 dark:bg-gray-900\">\n      <Sidebar />\n      <div className=\"flex flex-col flex-1 overflow-hidden\">\n        <Header />\n        <main className=\"flex-1 overflow-y-auto p-4\">\n          {children}\n        </main>\n      </div>\n    </div>\n  );\n}\n```\n2. Implement navigation components (sidebar, header, breadcrumbs)\n3. Create reusable UI components:\n   - Cards and panels\n   - Metric displays\n   - Status indicators\n   - Alerts and notifications\n4. Design dashboard grid system for arranging metrics\n5. Implement tab navigation for different dashboard sections\n6. Add responsive behavior for mobile and tablet views",
+        "testStrategy": "1. Component testing with React Testing Library\n2. Visual regression testing with Storybook\n3. Accessibility testing with axe-core\n4. Responsive design testing across different viewport sizes\n5. User flow testing for navigation between dashboard sections",
+        "priority": "medium",
+        "dependencies": [
+          86
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 90,
+        "title": "Implement Meta-Agent Performance Monitoring UI",
+        "description": "Develop the UI components for displaying meta-agent performance metrics including status tracking, task completion rates, processing time analytics, and reliability scoring.",
+        "details": "1. Create agent status card component:\n```typescript\n// components/agents/AgentStatusCard.tsx\ntype AgentStatus = 'online' | 'offline' | 'busy';\n\ntype AgentStatusCardProps = {\n  agentId: string;\n  agentName: string;\n  status: AgentStatus;\n  reliability: number;\n  taskCompletionRate: number;\n  avgProcessingTime: number;\n};\n\nexport default function AgentStatusCard({\n  agentId,\n  agentName,\n  status,\n  reliability,\n  taskCompletionRate,\n  avgProcessingTime\n}: AgentStatusCardProps) {\n  return (\n    <div className=\"bg-white dark:bg-gray-800 rounded-lg shadow p-4\">\n      <div className=\"flex items-center justify-between\">\n        <h3 className=\"font-medium text-gray-900 dark:text-white\">{agentName}</h3>\n        <StatusBadge status={status} />\n      </div>\n      <div className=\"mt-4 grid grid-cols-2 gap-4\">\n        <MetricItem label=\"Reliability\" value={`${reliability}%`} />\n        <MetricItem label=\"Completion Rate\" value={`${taskCompletionRate}%`} />\n        <MetricItem label=\"Avg. Processing\" value={`${avgProcessingTime}ms`} />\n      </div>\n    </div>\n  );\n}\n```\n2. Implement performance trend charts using Chart.js or D3.js\n3. Create agent comparison view for side-by-side analysis\n4. Develop detailed agent profile page with historical performance\n5. Implement filtering and sorting options for agent list\n6. Add real-time updates via WebSocket connection",
+        "testStrategy": "1. Unit tests for individual components\n2. Integration tests for data fetching and display\n3. Test real-time updates with mock WebSocket events\n4. Verify correct rendering of different agent statuses\n5. Test performance with large datasets\n6. Verify accessibility of charts and interactive elements",
+        "priority": "medium",
+        "dependencies": [
+          88,
+          89
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 91,
+        "title": "Develop UEP Coordination Metrics Visualization",
+        "description": "Create visualization components for UEP coordination metrics including protocol message flow, agent-to-agent communication patterns, coordination event timeline, and UEP compliance monitoring.",
+        "details": "1. Implement network graph visualization for agent communication:\n```typescript\n// components/coordination/AgentNetworkGraph.tsx\nimport { useEffect, useRef } from 'react';\nimport * as d3 from 'd3';\n\ntype Agent = {\n  id: string;\n  name: string;\n};\n\ntype Communication = {\n  source: string;\n  target: string;\n  messageCount: number;\n  protocol: string;\n};\n\ntype AgentNetworkGraphProps = {\n  agents: Agent[];\n  communications: Communication[];\n};\n\nexport default function AgentNetworkGraph({ agents, communications }: AgentNetworkGraphProps) {\n  const svgRef = useRef<SVGSVGElement>(null);\n  \n  useEffect(() => {\n    if (!svgRef.current) return;\n    \n    // D3.js force-directed graph implementation\n    // ...\n  }, [agents, communications]);\n  \n  return (\n    <div className=\"w-full h-96 bg-white dark:bg-gray-800 rounded-lg shadow p-4\">\n      <h3 className=\"text-lg font-medium mb-4\">Agent Communication Network</h3>\n      <svg ref={svgRef} className=\"w-full h-full\" />\n    </div>\n  );\n}\n```\n2. Create timeline visualization for coordination events\n3. Implement message flow diagrams showing protocol sequences\n4. Develop UEP compliance dashboard with key indicators\n5. Add filters for protocol types and time ranges\n6. Create detailed message inspection view",
+        "testStrategy": "1. Test visualization rendering with sample data\n2. Verify interactive elements (zoom, pan, click) work correctly\n3. Test responsiveness of visualizations at different screen sizes\n4. Verify correct data binding and updates\n5. Test edge cases (no data, large datasets)\n6. Verify accessibility of interactive visualizations",
+        "priority": "medium",
+        "dependencies": [
+          88,
+          89
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 92,
+        "title": "Implement Factory Operations Dashboard",
+        "description": "Build the factory operations dashboard components for tracking active projects, queue management visualization, resource allocation monitoring, and factory throughput metrics.",
+        "details": "1. Create project tracking board:\n```typescript\n// components/factory/ProjectTrackingBoard.tsx\ntype Project = {\n  id: string;\n  name: string;\n  status: 'queued' | 'in-progress' | 'completed' | 'failed';\n  progress: number;\n  startTime: string;\n  estimatedCompletion: string;\n  assignedAgents: string[];\n};\n\ntype ProjectTrackingBoardProps = {\n  projects: Project[];\n};\n\nexport default function ProjectTrackingBoard({ projects }: ProjectTrackingBoardProps) {\n  return (\n    <div className=\"bg-white dark:bg-gray-800 rounded-lg shadow\">\n      <div className=\"p-4 border-b border-gray-200 dark:border-gray-700\">\n        <h3 className=\"text-lg font-medium\">Active Projects</h3>\n      </div>\n      <div className=\"divide-y divide-gray-200 dark:divide-gray-700\">\n        {projects.map(project => (\n          <ProjectCard key={project.id} project={project} />\n        ))}\n      </div>\n    </div>\n  );\n}\n```\n2. Implement queue visualization with priority indicators\n3. Create resource allocation charts showing agent utilization\n4. Develop throughput metrics dashboard with historical trends\n5. Add success/failure rate visualizations\n6. Implement project details modal with timeline view",
+        "testStrategy": "1. Unit tests for individual components\n2. Test sorting and filtering of project lists\n3. Verify progress calculations and displays\n4. Test queue visualization with various states\n5. Verify resource allocation charts with different data scenarios\n6. Test modal interactions and detailed views",
+        "priority": "medium",
+        "dependencies": [
+          88,
+          89
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 93,
+        "title": "Create System Health Monitoring Components",
+        "description": "Develop UI components for system health monitoring including infrastructure status, Redis coordination health, RAG system performance, memory usage, and error rate tracking.",
+        "details": "1. Implement system health overview dashboard:\n```typescript\n// components/health/SystemHealthOverview.tsx\ntype SystemComponent = {\n  name: string;\n  status: 'healthy' | 'degraded' | 'critical' | 'unknown';\n  metrics: {\n    [key: string]: number;\n  };\n  lastUpdated: string;\n};\n\ntype SystemHealthOverviewProps = {\n  components: SystemComponent[];\n  overallHealth: number; // 0-100\n  errorRate: number;\n  memoryUsage: {\n    total: number;\n    used: number;\n    free: number;\n  };\n};\n\nexport default function SystemHealthOverview({\n  components,\n  overallHealth,\n  errorRate,\n  memoryUsage\n}: SystemHealthOverviewProps) {\n  return (\n    <div className=\"grid grid-cols-1 lg:grid-cols-2 gap-4\">\n      <HealthGauge value={overallHealth} />\n      <ErrorRateChart value={errorRate} />\n      <MemoryUsageChart {...memoryUsage} />\n      <ComponentStatusList components={components} />\n    </div>\n  );\n}\n```\n2. Create Redis health monitoring dashboard\n3. Implement RAG system performance metrics\n4. Develop error tracking and logging interface\n5. Create memory usage visualization with optimization recommendations\n6. Implement alert system for critical health issues",
+        "testStrategy": "1. Test rendering of health indicators with various states\n2. Verify gauge and chart components with different values\n3. Test alert triggering based on threshold values\n4. Verify real-time updates of health metrics\n5. Test error logging and display\n6. Verify responsive behavior of health dashboard",
+        "priority": "medium",
+        "dependencies": [
+          88,
+          89
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 94,
+        "title": "Implement WebSocket Integration in Frontend",
+        "description": "Integrate WebSocket connections in the frontend to enable real-time updates for all dashboard components and implement live visualization updates.",
+        "details": "1. Create WebSocket context provider:\n```typescript\n// contexts/WebSocketContext.tsx\nimport { createContext, useContext, useEffect, useState, ReactNode } from 'react';\nimport io, { Socket } from 'socket.io-client';\n\ntype WebSocketContextType = {\n  socket: Socket | null;\n  isConnected: boolean;\n  subscribe: (channels: string[]) => void;\n  unsubscribe: (channels: string[]) => void;\n};\n\nconst WebSocketContext = createContext<WebSocketContextType>({\n  socket: null,\n  isConnected: false,\n  subscribe: () => {},\n  unsubscribe: () => {}\n});\n\nexport function WebSocketProvider({ children }: { children: ReactNode }) {\n  const [socket, setSocket] = useState<Socket | null>(null);\n  const [isConnected, setIsConnected] = useState(false);\n  \n  useEffect(() => {\n    const socketInstance = io(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4000');\n    \n    socketInstance.on('connect', () => {\n      setIsConnected(true);\n    });\n    \n    socketInstance.on('disconnect', () => {\n      setIsConnected(false);\n    });\n    \n    setSocket(socketInstance);\n    \n    return () => {\n      socketInstance.disconnect();\n    };\n  }, []);\n  \n  const subscribe = (channels: string[]) => {\n    if (socket && isConnected) {\n      socket.emit('subscribe', channels);\n    }\n  };\n  \n  const unsubscribe = (channels: string[]) => {\n    if (socket && isConnected) {\n      socket.emit('unsubscribe', channels);\n    }\n  };\n  \n  return (\n    <WebSocketContext.Provider value={{ socket, isConnected, subscribe, unsubscribe }}>\n      {children}\n    </WebSocketContext.Provider>\n  );\n}\n\nexport const useWebSocket = () => useContext(WebSocketContext);\n```\n2. Create custom hooks for different data types:\n   - useAgentStatus\n   - useCoordinationMetrics\n   - useFactoryOperations\n   - useSystemHealth\n3. Implement real-time updates for charts and visualizations\n4. Add connection status indicator\n5. Implement reconnection logic\n6. Create fallback to REST API when WebSocket is unavailable",
+        "testStrategy": "1. Test WebSocket connection establishment\n2. Verify subscription to different channels\n3. Test real-time updates with mock events\n4. Verify reconnection behavior\n5. Test fallback to REST API\n6. Measure update performance and optimize if needed",
+        "priority": "high",
+        "dependencies": [
+          88,
+          89,
+          90,
+          91,
+          92,
+          93
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 95,
+        "title": "Configure Deployment and CI/CD Pipeline",
+        "description": "Set up deployment configuration for Vercel, Docker containerization, environment-based configuration, and automated CI/CD pipeline for the dashboard application.",
+        "details": "1. Create Vercel configuration:\n```json\n// vercel.json\n{\n  \"version\": 2,\n  \"builds\": [\n    {\n      \"src\": \"frontend/package.json\",\n      \"use\": \"@vercel/next\"\n    },\n    {\n      \"src\": \"backend/index.ts\",\n      \"use\": \"@vercel/node\"\n    }\n  ],\n  \"routes\": [\n    {\n      \"src\": \"/api/(.*)\",\n      \"dest\": \"backend/index.ts\"\n    },\n    {\n      \"src\": \"/(.*)\",\n      \"dest\": \"frontend/$1\"\n    }\n  ]\n}\n```\n2. Create Docker configuration:\n```dockerfile\n# Frontend Dockerfile\nFROM node:18-alpine AS frontend\nWORKDIR /app\nCOPY frontend/package*.json ./\nRUN npm ci\nCOPY frontend .\nRUN npm run build\n\n# Backend Dockerfile\nFROM node:18-alpine AS backend\nWORKDIR /app\nCOPY backend/package*.json ./\nRUN npm ci\nCOPY backend .\nRUN npm run build\n\n# Docker Compose for local development\n# docker-compose.yml\nversion: '3'\nservices:\n  frontend:\n    build:\n      context: .\n      dockerfile: Dockerfile.frontend\n    ports:\n      - \"3000:3000\"\n    environment:\n      - NEXT_PUBLIC_API_URL=http://backend:4000\n      - NEXT_PUBLIC_WS_URL=ws://backend:4000\n  backend:\n    build:\n      context: .\n      dockerfile: Dockerfile.backend\n    ports:\n      - \"4000:4000\"\n    environment:\n      - REDIS_URL=redis://redis:6379\n  redis:\n    image: redis:alpine\n    ports:\n      - \"6379:6379\"\n```\n3. Set up environment configuration for different environments\n4. Configure GitHub Actions for CI/CD:\n```yaml\n# .github/workflows/ci.yml\nname: CI/CD Pipeline\n\non:\n  push:\n    branches: [ main, develop ]\n  pull_request:\n    branches: [ main, develop ]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - name: Setup Node.js\n        uses: actions/setup-node@v3\n        with:\n          node-version: '18'\n      - name: Install dependencies\n        run: |\n          cd frontend && npm ci\n          cd ../backend && npm ci\n      - name: Run tests\n        run: |\n          cd frontend && npm test\n          cd ../backend && npm test\n  \n  deploy:\n    needs: test\n    if: github.ref == 'refs/heads/main'\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - name: Deploy to Vercel\n        uses: amondnet/vercel-action@v20\n        with:\n          vercel-token: ${{ secrets.VERCEL_TOKEN }}\n          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}\n          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}\n          vercel-args: '--prod'\n```\n5. Set up monitoring and logging for production\n6. Create deployment documentation",
+        "testStrategy": "1. Test Vercel deployment with staging environment\n2. Verify Docker containers build and run correctly\n3. Test CI/CD pipeline with test commits\n4. Verify environment configuration works across environments\n5. Test monitoring and logging setup\n6. Perform end-to-end testing in staging environment before production deployment",
+        "priority": "medium",
+        "dependencies": [
+          86,
+          87,
+          88
+        ],
+        "status": "pending",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-26T14:11:33.424Z",
-      "updated": "2025-07-26T18:45:54.839Z",
+      "updated": "2025-07-26T19:22:44.535Z",
       "description": "Tasks for master context"
     }
   }

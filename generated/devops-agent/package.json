@@ -11,12 +11,12 @@
     "dev": "ts-node-esm src/main.ts"
   },
   "dependencies": {
-    "typescript": "^5.3.3",
-    "@types/node": "^20.11.17",
-    "fs-extra": "^11.2.0",
     "@types/fs-extra": "^11.0.4",
-    "yaml": "^2.3.4",
-    "@types/yaml": "^1.2.0"
+    "@types/node": "^20.11.17",
+    "@types/yaml": "^1.2.0",
+    "fs-extra": "^11.2.0",
+    "typescript": "^5.3.3",
+    "yaml": "^2.8.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.2"

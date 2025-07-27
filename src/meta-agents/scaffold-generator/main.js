@@ -7,15 +7,24 @@
  * Following current best practices for CLI applications and file generation
  */
 
-const fs = require('fs-extra');
-const path = require('path');
-const chalk = require('chalk');
-const { Command } = require('commander');
-const { parseInput } = require('./lib/inputParser');
-const FileGenerator = require('./lib/fileGenerator');
+import fs from 'fs-extra';
+import path from 'path';
+import chalk from 'chalk';
+import { Command } from 'commander';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+// Import CommonJS lib modules using require (now with .cjs extension)
+const { parseInput } = require('./lib/inputParser.cjs');
+const FileGenerator = require('./lib/fileGenerator.cjs');
+import { fileURLToPath } from 'url';
 
 // Working Memory Integration following ADD methodology
-const { createMemoryEnhancedAgent } = require('../../memory/agentMemoryIntegration');
+import { createMemoryEnhancedAgent } from '../../memory/agentMemoryIntegration.js';
+
+// ES modules don't have __dirname, so we need to create it
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class ScaffoldGeneratorAgent {
   constructor(config = {}) {
@@ -323,13 +332,13 @@ function setupCLI() {
 }
 
 // Export for programmatic usage
-module.exports = {
+export {
   ScaffoldGeneratorAgent,
   main
 };
 
 // Execute if run directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const program = setupCLI();
   program.parse();
 }

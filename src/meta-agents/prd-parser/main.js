@@ -14,21 +14,22 @@
  */
 
 // Load environment variables from .env file in project root
-require('dotenv').config({ path: '../../../.env' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '../../../.env' });
 
-const fs = require('fs').promises;
-const path = require('path');
-const chokidar = require('chokidar');
-const { EventEmitter } = require('events');
-const { spawn } = require('child_process');
+import fs from 'fs/promises';
+import path from 'path';
+import chokidar from 'chokidar';
+import { EventEmitter } from 'events';
+import { spawn } from 'child_process';
 
-const Parser = require('./parser');
-const ResearchGenerator = require('./research-generator');
-const TaskFormatter = require('./task-formatter');
-const GitIntegration = require('./git-integration');
+import Parser from './parser.js';
+import ResearchGenerator from './research-generator.js';
+import TaskFormatter from './task-formatter.js';
+import GitIntegration from './git-integration.js';
 
 // Working Memory Integration following ADD methodology
-const { createMemoryEnhancedAgent, runAgentTaskWithMemory } = require('../../memory/agentMemoryIntegration');
+import { createMemoryEnhancedAgent, runAgentTaskWithMemory } from '../../memory/agentMemoryIntegration.js';
 
 class PRDParserAgent extends EventEmitter {
     constructor(options = {}) {
@@ -436,7 +437,7 @@ class PRDParserAgent extends EventEmitter {
 }
 
 // CLI interface for standalone usage
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
     const agent = new PRDParserAgent({
         watchDir: process.env.PRD_WATCH_DIR || 'docs',
         outputDir: process.env.TASKMASTER_OUTPUT_DIR || '.taskmaster/tasks',
@@ -464,4 +465,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = PRDParserAgent;
+export default PRDParserAgent;

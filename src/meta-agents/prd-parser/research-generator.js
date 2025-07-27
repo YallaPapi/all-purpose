@@ -8,9 +8,9 @@
  * Follows All-Purpose Pattern - works for ANY agent domain with NO hardcoded limitations
  */
 
-const { spawn } = require('child_process');
-const fs = require('fs').promises;
-const path = require('path');
+import { spawn } from 'child_process';
+import fs from 'fs/promises';
+import path from 'path';
 
 class ResearchGenerator {
     constructor(config = {}) {
@@ -714,4 +714,4 @@ class ResearchGenerator {
     }
 }
 
-module.exports = ResearchGenerator;
+export default ResearchGenerator;

@@ -8,8 +8,8 @@
  * Follows All-Purpose Pattern - generates tasks for ANY agent type with NO limitations
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
 class TaskFormatter {
     constructor(config = {}) {
@@ -981,4 +981,4 @@ ${implementationTasks.slice(0, 5).map(task => `- Task #${task.id}: ${task.title}
     }
 }
 
-module.exports = TaskFormatter;
+export default TaskFormatter;

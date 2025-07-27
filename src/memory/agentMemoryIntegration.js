@@ -6,10 +6,11 @@
  * Provides seamless memory integration for all meta-agents
  */
 
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Since we're integrating with JS agents, we'll directly implement the Redis functions
-const { Redis } = require('@upstash/redis');
+import { Redis } from '@upstash/redis';
 
 // Redis client following existing project patterns
 const redis = new Redis({
@@ -243,7 +244,7 @@ function createMemoryEnhancedAgent(agentName, baseAgent = null) {
   return new AgentMemoryWrapper(agentName, baseAgent);
 }
 
-module.exports = {
+export {
   // Core memory functions
   appendToMemory,
   getMemory,
@@ -254,10 +255,9 @@ module.exports = {
   // Integration classes
   AgentMemoryWrapper,
   createMemoryEnhancedAgent,
-  
-  // Configuration
-  memoryConfig: {
-    MEMORY_DEPTH,
-    KEY_PREFIX: 'agent:mem:',
-  }
+};
+
+export const memoryConfig = {
+  MEMORY_DEPTH,
+  KEY_PREFIX: 'agent:mem:',
 };

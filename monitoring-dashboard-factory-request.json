@@ -1,0 +1,25 @@
+{
+  "type": "scaffold",
+  "description": "Performance Monitoring Dashboard for Meta-Agent Factory - Real-time analytics dashboard with observability into meta-agent performance, coordination metrics, system health indicators, and factory operations. This dashboard will provide complete visibility into how the 9 meta-agents coordinate, communicate, and work together through real-time monitoring and visualization.",
+  "requirements": {
+    "projectName": "monitoring-dashboard",
+    "framework": "nextjs",
+    "features": [
+      "Real-time meta-agent performance monitoring",
+      "Agent coordination metrics tracking", 
+      "UEP protocol status indicators",
+      "Factory operation health monitoring",
+      "WebSocket real-time updates",
+      "Redis coordination data visualization",
+      "Interactive agent network graphs",
+      "Task completion tracking",
+      "Agent communication flow visualization",
+      "System compliance scoring",
+      "Export and reporting functionality",
+      "Responsive design with dark/light mode"
+    ],
+    "targetDirectory": "../../../generated/monitoring-dashboard"
+  },
+  "priority": "high",
+  "prdContent": "# Meta-Agent Factory Performance Monitoring Dashboard\n\n## Project Overview\n\nReal-time analytics dashboard providing observability into meta-agent performance, coordination metrics, system health indicators, and factory operations. Enable complete visibility into how the 9 meta-agents coordinate, communicate, and work together.\n\n## Core Requirements\n\n### 1. Meta-Agent Performance Monitoring\n- Real-time agent status tracking (online/offline/busy)\n- Task completion rates per agent\n- Processing time analytics\n- Agent reliability scoring\n- Performance trend analysis\n\n### 2. UEP Coordination Metrics  \n- Protocol message flow visualization\n- Agent-to-agent communication patterns\n- Coordination event timeline\n- Cross-agent knowledge sharing metrics\n- UEP compliance monitoring\n\n### 3. Factory Operations Dashboard\n- Active project tracking\n- Queue management visualization\n- Resource allocation monitoring\n- Factory throughput metrics\n- Operation success/failure rates\n\n### 4. System Health Indicators\n- Infrastructure status monitoring\n- Redis coordination health\n- RAG system performance\n- Memory usage and optimization\n- Error rate tracking\n\n### 5. Real-time Visualization\n- Live agent network topology\n- Dynamic task flow diagrams\n- Real-time metric updates\n- Interactive filtering and drill-down\n- WebSocket-based live updates"
+}

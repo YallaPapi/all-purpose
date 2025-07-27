@@ -1,6 +1,7 @@
 {
   "name": "prd-parser-agent",
   "version": "1.0.0",
+  "type": "module",
   "description": "PRD-Parser & Research Agent - Automatically parses PRD specifications and generates research-backed TaskMaster task lists",
   "main": "main.js",
   "scripts": {

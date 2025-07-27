@@ -1,6 +1,7 @@
 {
   "name": "@meta-agents/parameter-flow",
   "version": "1.0.0",
+  "type": "module",
   "description": "The INTEGRATION BUILDER for System Architecture - Ensures bulletproof data flow between all system components",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

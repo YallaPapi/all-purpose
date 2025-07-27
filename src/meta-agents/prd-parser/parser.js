@@ -6,8 +6,8 @@
  * Follows All-Purpose Pattern - works for ANY agent type with NO hardcoded limitations
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
 class Parser {
     constructor(config = {}) {
@@ -568,4 +568,4 @@ class Parser {
     }
 }
 
-module.exports = Parser;
+export default Parser;

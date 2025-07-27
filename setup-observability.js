@@ -7,8 +7,13 @@
  * Usage: node setup-observability.js
  */
 
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// ES modules don't have __dirname, so we need to create it
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from .env.local
 function loadEnvFile() {
@@ -41,8 +46,8 @@ function loadEnvFile() {
 loadEnvFile();
 
 // Import the coordination system (using compiled JS files)
-const { createMetaAgentCoordinator } = require('./rag-system/dist/coordination/metaAgentCoordinator.js');
-const { createObservabilityCollector } = require('./rag-system/dist/observability/ObservabilityCollector.js');
+import { createMetaAgentCoordinator } from './rag-system/dist/coordination/metaAgentCoordinator.js';
+import { createObservabilityCollector } from './rag-system/dist/observability/ObservabilityCollector.js';
 
 async function setupObservabilitySystem() {
   try {
@@ -241,8 +246,8 @@ function getSystemHealth(stats) {
 }
 
 // Run the setup if this script is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   setupObservabilitySystem().catch(console.error);
 }
 
-module.exports = { setupObservabilitySystem };
+export { setupObservabilitySystem };

@@ -1,6 +1,7 @@
 {
   "name": "@meta-agents/template-engine-factory",
   "version": "1.0.0",
+  "type": "module",
   "description": "The CODE BUILDER for Dynamic Systems - Converts hardcoded content into dynamic, scalable template systems",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -10,4 +10,4 @@
 console.log('Scaffold Generator Agent - Development in progress...');
 
 // TODO: Implement main application logic
-module.exports = {};
+export default {};

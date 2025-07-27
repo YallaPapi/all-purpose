@@ -1,201 +1,269 @@
-# 🌟 All-Purpose Lead System - Environment Setup Guide
+# Environment Setup Guide
 
-> **Complete setup instructions for development and production environments**  
-> **NOW SUPPORTS ANY INDUSTRY**: Dental, Automotive, Legal, Chiropractic, Business Funding, etc.
+Complete guide for setting up the allpurp development environment.
 
----
+## Prerequisites
 
-## 🔑 REQUIRED ENVIRONMENT VARIABLES
+### System Requirements
+- **Node.js**: >= 18.0.0 (recommended: 20.x LTS)
+- **npm**: >= 8.0.0 or **yarn**: >= 1.22.0
+- **Git**: >= 2.30.0
+- **Python**: >= 3.8 (for certain agent integrations)
 
-### **OpenAI Configuration**
+### Optional Dependencies
+- **Docker**: For containerized development
+- **Redis**: For caching and session management
+- **PostgreSQL**: For persistent data storage
+
+## Installation Steps
+
+### 1. Clone the Repository
+
 ```bash
-OPENAI_API_KEY=sk-your-openai-api-key-here
+git clone <repository-url>
+cd allpurp
 ```
-- **Source**: [OpenAI Platform](https://platform.openai.com/api-keys)
-- **Required for**: Chat API, Assistant creation, Thread management
-- **Note**: Must have Assistants API access enabled
 
-### **Redis/Upstash Configuration**
+### 2. Install Dependencies
+
 ```bash
-KV_REST_API_URL=https://your-redis-url.upstash.io
-KV_REST_API_TOKEN=your-redis-token-here
-```
-- **Source**: [Upstash Console](https://upstash.com/)
-- **Required for**: Assistant ID mapping, Company slug storage
-- **Note**: Free tier sufficient for development
+# Using npm
+npm install
 
-### **Domain Configuration**
+# Or using yarn
+yarn install
+```
+
+### 3. Environment Configuration
+
+1. Copy the environment template:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Configure the following environment variables:
+
 ```bash
-NEXT_PUBLIC_ROOT_DOMAIN=solarbookers.com  # Current production domain
-VERCEL_URL=auto-populated-by-vercel
-```
-- **NEXT_PUBLIC_ROOT_DOMAIN**: Production domain for URL generation (will migrate to generic DBR domain)
-- **VERCEL_URL**: Auto-populated by Vercel for preview deployments
-- **FUTURE**: Will use generic domain like `dbr.com` for all-purpose demos
+# Core Configuration
+NODE_ENV=development
+PORT=3000
 
----
+# API Keys (obtain from respective services)
+OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
-## 🛠️ SETUP INSTRUCTIONS
+# Database Configuration
+DATABASE_URL=postgresql://username:password@localhost:5432/dbname
 
-### **1. Development Setup**
-1. Copy environment variables template:
-   ```bash
-   # Create .env.local file with:
-   OPENAI_API_KEY=sk-your-key-here
-   KV_REST_API_URL=https://your-url.upstash.io
-   KV_REST_API_TOKEN=your-token-here
-   NEXT_PUBLIC_ROOT_DOMAIN=localhost:3000
-   NODE_ENV=development
-   ```
+# Redis Configuration (for caching)
+REDIS_URL=redis://localhost:6379
+KV_REST_API_URL=your_upstash_redis_url
+KV_REST_API_TOKEN=your_upstash_token
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+# Vector Database (Qdrant)
+QDRANT_URL=http://localhost:6333
+QDRANT_API_KEY=your_qdrant_api_key
 
-3. Test configuration:
-   ```bash
-   npm run dev
-   # Visit: http://localhost:3000/api/debug
-   ```
+# Meta-Agent Configuration
+META_AGENT_FACTORY_ENABLED=true
+UEP_ENFORCEMENT_LEVEL=standard
+PROJECT_CONTEXT_PERSISTENCE=enabled
 
-### **2. Vercel Production Setup**
-1. **Domain Configuration**:
-   - Assign `solarbookers.com` to production branch
-   - Set up redirects: `www.solarbookers.com` → `solarbookers.com`
-
-2. **Environment Variables** (in Vercel Dashboard):
-   ```
-   OPENAI_API_KEY (All environments)
-   KV_REST_API_URL (All environments)
-   KV_REST_API_TOKEN (All environments)
-   NEXT_PUBLIC_ROOT_DOMAIN=solarbookers.com (Production only)
-   ```
-
-3. **Preview Environment Variables**:
-   ```
-   NEXT_PUBLIC_ROOT_DOMAIN=vercel-preview-domain (Preview only)
-   ```
-
-### **3. n8n Workflow Configuration**
-Update webhook URLs in n8n workflow:
-```
-Production: https://all-purpose-1pd1-git-main-stuartoden-2590s-projects.vercel.app/api/create-prototype
-Preview: https://[preview-url].vercel.app/api/create-prototype
+# Documentation System
+AUTO_DOCUMENTATION_ENABLED=true
+DOCUMENTATION_VALIDATION_ENABLED=true
+DOC_EVENT_LISTENING_ENABLED=true
 ```
 
-**IMPORTANT**: Include `industry` parameter in N8N requests:
+### 4. Database Setup
+
+If using PostgreSQL:
+
+```bash
+# Create database
+createdb allpurp_dev
+
+# Run migrations (if applicable)
+npm run migrate
+```
+
+### 5. Redis Setup
+
+```bash
+# Using Docker
+docker run -d -p 6379:6379 redis:alpine
+
+# Or install locally on macOS
+brew install redis
+brew services start redis
+
+# Or install locally on Ubuntu
+sudo apt-get install redis-server
+sudo systemctl start redis-server
+```
+
+### 6. Vector Database Setup (Qdrant)
+
+```bash
+# Using Docker
+docker run -p 6333:6333 qdrant/qdrant
+```
+
+## Development Workflow
+
+### Starting the Development Server
+
+```bash
+# Start main application
+npm run dev
+
+# Start with specific components
+npm run dev:agents    # Start meta-agent factory
+npm run dev:docs      # Start documentation system
+npm run dev:rag       # Start RAG system
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test suites
+npm run test:unit
+npm run test:integration
+npm run test:agents
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Building for Production
+
+```bash
+# Build TypeScript
+npm run build
+
+# Build for production deployment
+npm run build:prod
+```
+
+## Configuration Details
+
+### Meta-Agent Factory Configuration
+
+Create `meta-agent.config.json`:
+
 ```json
 {
-  "companyName": "Bright Dental",
-  "contactName": "Dr. Sarah Johnson", 
-  "contactEmail": "sarah@brightdental.com",
-  "industry": "dental"
+  "factory": {
+    "maxConcurrentAgents": 10,
+    "defaultTimeout": 300000,
+    "enablePerformanceMonitoring": true
+  },
+  "uep": {
+    "enforcementLevel": "standard",
+    "validationEnabled": true,
+    "auditLogging": true
+  },
+  "projectContext": {
+    "persistenceEnabled": true,
+    "syncInterval": 5000,
+    "maxContextSize": "10MB"
+  }
 }
 ```
 
----
+### Documentation System Configuration
 
-## 📋 VERIFICATION CHECKLIST
+Create `documentation.config.json`:
 
-### **✅ Development Environment**
-- [ ] `npm run dev` starts without errors
-- [ ] `/api/debug` shows all green checkmarks
-- [ ] OpenAI API key validated
-- [ ] Redis connection successful
-- [ ] Domain detection working
-
-### **✅ Production Environment**
-- [ ] Production domain resolves to latest deployment
-- [ ] All environment variables set in Vercel
-- [ ] `/api/debug` accessible on production
-- [ ] n8n workflow webhooks updated with industry parameter
-- [ ] End-to-end demo creation working for multiple industries
-- [ ] Industry parameter correctly generates dynamic assistants
-
-### **✅ Preview Environment**
-- [ ] Preview URLs working with dynamic domain detection
-- [ ] Chat API functional on preview deployments
-- [ ] Environment variables correctly scoped
-
----
-
-## 🚨 TROUBLESHOOTING
-
-### **Common Issues & Solutions**
-
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| `401 Unauthorized` | Vercel Preview/Auth Protection | Disable protection in Vercel dashboard project settings |
-| `Chat API fails` | Invalid OpenAI key | Check key validity at OpenAI |
-| `Assistant not found` | Redis connection issue | Verify KV_REST_API_* variables |
-| `Domain detection fails` | Missing environment vars | Use actual deployment URL, not hardcoded domains |
-| `n8n webhook fails` | Missing industry parameter | Ensure N8N passes industry field in payload |
-| `Industry validation fails` | Unsupported industry value | Check industry mapping in validateIndustry function |
-
-### **Vercel Authentication Protection Issue**
-If API endpoints return 401 "Authentication Required" with SSO redirect page:
-
-1. **In Vercel Dashboard**: Go to Project Settings → Security
-2. **Disable "Deployment Protection"** for the environment
-3. **Wait 2-3 minutes** for settings to propagate
-4. **Test endpoints** - they should now return JSON instead of HTML
-5. **Secret Key**: If available, may be used for bypassing protection (implementation varies)
-
-### **Debug Endpoints**
-- **System Status**: `/api/debug`
-- **Domain Detection**: `/api/domain-info` (if available)
-- **Company Assistant Lookup**: `/api/company-assistant?company=test`
-
-### **Logs to Check**
-- Vercel Function logs in dashboard
-- Browser console for frontend errors
-- OpenAI API usage in OpenAI dashboard
-- Redis command logs in Upstash console
-
----
-
-## 🔄 DEPLOYMENT WORKFLOW
-
-### **1. Development → Preview**
-```bash
-git push origin feature-branch
-# Vercel auto-deploys to preview URL
-# Test via /api/debug on preview domain
+```json
+{
+  "organizer": {
+    "autoOrganize": true,
+    "followNamingConventions": true,
+    "createMissingDirectories": true
+  },
+  "validation": {
+    "enabled": true,
+    "autoFix": true,
+    "strictMode": false
+  },
+  "eventListener": {
+    "debounceMs": 2000,
+    "batchEvents": true,
+    "integrations": {
+      "projectContext": true,
+      "git": true,
+      "fileSystem": true
+    }
+  }
+}
 ```
 
-### **2. Preview → Production**
-```bash
-git push origin main
-# Vercel deploys to solarbookers.com
-# Verify production functionality
-```
+## Troubleshooting
 
-### **3. Environment Variable Updates**
-1. Update in Vercel Dashboard
-2. Redeploy affected environments
-3. Test via debug endpoints
-4. Update n8n webhooks if domain changed
+### Common Issues
+
+1. **Port already in use**
+   ```bash
+   # Find and kill process using port 3000
+   lsof -ti:3000 | xargs kill -9
+   ```
+
+2. **Redis connection failed**
+   ```bash
+   # Check Redis status
+   redis-cli ping
+   # Should return "PONG"
+   ```
+
+3. **TypeScript compilation errors**
+   ```bash
+   # Clean and rebuild
+   npm run clean
+   npm run build
+   ```
+
+4. **Missing environment variables**
+   - Verify all required variables are set in `.env`
+   - Check for typos in variable names
+   - Ensure API keys are valid and have correct permissions
+
+### Performance Optimization
+
+1. **Enable Node.js optimization flags**:
+   ```bash
+   export NODE_OPTIONS="--max-old-space-size=4096"
+   ```
+
+2. **Configure Redis for optimal performance**:
+   - Set appropriate memory limits
+   - Enable persistence if needed
+   - Configure eviction policies
+
+### Development Tools
+
+Recommended VS Code extensions:
+- TypeScript and JavaScript Language Features
+- ESLint
+- Prettier
+- GitLens
+- Thunder Client (for API testing)
+
+## Deployment
+
+See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for production deployment instructions.
+
+## Support
+
+For additional help:
+- Check the [Debugging Guide](./docs/DEBUGGING_GUIDE.md)
+- Review system logs in `./logs/`
+- Create an issue in the repository
 
 ---
 
-## 🎯 NEXT STEPS AFTER SETUP
-
-1. **Test Full Workflow**:
-   - Create demo via n8n → API → Chat functionality
-   
-2. **Monitor Performance**:
-   - Check Vercel Analytics
-   - Monitor OpenAI usage
-   - Watch Redis memory usage
-
-3. **Scale Considerations**:
-   - OpenAI rate limits
-   - Redis connection limits
-   - Vercel function timeouts
-
----
-
-**Last Updated**: 2025-07-19  
-**Environment**: Development, Preview, Production  
-**Dependencies**: OpenAI, Upstash Redis, Vercel, n8n 
+*Last updated: 2025-07-25*
+*Generated by: Simple Documentation Update System*

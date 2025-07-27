@@ -1,6 +1,7 @@
 {
   "name": "scaffold-generator",
   "version": "1.0.0",
+  "type": "module",
   "description": "Generate consistent directory structures and base files for new agents based on parsed task lists from the PRD-Parser",
   "main": "src/index.js",
   "directories": {
