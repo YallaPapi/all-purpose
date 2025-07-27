@@ -7,8 +7,8 @@
  * - Agent coordination and communication
  */
 
-const { createMessagePassingSystem } = require('./dist/uep/MessagePassingSystem');
-const { createTaskStateManager } = require('./dist/uep/TaskStateManager');
+import { createMessagePassingSystem } from './dist/uep/MessagePassingSystem.js';
+import { createTaskStateManager } from './dist/uep/TaskStateManager.js';
 
 async function testFullUEPIntegration() {
   console.log('🧪 Testing Full UEP Integration (Message Passing + Task State Management)...\n');
