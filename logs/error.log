@@ -7489,6 +7489,9 @@
 {"error":"Failed to parse URL from /pipeline","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-25 20:03:10:310"}
 {"error":"Failed to parse URL from /pipeline","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-25 20:03:14:314"}
 {"error":"Failed to parse URL from /pipeline","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-25 20:03:24:324"}
-{"error":"fetch failed","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-25 23:32:54:3254"}
-{"error":"fetch failed","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-26 08:44:33:4433"}
-{"error":"fetch failed","level":"error","message":"[OBSERVABILITY] Failed to collect system metrics","timestamp":"2025-07-26 08:44:38:4438"}
+{"error":"Unauthorized: Invalid auth token","level":"error","message":"Vector search failed","timestamp":"2025-07-25 20:46:22:4622"}
+{"error":"Unauthorized: Invalid auth token","level":"error","message":"[API] Context search failed","timestamp":"2025-07-25 20:46:22:4622"}
+{"command":"parse-prd","error":"Unauthorized: Invalid auth token","level":"error","message":"Failed to enhance command, falling back to original","timestamp":"2025-07-25 20:46:22:4622"}
+{"error":"Unauthorized: Invalid auth token","level":"error","message":"Vector search failed","timestamp":"2025-07-25 20:46:31:4631"}
+{"error":"Unauthorized: Invalid auth token","level":"error","message":"[API] Context search failed","timestamp":"2025-07-25 20:46:31:4631"}
+{"command":"parse-prd","error":"Unauthorized: Invalid auth token","level":"error","message":"Failed to enhance command, falling back to original","timestamp":"2025-07-25 20:46:31:4631"}

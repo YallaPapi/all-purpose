@@ -1,0 +1,16 @@
+{
+  "agentName": "backend-agent",
+  "description": "Domain-specific agent for backend development including API design, security review, DB modeling, and backend testing",
+  "features": [
+    "Express/Fastify API endpoint generation",
+    "Database schema design and migrations", 
+    "Authentication/authorization middleware",
+    "Security review and validation",
+    "API documentation generation",
+    "Backend testing with Jest/Supertest",
+    "UEP integration for agent coordination"
+  ],
+  "framework": "node",
+  "includeTests": true,
+  "includeDocumentation": true
+}

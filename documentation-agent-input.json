@@ -1,0 +1,16 @@
+{
+  "agentName": "documentation-agent",
+  "description": "Domain-specific agent for documentation generation including API docs, user guides, and knowledge base maintenance",
+  "features": [
+    "API documentation from code analysis",
+    "User guide generation",
+    "Technical specification writing",
+    "Changelog automation",
+    "Knowledge base maintenance",
+    "Markdown documentation generation",
+    "UEP integration for agent coordination"
+  ],
+  "framework": "node", 
+  "includeTests": true,
+  "includeDocumentation": true
+}
