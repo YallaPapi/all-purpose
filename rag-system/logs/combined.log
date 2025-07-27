@@ -3278,3 +3278,62 @@
 {"contextItems":3,"contextLength":981,"enhancementTime":963,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-26 23:15:34:1534"}
 {"args":2,"command":"research","level":"info","message":"Executing TaskMaster command","timestamp":"2025-07-26 23:15:34:1534"}
 {"command":"research","exitCode":1,"level":"info","message":"TaskMaster command completed","timestamp":"2025-07-26 23:15:34:1534"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:05:42:542"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:05:42:542"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-27 14:05:42:542"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-27 14:05:42:542","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"chunkSize":500,"filePatterns":3,"level":"info","message":"[PROCESSING] Document processor initialized","sourceDir":"C:\\Users\\Stuart\\Desktop\\Projects\\allpurp","timestamp":"2025-07-27 14:05:42:542"}
+{"level":"info","message":"[PROCESSING] Starting document processing","timestamp":"2025-07-27 14:05:42:542"}
+{"level":"info","message":"[PROCESSING] Discovered 3 files for processing","timestamp":"2025-07-27 14:05:42:542"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:12:27:1227"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:12:27:1227"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-27 14:12:27:1227"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:12:27:1227"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-27 14:12:27:1227"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-27 14:12:27:1227"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-27 14:12:27:1227"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-27 14:12:27:1227"}
+{"estimatedCost":3.2e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-27 14:12:28:1228","totalTokens":16}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-27 14:12:28:1228"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-27 14:12:28:1228","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-27 14:12:28:1228","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"count":1,"error":"Exceeded daily write limit: 10000","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-27 14:12:28:1228"}
+{"level":"debug","message":"Vector search completed","resultCount":1,"timestamp":"2025-07-27 14:12:28:1228","topK":1}
+{"count":1,"error":"Exceeded daily write limit: 10000","level":"error","message":"Failed to delete vectors","timestamp":"2025-07-27 14:12:28:1228"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:21:25:2125"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:21:25:2125"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-27 14:21:25:2125"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:21:25:2125"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-27 14:21:25:2125"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-27 14:21:25:2125"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-27 14:21:25:2125"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-27 14:21:25:2125"}
+{"estimatedCost":3.2e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-27 14:21:25:2125","totalTokens":16}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-27 14:21:25:2125"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-27 14:21:25:2125","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-27 14:21:25:2125","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"count":1,"error":"Exceeded daily write limit: 10000","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-27 14:21:25:2125"}
+{"level":"debug","message":"Vector search completed","resultCount":1,"timestamp":"2025-07-27 14:21:25:2125","topK":1}
+{"count":1,"error":"Exceeded daily write limit: 10000","level":"error","message":"Failed to delete vectors","timestamp":"2025-07-27 14:21:26:2126"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:44:20:4420"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:44:20:4420"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-27 14:44:20:4420"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-27 14:44:20:4420","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-27 14:44:20:4420"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-27 14:44:20:4420"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-27 14:44:20:4420","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"autoEnhancement":true,"level":"info","maxContextLength":4000,"message":"[API] Context API initialized","timestamp":"2025-07-27 14:44:20:4420"}
+{"enableContextInjection":true,"enhancedCommands":5,"level":"info","message":"TaskMaster integration initialized","timestamp":"2025-07-27 14:44:20:4420"}
+{"command":"research","level":"info","message":"Enhancing TaskMaster command with context","timestamp":"2025-07-27 14:44:20:4420"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"meta-agent development research methodology\n\nOriginal request: scaffold generator input format...","timestamp":"2025-07-27 14:44:20:4420"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"meta-agent development research methodology\n\nOriginal request: scaffold generator input format...","timestamp":"2025-07-27 14:44:20:4420"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-27 14:44:20:4420"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-27 14:44:20:4420"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-27 14:44:20:4420"}
+{"estimatedCost":2.6e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-27 14:44:21:4421","totalTokens":13}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-27 14:44:21:4421"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-27 14:44:21:4421","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":1310,"timestamp":"2025-07-27 14:44:21:4421"}
+{"contextItems":3,"contextLength":268,"enhancementTime":1311,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-27 14:44:21:4421"}
+{"args":2,"command":"research","level":"info","message":"Executing TaskMaster command","timestamp":"2025-07-27 14:44:21:4421"}
+{"command":"research","exitCode":1,"level":"info","message":"TaskMaster command completed","timestamp":"2025-07-27 14:44:21:4421"}

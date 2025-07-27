@@ -104,26 +104,22 @@ async function buildProject() {
 
     console.log('🏗️ Scaffold Generator agent created');
 
-    // Generate project scaffold with real estate CRM structure
-    const scaffoldResult = await scaffoldGenerator.generate({
-      projectName: '${projectName}',
-      projectType: 'real-estate-crm',
-      requirements: {
-        tasks: [
-          { id: 1, title: "Next.js Setup", description: "Initialize Next.js with TypeScript and Tailwind" },
-          { id: 2, title: "Authentication", description: "Implement NextAuth.js for agent/manager/admin roles" },
-          { id: 3, title: "Database", description: "Set up Prisma with lead and property models" },
-          { id: 4, title: "Lead Management", description: "Build lead tracking and assignment system" },
-          { id: 5, title: "Property Management", description: "Create property listing and management features" }
-        ],
-        metadata: {
-          projectName: "${projectName}",
-          description: "Real Estate CRM System",
-          version: "1.0.0"
-        }
-      },
-      outputDirectory: outputDir
-    });
+    // Convert TaskMaster data to scaffold format
+    const tasksPath = './taskmaster/tasks/tasks.json';
+    const tasksContent = await readFile(tasksPath, 'utf-8');
+    const tasksData = JSON.parse(tasksContent);
+    
+    const scaffoldInput = {
+      tasks: tasksData.master.tasks,
+      metadata: {
+        projectName: "${projectName}",
+        description: "Task management application from PRD",
+        version: "1.0.0"
+      }
+    };
+
+    // Generate project scaffold with TaskMaster data
+    const scaffoldResult = await scaffoldGenerator.process(scaffoldInput);
 
     console.log('🎉 Project build completed!');
     console.log('📁 Output directory:', scaffoldResult.outputDirectory);

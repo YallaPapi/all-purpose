@@ -52,3 +52,7 @@
 {"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-26 14:12:34:1234"}
 {"attempts":3,"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[EMBEDDING] Embedding batch failed after all retries","timestamp":"2025-07-26 14:12:51:1251"}
 {"error":"400 '$.input' is invalid. Please check the API reference: https://platform.openai.com/docs/api-reference.","level":"error","message":"[API] Context search failed","timestamp":"2025-07-26 14:12:51:1251"}
+{"count":1,"error":"Exceeded daily write limit: 10000","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-27 14:12:28:1228"}
+{"count":1,"error":"Exceeded daily write limit: 10000","level":"error","message":"Failed to delete vectors","timestamp":"2025-07-27 14:12:28:1228"}
+{"count":1,"error":"Exceeded daily write limit: 10000","level":"error","message":"Failed to upsert vectors","timestamp":"2025-07-27 14:21:25:2125"}
+{"count":1,"error":"Exceeded daily write limit: 10000","level":"error","message":"Failed to delete vectors","timestamp":"2025-07-27 14:21:26:2126"}

@@ -44,12 +44,8 @@ export class AgentIntegrationAdapter {
           break;
           
         case 'scaffold-generator':
-          // Map to processWithUEPContext for Enhanced Scaffold Generator
-          result = await this.agentInstance.processWithUEPContext(
-            input,
-            options.memory || '',
-            options.uepMetadata || null
-          );
+          // Map to process method for Scaffold Generator
+          result = await this.agentInstance.process(input);
           break;
           
         default:
