@@ -1,0 +1,193 @@
+http:
+  middlewares:
+    # Enhanced Authentication Middleware
+    auth-factory:
+      forwardAuth:
+        address: "http://factory-core:3000/auth/validate"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "X-Auth-User"
+          - "X-Auth-Roles"
+          - "X-Auth-Permissions"
+
+    # Advanced Rate Limiting
+    rate-limit-api:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: "1m"
+        sourceCriterion:
+          ipStrategy:
+            depth: 2
+
+    rate-limit-heavy:
+      rateLimit:
+        average: 10
+        burst: 20
+        period: "1m"
+
+    # Security Headers
+    security-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        accessControlAllowOrigins:
+          - "https://*.yourdomain.com"
+          - "http://localhost:*"
+        accessControlAllowHeaders:
+          - "*"
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+        customResponseHeaders:
+          X-Frame-Options: "DENY"
+          X-Content-Type-Options: "nosniff"
+          X-XSS-Protection: "1; mode=block"
+          Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+
+    # Request/Response Modification
+    strip-prefix-api:
+      stripPrefix:
+        prefixes:
+          - "/api/v1"
+          - "/api/v2"
+
+    add-prefix-internal:
+      addPrefix:
+        prefix: "/internal"
+
+    # Circuit Breaker for resilience
+    circuit-breaker:
+      circuitBreaker:
+        expression: "NetworkErrorRatio() > 0.3 || ResponseCodeRatio(500, 600, 0, 600) > 0.3"
+        checkPeriod: "10s"
+        fallbackDuration: "30s"
+        recoveryDuration: "10s"
+
+    # Request logging
+    access-log:
+      accessLog:
+        filePath: "/var/log/traefik/access.log"
+        format: json
+        bufferingSize: 100
+
+    # Compression
+    compression:
+      compress:
+        excludedContentTypes:
+          - "text/event-stream"
+
+    # Request size limiting
+    buffering:
+      buffering:
+        maxRequestBodyBytes: 10485760  # 10MB
+        maxResponseBodyBytes: 10485760
+        memRequestBodyBytes: 2097152   # 2MB
+        memResponseBodyBytes: 2097152
+
+    # Retry mechanism
+    retry:
+      retry:
+        attempts: 3
+        initialInterval: "100ms"
+
+    # IP Whitelisting for admin endpoints
+    admin-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "127.0.0.1/32"
+          - "10.0.0.0/8"
+          - "172.16.0.0/12"
+          - "192.168.0.0/16"
+
+    # Content-Type based routing
+    content-type-json:
+      contentType:
+        autoDetect: false
+
+  # Enhanced service configurations with health checks
+  services:
+    factory-core-enhanced:
+      loadBalancer:
+        servers:
+          - url: "http://factory-core:3000"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+          timeout: "10s"
+          scheme: "http"
+        sticky:
+          cookie:
+            name: "factory-session"
+            secure: true
+            httpOnly: true
+
+    domain-agents-enhanced:
+      loadBalancer:
+        servers:
+          - url: "http://domain-agents:3001"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+          timeout: "10s"
+        sticky:
+          cookie:
+            name: "agents-session"
+
+    # Weighted routing for A/B testing
+    factory-core-ab:
+      weighted:
+        services:
+          - name: "factory-core-v1"
+            weight: 90
+          - name: "factory-core-v2"
+            weight: 10
+
+  # Enhanced routing rules
+  routers:
+    api-factory-v1:
+      rule: "Host(`factory.localhost`) && PathPrefix(`/api/v1`)"
+      service: factory-core-enhanced
+      middlewares:
+        - auth-factory
+        - rate-limit-api
+        - security-headers
+        - strip-prefix-api
+        - compression
+        - circuit-breaker
+      tls:
+        certResolver: letsencrypt
+
+    api-factory-heavy:
+      rule: "Host(`factory.localhost`) && (PathPrefix(`/api/generate`) || PathPrefix(`/api/build`))"
+      service: factory-core-enhanced
+      middlewares:
+        - auth-factory
+        - rate-limit-heavy
+        - security-headers
+        - buffering
+        - retry
+      tls:
+        certResolver: letsencrypt
+
+    admin-dashboard:
+      rule: "Host(`admin.localhost`) || (Host(`factory.localhost`) && PathPrefix(`/admin`))"
+      service: factory-core-enhanced
+      middlewares:
+        - admin-whitelist
+        - auth-factory
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+
+    websockets:
+      rule: "Host(`ws.localhost`) || (PathPrefix(`/ws`) && Headers(`Connection`, `Upgrade`))"
+      service: factory-core-enhanced
+      middlewares:
+        - auth-factory
+        - rate-limit-api
+      tls:
+        certResolver: letsencrypt

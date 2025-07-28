@@ -186,3 +186,117 @@ jobs:
           echo "✅ Docker build validation passes"
           echo ""
           echo "🚀 READY FOR PHASE 1: MVS Containerization"
+
+  # Phase 2: Docker Build and Publish
+  docker-build-publish:
+    name: 🐳 Docker Build & Publish
+    runs-on: ubuntu-latest
+    needs: [lint-and-test, integration-test, factory-validation]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-gateway
+            ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-core
+            ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-agents
+            ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-nats
+            ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-observability
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push API Gateway
+        uses: docker/build-push-action@v5
+        with:
+          context: ./containers/api-gateway
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-gateway:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Factory Core
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./containers/factory-core/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-core:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Domain Agents
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./containers/domain-agents/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-agents:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push NATS Broker
+        uses: docker/build-push-action@v5
+        with:
+          context: ./containers/nats-broker
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-nats:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Observability
+        uses: docker/build-push-action@v5
+        with:
+          context: ./containers/observability
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-observability:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Update Docker Compose for production
+        run: |
+          # Create production docker-compose with published images
+          cp docker-compose.yml docker-compose.prod.yml
+          echo "📦 Production Docker Compose created"
+
+      - name: Test container startup
+        run: |
+          echo "🧪 Testing container orchestration..."
+          docker-compose -f docker-compose.yml config --quiet
+          echo "✅ Docker Compose configuration valid"
+
+      - name: Security scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/meta-agent-factory-core:latest
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

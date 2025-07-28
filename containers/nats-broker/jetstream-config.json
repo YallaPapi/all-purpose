@@ -1,0 +1,130 @@
+{
+  "streams": [
+    {
+      "name": "META_AGENT_EVENTS",
+      "description": "Stream for meta-agent lifecycle and execution events",
+      "subjects": [
+        "meta.agent.created",
+        "meta.agent.started",
+        "meta.agent.completed",
+        "meta.agent.failed",
+        "meta.agent.deleted"
+      ],
+      "retention": "limits",
+      "max_consumers": -1,
+      "max_msgs": 100000,
+      "max_bytes": 1073741824,
+      "max_age": 2592000000000000,
+      "storage": "file",
+      "replicas": 1,
+      "discard": "old"
+    },
+    {
+      "name": "DOMAIN_AGENT_EVENTS",
+      "description": "Stream for domain-specific agent events and results",
+      "subjects": [
+        "domain.lead-generation.*",
+        "domain.documentation.*", 
+        "domain.qa-testing.*",
+        "domain.devops.*",
+        "domain.prospector.*"
+      ],
+      "retention": "limits",
+      "max_consumers": -1,
+      "max_msgs": 50000,
+      "max_bytes": 536870912,
+      "max_age": 1209600000000000,
+      "storage": "file",
+      "replicas": 1,
+      "discard": "old"
+    },
+    {
+      "name": "FACTORY_COORDINATION",
+      "description": "Stream for factory-level coordination and orchestration",
+      "subjects": [
+        "factory.task.assigned",
+        "factory.task.progress",
+        "factory.task.completed",
+        "factory.workflow.started",
+        "factory.workflow.completed",
+        "factory.error.reported"
+      ],
+      "retention": "limits",
+      "max_consumers": -1,
+      "max_msgs": 25000,
+      "max_bytes": 268435456,
+      "max_age": 604800000000000,
+      "storage": "file",
+      "replicas": 1,
+      "discard": "old"
+    },
+    {
+      "name": "SYSTEM_METRICS",
+      "description": "Stream for system-wide metrics and health data",
+      "subjects": [
+        "metrics.performance.*",
+        "metrics.health.*",
+        "metrics.resource.*",
+        "alerts.*"
+      ],
+      "retention": "limits",
+      "max_consumers": -1,
+      "max_msgs": 10000,
+      "max_bytes": 134217728,
+      "max_age": 259200000000000,
+      "storage": "memory",
+      "replicas": 1,
+      "discard": "old"
+    }
+  ],
+  "consumers": [
+    {
+      "stream_name": "META_AGENT_EVENTS",
+      "name": "factory-core-consumer",
+      "description": "Factory core service consumer for meta-agent events",
+      "durable_name": "factory-core",
+      "deliver_policy": "all",
+      "ack_policy": "explicit",
+      "ack_wait": 30000000000,
+      "max_deliver": 3,
+      "filter_subject": "meta.agent.*",
+      "replay_policy": "instant"
+    },
+    {
+      "stream_name": "DOMAIN_AGENT_EVENTS", 
+      "name": "coordination-consumer",
+      "description": "Cross-domain coordination consumer",
+      "durable_name": "coordination",
+      "deliver_policy": "all",
+      "ack_policy": "explicit",
+      "ack_wait": 30000000000,
+      "max_deliver": 3,
+      "filter_subject": "domain.*",
+      "replay_policy": "instant"
+    },
+    {
+      "stream_name": "FACTORY_COORDINATION",
+      "name": "orchestrator-consumer",
+      "description": "Factory orchestration consumer",
+      "durable_name": "orchestrator",
+      "deliver_policy": "all",
+      "ack_policy": "explicit", 
+      "ack_wait": 60000000000,
+      "max_deliver": 5,
+      "filter_subject": "factory.*",
+      "replay_policy": "instant"
+    },
+    {
+      "stream_name": "SYSTEM_METRICS",
+      "name": "observability-consumer",
+      "description": "Observability system consumer for metrics",
+      "durable_name": "observability",
+      "deliver_policy": "last_per_subject",
+      "ack_policy": "explicit",
+      "ack_wait": 10000000000,
+      "max_deliver": 1,
+      "filter_subject": "metrics.*",
+      "replay_policy": "instant"
+    }
+  ]
+}

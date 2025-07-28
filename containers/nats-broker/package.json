@@ -1,0 +1,8 @@
+{
+  "name": "nats-broker-setup",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "nats": "^2.18.0"
+  }
+}

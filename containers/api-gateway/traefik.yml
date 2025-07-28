@@ -49,3 +49,14 @@ tracing:
   jaeger:
     samplingServerURL: "http://observability:14268/api/sampling"
     localAgentHostPort: "observability:6832"
+
+# Enhanced middleware for production
+ping:
+  entryPoint: "traefik"
+
+# Rate limiting configuration
+experimental:
+  plugins:
+    fail2ban:
+      moduleName: "github.com/tomMoulard/fail2ban"
+      version: "v0.6.6"

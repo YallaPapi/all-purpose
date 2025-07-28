@@ -9,6 +9,7 @@ import { HealthCheckService } from './services/HealthCheckService.js';
 import { AuthService } from './services/AuthService.js';
 import { MetricsService } from './services/MetricsService.js';
 import { Logger } from './utils/Logger.js';
+import { EventBus } from '../../../shared/messaging/EventBus.js';
 
 const app = express();
 const server = createServer(app);
@@ -26,7 +27,8 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-const metaAgentFactory = new MetaAgentFactory();
+const eventBus = new EventBus(config.nats.url);
+const metaAgentFactory = new MetaAgentFactory(eventBus);
 const healthService = new HealthCheckService();
 const authService = new AuthService();
 const metricsService = new MetricsService();
@@ -92,7 +94,27 @@ const gracefulShutdown = () => {
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
-server.listen(config.port, () => {
+server.listen(config.port, async () => {
   logger.info(`Factory Core server running on port ${config.port}`);
   logger.info('Available Meta-Agents:', metaAgentFactory.getAvailableAgentTypes());
+  
+  // Initialize EventBus
+  try {
+    await eventBus.connect();
+    logger.info('✅ EventBus connected successfully');
+    
+    // Set up event subscriptions
+    await eventBus.subscribe('factory.task.assigned', async (message) => {
+      logger.info('📋 Task assigned:', message.data);
+      metricsService.incrementCounter('factory_tasks_assigned_total');
+    });
+
+    await eventBus.subscribe('meta.agent.created', async (message) => {
+      logger.info('🤖 Meta-agent created:', message.data);
+      metricsService.incrementCounter('factory_agents_created_total');
+    });
+
+  } catch (error) {
+    logger.error('❌ EventBus connection failed:', error);
+  }
 });

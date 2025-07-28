@@ -4,9 +4,11 @@ http:
       rule: "Host(`factory.localhost`) || PathPrefix(`/api/factory`)"
       service: factory-core
       middlewares:
-        - auth
-        - rate-limit
-        - cors
+        - auth-factory
+        - rate-limit-api
+        - security-headers
+        - compression
+        - circuit-breaker
       tls:
         certResolver: letsencrypt
 
@@ -14,9 +16,10 @@ http:
       rule: "Host(`agents.localhost`) || PathPrefix(`/api/agents`)"
       service: domain-agents
       middlewares:
-        - auth
-        - rate-limit
-        - cors
+        - auth-factory
+        - rate-limit-api
+        - security-headers
+        - compression
       tls:
         certResolver: letsencrypt
 
@@ -24,7 +27,8 @@ http:
       rule: "Host(`app.localhost`) || PathPrefix(`/app`)"
       service: frontend
       middlewares:
-        - cors
+        - security-headers
+        - compression
       tls:
         certResolver: letsencrypt
 
@@ -32,7 +36,9 @@ http:
       rule: "Host(`metrics.localhost`) || PathPrefix(`/metrics`)"
       service: observability
       middlewares:
-        - auth
+        - admin-whitelist
+        - auth-factory
+        - security-headers
       tls:
         certResolver: letsencrypt
 
@@ -40,8 +46,9 @@ http:
       rule: "Host(`nats.localhost`) || PathPrefix(`/nats`)"
       service: nats-broker
       middlewares:
-        - auth
-        - rate-limit
+        - admin-whitelist
+        - auth-factory
+        - rate-limit-api
       tls:
         certResolver: letsencrypt
 
