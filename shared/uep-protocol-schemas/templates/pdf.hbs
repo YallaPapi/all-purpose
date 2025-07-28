@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{info.title}} - Protocol Documentation</title>
+    <style>
+        /* PDF-optimized styles */
+        @page {
+            size: A4;
+            margin: 2cm;
+            counter-increment: page;
+            @top-right {
+                content: "Page " counter(page);
+                font-size: 10pt;
+                color: #666;
+            }
+            @top-left {
+                content: "{{info.title}} v{{info.version}}";
+                font-size: 10pt;
+                color: #666;
+            }
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            font-size: 11pt;
+        }
+        
+        .cover-page {
+            page-break-after: always;
+            text-align: center;
+            padding-top: 5cm;
+        }
+        
+        .cover-title {
+            font-size: 24pt;
+            font-weight: bold;
+            margin-bottom: 1cm;
+            color: {{config.branding.primaryColor}};
+        }
+        
+        .cover-subtitle {
+            font-size: 16pt;
+            margin-bottom: 2cm;
+            color: #666;
+        }
+        
+        .cover-info {
+            font-size: 12pt;
+            text-align: left;
+            display: inline-block;
+            margin-top: 3cm;
+        }
+        
+        .toc {
+            page-break-before: always;
+            page-break-after: always;
+        }
+        
+        .toc h2 {
+            border-bottom: 2px solid {{config.branding.primaryColor}};
+            padding-bottom: 0.5cm;
+        }
+        
+        .toc-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc-list li {
+            margin: 0.3cm 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .toc-list .toc-dots {
+            flex-grow: 1;
+            border-bottom: 1px dotted #ccc;
+            height: 1em;
+            margin: 0 0.5cm;
+        }
+        
+        h1 {
+            color: {{config.branding.primaryColor}};
+            font-size: 18pt;
+            margin-top: 1.5cm;
+            margin-bottom: 0.5cm;
+            page-break-after: avoid;
+        }
+        
+        h2 {
+            color: {{config.branding.secondaryColor}};
+            font-size: 14pt;
+            margin-top: 1cm;
+            margin-bottom: 0.3cm;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            font-size: 12pt;
+            margin-top: 0.8cm;
+            margin-bottom: 0.2cm;
+            page-break-after: avoid;
+        }
+        
+        .section {
+            margin-bottom: 1.5cm;
+            page-break-inside: avoid;
+        }
+        
+        .info-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 1cm;
+        }
+        
+        .info-item {
+            display: table-cell;
+            padding: 0.3cm;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        
+        .info-item h4 {
+            margin: 0 0 0.2cm 0;
+            font-size: 10pt;
+            color: #666;
+        }
+        
+        .endpoint-item {
+            border: 1px solid #ddd;
+            margin: 0.5cm 0;
+            padding: 0.5cm;
+            page-break-inside: avoid;
+        }
+        
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.3cm;
+        }
+        
+        .method {
+            background: #007acc;
+            color: white;
+            padding: 0.1cm 0.3cm;
+            border-radius: 0.1cm;
+            font-weight: bold;
+            font-size: 9pt;
+            margin-right: 0.3cm;
+        }
+        
+        .method-GET { background: #61affe; }
+        .method-POST { background: #49cc90; }
+        .method-PUT { background: #fca130; }
+        .method-DELETE { background: #f93e3e; }
+        .method-PATCH { background: #50e3c2; }
+        
+        .path {
+            font-family: monospace;
+            background: #f8f8f8;
+            padding: 0.1cm 0.3cm;
+            border-radius: 0.1cm;
+        }
+        
+        .deprecated {
+            opacity: 0.6;
+        }
+        
+        .deprecated-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 0.1cm 0.3cm;
+            border-radius: 0.1cm;
+            font-size: 8pt;
+            margin-left: 0.3cm;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.5cm 0;
+            font-size: 10pt;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.2cm;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background: #f8f8f8;
+            font-weight: bold;
+        }
+        
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f8f8f8;
+            padding: 0.1cm 0.2cm;
+            border-radius: 0.1cm;
+            font-size: 9pt;
+        }
+        
+        pre {
+            background: #f8f8f8;
+            padding: 0.5cm;
+            border-radius: 0.2cm;
+            overflow-x: auto;
+            font-size: 9pt;
+            page-break-inside: avoid;
+        }
+        
+        .schema-item {
+            border: 1px solid #ddd;
+            margin: 0.5cm 0;
+            padding: 0.5cm;
+            page-break-inside: avoid;
+        }
+        
+        .tags {
+            margin: 0.3cm 0;
+        }
+        
+        .tag {
+            background: #e1f5fe;
+            color: #01579b;
+            padding: 0.1cm 0.3cm;
+            border-radius: 0.1cm;
+            font-size: 8pt;
+            margin-right: 0.2cm;
+        }
+        
+        .status-code {
+            font-weight: bold;
+            padding: 0.1cm 0.3cm;
+            border-radius: 0.1cm;
+            margin-right: 0.3cm;
+        }
+        
+        .status-200, .status-201 { background: #d4edda; color: #155724; }
+        .status-400, .status-401, .status-403, .status-404 { background: #f8d7da; color: #721c24; }
+        .status-500 { background: #f5c6cb; color: #721c24; }
+        
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding: 0.3cm;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cover Page -->
+    <div class="cover-page">
+        {{#if config.branding.logo}}
+        <img src="{{config.branding.logo}}" alt="{{config.branding.organization}}" style="max-height: 3cm; margin-bottom: 2cm;">
+        {{/if}}
+        
+        <h1 class="cover-title">{{info.title}}</h1>
+        <div class="cover-subtitle">Protocol Documentation</div>
+        
+        <div class="cover-info">
+            <p><strong>Version:</strong> {{info.version}}</p>
+            <p><strong>Protocol ID:</strong> {{protocol.id}}</p>
+            <p><strong>Status:</strong> {{metadata.status}}</p>
+            <p><strong>Author:</strong> {{metadata.author}}</p>
+            <p><strong>Organization:</strong> {{config.branding.organization}}</p>
+            <p><strong>Generated:</strong> {{formatDate timestamp}}</p>
+        </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+        <h2>Table of Contents</h2>
+        <ul class="toc-list">
+            <li>
+                <span>Overview</span>
+                <span class="toc-dots"></span>
+                <span>3</span>
+            </li>
+            {{#if servers.length}}
+            <li>
+                <span>Servers</span>
+                <span class="toc-dots"></span>
+                <span>4</span>
+            </li>
+            {{/if}}
+            {{#if endpoints.length}}
+            <li>
+                <span>API Endpoints</span>
+                <span class="toc-dots"></span>
+                <span>5</span>
+            </li>
+            {{#each endpoints}}
+            <li style="margin-left: 1cm; font-size: 9pt;">
+                <span>{{method}} {{path}}</span>
+                <span class="toc-dots"></span>
+                <span>{{add @index 6}}</span>
+            </li>
+            {{/each}}
+            {{/if}}
+            {{#if schemas.length}}
+            <li>
+                <span>Data Schemas</span>
+                <span class="toc-dots"></span>
+                <span>{{add endpoints.length 10}}</span>
+            </li>
+            {{/if}}
+        </ul>
+    </div>
+
+    <!-- Overview Section -->
+    <section class="section">
+        <h1>Overview</h1>
+        <p>{{info.description}}</p>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <h4>Protocol ID</h4>
+                <p>{{protocol.id}}</p>
+            </div>
+            <div class="info-item">
+                <h4>Version</h4>
+                <p>{{info.version}}</p>
+            </div>
+            <div class="info-item">
+                <h4>Status</h4>
+                <p>{{metadata.status}}</p>
+            </div>
+            <div class="info-item">
+                <h4>Author</h4>
+                <p>{{metadata.author}}</p>
+            </div>
+        </div>
+        
+        {{#if info.contact}}
+        <h3>Contact Information</h3>
+        <p><strong>{{info.contact.name}}</strong><br>
+        Email: {{info.contact.email}}<br>
+        {{#if info.contact.url}}Website: {{info.contact.url}}{{/if}}</p>
+        {{/if}}
+        
+        {{#if info.license}}
+        <h3>License</h3>
+        <p>{{info.license.name}}{{#if info.license.url}} - {{info.license.url}}{{/if}}</p>
+        {{/if}}
+    </section>
+
+    <!-- Servers Section -->
+    {{#if servers.length}}
+    <section class="section">
+        <h1>Servers</h1>
+        {{#each servers}}
+        <h3>{{description}}</h3>
+        <p><strong>Base URL:</strong> <code>{{url}}</code></p>
+        {{#if variables}}
+        <h4>Variables:</h4>
+        <ul>
+            {{#each variables}}
+            <li><strong>{{@key}}</strong>: {{description}} (default: <code>{{default}}</code>)</li>
+            {{/each}}
+        </ul>
+        {{/if}}
+        {{/each}}
+    </section>
+    {{/if}}
+
+    <!-- API Endpoints Section -->
+    {{#if endpoints.length}}
+    <section class="section">
+        <h1>API Endpoints</h1>
+        {{#each endpoints}}
+        <div class="endpoint-item {{#if deprecated}}deprecated{{/if}}">
+            <div class="endpoint-header">
+                <span class="method method-{{method}}">{{method}}</span>
+                <span class="path">{{path}}</span>
+                {{#if deprecated}}
+                <span class="deprecated-badge">DEPRECATED</span>
+                {{/if}}
+            </div>
+            
+            <h3>{{summary}}</h3>
+            {{#if description}}
+            <p>{{description}}</p>
+            {{/if}}
+            
+            {{#if tags.length}}
+            <div class="tags">
+                {{#each tags}}
+                <span class="tag">{{this}}</span>
+                {{/each}}
+            </div>
+            {{/if}}
+            
+            {{#if parameters.length}}
+            <h4>Parameters</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each parameters}}
+                    <tr>
+                        <td><code>{{name}}</code></td>
+                        <td>{{schema.type}}</td>
+                        <td>{{in}}</td>
+                        <td>{{#if required}}Yes{{else}}No{{/if}}</td>
+                        <td>{{description}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            {{/if}}
+            
+            {{#if requestBody}}
+            <h4>Request Body</h4>
+            <p><strong>Content Type:</strong> {{requestBody.contentType}}</p>
+            <p><strong>Required:</strong> {{#if requestBody.required}}Yes{{else}}No{{/if}}</p>
+            {{#if requestBody.description}}
+            <p>{{requestBody.description}}</p>
+            {{/if}}
+            {{/if}}
+            
+            {{#if responses.length}}
+            <h4>Responses</h4>
+            {{#each responses}}
+            <div style="margin: 0.3cm 0;">
+                <span class="status-code status-{{statusCode}}">{{statusCode}}</span>
+                <span>{{description}}</span>
+            </div>
+            {{/each}}
+            {{/if}}
+        </div>
+        {{/each}}
+    </section>
+    {{/if}}
+
+    <!-- Data Schemas Section -->
+    {{#if schemas.length}}
+    <section class="section">
+        <h1>Data Schemas</h1>
+        {{#each schemas}}
+        <div class="schema-item">
+            <h2>{{name}}</h2>
+            {{#if description}}
+            <p>{{description}}</p>
+            {{/if}}
+            
+            <p><strong>Type:</strong> {{type}}</p>
+            {{#if required.length}}
+            <p><strong>Required Fields:</strong> {{join required ", "}}</p>
+            {{/if}}
+            
+            {{#if properties.length}}
+            <h4>Properties</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each properties}}
+                    <tr {{#if deprecated}}class="deprecated"{{/if}}>
+                        <td><code>{{name}}</code></td>
+                        <td>{{type}}{{#if format}} ({{format}}){{/if}}</td>
+                        <td>{{#if required}}Yes{{else}}No{{/if}}</td>
+                        <td>{{description}}{{#if deprecated}} <em>DEPRECATED</em>{{/if}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            {{/if}}
+        </div>
+        {{/each}}
+    </section>
+    {{/if}}
+
+    <!-- Footer (appears on every page) -->
+    <div class="footer">
+        Generated by UEP Protocol Documentation Generator v1.0.0 | {{formatDate timestamp}} | {{config.branding.organization}}
+    </div>
+</body>
+</html>

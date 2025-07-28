@@ -1,0 +1,154 @@
+{
+  "name": "UEP Protocol Schema Repository",
+  "version": "1.0.0",
+  "description": "Git-based repository for UEP protocol definitions with versioning and validation",
+  "created": "2025-01-28T00:00:00.000Z",
+  "configuration": {
+    "basePath": "./",
+    "gitEnabled": true,
+    "validationEnabled": true,
+    "autoVersioning": true,
+    "backupEnabled": true,
+    "compressionEnabled": false,
+    "cachingEnabled": true,
+    "indexingEnabled": true
+  },
+  "directories": {
+    "schemas": {
+      "metaAgents": "schemas/meta-agents",
+      "domainAgents": "schemas/domain-agents",
+      "coreProtocols": "schemas/core-protocols"
+    },
+    "templates": "templates",
+    "versions": "versions",
+    "validation": "validation",
+    "examples": "examples",
+    "migrations": "migrations",
+    "docs": "docs",
+    "backups": "backups"
+  },
+  "validation": {
+    "openapi": {
+      "version": "3.1.0",
+      "strictMode": true,
+      "allowAdditionalProperties": false,
+      "validateExamples": true
+    },
+    "asyncapi": {
+      "version": "2.6.0",
+      "strictMode": true,
+      "validateChannels": true,
+      "validateMessages": true
+    },
+    "uep": {
+      "enforceCapabilityNaming": true,
+      "enforceVersioning": true,
+      "enforceMetadata": true,
+      "validateDependencies": true
+    }
+  },
+  "versioning": {
+    "semanticVersioning": true,
+    "autoIncrement": {
+      "patch": true,
+      "minor": false,
+      "major": false
+    },
+    "compatibilityChecks": true,
+    "migrationGeneration": true
+  },
+  "git": {
+    "enabled": true,
+    "autoCommit": true,
+    "branchStrategy": "feature-branch",
+    "commitMessageTemplate": "{{type}}: {{description}} for {{protocolId}} v{{version}}",
+    "hooks": {
+      "preCommit": ["validate", "lint", "test"],
+      "postCommit": ["backup", "notify"]
+    }
+  },
+  "backup": {
+    "enabled": true,
+    "strategy": "incremental",
+    "retention": {
+      "days": 30,
+      "versions": 10
+    },
+    "compression": true
+  },
+  "caching": {
+    "enabled": true,
+    "ttl": 3600000,
+    "maxSize": 1000,
+    "strategy": "lru"
+  },
+  "notifications": {
+    "enabled": true,
+    "channels": ["webhook", "email"],
+    "events": ["protocol-registered", "protocol-updated", "validation-failed", "breaking-change-detected"]
+  },
+  "security": {
+    "authentication": {
+      "required": true,
+      "methods": ["jwt", "api-key"]
+    },
+    "authorization": {
+      "rbac": true,
+      "permissions": {
+        "read": ["viewer", "editor", "admin"],
+        "write": ["editor", "admin"],
+        "delete": ["admin"],
+        "manage": ["admin"]
+      }
+    },
+    "audit": {
+      "enabled": true,
+      "events": ["create", "update", "delete", "access"],
+      "retention": 90
+    }
+  },
+  "metrics": {
+    "enabled": true,
+    "collection": {
+      "protocolCount": true,
+      "versionCount": true,
+      "validationResults": true,
+      "accessPatterns": true,
+      "performanceMetrics": true
+    },
+    "export": {
+      "prometheus": true,
+      "json": true
+    }
+  },
+  "integration": {
+    "uepValidation": {
+      "enabled": true,
+      "endpoint": "http://localhost:3000/api/uep/validation"
+    },
+    "uepCommunication": {
+      "enabled": true,
+      "endpoint": "http://localhost:3000/api/uep/communication"
+    },
+    "taskMaster": {
+      "enabled": true,
+      "endpoint": "http://localhost:3000/api/taskmaster"
+    }
+  },
+  "templates": {
+    "metaAgent": "templates/meta-agent-protocol-template.json",
+    "domainAgent": "templates/domain-agent-protocol-template.json",
+    "coreProtocol": "templates/core-protocol-template.json"
+  },
+  "examples": {
+    "prdParser": "examples/prd-parser-protocol.json",
+    "infrastructureOrchestrator": "examples/infrastructure-orchestrator-protocol.json"
+  },
+  "documentation": {
+    "autoGenerate": true,
+    "formats": ["html", "markdown", "pdf"],
+    "includeExamples": true,
+    "includeSchemas": true,
+    "outputPath": "docs/generated"
+  }
+}

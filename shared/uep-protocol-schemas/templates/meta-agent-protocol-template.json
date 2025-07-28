@@ -1,0 +1,228 @@
+{
+  "id": "meta-agent-{{AGENT_NAME_KEBAB}}",
+  "name": "{{AGENT_NAME}}",
+  "version": "1.0.0",
+  "category": "meta-agent",
+  "description": "{{DESCRIPTION}}",
+  "specification": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "{{AGENT_NAME}} API",
+      "version": "1.0.0",
+      "description": "{{DESCRIPTION}}",
+      "contact": {
+        "name": "{{AUTHOR}}",
+        "email": "{{AUTHOR_EMAIL}}"
+      },
+      "license": {
+        "name": "UEP Protocol License",
+        "url": "https://uep.local/licenses/protocol"
+      }
+    },
+    "servers": [
+      {
+        "url": "http://localhost:{{DEV_PORT}}/api/v1",
+        "description": "Development server"
+      },
+      {
+        "url": "https://meta-agents.uep.local/{{AGENT_NAME_KEBAB}}/v1",
+        "description": "Production server"
+      }
+    ],
+    "paths": {
+      "/{{PRIMARY_ENDPOINT}}": {
+        "post": {
+          "summary": "{{ENDPOINT_SUMMARY}}",
+          "description": "{{ENDPOINT_DESCRIPTION}}",
+          "operationId": "{{OPERATION_ID}}",
+          "x-uep-method": "{{METHOD_NAME}}",
+          "x-uep-complexity": "{{COMPLEXITY}}",
+          "x-uep-timeout": "{{TIMEOUT_MS}}",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": "{{REQUIRED_FIELDS}}",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "description": "Primary data payload"
+                    },
+                    "options": {
+                      "type": "object",
+                      "description": "Configuration options"
+                    },
+                    "context": {
+                      "type": "object",
+                      "description": "Contextual information"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Operation completed successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["status", "data"],
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "enum": ["success"]
+                      },
+                      "data": {
+                        "type": "object",
+                        "description": "Response data specific to {{AGENT_NAME}}"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UEPError"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Request valid but cannot be processed",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UEPError"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UEPError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "UEPRequest": {
+          "type": "object",
+          "required": ["method", "data", "metadata"],
+          "properties": {
+            "method": { "type": "string" },
+            "data": { "type": "object" },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "traceId": { "type": "string" },
+                "timestamp": { "type": "string", "format": "date-time" },
+                "version": { "type": "string", "default": "1.0.0" },
+                "requestId": { "type": "string" },
+                "agentId": { "type": "string" }
+              }
+            }
+          }
+        },
+        "UEPResponse": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "type": "string", "enum": ["success", "error"] },
+            "data": { "type": "object" },
+            "error": { "type": "string" },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "responseTime": { "type": "number" },
+                "traceId": { "type": "string" },
+                "version": { "type": "string" }
+              }
+            }
+          }
+        },
+        "UEPError": {
+          "type": "object",
+          "required": ["status", "error", "code"],
+          "properties": {
+            "status": { "type": "string", "enum": ["error"] },
+            "error": { "type": "string" },
+            "code": { "type": "string" },
+            "details": { "type": "object" },
+            "timestamp": { "type": "string", "format": "date-time" }
+          }
+        }
+      },
+      "securitySchemes": {
+        "UEPAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT",
+          "description": "UEP Agent Authentication Token"
+        }
+      }
+    },
+    "security": [
+      {
+        "UEPAuth": []
+      }
+    ],
+    "x-uep-capability": "{{CAPABILITY_NAME}}",
+    "x-uep-version": "1.0.0",
+    "x-uep-metadata": {
+      "agentType": "meta",
+      "complexity": "{{COMPLEXITY}}",
+      "dependencies": "{{DEPENDENCIES}}",
+      "tags": "{{TAGS}}",
+      "capabilities": "{{CAPABILITIES}}",
+      "interactionPatterns": ["request-reply"],
+      "securityRequirements": ["authentication", "authorization", "input-validation"]
+    }
+  },
+  "metadata": {
+    "author": "{{AUTHOR}}",
+    "createdAt": "{{CREATED_DATE}}",
+    "updatedAt": "{{UPDATED_DATE}}",
+    "maintainers": ["{{AUTHOR}}"],
+    "status": "draft",
+    "breaking": false,
+    "experimental": true,
+    "stability": "alpha"
+  },
+  "compatibility": {
+    "minVersion": "1.0.0",
+    "breakingChanges": [],
+    "deprecations": [],
+    "migrations": []
+  },
+  "lifecycle": {
+    "phase": "development",
+    "changeLog": [
+      {
+        "version": "1.0.0",
+        "date": "{{CREATED_DATE}}",
+        "type": "major",
+        "changes": [
+          "Initial protocol definition for {{AGENT_NAME}}"
+        ],
+        "author": "{{AUTHOR}}",
+        "breaking": false
+      }
+    ]
+  }
+}

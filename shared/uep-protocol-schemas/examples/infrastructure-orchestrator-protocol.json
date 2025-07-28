@@ -1,0 +1,435 @@
+{
+  "id": "meta-agent-infrastructure-orchestrator",
+  "name": "Infrastructure Orchestrator Agent",
+  "version": "1.0.0",
+  "category": "meta-agent",
+  "description": "Protocol definition for coordinating multi-agent infrastructure workflows and project orchestration",
+  "specification": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Infrastructure Orchestrator Agent API",
+      "version": "1.0.0",
+      "description": "UEP-compliant API for orchestrating complex multi-agent workflows and infrastructure coordination",
+      "contact": {
+        "name": "UEP Infrastructure Team",
+        "email": "infrastructure@uep.local"
+      }
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3002/api/v1",
+        "description": "Development server"
+      },
+      {
+        "url": "https://meta-agents.uep.local/infrastructure-orchestrator/v1",
+        "description": "Production server"
+      }
+    ],
+    "paths": {
+      "/orchestrate-project": {
+        "post": {
+          "summary": "Orchestrate multi-agent project workflow",
+          "description": "Coordinates multiple agents to execute a complete project workflow from requirements to deployment",
+          "operationId": "orchestrateProject",
+          "x-uep-method": "orchestrate-project",
+          "x-uep-complexity": "high",
+          "x-uep-timeout": 1800000,
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["projectData"],
+                  "properties": {
+                    "projectData": {
+                      "type": "object",
+                      "required": ["prdData", "requirements"],
+                      "properties": {
+                        "prdData": {
+                          "type": "object",
+                          "description": "Parsed PRD data from PRD Parser Agent"
+                        },
+                        "requirements": {
+                          "type": "object",
+                          "properties": {
+                            "functional": { "type": "array", "items": { "type": "object" } },
+                            "technical": { "type": "array", "items": { "type": "object" } },
+                            "performance": { "type": "array", "items": { "type": "object" } }
+                          }
+                        },
+                        "constraints": {
+                          "type": "object",
+                          "properties": {
+                            "budget": { "type": "string" },
+                            "timeline": { "type": "string" },
+                            "techStack": { "type": "array", "items": { "type": "string" } },
+                            "deployment": { "type": "string", "enum": ["cloud", "on-premise", "hybrid"] }
+                          }
+                        },
+                        "preferences": {
+                          "type": "object",
+                          "properties": {
+                            "architecture": { "type": "string" },
+                            "testing": { "type": "string", "enum": ["unit", "integration", "e2e", "all"] },
+                            "documentation": { "type": "boolean", "default": true },
+                            "cicd": { "type": "boolean", "default": true }
+                          }
+                        }
+                      }
+                    },
+                    "orchestrationOptions": {
+                      "type": "object",
+                      "properties": {
+                        "enableParallelExecution": { "type": "boolean", "default": true },
+                        "timeoutMinutes": { "type": "number", "default": 30 },
+                        "retryFailedSteps": { "type": "boolean", "default": true },
+                        "maxRetries": { "type": "integer", "default": 3 },
+                        "enableRollback": { "type": "boolean", "default": true },
+                        "notificationLevel": { "type": "string", "enum": ["none", "errors", "progress", "all"], "default": "progress" }
+                      }
+                    },
+                    "agentConfiguration": {
+                      "type": "object",
+                      "properties": {
+                        "scaffoldGenerator": { "type": "object" },
+                        "templateEngine": { "type": "object" },
+                        "allPurposePattern": { "type": "object" },
+                        "parameterFlow": { "type": "object" },
+                        "postCreationInvestigator": { "type": "object" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Orchestration completed successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["status", "data"],
+                    "properties": {
+                      "status": { "type": "string", "enum": ["success"] },
+                      "data": {
+                        "type": "object",
+                        "required": ["workflowId", "results"],
+                        "properties": {
+                          "workflowId": { "type": "string" },
+                          "results": {
+                            "type": "object",
+                            "properties": {
+                              "projectStructure": {
+                                "type": "object",
+                                "properties": {
+                                  "directories": { "type": "array", "items": { "type": "string" } },
+                                  "files": { "type": "array", "items": { "type": "string" } },
+                                  "configuration": { "type": "object" }
+                                }
+                              },
+                              "templates": {
+                                "type": "object",
+                                "properties": {
+                                  "generated": { "type": "array", "items": { "type": "string" } },
+                                  "customized": { "type": "array", "items": { "type": "string" } }
+                                }
+                              },
+                              "patterns": {
+                                "type": "object",
+                                "properties": {
+                                  "applied": { "type": "array", "items": { "type": "string" } },
+                                  "removed": { "type": "array", "items": { "type": "string" } }
+                                }
+                              },
+                              "containerization": {
+                                "type": "object",
+                                "properties": {
+                                  "dockerfiles": { "type": "array", "items": { "type": "string" } },
+                                  "composeFiles": { "type": "array", "items": { "type": "string" } },
+                                  "helmCharts": { "type": "array", "items": { "type": "string" } }
+                                }
+                              },
+                              "deployment": {
+                                "type": "object",
+                                "properties": {
+                                  "platform": { "type": "string" },
+                                  "configuration": { "type": "object" },
+                                  "scripts": { "type": "array", "items": { "type": "string" } }
+                                }
+                              }
+                            }
+                          },
+                          "workflow": {
+                            "type": "object",
+                            "properties": {
+                              "steps": { "type": "array", "items": { "type": "object" } },
+                              "agentsInvolved": { "type": "array", "items": { "type": "string" } },
+                              "duration": { "type": "number" },
+                              "parallelSteps": { "type": "integer" }
+                            }
+                          },
+                          "metrics": {
+                            "type": "object",
+                            "properties": {
+                              "executionTime": { "type": "number" },
+                              "stepsCompleted": { "type": "number" },
+                              "stepsSkipped": { "type": "number" },
+                              "errorCount": { "type": "number" },
+                              "warningCount": { "type": "number" },
+                              "agentsInvolved": { "type": "array", "items": { "type": "string" } },
+                              "resourcesCreated": { "type": "integer" },
+                              "linesOfCode": { "type": "integer" }
+                            }
+                          },
+                          "validation": {
+                            "type": "object",
+                            "properties": {
+                              "testsGenerated": { "type": "integer" },
+                              "testsPassing": { "type": "integer" },
+                              "coveragePercentage": { "type": "number" },
+                              "lintingScore": { "type": "number" },
+                              "securityScore": { "type": "number" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "202": {
+              "description": "Orchestration started - check status endpoint for progress",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "enum": ["processing"] },
+                      "workflowId": { "type": "string" },
+                      "estimatedCompletion": { "type": "string", "format": "date-time" },
+                      "statusEndpoint": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid project data or orchestration options",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UEPError"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Project data is valid but cannot be orchestrated",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "enum": ["error"] },
+                      "error": { "type": "string" },
+                      "reason": { "type": "string", "enum": ["insufficient_requirements", "unsupported_architecture", "agent_unavailable"] },
+                      "missingAgents": { "type": "array", "items": { "type": "string" } },
+                      "alternatives": { "type": "array", "items": { "type": "string" } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/workflow-status/{workflowId}": {
+        "get": {
+          "summary": "Get orchestration workflow status",
+          "description": "Retrieves current status and progress of an orchestration workflow",
+          "operationId": "getWorkflowStatus",
+          "x-uep-method": "get-workflow-status",
+          "parameters": [
+            {
+              "name": "workflowId",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" },
+              "description": "Unique workflow identifier"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Workflow status retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "workflowId": { "type": "string" },
+                      "status": { "type": "string", "enum": ["pending", "running", "completed", "failed", "cancelled"] },
+                      "progress": { "type": "object" },
+                      "currentStep": { "type": "string" },
+                      "completedSteps": { "type": "array", "items": { "type": "string" } },
+                      "failedSteps": { "type": "array", "items": { "type": "string" } },
+                      "estimatedCompletion": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/cancel-workflow/{workflowId}": {
+        "post": {
+          "summary": "Cancel running orchestration workflow",
+          "description": "Cancels a running workflow and performs cleanup",
+          "operationId": "cancelWorkflow",
+          "x-uep-method": "cancel-workflow",
+          "parameters": [
+            {
+              "name": "workflowId",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "reason": { "type": "string" },
+                    "cleanup": { "type": "boolean", "default": true }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Workflow cancelled successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "enum": ["cancelled"] },
+                      "cleanupPerformed": { "type": "boolean" },
+                      "resourcesReleased": { "type": "array", "items": { "type": "string" } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "UEPRequest": {
+          "type": "object",
+          "required": ["method", "data", "metadata"],
+          "properties": {
+            "method": { "type": "string" },
+            "data": { "type": "object" },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "traceId": { "type": "string" },
+                "timestamp": { "type": "string", "format": "date-time" },
+                "version": { "type": "string", "default": "1.0.0" },
+                "requestId": { "type": "string" },
+                "agentId": { "type": "string" },
+                "priority": { "type": "string", "enum": ["low", "normal", "high", "urgent"], "default": "normal" }
+              }
+            }
+          }
+        },
+        "UEPResponse": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "type": "string", "enum": ["success", "error", "processing"] },
+            "data": { "type": "object" },
+            "error": { "type": "string" },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "responseTime": { "type": "number" },
+                "traceId": { "type": "string" },
+                "version": { "type": "string" },
+                "agentId": { "type": "string" }
+              }
+            }
+          }
+        },
+        "UEPError": {
+          "type": "object",
+          "required": ["status", "error", "code"],
+          "properties": {
+            "status": { "type": "string", "enum": ["error"] },
+            "error": { "type": "string" },
+            "code": { "type": "string" },
+            "details": { "type": "object" },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "retryable": { "type": "boolean" },
+            "retryAfter": { "type": "number" }
+          }
+        }
+      }
+    },
+    "x-uep-capability": "infrastructure-orchestration",
+    "x-uep-version": "1.0.0",
+    "x-uep-metadata": {
+      "agentType": "meta",
+      "complexity": "high",
+      "dependencies": ["prd-parsing", "template-generation", "scaffold-generation"],
+      "tags": ["orchestration", "coordination", "workflow", "infrastructure"],
+      "capabilities": ["infrastructure-orchestration", "workflow-management", "agent-coordination", "project-generation"],
+      "interactionPatterns": ["request-reply", "publish-subscribe"],
+      "securityRequirements": ["authentication", "authorization", "audit-logging"]
+    }
+  },
+  "metadata": {
+    "author": "UEP Infrastructure Team",
+    "createdAt": "2025-01-28T00:00:00.000Z",
+    "updatedAt": "2025-01-28T00:00:00.000Z",
+    "maintainers": ["UEP Infrastructure Team"],
+    "status": "approved",
+    "breaking": false,
+    "experimental": false,
+    "stability": "stable"
+  },
+  "compatibility": {
+    "minVersion": "1.0.0",
+    "breakingChanges": [],
+    "deprecations": [],
+    "migrations": []
+  },
+  "lifecycle": {
+    "phase": "production",
+    "changeLog": [
+      {
+        "version": "1.0.0",
+        "date": "2025-01-28T00:00:00.000Z",
+        "type": "major",
+        "changes": [
+          "Initial protocol definition for Infrastructure Orchestrator Agent",
+          "Added comprehensive workflow orchestration capabilities",
+          "Implemented multi-agent coordination patterns",
+          "Added real-time status tracking and cancellation support"
+        ],
+        "author": "UEP Infrastructure Team",
+        "breaking": false
+      }
+    ]
+  }
+}

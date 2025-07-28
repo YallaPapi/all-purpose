@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{protocol.name}} - API Documentation</title>
+    {{#if config.branding.favicon}}
+    <link rel="icon" href="{{config.branding.favicon}}" type="image/x-icon">
+    {{/if}}
+    <style>
+        /* Custom UEP styling for Redoc */
+        body {
+            margin: 0;
+            font-family: {{config.branding.fontFamily}};
+        }
+        
+        .uep-header {
+            background: linear-gradient(135deg, {{config.branding.primaryColor}}, {{config.branding.secondaryColor}});
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .uep-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .uep-header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        .uep-header .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        
+        .uep-metadata {
+            background: #f8f9fa;
+            padding: 25px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .uep-metadata .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .uep-metadata h3 {
+            color: {{config.branding.primaryColor}};
+            margin: 0 0 20px 0;
+            font-size: 1.3em;
+        }
+        
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .metadata-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid {{config.branding.primaryColor}};
+        }
+        
+        .metadata-card .label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .metadata-card .value {
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .status-active { color: #28a745; }
+        .status-deprecated { color: #ffc107; }
+        .status-development { color: #17a2b8; }
+        
+        /* Custom Redoc theme overrides */
+        .redoc-container {
+            margin-top: 0 !important;
+        }
+        
+        /* Hide default Redoc header since we have custom one */
+        .api-info {
+            display: none !important;
+        }
+        
+        /* Custom styling for operations */
+        .operation-summary {
+            font-family: {{config.branding.fontFamily}} !important;
+        }
+        
+        /* Custom footer */
+        .uep-footer {
+            background: #f8f9fa;
+            padding: 30px 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            margin-top: 50px;
+        }
+        
+        .uep-footer .links {
+            margin-top: 15px;
+        }
+        
+        .uep-footer .links a {
+            color: {{config.branding.primaryColor}};
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        
+        .uep-footer .links a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .uep-header h1 {
+                font-size: 2em;
+            }
+            
+            .uep-header, .uep-metadata {
+                padding: 20px 15px;
+            }
+            
+            .metadata-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+    </style>
+    
+    <!-- Redoc styling customization -->
+    <style>
+        /* Redoc theme customization */
+        redoc {
+            --redoc-brand-color: {{config.branding.primaryColor}};
+            --redoc-text-color: #333;
+            --redoc-subtle-text-color: #6c757d;
+            --redoc-border-color: #e9ecef;
+            --redoc-code-background-color: #f8f9fa;
+            --redoc-font-family: {{config.branding.fontFamily}};
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom UEP Header -->
+    <div class="uep-header">
+        {{#if config.branding.logo}}
+        <img src="{{config.branding.logo}}" alt="{{config.branding.organization}}" style="max-height: 60px; margin-bottom: 20px;">
+        {{/if}}
+        <h1>{{protocol.name}}</h1>
+        <div class="subtitle">UEP Protocol Documentation</div>
+        <div class="version-badge">Version {{protocol.version}}</div>
+    </div>
+    
+    <!-- UEP Metadata Section -->
+    <div class="uep-metadata">
+        <div class="container">
+            <h3>Protocol Information</h3>
+            <div class="metadata-grid">
+                <div class="metadata-card">
+                    <div class="label">Protocol ID</div>
+                    <div class="value">{{protocol.id}}</div>
+                </div>
+                
+                <div class="metadata-card">
+                    <div class="label">Version</div>
+                    <div class="value">{{protocol.version}}</div>
+                </div>
+                
+                <div class="metadata-card">
+                    <div class="label">Status</div>
+                    <div class="value status-{{protocol.metadata.status}}">
+                        {{protocol.metadata.status}}
+                    </div>
+                </div>
+                
+                <div class="metadata-card">
+                    <div class="label">Author</div>
+                    <div class="value">{{protocol.metadata.author}}</div>
+                </div>
+                
+                <div class="metadata-card">
+                    <div class="label">Organization</div>
+                    <div class="value">{{config.branding.organization}}</div>
+                </div>
+                
+                <div class="metadata-card">
+                    <div class="label">Last Updated</div>
+                    <div class="value">{{formatDate protocol.metadata.lastUpdated}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Redoc Container -->
+    <div id="redoc-container"></div>
+    
+    <!-- Custom UEP Footer -->
+    <div class="uep-footer">
+        <div>
+            <strong>{{config.branding.organization}}</strong> - UEP Protocol Documentation
+        </div>
+        <div>Generated by UEP Protocol Documentation Generator v1.0.0</div>
+        <div>Documentation powered by Redoc | Generated on {{formatDate timestamp}}</div>
+        
+        <div class="links">
+            {{#if protocol.specification.info.contact}}
+            <a href="mailto:{{protocol.specification.info.contact.email}}">Contact</a>
+            {{/if}}
+            {{#if protocol.specification.info.license}}
+            <a href="{{protocol.specification.info.license.url}}" target="_blank">License</a>
+            {{/if}}
+            <a href="#" onclick="downloadSpec()">Download OpenAPI Spec</a>
+        </div>
+    </div>
+
+    <!-- Redoc JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js"></script>
+    
+    <script>
+        // OpenAPI specification with UEP enhancements
+        const spec = {{{spec}}};
+        
+        // Add UEP-specific metadata to the spec
+        if (!spec['x-uep-metadata']) {
+            spec['x-uep-metadata'] = {
+                protocolId: '{{protocol.id}}',
+                version: '{{protocol.version}}',
+                status: '{{protocol.metadata.status}}',
+                author: '{{protocol.metadata.author}}',
+                organization: '{{config.branding.organization}}',
+                generatedAt: '{{timestamp}}'
+            };
+        }
+        
+        // Enhance info section with UEP details
+        if (spec.info) {
+            spec.info['x-logo'] = {
+                url: '{{config.branding.logo}}',
+                altText: '{{config.branding.organization}}'
+            };
+            
+            // Add UEP-specific description
+            const uepDescription = `
+This is a UEP (Universal Execution Protocol) compliant API specification.
+
+**Protocol Details:**
+- **Protocol ID**: \`{{protocol.id}}\`
+- **Version**: \`{{protocol.version}}\`
+- **Status**: \`{{protocol.metadata.status}}\`
+- **Author**: {{protocol.metadata.author}}
+
+**UEP Compliance:**
+This API follows UEP standards for containerized service communication, including standardized headers, error responses, and protocol versioning.
+            `;
+            
+            spec.info.description = (spec.info.description || '') + uepDescription;
+        }
+        
+        // Initialize Redoc with custom options
+        Redoc.init(spec, {
+            scrollYOffset: 80,
+            hideDownloadButton: false,
+            disableSearch: false,
+            expandResponses: '200,201',
+            requiredPropsFirst: true,
+            sortPropsAlphabetically: true,
+            showExtensions: true,
+            hideHostname: false,
+            expandSingleSchemaField: true,
+            menuToggle: true,
+            theme: {
+                colors: {
+                    primary: {
+                        main: '{{config.branding.primaryColor}}'
+                    },
+                    success: {
+                        main: '#28a745'
+                    },
+                    warning: {
+                        main: '#ffc107'
+                    },
+                    error: {
+                        main: '#dc3545'
+                    }
+                },
+                typography: {
+                    fontSize: '14px',
+                    lineHeight: '1.5',
+                    fontFamily: '{{config.branding.fontFamily}}, sans-serif',
+                    headings: {
+                        fontFamily: '{{config.branding.fontFamily}}, sans-serif',
+                        fontWeight: '600'
+                    },
+                    code: {
+                        fontSize: '13px',
+                        fontFamily: 'Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
+                    }
+                },
+                sidebar: {
+                    width: '300px',
+                    backgroundColor: '#fafafa',
+                    textColor: '#333'
+                },
+                rightPanel: {
+                    backgroundColor: '#263238',
+                    width: '40%'
+                }
+            }
+        }, document.getElementById('redoc-container'));
+        
+        // Add UEP-specific functionality after initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            addUEPFeatures();
+        });
+        
+        function addUEPFeatures() {
+            // Add UEP protocol badge to operations
+            setTimeout(() => {
+                const operations = document.querySelectorAll('[data-section-id]');
+                operations.forEach(operation => {
+                    if (operation.querySelector('.http-verb')) {
+                        const badge = document.createElement('span');
+                        badge.textContent = 'UEP';
+                        badge.style.cssText = `
+                            background: {{config.branding.primaryColor}};
+                            color: white;
+                            padding: 2px 6px;
+                            border-radius: 3px;
+                            font-size: 10px;
+                            margin-left: 8px;
+                            font-weight: bold;
+                        `;
+                        
+                        const httpVerb = operation.querySelector('.http-verb');
+                        if (httpVerb) {
+                            httpVerb.parentNode.appendChild(badge);
+                        }
+                    }
+                });
+            }, 1000);
+            
+            // Add copy functionality for code examples
+            addCopyButtons();
+            
+            // Add UEP validation warnings
+            addUEPValidation();
+        }
+        
+        function addCopyButtons() {
+            setTimeout(() => {
+                const codeBlocks = document.querySelectorAll('pre');
+                codeBlocks.forEach(block => {
+                    const button = document.createElement('button');
+                    button.textContent = 'Copy';
+                    button.style.cssText = `
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        background: {{config.branding.primaryColor}};
+                        color: white;
+                        border: none;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    `;
+                    
+                    button.onclick = () => {
+                        navigator.clipboard.writeText(block.textContent).then(() => {
+                            button.textContent = 'Copied!';
+                            setTimeout(() => {
+                                button.textContent = 'Copy';
+                            }, 2000);
+                        });
+                    };
+                    
+                    block.style.position = 'relative';
+                    block.appendChild(button);
+                });
+            }, 1500);
+        }
+        
+        function addUEPValidation() {
+            // Add UEP protocol validation notes
+            console.log('UEP Protocol Documentation loaded:', {
+                protocolId: '{{protocol.id}}',
+                version: '{{protocol.version}}',
+                status: '{{protocol.metadata.status}}',
+                generatedAt: '{{timestamp}}'
+            });
+        }
+        
+        function downloadSpec() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(spec, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "{{protocol.id}}-openapi-spec.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('input[placeholder*="Search"]');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+            
+            // Ctrl/Cmd + D to download spec
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                downloadSpec();
+            }
+        });
+    </script>
+</body>
+</html>

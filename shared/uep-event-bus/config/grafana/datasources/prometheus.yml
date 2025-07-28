@@ -1,0 +1,274 @@
+# Grafana Datasource Configuration for UEP Message Broker Monitoring
+#
+# This configuration sets up Prometheus as the primary datasource for
+# UEP Message Broker observability dashboards.
+
+apiVersion: 1
+
+datasources:
+  # Primary Prometheus datasource for NATS metrics
+  - name: Prometheus-NATS
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://prometheus:9090
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      alertmanagerUid: alertmanager
+      
+      # Query settings
+      queryTimeout: 60s
+      defaultRegion: default
+      customQueryParameters: ''
+      
+      # Time interval settings
+      timeInterval: 15s
+      
+      # Prometheus specific settings
+      disableMetricsLookup: false
+      prometheusType: Prometheus
+      prometheusVersion: 2.45.0
+      
+      # Caching settings
+      cacheLevel: 'High'
+      
+      # TSDB settings
+      incrementalQuerying: true
+      queryOverlapWindow: 10m
+      
+    secureJsonData: {}
+
+  # Secondary datasource for long-term metrics storage
+  - name: Prometheus-LongTerm
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://prometheus-longterm:9090
+    isDefault: false
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: POST
+      manageAlerts: false
+      queryTimeout: 120s
+      timeInterval: 1m
+      prometheusType: Prometheus
+      prometheusVersion: 2.45.0
+      incrementalQuerying: true
+      queryOverlapWindow: 1h
+    secureJsonData: {}
+
+  # Alertmanager datasource for alert management
+  - name: Alertmanager
+    type: alertmanager
+    access: proxy
+    orgId: 1
+    url: http://alertmanager:9093
+    version: 1
+    editable: true
+    uid: alertmanager
+    jsonData:
+      implementation: prometheus
+      handleGrafanaManagedAlerts: true
+    secureJsonData: {}
+
+  # Loki datasource for log aggregation (if available)
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: http://loki:3100
+    version: 1
+    editable: true
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - datasourceUid: jaeger
+          matcherRegex: "trace_id=(\\w+)"
+          name: TraceID
+          url: "$${__value.raw}"
+        - datasourceUid: prometheus
+          matcherRegex: "message_id=(\\w+)"
+          name: MessageID
+          url: "/d/uep-message-details?var-message_id=$${__value.raw}"
+    secureJsonData: {}
+
+  # Jaeger datasource for distributed tracing (if available)
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    orgId: 1
+    url: http://jaeger:16686
+    version: 1
+    editable: true
+    uid: jaeger
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '-1h'
+        tags: ['job', 'instance', 'pod', 'namespace']
+        filterByTraceID: false
+        filterBySpanID: false
+        customQuery: true
+        query: 'trace_id="${__trace.traceID}"'
+      tracesToMetrics:
+        datasourceUid: prometheus
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '-1h'
+        tags: [{ key: 'service.name', value: 'service' }]
+        queries:
+          - name: 'Sample query'
+            query: 'sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))'
+      nodeGraph:
+        enabled: true
+    secureJsonData: {}
+
+  # InfluxDB datasource for time-series data (if available)
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    orgId: 1
+    url: http://influxdb:8086
+    version: 1
+    editable: true
+    database: uep_metrics
+    user: grafana
+    jsonData:
+      httpMode: GET
+      keepCookies: []
+    secureJsonData:
+      password: grafana_password
+
+  # Elasticsearch datasource for log analysis (if available)
+  - name: Elasticsearch
+    type: elasticsearch
+    access: proxy
+    orgId: 1
+    url: http://elasticsearch:9200
+    version: 1
+    editable: true
+    database: "uep-logs-*"
+    jsonData:
+      esVersion: "8.0.0"
+      timeField: "@timestamp"
+      interval: Daily
+      maxConcurrentShardRequests: 5
+      includeFrozen: false
+      logMessageField: message
+      logLevelField: level
+    secureJsonData: {}
+
+  # TestData datasource for development and testing
+  - name: TestData DB
+    type: testdata
+    access: proxy
+    orgId: 1
+    version: 1
+    editable: true
+    jsonData: {}
+
+  # Mixed datasource for combining multiple sources
+  - name: Mixed
+    type: mixed
+    access: proxy
+    orgId: 1
+    version: 1
+    editable: false
+
+# Notification channels configuration
+notifiers:
+  - name: webhook
+    type: webhook
+    uid: webhook-1
+    org_id: 1
+    is_default: true
+    send_reminder: true
+    disable_resolve_message: false
+    frequency: 10s
+    settings:
+      url: "http://webhook-endpoint:8080/alerts"
+      httpMethod: POST
+      username: ""
+      password: ""
+      title: "UEP Message Broker Alert"
+      text: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+
+  - name: slack
+    type: slack
+    uid: slack-1
+    org_id: 1
+    is_default: false
+    send_reminder: true
+    disable_resolve_message: false
+    frequency: 5m
+    settings:
+      url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+      channel: "#uep-alerts"
+      username: "Grafana"
+      title: "UEP Message Broker Alert"
+      text: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+      iconEmoji: ":exclamation:"
+
+# Global notification settings
+global:
+  # SMTP configuration for email alerts
+  smtp_host: "smtp.gmail.com:587"
+  smtp_user: "alerts@yourdomain.com"
+  smtp_password: "your_password"
+  smtp_from_address: "alerts@yourdomain.com"
+  smtp_from_name: "UEP Message Broker Alerts"
+
+# Default dashboard refresh intervals
+refresh_intervals:
+  - "5s"
+  - "10s"
+  - "30s"
+  - "1m"
+  - "5m"
+  - "15m"
+  - "30m"
+  - "1h"
+  - "2h"
+  - "1d"
+
+# Custom variables for dashboards
+variables:
+  nats_cluster:
+    name: "cluster"
+    type: "query"
+    query: "label_values(nats_core_mem, cluster)"
+    refresh: 1
+    includeAll: true
+    multi: true
+
+  nats_server:
+    name: "server"
+    type: "query"
+    query: "label_values(nats_core_mem{cluster=~\"$cluster\"}, instance)"
+    refresh: 1
+    includeAll: true
+    multi: true
+
+  uep_namespace:
+    name: "namespace"
+    type: "query"
+    query: "label_values(uep_message_total, namespace)"
+    refresh: 1
+    includeAll: true
+    multi: true
+
+  time_range:
+    name: "range"
+    type: "interval"
+    query: "1m,5m,10m,30m,1h,6h,12h,1d,7d,14d,30d"
+    refresh: 0
+    includeAll: false
+    multi: false
+    current:
+      value: "5m"
+      text: "5m"

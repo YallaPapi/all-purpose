@@ -1,0 +1,321 @@
+# {{info.title}}
+
+> Protocol Documentation v{{info.version}}  
+> Generated on {{timestamp}}
+
+{{info.description}}
+
+## Table of Contents
+
+- [Overview](#overview)
+{{#if servers.length}}
+- [Servers](#servers)
+{{/if}}
+{{#if endpoints.length}}
+- [API Endpoints](#api-endpoints)
+{{#each endpoints}}
+  - [{{method}} {{path}}](#{{method}}-{{path}})
+{{/each}}
+{{/if}}
+{{#if schemas.length}}
+- [Data Schemas](#data-schemas)
+{{#each schemas}}
+  - [{{name}}](#{{name}})
+{{/each}}
+{{/if}}
+{{#if config.includeExamples}}
+- [Examples](#examples)
+{{/if}}
+{{#if config.includeChangelog}}
+- [Changelog](#changelog)
+{{/if}}
+
+---
+
+## Overview
+
+**Protocol Information:**
+- **ID**: `{{protocol.id}}`
+- **Version**: `{{info.version}}`
+- **Status**: `{{metadata.status}}`
+- **Author**: {{metadata.author}}
+- **Created**: {{formatDate metadata.createdAt}}
+- **Last Updated**: {{formatDate metadata.lastUpdated}}
+
+{{#if info.contact}}
+**Contact Information:**
+- **Name**: {{info.contact.name}}
+- **Email**: [{{info.contact.email}}](mailto:{{info.contact.email}})
+{{#if info.contact.url}}
+- **Website**: [{{info.contact.url}}]({{info.contact.url}})
+{{/if}}
+{{/if}}
+
+{{#if info.license}}
+**License:** [{{info.license.name}}]({{info.license.url}})
+{{/if}}
+
+{{#if uepMetadata}}
+**UEP Metadata:**
+- **Domain**: {{uepMetadata.domain}}
+- **Category**: {{uepMetadata.category}}
+- **Compatibility Level**: {{uepMetadata.compatibilityLevel}}
+{{/if}}
+
+---
+
+{{#if servers.length}}
+## Servers
+
+{{#each servers}}
+### {{description}}
+
+**Base URL:** `{{url}}`
+
+{{#if variables}}
+**Variables:**
+{{#each variables}}
+- **{{@key}}**: {{description}} (default: `{{default}}`)
+{{/each}}
+{{/if}}
+
+{{/each}}
+
+---
+{{/if}}
+
+{{#if endpoints.length}}
+## API Endpoints
+
+{{#each endpoints}}
+### {{method}} {{path}}
+{{#if deprecated}}
+> ⚠️ **DEPRECATED** - This endpoint is deprecated and may be removed in future versions.
+{{/if}}
+
+**Summary:** {{summary}}
+
+{{#if description}}
+{{description}}
+{{/if}}
+
+{{#if tags.length}}
+**Tags:** {{join tags ", "}}
+{{/if}}
+
+{{#if parameters.length}}
+#### Parameters
+
+| Name | Type | In | Required | Description |
+|------|------|----|----------|-------------|
+{{#each parameters}}
+| `{{name}}` | {{schema.type}} | {{in}} | {{#if required}}✅{{else}}❌{{/if}} | {{description}} |
+{{/each}}
+{{/if}}
+
+{{#if requestBody}}
+#### Request Body
+
+**Content Type:** `{{requestBody.contentType}}`  
+**Required:** {{#if requestBody.required}}✅ Yes{{else}}❌ No{{/if}}
+
+{{#if requestBody.description}}
+{{requestBody.description}}
+{{/if}}
+
+{{#if requestBody.schema}}
+**Schema:**
+```json
+{{json requestBody.schema}}
+```
+{{/if}}
+{{/if}}
+
+{{#if responses.length}}
+#### Responses
+
+{{#each responses}}
+**{{statusCode}}** - {{description}}
+
+{{#if contentType}}
+Content Type: `{{contentType}}`
+{{/if}}
+
+{{#if schema}}
+```json
+{{json schema}}
+```
+{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{#if examples.length}}
+#### Examples
+
+{{#each examples}}
+##### {{name}}
+
+{{#if description}}
+{{description}}
+{{/if}}
+
+```{{language}}
+{{json value}}
+```
+
+{{/each}}
+{{/if}}
+
+---
+
+{{/each}}
+{{/if}}
+
+{{#if schemas.length}}
+## Data Schemas
+
+{{#each schemas}}
+### {{name}}
+
+**Type:** `{{type}}`
+
+{{#if description}}
+{{description}}
+{{/if}}
+
+{{#if required.length}}
+**Required Fields:** {{join required ", "}}
+{{/if}}
+
+{{#if properties.length}}
+#### Properties
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+{{#each properties}}
+| `{{name}}` | {{type}}{{#if format}} ({{format}}){{/if}} | {{#if required}}✅{{else}}❌{{/if}} | {{description}}{{#if deprecated}} ⚠️ DEPRECATED{{/if}} |
+{{/each}}
+{{/if}}
+
+{{#if examples.length}}
+#### Examples
+
+{{#each examples}}
+##### {{name}}
+
+{{#if description}}
+{{description}}
+{{/if}}
+
+```json
+{{json value}}
+```
+
+{{/each}}
+{{/if}}
+
+---
+
+{{/each}}
+{{/if}}
+
+{{#if config.includeExamples}}
+## Examples
+
+### Basic Usage
+
+```javascript
+// Example API client usage
+const client = new UEPClient('{{servers.0.url}}');
+
+// Basic request
+try {
+  const response = await client.request({
+    method: '{{endpoints.0.method}}',
+    path: '{{endpoints.0.path}}',
+    {{#if endpoints.0.requestBody}}
+    body: {
+      // Request body data
+    }
+    {{/if}}
+  });
+  
+  console.log('Response:', response);
+} catch (error) {
+  console.error('API Error:', error);
+}
+```
+
+### Error Handling
+
+```javascript
+// Comprehensive error handling
+try {
+  const result = await client.{{endpoints.0.path.replace(/[{}]/g, '')}}();
+} catch (error) {
+  if (error.status === 400) {
+    console.error('Bad Request:', error.message);
+  } else if (error.status === 401) {
+    console.error('Unauthorized:', error.message);
+  } else if (error.status >= 500) {
+    console.error('Server Error:', error.message);
+  } else {
+    console.error('Unexpected Error:', error);
+  }
+}
+```
+
+### Authentication
+
+{{#if security}}
+```javascript
+// Authentication setup
+const client = new UEPClient('{{servers.0.url}}', {
+  authentication: {
+    {{#each security}}
+    {{@key}}: 'your-{{@key}}-here'{{#unless @last}},{{/unless}}
+    {{/each}}
+  }
+});
+```
+{{/if}}
+
+{{/if}}
+
+{{#if config.includeChangelog}}
+## Changelog
+
+{{#each changelog}}
+### Version {{version}} - {{formatDate timestamp}}
+
+{{#each changes}}
+- {{this}}
+{{/each}}
+
+{{/each}}
+{{/if}}
+
+---
+
+## Development Information
+
+**Generated by:** UEP Protocol Documentation Generator v1.0.0  
+**Generated on:** {{timestamp}}  
+**Protocol Schema:** [{{protocol.id}}.json](./{{protocol.id}}.json)
+
+{{#if config.includeMigration}}
+## Migration Information
+
+{{#if metadata.migrationNotes}}
+### Migration Notes
+
+{{metadata.migrationNotes}}
+{{/if}}
+
+For migration assistance and version compatibility information, see the [Protocol Version Manager documentation](./versions/README.md).
+{{/if}}
+
+---
+
+*This documentation is automatically generated from the UEP protocol definition. For the most up-to-date information, please refer to the source protocol specification.*

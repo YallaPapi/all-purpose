@@ -1,0 +1,445 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "UEP Message Broker - NATS JetStream Cluster",
+    "description": "Comprehensive monitoring dashboard for NATS JetStream cluster with UEP-specific metrics",
+    "tags": ["nats", "jetstream", "uep", "message-broker", "cluster"],
+    "style": "dark",
+    "timezone": "browser",
+    "editable": true,
+    "hideControls": false,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "refresh": "30s",
+    "version": 1,
+    "panels": [
+      {
+        "id": 1,
+        "title": "Cluster Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count(up{job=\"nats-cluster\"} == 1)",
+            "legendFormat": "Active Nodes",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(nats_core_total_connections)",
+            "legendFormat": "Total Connections",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(nats_core_total_msgs[5m]))",
+            "legendFormat": "Messages/sec",
+            "refId": "C"
+          },
+          {
+            "expr": "sum(nats_jetstream_streams)",
+            "legendFormat": "JetStream Streams",
+            "refId": "D"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background",
+          "graphMode": "area",
+          "justifyMode": "center"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 1 },
+                { "color": "green", "value": 3 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Message Throughput",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(nats_core_total_msgs[1m])) by (instance)",
+            "legendFormat": "{{instance}} - Messages/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(nats_core_total_bytes[1m])) by (instance)",
+            "legendFormat": "{{instance}} - Bytes/sec",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+        "yAxes": [
+          {
+            "label": "Messages/sec",
+            "min": 0,
+            "show": true
+          },
+          {
+            "label": "Bytes/sec",
+            "min": 0,
+            "show": true
+          }
+        ],
+        "xAxis": { "show": true },
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "pointradius": 5,
+        "legend": {
+          "show": true,
+          "values": true,
+          "current": true,
+          "max": true,
+          "avg": true
+        }
+      },
+      {
+        "id": 3,
+        "title": "JetStream Streams Health",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "nats_jetstream_stream_messages by (stream_name, instance)",
+            "legendFormat": "{{stream_name}}",
+            "refId": "A",
+            "format": "table"
+          },
+          {
+            "expr": "nats_jetstream_stream_bytes by (stream_name, instance)",
+            "legendFormat": "{{stream_name}}",
+            "refId": "B",
+            "format": "table"
+          },
+          {
+            "expr": "nats_jetstream_stream_consumers by (stream_name, instance)",
+            "legendFormat": "{{stream_name}}",
+            "refId": "C",
+            "format": "table"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{ "desc": false, "displayName": "Stream Name" }]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "red", "value": 80 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Messages" },
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "title": "Connection Status",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "nats_core_total_connections by (instance)",
+            "legendFormat": "{{instance}} - Active Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "nats_core_slow_consumers by (instance)",
+            "legendFormat": "{{instance}} - Slow Consumers",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+        "yAxes": [
+          {
+            "label": "Connections",
+            "min": 0,
+            "show": true
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [100],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["B", "5m", "now"]
+              },
+              "reducer": {
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "5m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "High Slow Consumer Count",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "nats_core_mem by (instance)",
+            "legendFormat": "{{instance}} - Memory Used",
+            "refId": "A"
+          },
+          {
+            "expr": "nats_jetstream_mem_used by (instance)",
+            "legendFormat": "{{instance}} - JetStream Memory",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+        "yAxes": [
+          {
+            "label": "Bytes",
+            "min": 0,
+            "show": true,
+            "logBase": 1
+          }
+        ],
+        "thresholds": [
+          {
+            "colorMode": "critical",
+            "fill": true,
+            "value": 536870912
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "UEP Message Processing",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(uep_messages_processed_total[5m])) by (message_type)",
+            "legendFormat": "{{message_type}} - Processed/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(uep_messages_failed_total[5m])) by (message_type)",
+            "legendFormat": "{{message_type}} - Failed/sec",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+        "yAxes": [
+          {
+            "label": "Messages/sec",
+            "min": 0,
+            "show": true
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Circuit Breaker Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(uep_circuit_breaker_open_total)",
+            "legendFormat": "Open Circuit Breakers",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(uep_circuit_breaker_half_open_total)",
+            "legendFormat": "Half-Open Circuit Breakers",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Dead Letter Queue",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(uep_dlq_messages_total) by (subject)",
+            "legendFormat": "{{subject}} - DLQ Messages",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(uep_dlq_messages_total[5m])",
+            "legendFormat": "DLQ Rate/sec",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 28 },
+        "yAxes": [
+          {
+            "label": "Messages",
+            "min": 0,
+            "show": true
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [10],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["B", "5m", "now"]
+              },
+              "reducer": {
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "2m",
+          "frequency": "30s",
+          "handler": 1,
+          "name": "High Dead Letter Queue Rate",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "cluster",
+          "type": "query",
+          "query": "label_values(nats_core_mem, cluster)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true,
+          "current": {
+            "value": "$__all",
+            "text": "All"
+          }
+        },
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(nats_core_mem{cluster=~\"$cluster\"}, instance)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true,
+          "current": {
+            "value": "$__all",
+            "text": "All"
+          }
+        },
+        {
+          "name": "stream",
+          "type": "query",
+          "query": "label_values(nats_jetstream_stream_messages, stream_name)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true,
+          "current": {
+            "value": "$__all",
+            "text": "All"
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus-NATS",
+          "enable": true,
+          "expr": "changes(nats_core_start_time[1h]) > 0",
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "titleFormat": "NATS Restart",
+          "textFormat": "NATS server {{instance}} restarted"
+        }
+      ]
+    },
+    "links": [
+      {
+        "title": "NATS Management Console",
+        "url": "http://localhost:8222",
+        "type": "link",
+        "targetBlank": true
+      },
+      {
+        "title": "HAProxy Stats",
+        "url": "http://localhost:8404/stats",
+        "type": "link",
+        "targetBlank": true
+      }
+    ]
+  },
+  "overwrite": true
+}

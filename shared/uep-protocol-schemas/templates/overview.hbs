@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UEP Protocol Documentation Overview</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    {{#if config.branding.favicon}}
+    <link rel="icon" href="{{config.branding.favicon}}" type="image/x-icon">
+    {{/if}}
+    <style>
+        /* Overview page specific styles */
+        body {
+            font-family: {{config.branding.fontFamily}};
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, {{config.branding.primaryColor}}, {{config.branding.secondaryColor}});
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 3em;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header .subtitle {
+            font-size: 1.3em;
+            margin-top: 15px;
+            opacity: 0.9;
+        }
+        
+        .header .stats {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .protocols-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .protocol-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .protocol-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .protocol-header {
+            padding: 25px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .protocol-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            color: {{config.branding.primaryColor}};
+        }
+        
+        .protocol-id {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .protocol-version {
+            float: right;
+            background: {{config.branding.primaryColor}};
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .protocol-description {
+            color: #666;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+        
+        .protocol-meta {
+            padding: 20px 25px;
+            background: #f8f9fa;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 0.9em;
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meta-label {
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+        }
+        
+        .meta-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .status-active { color: #28a745; }
+        .status-development { color: #17a2b8; }
+        .status-deprecated { color: #ffc107; }
+        .status-archived { color: #6c757d; }
+        
+        .protocol-actions {
+            padding: 20px 25px;
+            background: white;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: {{config.branding.primaryColor}};
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: {{config.branding.secondaryColor}};
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #dee2e6;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .generation-info {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .generation-info h3 {
+            color: {{config.branding.primaryColor}};
+            margin-top: 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .info-card .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: {{config.branding.primaryColor}};
+            display: block;
+        }
+        
+        .info-card .label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            background: {{config.branding.primaryColor}};
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+        }
+        
+        .footer a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        /* Search functionality */
+        .search-container {
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1.1em;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: {{config.branding.primaryColor}};
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .header .stats {
+                gap: 20px;
+            }
+            
+            .protocols-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .protocol-meta {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        {{#if config.branding.logo}}
+        <img src="{{config.branding.logo}}" alt="{{config.branding.organization}}" style="max-height: 80px; margin-bottom: 30px;">
+        {{/if}}
+        <h1>UEP Protocol Documentation</h1>
+        <div class="subtitle">Universal Execution Protocol - Documentation Overview</div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-number">{{protocols.length}}</span>
+                <span class="stat-label">Protocols</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{countByStatus protocols 'active'}}</span>
+                <span class="stat-label">Active</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{countByStatus protocols 'development'}}</span>
+                <span class="stat-label">In Development</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{formatDate generatedAt}}</span>
+                <span class="stat-label">Last Updated</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Search -->
+        <div class="search-container">
+            <input type="text" 
+                   id="protocol-search" 
+                   class="search-input" 
+                   placeholder="Search protocols by name, ID, or description...">
+        </div>
+        
+        <!-- Protocols Grid -->
+        <div class="protocols-grid" id="protocols-grid">
+            {{#each protocols}}
+            <div class="protocol-card" data-protocol-id="{{id}}" data-search-text="{{name}} {{id}} {{description}}">
+                <div class="protocol-header">
+                    <div class="protocol-version">v{{version}}</div>
+                    <h2 class="protocol-title">{{name}}</h2>
+                    <div class="protocol-id">{{id}}</div>
+                    {{#if description}}
+                    <div class="protocol-description">{{description}}</div>
+                    {{/if}}
+                </div>
+                
+                <div class="protocol-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Status</div>
+                        <div class="meta-value status-{{status}}">{{status}}</div>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <div class="meta-label">Documentation</div>
+                        <div class="meta-value">
+                            {{#if result.success}}
+                            <span style="color: #28a745;">✓ Generated</span>
+                            {{else}}
+                            <span style="color: #dc3545;">✗ Failed</span>
+                            {{/if}}
+                        </div>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <div class="meta-label">Files Generated</div>
+                        <div class="meta-value">
+                            {{#if result.generatedFiles}}
+                            {{result.generatedFiles.length}} files
+                            {{else}}
+                            0 files
+                            {{/if}}
+                        </div>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <div class="meta-label">Last Updated</div>
+                        <div class="meta-value">{{formatDate ../generatedAt}}</div>
+                    </div>
+                </div>
+                
+                <div class="protocol-actions">
+                    {{#if result.success}}
+                    <a href="{{id}}/index.html" class="action-btn btn-primary">View Documentation</a>
+                    <a href="{{id}}/api-docs.html" class="action-btn btn-secondary">Interactive API</a>
+                    <a href="{{id}}/README.md" class="action-btn btn-secondary">Markdown</a>
+                    <a href="{{id}}/documentation.pdf" class="action-btn btn-secondary">PDF</a>
+                    {{else}}
+                    <span class="action-btn" style="background: #f8d7da; color: #721c24;">
+                        Generation Failed
+                    </span>
+                    {{/if}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        
+        <!-- No Results Message -->
+        <div id="no-results" style="display: none; text-align: center; padding: 60px 20px; color: #666;">
+            <h3>No protocols found</h3>
+            <p>Try adjusting your search terms or filters.</p>
+        </div>
+        
+        <!-- Generation Information -->
+        <div class="generation-info">
+            <h3>Documentation Generation Summary</h3>
+            <p>This overview page shows all UEP protocol documentation generated on {{formatDate generatedAt}}.</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <span class="number">{{protocols.length}}</span>
+                    <div class="label">Total Protocols</div>
+                </div>
+                
+                <div class="info-card">
+                    <span class="number">{{countSuccessful protocols}}</span>
+                    <div class="label">Successfully Generated</div>
+                </div>
+                
+                <div class="info-card">
+                    <span class="number">{{countErrors protocols}}</span>
+                    <div class="label">With Errors</div>
+                </div>
+                
+                <div class="info-card">
+                    <span class="number">{{calculateTotalFiles protocols}}</span>
+                    <div class="label">Total Files Generated</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h4>Generator Information</h4>
+                <p><strong>Generator:</strong> UEP Protocol Documentation Generator v1.0.0</p>
+                <p><strong>Configuration:</strong> {{config.theme}} theme, {{config.formats.length}} output formats</p>
+                <p><strong>Features:</strong> 
+                    {{#if config.includeExamples}}Examples, {{/if}}
+                    {{#if config.includeDiagrams}}Diagrams, {{/if}}
+                    {{#if config.includeInteractive}}Interactive Features, {{/if}}
+                    {{#if config.enableSearch}}Search{{/if}}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; {{currentYear}} {{config.branding.organization}}</p>
+        <p>Generated by <strong>UEP Protocol Documentation Generator v1.0.0</strong></p>
+        <p>Universal Execution Protocol (UEP) - Standardized containerized service communication</p>
+        
+        <div style="margin-top: 20px;">
+            {{#if config.branding.contact}}
+            <a href="mailto:{{config.branding.contact.email}}">Contact</a> | 
+            {{/if}}
+            <a href="https://github.com/uep/protocol-schemas" target="_blank">GitHub</a> |
+            <a href="#" onclick="downloadAllSpecs()">Download All Specs</a>
+        </div>
+    </div>
+    
+    <script>
+        // Search functionality
+        document.getElementById('protocol-search').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const protocolCards = document.querySelectorAll('.protocol-card');
+            const noResults = document.getElementById('no-results');
+            let visibleCount = 0;
+            
+            protocolCards.forEach(card => {
+                const searchText = card.getAttribute('data-search-text').toLowerCase();
+                const isVisible = searchText.includes(searchTerm);
+                
+                card.style.display = isVisible ? 'block' : 'none';
+                if (isVisible) visibleCount++;
+            });
+            
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        });
+        
+        // Download all specifications
+        function downloadAllSpecs() {
+            const protocols = {{{json protocols}}};
+            const specs = {};
+            
+            protocols.forEach(protocol => {
+                specs[protocol.id] = {
+                    name: protocol.name,
+                    version: protocol.version,
+                    status: protocol.status,
+                    specification: 'See individual protocol files for full specification'
+                };
+            });
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(specs, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "uep-protocols-overview.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + F to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('protocol-search').focus();
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('UEP Protocol Documentation Overview loaded');
+            console.log('Protocols:', {{protocols.length}});
+            console.log('Generated:', '{{generatedAt}}');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+# Docker Compose Override for Development Environment
+# This file is automatically loaded when running docker-compose commands
+# Provides development-specific configurations
+
+version: '3.8'
+
+services:
+  # Factory Core - Development Overrides
+  factory-core:
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    volumes:
+      - ./src:/app/src:ro  # Hot reload source code
+      - ./shared:/app/shared:ro
+    deploy:
+      resources:
+        limits:
+          memory: 1G  # Reduced for development
+          cpus: '0.5'
+
+  # Domain Agents - Development Overrides  
+  domain-agents:
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    volumes:
+      - ./src:/app/src:ro
+      - ./shared:/app/shared:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.3'
+
+  # UEP Registry - Development Overrides
+  uep-registry:
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    volumes:
+      - ./services/uep-registry/src:/app/src:ro
+    ports:
+      - "3001:3001"
+      - "50051:50051"
+
+  # UEP Service - Development Overrides
+  uep-service:
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    volumes:
+      - ./containers/uep-service/src:/app/src:ro
+
+  # NATS Broker - Development Overrides
+  nats-broker:
+    volumes:
+      - ./containers/nats-broker/nats-server.conf:/etc/nats/nats-server.conf:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.2'
+
+  # Redis - Development Overrides
+  redis:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+
+  # etcd - Development Overrides  
+  etcd:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.2'
+
+  # API Gateway - Development Overrides
+  api-gateway:
+    volumes:
+      - ./containers/api-gateway/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./containers/api-gateway/dynamic:/etc/traefik/dynamic:ro
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+
+  # Observability - Development Overrides
+  observability:
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Simple password for dev
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.3'
+
+  # Development Database (Optional)
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: meta-agent-postgres-dev
+    environment:
+      - POSTGRES_DB=meta_agent_factory_dev
+      - POSTGRES_USER=developer
+      - POSTGRES_PASSWORD=dev_password
+    ports:
+      - "5432:5432"  
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - meta-agent-factory
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
+    driver: local

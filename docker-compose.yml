@@ -1,6 +1,12 @@
 version: '3.8'
 
+# All-Purpose Meta-Agent Factory - Production Docker Compose Configuration
+# Complete orchestration with proper service dependencies, health checks, and monitoring
+# Usage: docker-compose up -d
+# Dashboard: http://localhost:3000/admin/observability
+
 services:
+  # API Gateway - Traefik
   # API Gateway - Traefik
   api-gateway:
     build:
@@ -13,16 +19,36 @@ services:
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./data/traefik/acme.json:/acme.json
+      - traefik_data:/data
+      - ./containers/api-gateway/traefik.yml:/etc/traefik/traefik.yml:ro
     networks:
       - meta-agent-factory
     depends_on:
-      - factory-core
-      - domain-agents
-      - uep-service
-      - nats-broker
-      - observability
+      factory-core:
+        condition: service_healthy
+      domain-agents:
+        condition: service_healthy
+      uep-service:
+        condition: service_healthy
+      uep-registry:
+        condition: service_healthy
+      observability:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)"
@@ -42,15 +68,36 @@ services:
       - JWT_SECRET=${JWT_SECRET:-factory-core-secret}
       - REDIS_URL=redis://redis:6379
       - NATS_URL=nats://nats-broker:4222
+      - UEP_REGISTRY_URL=http://uep-registry:3001
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./data/factory-core:/app/data
       - ./logs:/app/logs
     networks:
       - meta-agent-factory
     depends_on:
-      - redis
-      - nats-broker
+      redis:
+        condition: service_healthy
+      nats-broker:
+        condition: service_healthy
+      uep-registry:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.factory.rule=Host(`factory.localhost`)"
@@ -63,25 +110,87 @@ services:
       dockerfile: ./containers/domain-agents/Dockerfile
     container_name: meta-agent-domain-agents
     ports:
-      - "3001:3001"
+      - "3002:3001"
     environment:
       - NODE_ENV=production
       - PORT=3001
       - NATS_URL=nats://nats-broker:4222
       - FACTORY_CORE_URL=http://factory-core:3000
+      - UEP_REGISTRY_URL=http://uep-registry:3001
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./data/domain-agents:/app/data
       - ./logs:/app/logs
     networks:
       - meta-agent-factory
     depends_on:
-      - nats-broker
-      - factory-core
+      nats-broker:
+        condition: service_healthy
+      factory-core:
+        condition: service_healthy
+      uep-registry:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+          cpus: '0.8'
+        reservations:
+          memory: 256M
+          cpus: '0.2'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.agents.rule=Host(`agents.localhost`)"
       - "traefik.http.services.agents.loadbalancer.server.port=3001"
+
+  # UEP Registry Service - Service Discovery and Agent Registration
+  uep-registry:
+    build:
+      context: ./services/uep-registry
+      dockerfile: Dockerfile
+    container_name: meta-agent-uep-registry
+    ports:
+      - "3001:3001"  # HTTP API
+      - "50051:50051"  # gRPC
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - GRPC_PORT=50051
+      - ETCD_ENDPOINTS=etcd:2379
+      - REDIS_URL=redis://redis:6379
+      - NATS_URL=nats://nats-broker:4222
+      - LOG_LEVEL=info
+    volumes:
+      - ./data/uep-registry:/app/data
+      - ./logs:/app/logs
+    networks:
+      - meta-agent-factory
+    depends_on:
+      etcd:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats-broker:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.registry.rule=Host(`registry.localhost`)"
+      - "traefik.http.services.registry.loadbalancer.server.port=3001"
 
   # UEP Service - Universal Execution Protocol
   uep-service:
@@ -97,6 +206,7 @@ services:
       - NATS_URL=nats://nats-broker:4222
       - FACTORY_CORE_URL=http://factory-core:3000
       - DOMAIN_AGENTS_URL=http://domain-agents:3001
+      - UEP_REGISTRY_URL=http://uep-registry:3001
       - UEP_MODE=strict
       - UEP_VALIDATION_ENABLED=true
       - UEP_ENFORCEMENT_ENABLED=true
@@ -106,14 +216,63 @@ services:
     networks:
       - meta-agent-factory
     depends_on:
-      - nats-broker
-      - factory-core
-      - domain-agents
+      uep-registry:
+        condition: service_healthy
+      nats-broker:
+        condition: service_healthy
+      factory-core:
+        condition: service_healthy
+      domain-agents:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.uep.rule=Host(`uep.localhost`)"
       - "traefik.http.services.uep.loadbalancer.server.port=3003"
+
+  # etcd - Distributed Service Registry
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.7
+    container_name: meta-agent-etcd
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    environment:
+      - ETCD_NAME=etcd-main
+      - ETCD_DATA_DIR=/etcd-data
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER=etcd-main=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-1
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_AUTO_COMPACTION_RETENTION=1
+    volumes:
+      - etcd_data:/etcd-data
+    networks:
+      - meta-agent-factory
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
 
   # NATS Broker - JetStream
   nats-broker:
@@ -126,11 +285,25 @@ services:
       - "8222:8222"
       - "6222:6222"
     volumes:
-      - ./data/nats:/data
+      - nats_data:/data
       - ./logs/nats:/logs
     networks:
       - meta-agent-factory
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nats", "server", "check", "jetstream"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
     command: ["nats-server", "-c", "/etc/nats/nats-server.conf"]
 
   # Observability - Prometheus + Grafana
@@ -144,12 +317,29 @@ services:
       - "3004:3000"  # Grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
     volumes:
-      - ./data/prometheus:/prometheus
-      - ./data/grafana:/var/lib/grafana
+      - prometheus_data:/prometheus
+      - grafana_data:/var/lib/grafana
+      - ./containers/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
       - meta-agent-factory
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.metrics.rule=Host(`metrics.localhost`)"
@@ -162,11 +352,25 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ./data/redis:/data
+      - redis_data:/data
     networks:
       - meta-agent-factory
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.3'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
   # Frontend (optional - can be external)
   frontend:
@@ -186,14 +390,64 @@ services:
       - "traefik.http.services.app.loadbalancer.server.port=80"
 
 networks:
+  # Frontend network - Public-facing services
+  frontend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+    labels:
+      - "network.description=Frontend network for public-facing services"
+  
+  # Backend network - Internal service communication
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.2.0/24
+    internal: false  # Allow external access for development
+    labels:
+      - "network.description=Backend network for internal service communication"
+  
+  # Database network - Persistent storage services
+  database:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.3.0/24
+    internal: true  # Isolated database network
+    labels:
+      - "network.description=Database network for persistent storage services"
+  
+  # Monitoring network - Observability and metrics
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.4.0/24
+    labels:
+      - "network.description=Monitoring network for observability services"
+  
+  # Legacy network - Backward compatibility
   meta-agent-factory:
     driver: bridge
     ipam:
       config:
         - subnet: 172.20.0.0/16
+    labels:
+      - "network.description=Legacy network for backward compatibility"
 
 volumes:
+  # Named volumes for persistent data
   prometheus_data:
+    driver: local
   grafana_data:
+    driver: local
   redis_data:
+    driver: local
   nats_data:
+    driver: local
+  etcd_data:
+    driver: local
+  traefik_data:
+    driver: local

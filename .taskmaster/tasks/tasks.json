@@ -220,8 +220,62 @@
           191,
           192
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Service Organization and Dependency Management",
+            "description": "Structure all services into logical groups (infrastructure, meta-agents, domain agents) and configure their dependencies using 'depends_on', health checks, and wait-for scripts to ensure correct startup order.",
+            "dependencies": [],
+            "details": "Identify all required services and group them logically. Define 'depends_on' relationships with condition checks for critical dependencies. Implement health checks and wait-for scripts to guarantee services start in the correct sequence and are ready before dependents initialize.",
+            "status": "done",
+            "testStrategy": "Start the full stack and measure startup timing. Verify all services start in the intended order and are healthy before dependents proceed."
+          },
+          {
+            "id": 2,
+            "title": "Implement Networking Configuration",
+            "description": "Create isolated Docker networks for different service groups, configure DNS-based service discovery, set up port mappings for external access, and assign network aliases as needed.",
+            "dependencies": [
+              "193.1"
+            ],
+            "details": "Define custom networks in the Compose file to isolate service groups. Configure each service to join the appropriate network(s). Set up DNS resolution for inter-service communication, expose only necessary ports to the host, and use network aliases for backward compatibility.",
+            "status": "done",
+            "testStrategy": "Test network connectivity between service groups. Validate that only intended ports are accessible externally and that services can resolve each other by name."
+          },
+          {
+            "id": 3,
+            "title": "Configure Volume Management and Data Persistence",
+            "description": "Set up named volumes for persistent data, bind mounts for development, appropriate access permissions, and tmpfs mounts for sensitive temporary data.",
+            "dependencies": [
+              "193.1"
+            ],
+            "details": "Define named volumes for databases and persistent storage. Use bind mounts for code and configuration in development environments. Set permissions for all mounted volumes and configure tmpfs for sensitive or ephemeral data.",
+            "status": "done",
+            "testStrategy": "Verify data persists across container restarts. Test access permissions and validate that tmpfs mounts are used for temporary data."
+          },
+          {
+            "id": 4,
+            "title": "Establish Environment and Secrets Configuration",
+            "description": "Implement .env file support, create environment variable templates for each service, configure secrets management, and document all configuration options.",
+            "dependencies": [
+              "193.1"
+            ],
+            "details": "Enable .env file loading in Compose. Define environment variable templates for each service, integrate Docker secrets or external secret managers for sensitive data, and provide clear documentation for all configuration options.",
+            "status": "done",
+            "testStrategy": "Test configuration overrides via .env files. Validate secrets are not exposed in logs or environment dumps. Review documentation for completeness."
+          },
+          {
+            "id": 5,
+            "title": "Define Resource Limits, Restart Policies, and Environment-Specific Overrides",
+            "description": "Set CPU and memory limits, configure restart and logging policies, and create separate Compose files for development and production with appropriate overrides.",
+            "dependencies": [
+              "193.1"
+            ],
+            "details": "Specify resource constraints for each service. Define restart policies based on service criticality. Implement logging configuration with size limits. Create override files for development (e.g., hot-reloading, bind mounts) and production (e.g., stricter resource limits, no code mounts).",
+            "status": "done",
+            "testStrategy": "Validate resource limits under load. Test restart and logging behavior. Ensure development and production environments behave as intended with their respective Compose files."
+          }
+        ]
       },
       {
         "id": 194,
@@ -233,8 +287,62 @@
         "dependencies": [
           191
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Select and Configure UEP Message Broker for Containers",
+            "description": "Research, select, and implement NATS (v2.10+) as the message broker for UEP communication within the containerized microservices environment. Ensure high availability, performance, and secure authentication/authorization for service-to-service messaging.",
+            "dependencies": [],
+            "details": "Evaluate NATS features for container orchestration, configure clustering and failover, and integrate with container orchestration platforms (e.g., Kubernetes). Implement secure authentication and authorization mechanisms for all agent communications.",
+            "status": "done",
+            "testStrategy": "Verify broker deployment in a containerized environment, test failover and high availability, and validate secure communication between services using integration and security tests."
+          },
+          {
+            "id": 2,
+            "title": "Develop UEP Protocol Validation Library in TypeScript",
+            "description": "Design and implement a reusable TypeScript library for UEP protocol validation, including JSON Schema validation for all message types, middleware for automatic validation, and support for protocol versioning.",
+            "dependencies": [
+              "194.1"
+            ],
+            "details": "Define UEP message schemas, implement validation logic, and create middleware for both incoming and outgoing messages. Ensure the library supports protocol evolution through versioning.",
+            "status": "done",
+            "testStrategy": "Create unit tests for schema validation, test middleware integration in sample services, and verify correct handling of protocol version changes."
+          },
+          {
+            "id": 3,
+            "title": "Implement Agent Communication Patterns Using UEP",
+            "description": "Establish standardized agent communication patterns using UEP, including request-reply for synchronous operations, publish-subscribe for events, queue-based workload distribution, and circuit breaker mechanisms for resilience.",
+            "dependencies": [
+              "194.2"
+            ],
+            "details": "Develop reusable components for each communication pattern, integrate with the UEP validation library, and ensure compatibility with the selected message broker.",
+            "status": "done",
+            "testStrategy": "Write integration tests for each pattern, simulate failure scenarios to test circuit breakers, and validate correct message routing and delivery."
+          },
+          {
+            "id": 4,
+            "title": "Integrate UEP with Service Discovery and Capability Advertising",
+            "description": "Link UEP endpoints with the service registry to enable dynamic discovery of UEP-capable services and advertise agent capabilities through service metadata.",
+            "dependencies": [
+              "194.3"
+            ],
+            "details": "Implement service registration and discovery logic, update service metadata with UEP capabilities, and ensure seamless integration with container orchestration service registries.",
+            "status": "done",
+            "testStrategy": "Test dynamic discovery of services, verify correct metadata propagation, and validate that only UEP-compliant services are discoverable."
+          },
+          {
+            "id": 5,
+            "title": "Implement Monitoring, Debugging, and Resilience for UEP Communication",
+            "description": "Set up distributed tracing (using OpenTelemetry), logging middleware, metrics collection, retry mechanisms, dead-letter queues, and circuit breakers to monitor, debug, and enhance the resilience of UEP communication.",
+            "dependencies": [
+              "194.4"
+            ],
+            "details": "Integrate tracing and logging into all UEP communication paths, collect protocol usage and performance metrics, and implement robust error handling and recovery strategies.",
+            "status": "done",
+            "testStrategy": "Perform end-to-end tracing and logging tests, simulate message failures to test retries and dead-letter queues, and measure protocol performance under load."
+          }
+        ]
       },
       {
         "id": 195,
@@ -457,8 +565,62 @@
           200,
           201
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Develop UEP Protocol Client Libraries and TypeScript Interfaces",
+            "description": "Create UEP protocol client libraries with strict TypeScript 5.2+ interfaces for request/response patterns, ensuring OpenAPI 3.1 schema validation and compatibility with UEP protocol requirements.",
+            "dependencies": [],
+            "details": "Implement reusable TypeScript modules that define UEP-compliant request and response interfaces, leveraging OpenAPI 3.1 schemas for validation. Ensure the library supports extension for Python and Go templates if needed.",
+            "status": "done",
+            "testStrategy": "Write unit tests for all TypeScript interfaces and schema validation logic. Validate compliance with UEP protocol specifications using automated schema checks."
+          },
+          {
+            "id": 2,
+            "title": "Implement Decorator and Wrapper Patterns for Agent Capabilities",
+            "description": "Design and implement decorator/wrapper patterns that expose agent capabilities through UEP-compliant interfaces, supporting both synchronous and asynchronous agent logic.",
+            "dependencies": [
+              "202.1"
+            ],
+            "details": "Provide decorators and wrappers in TypeScript that allow existing agent methods to be annotated as UEP capabilities. Ensure compatibility with the UEP protocol client library and support for schema-based validation.",
+            "status": "done",
+            "testStrategy": "Create unit tests for decorator logic, verifying correct exposure of agent capabilities and schema enforcement. Test with sample agent methods to ensure seamless integration."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Automatic UEP Registry and Service Discovery",
+            "description": "Develop mechanisms for automatic registration of agents and their capabilities with the UEP registry, enabling service discovery and capability advertisement.",
+            "dependencies": [
+              "202.2"
+            ],
+            "details": "Implement registry integration logic that registers agent metadata and capabilities at startup, updates on changes, and deregisters on shutdown. Ensure compatibility with UEP registry APIs and support for dynamic updates.",
+            "status": "done",
+            "testStrategy": "Write integration tests that verify agent registration, capability discovery, and deregistration flows with a mock or real UEP registry."
+          },
+          {
+            "id": 4,
+            "title": "Provide Health Check Endpoints for UEP Compliance Validation",
+            "description": "Add standardized health check endpoints to each template that validate UEP protocol compliance and agent readiness, including schema and registry checks.",
+            "dependencies": [
+              "202.3"
+            ],
+            "details": "Implement HTTP endpoints (e.g., /health, /uep/validate) that perform runtime checks for protocol compliance, schema validity, and registry status. Ensure endpoints are compatible with container orchestration health probes.",
+            "status": "done",
+            "testStrategy": "Develop automated tests that simulate health check requests and validate correct status reporting under normal and failure conditions."
+          },
+          {
+            "id": 5,
+            "title": "Standardize Error Handling for UEP Protocol Violations",
+            "description": "Implement a unified error handling strategy for UEP protocol violations, ensuring consistent error responses and logging across all templates.",
+            "dependencies": [
+              "202.4"
+            ],
+            "details": "Define error response formats and middleware for capturing, logging, and returning protocol violations. Ensure errors are compliant with UEP specifications and easily consumable by clients and monitoring systems.",
+            "status": "done",
+            "testStrategy": "Write unit and integration tests that trigger protocol violations and verify standardized error responses and logging behavior."
+          }
+        ]
       },
       {
         "id": 203,
@@ -470,8 +632,62 @@
         "dependencies": [
           200
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Middleware Architecture and Sidecar Pattern",
+            "description": "Define the overall architecture for the UEP validation middleware, ensuring it is reusable and can be deployed as a sidecar alongside any agent container. Specify integration points for Express.js, Fastify, and NestJS frameworks.",
+            "dependencies": [],
+            "details": "Document the middleware's interfaces, lifecycle, and configuration options. Ensure the design supports seamless attachment to agent containers and accommodates framework-specific hooks.",
+            "status": "done",
+            "testStrategy": "Review architecture with stakeholders. Validate sidecar deployment in containerized environments for each supported framework."
+          },
+          {
+            "id": 2,
+            "title": "Implement OpenAPI 3.1 Schema Validation Integration",
+            "description": "Develop the core validation logic that leverages OpenAPI 3.1 schemas to validate incoming requests and outgoing responses against UEP protocol specifications.",
+            "dependencies": [
+              "203.1"
+            ],
+            "details": "Integrate schema loading, parsing, and validation mechanisms. Ensure compatibility with Fastify's built-in schema validation and provide adapters for Express.js and NestJS.",
+            "status": "done",
+            "testStrategy": "Create unit tests for schema validation with valid and invalid payloads. Verify correct error reporting for protocol violations."
+          },
+          {
+            "id": 3,
+            "title": "Develop Protocol Violation Logging and Distributed Tracing",
+            "description": "Implement automatic logging of protocol violations and integrate distributed tracing using OpenTelemetry 1.15+ for comprehensive audit trails.",
+            "dependencies": [
+              "203.2"
+            ],
+            "details": "Configure structured logging for all validation failures. Set up OpenTelemetry instrumentation to capture trace data for each request and violation event.",
+            "status": "done",
+            "testStrategy": "Simulate protocol violations and verify logs and traces are generated and exported correctly. Check trace correlation across services."
+          },
+          {
+            "id": 4,
+            "title": "Optimize Validation Performance with Schema Caching",
+            "description": "Implement caching mechanisms for validation schemas to minimize performance overhead and reduce schema fetch latency.",
+            "dependencies": [
+              "203.2"
+            ],
+            "details": "Design and implement an in-memory or distributed cache for OpenAPI schemas. Ensure cache invalidation and refresh strategies are robust.",
+            "status": "done",
+            "testStrategy": "Benchmark validation latency with and without caching. Test cache hit/miss scenarios and schema updates."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Circuit Breaker for Graceful Failure Handling",
+            "description": "Add circuit breaker functionality to the middleware to handle repeated validation or schema registry failures gracefully.",
+            "dependencies": [
+              "203.2"
+            ],
+            "details": "Use Fastify's circuit breaker plugin and provide equivalent logic for Express.js and NestJS. Configure thresholds, timeouts, and fallback behaviors.",
+            "status": "done",
+            "testStrategy": "Simulate schema registry outages and repeated failures. Verify circuit breaker trips, recovers, and logs events as expected."
+          }
+        ]
       },
       {
         "id": 204,
@@ -484,8 +700,64 @@
           200,
           201
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up NestJS project with etcd integration",
+            "description": "Initialize a NestJS project with TypeScript and integrate etcd client for the distributed key-value store. Configure the project structure and establish connection to etcd for registry data storage.",
+            "dependencies": [],
+            "details": "1. Create a new NestJS project using the CLI: `nest new uep-service-registry`\n2. Install required dependencies: `npm install @nestjs/microservices etcd3 grpc @grpc/proto-loader google-protobuf`\n3. Set up TypeScript configuration with strict type checking\n4. Create an EtcdService module that handles connection to etcd cluster\n5. Implement connection pooling and retry logic for etcd client\n6. Create configuration service for environment-based settings\n7. Define the data models matching the required registry data structure\n8. Implement basic CRUD operations for the registry data in the etcd service",
+            "status": "done",
+            "testStrategy": "Write unit tests for the etcd service with mocked etcd responses. Test connection handling, retry logic, and basic CRUD operations. Use Jest for testing and implement integration tests with a real etcd instance in a Docker container."
+          },
+          {
+            "id": 2,
+            "title": "Implement agent registration and deregistration system",
+            "description": "Create the system for automatic agent registration on container startup and deregistration when agents become unhealthy or are stopped. Implement the health checking mechanism.",
+            "dependencies": [
+              "204.1"
+            ],
+            "details": "1. Create an AgentRegistryService that handles agent registration and deregistration\n2. Implement REST endpoints for manual agent registration and deregistration\n3. Create a container startup hook that automatically registers agents\n4. Implement the health checking system that periodically pings agents\n5. Add automatic deregistration logic for unhealthy agents\n6. Create TTL-based keys in etcd for automatic cleanup of stale registrations\n7. Implement logging for all registration/deregistration events\n8. Add validation for agent registration data according to the schema",
+            "status": "done",
+            "testStrategy": "Test automatic registration with simulated container lifecycle events. Verify health checking by creating mock agents that respond with different health statuses. Test automatic deregistration by simulating unhealthy agents and container shutdowns. Validate TTL-based cleanup with time-accelerated tests."
+          },
+          {
+            "id": 3,
+            "title": "Develop capability discovery API with filtering",
+            "description": "Implement the API endpoints for discovering agents based on their capabilities, with filtering by agent type and specific capabilities. Include UEP protocol version compatibility checking.",
+            "dependencies": [
+              "204.1",
+              "204.2"
+            ],
+            "details": "1. Define Protocol Buffers for the discovery API service\n2. Implement gRPC service for high-performance registry queries\n3. Create REST API endpoints that wrap the gRPC service for broader compatibility\n4. Implement filtering logic for agent type and capabilities\n5. Add UEP protocol version compatibility checking\n6. Create query optimization for frequently used filters\n7. Implement response caching for improved performance\n8. Add pagination support for large result sets\n9. Create detailed documentation for the API endpoints",
+            "status": "done",
+            "testStrategy": "Benchmark API performance under high load with hundreds of agent registrations. Test filtering accuracy with various query combinations. Verify version compatibility checking with agents reporting different UEP protocol versions. Test pagination with large datasets. Validate cache hit rates and response times."
+          },
+          {
+            "id": 4,
+            "title": "Implement real-time updates with watch API",
+            "description": "Create a watch API that provides real-time updates on agent availability and capability changes, allowing clients to subscribe to registry changes.",
+            "dependencies": [
+              "204.3"
+            ],
+            "details": "1. Leverage etcd's watch functionality to monitor key changes\n2. Implement a WebSocket server for real-time client notifications\n3. Create a gRPC streaming endpoint for watch functionality\n4. Develop filtering options for watch subscriptions\n5. Implement connection management for long-lived watch connections\n6. Add reconnection logic for clients\n7. Create rate limiting to prevent overwhelming clients\n8. Implement event batching for high-frequency updates\n9. Add authentication and authorization for watch subscriptions",
+            "status": "done",
+            "testStrategy": "Test watch API with simulated registry changes at various frequencies. Verify correct event delivery order. Test reconnection scenarios by intentionally breaking connections. Measure performance under high update frequency. Test with multiple concurrent watchers to ensure scalability."
+          },
+          {
+            "id": 5,
+            "title": "Develop comprehensive registry management UI",
+            "description": "Create a web-based user interface for managing and monitoring the service registry, including visualization of agent relationships, capability browsing, and health status monitoring.",
+            "dependencies": [
+              "204.3",
+              "204.4"
+            ],
+            "details": "1. Set up a React-based frontend with TypeScript\n2. Create dashboard views for registry overview\n3. Implement detailed agent information pages\n4. Add capability browser with filtering options\n5. Create a visual graph of agent relationships and dependencies\n6. Implement real-time updates using the watch API\n7. Add health status monitoring with visual indicators\n8. Create administrative functions for manual registry management\n9. Implement user authentication and role-based access control\n10. Add export functionality for registry data",
+            "status": "done",
+            "testStrategy": "Conduct usability testing with developers who will use the registry. Test UI responsiveness with large datasets. Verify real-time updates appear correctly. Test across different browsers and screen sizes. Validate that administrative functions work correctly with proper permissions."
+          }
+        ]
       },
       {
         "id": 205,
@@ -645,8 +917,64 @@
         "dependencies": [
           210
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Establish Protocol Schema Repository",
+            "description": "Set up a Git-based central repository to store all UEP protocol definitions, supporting both OpenAPI 3.1 and AsyncAPI 2.6 specifications.",
+            "dependencies": [],
+            "details": "Configure repository structure for protocol schemas, enforce contribution guidelines, and integrate tools for schema linting and validation (e.g., Spectral) to ensure consistency across agent interfaces.",
+            "status": "done",
+            "testStrategy": "Verify repository access controls, schema storage, and linting enforcement by submitting sample protocol definitions and checking for correct validation and error reporting."
+          },
+          {
+            "id": 2,
+            "title": "Implement Protocol Compiler for Validation Code Generation",
+            "description": "Develop a tool that generates request/response validation code for TypeScript agents from protocol definitions using JSON Schema (draft 2020-12).",
+            "dependencies": [
+              "211.1"
+            ],
+            "details": "The compiler should parse OpenAPI/AsyncAPI schemas and output TypeScript validation logic, ensuring compatibility with agent runtime environments.",
+            "status": "done",
+            "testStrategy": "Test code generation with various protocol schemas, validate generated code against sample payloads, and ensure correct error handling for invalid data."
+          },
+          {
+            "id": 3,
+            "title": "Design and Enforce Protocol Versioning System",
+            "description": "Create a semantic versioning system (major.minor.patch) for protocol definitions, including rules for backward compatibility and protocol evolution.",
+            "dependencies": [
+              "211.1"
+            ],
+            "details": "Define and document versioning policies, implement tooling to track and enforce version changes, and automate compatibility checks during schema updates.",
+            "status": "done",
+            "testStrategy": "Simulate protocol evolution scenarios, verify version increment logic, and test enforcement of backward compatibility rules with automated checks."
+          },
+          {
+            "id": 4,
+            "title": "Develop Protocol Documentation Generator",
+            "description": "Build an automated documentation generator that produces human-readable documentation from protocol definitions using tools like Redoc or Swagger UI.",
+            "dependencies": [
+              "211.1"
+            ],
+            "details": "Integrate the documentation generator with the schema repository to provide up-to-date, browsable protocol docs for all agent interfaces and versions.",
+            "status": "done",
+            "testStrategy": "Generate documentation from sample protocols, verify accuracy and completeness, and ensure updates are reflected automatically upon schema changes."
+          },
+          {
+            "id": 5,
+            "title": "Integrate and Validate End-to-End Protocol Definition System",
+            "description": "Combine all components into a unified system, ensuring seamless workflow from schema definition to validation code generation, versioning, and documentation.",
+            "dependencies": [
+              "211.2",
+              "211.3",
+              "211.4"
+            ],
+            "details": "Establish CI/CD pipelines for automated testing and deployment, and ensure all agents can consume protocol definitions, validation logic, and documentation as intended.",
+            "status": "done",
+            "testStrategy": "Create comprehensive test suites with valid and invalid protocol examples, verify end-to-end validation, versioning, and documentation flows, and test integration with agent development pipelines."
+          }
+        ]
       },
       {
         "id": 212,
@@ -658,8 +986,62 @@
         "dependencies": [
           211
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Deploy Scalable UEP Message Broker",
+            "description": "Research, select, and configure either NATS JetStream (v2.9+) or Apache Kafka (v3.4+) as the event bus backbone. Ensure support for subject-based routing, high availability, and clustering to enable scalable, asynchronous communication between containerized agents.",
+            "dependencies": [],
+            "details": "Evaluate both NATS JetStream and Kafka for suitability, focusing on deployment complexity, operational efficiency, and support for required messaging patterns. Implement the chosen broker with clustered deployment, configure subject/topic routing, and validate high availability and failover mechanisms.",
+            "status": "done",
+            "testStrategy": "Simulate broker outages and failover scenarios. Perform load testing to verify throughput, latency, and scalability under various agent loads."
+          },
+          {
+            "id": 2,
+            "title": "Implement UEP Message Validation Layer",
+            "description": "Develop a pre-processing hook or interceptor that validates all messages against the UEP protocol before they are accepted by the event bus, ensuring protocol compliance and message integrity.",
+            "dependencies": [
+              "212.1"
+            ],
+            "details": "Integrate message validation logic as a middleware or interceptor in the broker pipeline. Define validation rules based on UEP protocol specifications. Implement dead-letter queue handling for messages that fail validation.",
+            "status": "done",
+            "testStrategy": "Inject malformed and non-compliant messages to verify rejection and correct routing to dead-letter queues. Validate that only protocol-compliant messages are delivered."
+          },
+          {
+            "id": 3,
+            "title": "Define and Enforce UEP Event Schemas",
+            "description": "Create standardized event envelope formats and schemas for all supported coordination patterns, including both synchronous request/response and asynchronous event-based communication.",
+            "dependencies": [
+              "212.2"
+            ],
+            "details": "Design JSON or Protobuf schemas for each event type, including required metadata for tracing and validation. Document schema versions and ensure backward compatibility. Integrate schema enforcement into the validation layer.",
+            "status": "done",
+            "testStrategy": "Test schema validation with various event types and versions. Verify that schema violations are detected and handled appropriately."
+          },
+          {
+            "id": 4,
+            "title": "Integrate Distributed Message Tracing and Observability",
+            "description": "Implement distributed tracing for all message flows using OpenTelemetry, enabling end-to-end visibility and observability across agent interactions.",
+            "dependencies": [
+              "212.3"
+            ],
+            "details": "Instrument the event bus and agent communication paths with OpenTelemetry. Ensure that trace context is propagated in event metadata. Configure tracing backends and dashboards for real-time monitoring.",
+            "status": "done",
+            "testStrategy": "Verify trace propagation across multi-agent workflows. Simulate failures and confirm traceability of message paths and error sources."
+          },
+          {
+            "id": 5,
+            "title": "Implement Reliability Patterns and Failure Handling",
+            "description": "Add support for dead-letter queues, circuit breaker patterns, and the Outbox and Saga patterns to ensure reliable message delivery and robust handling of complex, multi-agent workflows.",
+            "dependencies": [
+              "212.4"
+            ],
+            "details": "Configure dead-letter queues for failed messages. Implement consumer backoff and circuit breaker logic using broker features. Design and document Outbox and Saga pattern implementations for transactional and long-running workflows.",
+            "status": "done",
+            "testStrategy": "Simulate downstream failures and message delivery errors. Test circuit breaker activation and recovery. Validate Outbox and Saga pattern behavior under normal and failure conditions."
+          }
+        ]
       },
       {
         "id": 213,
@@ -1050,7 +1432,7 @@
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-07-28T13:20:30.366Z",
+      "updated": "2025-07-28T18:28:56.436Z",
       "description": "Tasks for master context"
     }
   }
