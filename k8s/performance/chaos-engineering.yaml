@@ -1,0 +1,468 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chaos-engineering
+  labels:
+    istio-injection: enabled
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chaos-mesh
+  namespace: chaos-engineering
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chaos-mesh
+  template:
+    metadata:
+      labels:
+        app: chaos-mesh
+    spec:
+      serviceAccountName: chaos-mesh
+      containers:
+      - name: chaos-daemon
+        image: chaosengineering/chaostoolkit:latest
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 3600"]
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chaos-mesh
+  namespace: chaos-engineering
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: chaos-mesh
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "nodes"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: chaos-mesh
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh
+subjects:
+- kind: ServiceAccount
+  name: chaos-mesh
+  namespace: chaos-engineering
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaos-experiments
+  namespace: chaos-engineering
+data:
+  agent-registry-pod-failure.yaml: |
+    # Pod Failure Experiment for Agent Registry Service
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: pod-failure-experiment
+    data:
+      experiment.json: |
+        {
+          "version": "1.0.0",
+          "title": "Agent Registry Service Pod Failure",
+          "description": "Test system resilience when agent registry pods fail",
+          "tags": ["kubernetes", "pod", "failure"],
+          "configuration": {
+            "namespace": "agent-services"
+          },
+          "steady-state-hypothesis": {
+            "title": "System should remain operational",
+            "probes": [
+              {
+                "name": "agent-registry-health",
+                "type": "probe",
+                "provider": {
+                  "type": "http",
+                  "url": "http://agent-registry-service:3010/health",
+                  "timeout": 10
+                },
+                "tolerance": {
+                  "type": "status",
+                  "status": 200
+                }
+              }
+            ]
+          },
+          "method": [
+            {
+              "type": "action",
+              "name": "kill-agent-registry-pod",
+              "provider": {
+                "type": "python",
+                "module": "chaosk8s.pod.actions",
+                "func": "terminate_pods",
+                "arguments": {
+                  "label_selector": "app=agent-registry-service",
+                  "name_pattern": "agent-registry-.*",
+                  "rand": true,
+                  "ns": "agent-services"
+                }
+              },
+              "pauses": {
+                "after": 30
+              }
+            }
+          ],
+          "rollbacks": []
+        }
+
+  network-latency-experiment.yaml: |
+    # Network Latency Experiment
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: network-latency-experiment
+    data:
+      experiment.json: |
+        {
+          "version": "1.0.0",
+          "title": "Service Mesh Network Latency",
+          "description": "Test system behavior under network latency",
+          "tags": ["istio", "network", "latency"],
+          "configuration": {
+            "namespace": "agent-services"
+          },
+          "steady-state-hypothesis": {
+            "title": "Response times should remain acceptable",
+            "probes": [
+              {
+                "name": "response-time-check",
+                "type": "probe",
+                "provider": {
+                  "type": "http",
+                  "url": "http://api-gateway:80/api/agents",
+                  "timeout": 30
+                },
+                "tolerance": {
+                  "type": "range",
+                  "range": [0, 5000]
+                }
+              }
+            ]
+          },
+          "method": [
+            {
+              "type": "action",
+              "name": "add-network-latency",
+              "provider": {
+                "type": "python",
+                "module": "chaosistio.fault.actions",
+                "func": "add_delay_fault",
+                "arguments": {
+                  "virtual_service_name": "agent-registry-service",
+                  "fixed_delay": "5s",
+                  "percentage": 50,
+                  "ns": "agent-services"
+                }
+              },
+              "pauses": {
+                "after": 60
+              }
+            }
+          ],
+          "rollbacks": [
+            {
+              "type": "action",
+              "name": "remove-network-latency",
+              "provider": {
+                "type": "python",
+                "module": "chaosistio.fault.actions",
+                "func": "remove_delay_fault",
+                "arguments": {
+                  "virtual_service_name": "agent-registry-service",
+                  "ns": "agent-services"
+                }
+              }
+            }
+          ]
+        }
+
+  cpu-stress-experiment.yaml: |
+    # CPU Stress Experiment
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: cpu-stress-experiment
+    data:
+      experiment.json: |
+        {
+          "version": "1.0.0",
+          "title": "CPU Stress Test",
+          "description": "Test system behavior under high CPU load",
+          "tags": ["cpu", "stress", "performance"],
+          "configuration": {
+            "namespace": "agent-services"
+          },
+          "steady-state-hypothesis": {
+            "title": "Services should handle CPU stress",
+            "probes": [
+              {
+                "name": "service-availability",
+                "type": "probe",
+                "provider": {
+                  "type": "http",
+                  "url": "http://backend-agent-service:3020/health",
+                  "timeout": 15
+                },
+                "tolerance": {
+                  "type": "status",
+                  "status": 200
+                }
+              }
+            ]
+          },
+          "method": [
+            {
+              "type": "action",
+              "name": "stress-cpu",
+              "provider": {
+                "type": "python",
+                "module": "chaosk8s.pod.actions",
+                "func": "exec_in_pods",
+                "arguments": {
+                  "label_selector": "app=backend-agent-service",
+                  "command": ["stress", "--cpu", "2", "--timeout", "60s"],
+                  "ns": "agent-services"
+                }
+              },
+              "pauses": {
+                "after": 30
+              }
+            }
+          ]
+        }
+
+  database-connection-experiment.yaml: |
+    # Database Connection Failure Experiment
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: database-connection-experiment
+    data:
+      experiment.json: |
+        {
+          "version": "1.0.0",
+          "title": "Database Connection Failure",
+          "description": "Test system resilience when database connections fail",
+          "tags": ["database", "connection", "failure"],
+          "configuration": {
+            "namespace": "data-services"
+          },
+          "steady-state-hypothesis": {
+            "title": "Services should gracefully handle DB failures",
+            "probes": [
+              {
+                "name": "agent-registry-resilience",
+                "type": "probe",
+                "provider": {
+                  "type": "http",
+                  "url": "http://agent-registry-service:3010/health",
+                  "timeout": 20
+                },
+                "tolerance": {
+                  "type": "status",
+                  "status": [200, 503]
+                }
+              }
+            ]
+          },
+          "method": [
+            {
+              "type": "action",
+              "name": "block-database-traffic",
+              "provider": {
+                "type": "python",
+                "module": "chaosk8s.networking.actions",
+                "func": "create_deny_all_networkpolicy",
+                "arguments": {
+                  "name": "deny-postgres-traffic",
+                  "label_selector": "app=postgres-registry",
+                  "ns": "data-services"
+                }
+              },
+              "pauses": {
+                "after": 45
+              }
+            }
+          ],
+          "rollbacks": [
+            {
+              "type": "action",
+              "name": "restore-database-traffic",
+              "provider": {
+                "type": "python",
+                "module": "chaosk8s.networking.actions",
+                "func": "delete_networkpolicy",
+                "arguments": {
+                  "name": "deny-postgres-traffic",
+                  "ns": "data-services"
+                }
+              }
+            }
+          ]
+        }
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: chaos-experiments-runner
+  namespace: chaos-engineering
+spec:
+  schedule: "0 2 * * 1"  # Every Monday at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: chaos-mesh
+          containers:
+          - name: chaos-runner
+            image: chaosengineering/chaostoolkit:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              # Run pod failure experiment
+              echo "Running Agent Registry Pod Failure Experiment..."
+              chaos run /experiments/agent-registry-pod-failure.yaml
+              
+              # Wait between experiments
+              sleep 300
+              
+              # Run network latency experiment
+              echo "Running Network Latency Experiment..."
+              chaos run /experiments/network-latency-experiment.yaml
+              
+              # Wait between experiments
+              sleep 300
+              
+              # Run CPU stress experiment
+              echo "Running CPU Stress Experiment..."
+              chaos run /experiments/cpu-stress-experiment.yaml
+              
+              echo "All chaos experiments completed."
+            volumeMounts:
+            - name: experiments
+              mountPath: /experiments
+            env:
+            - name: CHAOS_NAMESPACE
+              value: "chaos-engineering"
+          volumes:
+          - name: experiments
+            configMap:
+              name: chaos-experiments
+          restartPolicy: OnFailure
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: manual-chaos-test
+  namespace: chaos-engineering
+spec:
+  template:
+    spec:
+      serviceAccountName: chaos-mesh
+      containers:
+      - name: chaos-test
+        image: chaosengineering/chaostoolkit:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Manual Chaos Engineering Test"
+          echo "Testing Meta-Agent Factory Resilience..."
+          
+          # Test 1: Pod failure recovery
+          echo "Test 1: Pod Failure Recovery"
+          chaos run /experiments/agent-registry-pod-failure.yaml
+          
+          # Test 2: Network resilience
+          echo "Test 2: Network Latency Resilience"
+          chaos run /experiments/network-latency-experiment.yaml
+          
+          # Test 3: Resource stress
+          echo "Test 3: CPU Stress Resilience"
+          chaos run /experiments/cpu-stress-experiment.yaml
+          
+          # Test 4: Database failures
+          echo "Test 4: Database Connection Resilience"
+          chaos run /experiments/database-connection-experiment.yaml
+          
+          echo "All manual tests completed successfully!"
+        volumeMounts:
+        - name: experiments
+          mountPath: /experiments
+      volumes:
+      - name: experiments
+        configMap:
+          name: chaos-experiments
+      restartPolicy: Never
+  backoffLimit: 1
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaos-test-reports
+  namespace: chaos-engineering
+data:
+  generate-report.sh: |
+    #!/bin/bash
+    
+    # Generate Chaos Engineering Report
+    echo "=== Meta-Agent Factory Chaos Engineering Report ===" > /tmp/chaos-report.md
+    echo "Generated: $(date)" >> /tmp/chaos-report.md
+    echo "" >> /tmp/chaos-report.md
+    
+    # System resilience metrics
+    echo "## System Resilience Metrics" >> /tmp/chaos-report.md
+    echo "- Pod Recovery Time: $(kubectl get events --field-selector reason=Created -o json | jq '.items[0].firstTimestamp')" >> /tmp/chaos-report.md
+    echo "- Service Availability: $(curl -s -o /dev/null -w '%{http_code}' http://agent-registry-service:3010/health)" >> /tmp/chaos-report.md
+    echo "- Network Latency Impact: TBD" >> /tmp/chaos-report.md
+    echo "" >> /tmp/chaos-report.md
+    
+    # Recommendations
+    echo "## Recommendations" >> /tmp/chaos-report.md
+    echo "1. Review circuit breaker configurations" >> /tmp/chaos-report.md
+    echo "2. Increase pod replicas for critical services" >> /tmp/chaos-report.md
+    echo "3. Implement database connection pooling" >> /tmp/chaos-report.md
+    echo "4. Add network retry policies" >> /tmp/chaos-report.md
+    
+    echo "Chaos Engineering Report generated at /tmp/chaos-report.md"

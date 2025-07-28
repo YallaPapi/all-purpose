@@ -1,0 +1,313 @@
+groups:
+- name: meta-agent-factory.alerts
+  rules:
+  # High-level system alerts
+  - alert: MetaAgentFactoryDown
+    expr: up{job="meta-agent-factory"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      component: "{{ $labels.instance }}"
+    annotations:
+      summary: "Meta-Agent Factory service is down"
+      description: "Service {{ $labels.instance }} has been down for more than 1 minute."
+      runbook_url: "https://docs.meta-agent-factory.com/runbooks/service-down"
+
+  - alert: HighErrorRate
+    expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+    for: 2m
+    labels:
+      severity: warning
+      component: "{{ $labels.job }}"
+    annotations:
+      summary: "High error rate detected"
+      description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.job }}"
+
+  - alert: CriticalErrorRate
+    expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.15
+    for: 1m
+    labels:
+      severity: critical
+      component: "{{ $labels.job }}"
+    annotations:
+      summary: "Critical error rate detected"
+      description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.job }}"
+
+  # Response time alerts
+  - alert: HighResponseTime
+    expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+    for: 3m
+    labels:
+      severity: warning
+      component: "{{ $labels.job }}"
+    annotations:
+      summary: "High response time detected"
+      description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}"
+
+  - alert: CriticalResponseTime
+    expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5
+    for: 1m
+    labels:
+      severity: critical
+      component: "{{ $labels.job }}"
+    annotations:
+      summary: "Critical response time detected"
+      description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}"
+
+- name: agent-registry.alerts
+  rules:
+  # Agent Registry specific alerts
+  - alert: AgentRegistryDown
+    expr: up{job="meta-agent-factory", instance=~".*agent-registry.*"} == 0
+    for: 30s
+    labels:
+      severity: critical
+      component: "agent-registry"
+    annotations:
+      summary: "Agent Registry service is down"
+      description: "Agent Registry service is critical for service discovery and coordination"
+
+  - alert: StaleAgentHeartbeats
+    expr: agent_registry_stale_agents > 5
+    for: 2m
+    labels:
+      severity: warning
+      component: "agent-registry"
+    annotations:
+      summary: "Multiple agents have stale heartbeats"
+      description: "{{ $value }} agents have not sent heartbeats recently"
+
+  - alert: AgentRegistrationFailures
+    expr: rate(agent_registry_registration_failures_total[5m]) > 0.1
+    for: 2m
+    labels:
+      severity: warning
+      component: "agent-registry"
+    annotations:
+      summary: "High agent registration failure rate"
+      description: "Agent registration failure rate is {{ $value }} per second"
+
+- name: uep-service.alerts
+  rules:
+  # UEP Service alerts
+  - alert: UEPValidationFailures
+    expr: rate(uep_validation_failures_total[5m]) > 1
+    for: 2m
+    labels:
+      severity: warning
+      component: "uep-service"
+    annotations:
+      summary: "High UEP validation failure rate"
+      description: "UEP validation failure rate is {{ $value }} per second"
+
+  - alert: UEPEnforcementActions
+    expr: rate(uep_enforcement_actions_total{action="block"}[5m]) > 0.5
+    for: 1m
+    labels:
+      severity: warning
+      component: "uep-service"
+    annotations:
+      summary: "High UEP enforcement blocking rate"
+      description: "UEP is blocking {{ $value }} requests per second"
+
+  - alert: UEPCriticalViolations
+    expr: rate(uep_violations_total{severity="critical"}[5m]) > 0.1
+    for: 30s
+    labels:
+      severity: critical
+      component: "uep-service"
+    annotations:
+      summary: "Critical UEP violations detected"
+      description: "Critical UEP violations are occurring at {{ $value }} per second"
+
+- name: database.alerts
+  rules:
+  # Database alerts
+  - alert: DatabaseDown
+    expr: up{job="databases"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      component: "database"
+    annotations:
+      summary: "Database is down"
+      description: "Database {{ $labels.instance }} has been down for more than 1 minute"
+
+  - alert: HighDatabaseConnections
+    expr: postgres_stat_database_numbackends / postgres_settings_max_connections > 0.8
+    for: 2m
+    labels:
+      severity: warning
+      component: "database"
+    annotations:
+      summary: "High database connection usage"
+      description: "Database {{ $labels.instance }} is using {{ $value | humanizePercentage }} of max connections"
+
+  - alert: DatabaseSlowQueries
+    expr: rate(postgres_stat_database_tup_returned[5m]) / rate(postgres_stat_database_tup_fetched[5m]) < 0.1
+    for: 3m
+    labels:
+      severity: warning
+      component: "database"
+    annotations:
+      summary: "Database queries are running slowly"
+      description: "Database {{ $labels.instance }} query efficiency is {{ $value | humanizePercentage }}"
+
+  - alert: RedisDown
+    expr: up{job="redis"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      component: "redis"
+    annotations:
+      summary: "Redis is down"
+      description: "Redis {{ $labels.instance }} has been down for more than 1 minute"
+
+  - alert: RedisHighMemoryUsage
+    expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+    for: 2m
+    labels:
+      severity: warning
+      component: "redis"
+    annotations:
+      summary: "Redis high memory usage"
+      description: "Redis {{ $labels.instance }} memory usage is {{ $value | humanizePercentage }}"
+
+- name: infrastructure.alerts
+  rules:
+  # Infrastructure alerts
+  - alert: HighCPUUsage
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 3m
+    labels:
+      severity: warning
+      component: "infrastructure"
+    annotations:
+      summary: "High CPU usage"
+      description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+  - alert: CriticalCPUUsage
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+    for: 1m
+    labels:
+      severity: critical
+      component: "infrastructure"
+    annotations:
+      summary: "Critical CPU usage"
+      description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+  - alert: HighMemoryUsage
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.85
+    for: 3m
+    labels:
+      severity: warning
+      component: "infrastructure"
+    annotations:
+      summary: "High memory usage"
+      description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+  - alert: CriticalMemoryUsage
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.95
+    for: 1m
+    labels:
+      severity: critical
+      component: "infrastructure"
+    annotations:
+      summary: "Critical memory usage"
+      description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+  - alert: DiskSpaceLow
+    expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) < 0.1
+    for: 5m
+    labels:
+      severity: warning
+      component: "infrastructure"
+    annotations:
+      summary: "Low disk space"
+      description: "Disk space is {{ $value | humanizePercentage }} available on {{ $labels.instance }}:{{ $labels.mountpoint }}"
+
+  - alert: DiskSpaceCritical
+    expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) < 0.05
+    for: 2m
+    labels:
+      severity: critical
+      component: "infrastructure"
+    annotations:
+      summary: "Critical disk space"
+      description: "Disk space is {{ $value | humanizePercentage }} available on {{ $labels.instance }}:{{ $labels.mountpoint }}"
+
+- name: istio.alerts
+  rules:
+  # Istio Service Mesh alerts
+  - alert: IstioHighErrorRate
+    expr: rate(istio_requests_total{response_code!~"2.."}[5m]) / rate(istio_requests_total[5m]) > 0.05
+    for: 2m
+    labels:
+      severity: warning
+      component: "istio"
+    annotations:
+      summary: "High error rate in service mesh"
+      description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.destination_service_name }}"
+
+  - alert: IstioCircuitBreakerOpen
+    expr: istio_request_total{response_flags=~".*UO.*"} > 0
+    for: 1m
+    labels:
+      severity: warning
+      component: "istio"
+    annotations:
+      summary: "Circuit breaker is open"
+      description: "Circuit breaker is open for {{ $labels.destination_service_name }}"
+
+  - alert: IstioHighLatency
+    expr: histogram_quantile(0.99, rate(istio_request_duration_milliseconds_bucket[5m])) > 5000
+    for: 2m
+    labels:
+      severity: warning
+      component: "istio"
+    annotations:
+      summary: "High latency in service mesh"
+      description: "99th percentile latency is {{ $value }}ms for {{ $labels.destination_service_name }}"
+
+- name: business-logic.alerts
+  rules:
+  # Business logic alerts
+  - alert: LowAgentUtilization
+    expr: avg(agent_utilization_percent) < 20
+    for: 10m
+    labels:
+      severity: info
+      component: "business"
+    annotations:
+      summary: "Low agent utilization"
+      description: "Average agent utilization is {{ $value }}% across the factory"
+
+  - alert: HighTaskFailureRate
+    expr: rate(agent_tasks_failed_total[10m]) / rate(agent_tasks_total[10m]) > 0.1
+    for: 5m
+    labels:
+      severity: warning
+      component: "business"
+    annotations:
+      summary: "High task failure rate"
+      description: "Task failure rate is {{ $value | humanizePercentage }}"
+
+  - alert: ProjectGenerationStalled
+    expr: time() - max(agent_last_project_generation_timestamp) > 3600
+    for: 0m
+    labels:
+      severity: warning
+      component: "business"
+    annotations:
+      summary: "Project generation has stalled"
+      description: "No projects have been generated in the last hour"
+
+  - alert: UEPComplianceScore
+    expr: avg(uep_compliance_score) < 0.8
+    for: 5m
+    labels:
+      severity: warning
+      component: "business"
+    annotations:
+      summary: "Low UEP compliance score"
+      description: "Average UEP compliance score is {{ $value }}"

@@ -1,0 +1,294 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    istio-injection: enabled
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger
+  namespace: observability
+  labels:
+    app: jaeger
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/component: all-in-one
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger
+  template:
+    metadata:
+      labels:
+        app: jaeger
+        app.kubernetes.io/name: jaeger
+        app.kubernetes.io/component: all-in-one
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "14269"
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: jaeger
+        image: jaegertracing/all-in-one:1.50
+        args:
+        - --memory.max-traces=50000
+        - --query.base-path=/jaeger
+        - --prometheus.server-url=http://prometheus:9090
+        - --prometheus.query.support-spanmetrics-connector=true
+        - --prometheus.query.namespace=istio-system
+        - --prometheus.query.duration-unit=ms
+        - --prometheus.query.normalize-calls=true
+        - --prometheus.query.normalize-duration=true
+        ports:
+        - containerPort: 5775
+          protocol: UDP
+        - containerPort: 6831
+          protocol: UDP
+        - containerPort: 6832
+          protocol: UDP
+        - containerPort: 5778
+          protocol: TCP
+        - containerPort: 16686
+          protocol: TCP
+          name: http-query
+        - containerPort: 14268
+          protocol: TCP
+          name: http-collector
+        - containerPort: 14250
+          protocol: TCP
+          name: grpc-collector
+        - containerPort: 9411
+          protocol: TCP
+          name: zipkin
+        - containerPort: 14269
+          protocol: TCP
+          name: http-admin
+        env:
+        - name: COLLECTOR_OTLP_ENABLED
+          value: "true"
+        - name: COLLECTOR_ZIPKIN_HOST_PORT
+          value: ":9411"
+        - name: METRICS_STORAGE_TYPE
+          value: prometheus
+        - name: PROMETHEUS_SERVER_URL
+          value: http://prometheus:9090
+        - name: PROMETHEUS_QUERY_SUPPORT_SPANMETRICS_CONNECTOR
+          value: "true"
+        - name: SPAN_STORAGE_TYPE
+          value: memory
+        readinessProbe:
+          httpGet:
+            path: "/"
+            port: 14269
+          initialDelaySeconds: 5
+        livenessProbe:
+          httpGet:
+            path: "/"
+            port: 14269
+          initialDelaySeconds: 10
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-query
+  namespace: observability
+  labels:
+    app: jaeger
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/component: query
+spec:
+  ports:
+  - name: http-query
+    port: 16686
+    protocol: TCP
+    targetPort: 16686
+  selector:
+    app: jaeger
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-collector
+  namespace: observability
+  labels:
+    app: jaeger
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/component: collector
+spec:
+  ports:
+  - name: jaeger-collector-http
+    port: 14268
+    protocol: TCP
+    targetPort: 14268
+  - name: jaeger-collector-grpc
+    port: 14250
+    protocol: TCP
+    targetPort: 14250
+  - name: jaeger-collector-zipkin
+    port: 9411
+    protocol: TCP
+    targetPort: 9411
+  selector:
+    app: jaeger
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-agent
+  namespace: observability
+  labels:
+    app: jaeger
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/component: agent
+spec:
+  ports:
+  - name: agent-zipkin-thrift
+    port: 5775
+    protocol: UDP
+    targetPort: 5775
+  - name: agent-compact
+    port: 6831
+    protocol: UDP
+    targetPort: 6831
+  - name: agent-binary
+    port: 6832
+    protocol: UDP
+    targetPort: 6832
+  - name: agent-configs
+    port: 5778
+    protocol: TCP
+    targetPort: 5778
+  clusterIP: None
+  selector:
+    app: jaeger
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jaeger
+  namespace: observability
+spec:
+  hosts:
+  - jaeger.localhost
+  gateways:
+  - istio-system/meta-agent-factory-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: jaeger-query
+        port:
+          number: 16686
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jaeger-configuration
+  namespace: observability
+data:
+  jaeger-config.yaml: |
+    # Jaeger Configuration for Meta-Agent Factory
+    
+    # Sampling configuration
+    sampling:
+      default_strategy:
+        type: probabilistic
+        param: 0.1  # Sample 10% of traces
+      max_traces_per_second: 1000
+      strategies:
+        - service: "agent-registry-service"
+          type: probabilistic
+          param: 1.0  # Sample 100% for registry service
+        - service: "uep-service"
+          type: probabilistic
+          param: 1.0  # Sample 100% for UEP service
+        - service: "backend-agent-service"
+          type: probabilistic
+          param: 0.5  # Sample 50% for agent services
+        - service: "frontend-agent-service"
+          type: probabilistic
+          param: 0.5
+        - service: "devops-agent-service"
+          type: probabilistic
+          param: 0.5
+    
+    # Storage configuration
+    storage:
+      type: memory
+      memory:
+        max_traces: 50000
+      options:
+        memory.max-traces: 50000
+    
+    # Query configuration
+    query:
+      base-path: /jaeger
+      static_files: /go/jaeger-ui/
+      ui_config: ui-config.json
+    
+    # Collector configuration
+    collector:
+      zipkin:
+        host-port: :9411
+      otlp:
+        grpc:
+          host-port: :14250
+        http:
+          host-port: :14268
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jaeger-ui-configuration
+  namespace: observability
+data:
+  ui-config.json: |
+    {
+      "monitor": {
+        "menuEnabled": true
+      },
+      "dependencies": {
+        "menuEnabled": true
+      },
+      "search": {
+        "maxLookback": {
+          "label": "2 days",
+          "value": "2d"
+        }
+      },
+      "tracking": {
+        "gaID": "UA-000000-2"
+      },
+      "menu": [
+        {
+          "label": "Meta-Agent Factory Docs",
+          "url": "https://docs.meta-agent-factory.com"
+        },
+        {
+          "label": "Grafana Dashboards",
+          "url": "http://grafana:3000"
+        }
+      ]
+    }

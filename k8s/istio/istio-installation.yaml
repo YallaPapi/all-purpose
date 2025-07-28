@@ -1,0 +1,106 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: meta-agent-factory-control-plane
+  namespace: istio-system
+spec:
+  values:
+    global:
+      meshID: meta-agent-factory-mesh
+      network: meta-agent-factory-network
+      hub: docker.io/istio
+      tag: 1.20.0
+    pilot:
+      env:
+        EXTERNAL_ISTIOD: false
+        PILOT_TRACE_SAMPLING: 1.0
+        PILOT_ENABLE_WORKLOAD_ENTRY_AUTOREGISTRATION: true
+    gateways:
+      istio-egressgateway:
+        autoscaleEnabled: false
+      istio-ingressgateway:
+        autoscaleEnabled: false
+  components:
+    pilot:
+      k8s:
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        nodeSelector:
+          kubernetes.io/arch: amd64
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        service:
+          type: LoadBalancer
+          ports:
+          - port: 80
+            targetPort: 8080
+            name: http2
+          - port: 443
+            targetPort: 8443
+            name: https
+          - port: 15021
+            targetPort: 15021
+            name: status-port
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+  meshConfig:
+    accessLogFile: /dev/stdout
+    defaultConfig:
+      gatewayTopology:
+        numTrustedProxies: 2
+      proxyStatsMatcher:
+        inclusionRegexps:
+        - ".*outlier_detection.*"
+        - ".*circuit_breakers.*"
+        - ".*upstream_rq_retry.*"
+        - ".*upstream_rq_pending.*"
+        - ".*_cx_.*"
+        exclusionRegexps:
+        - ".*osconfig.*"
+    extensionProviders:
+    - name: jaeger
+      envoyOtelAls:
+        service: jaeger-collector.observability.svc.cluster.local
+        port: 14250
+    - name: prometheus
+      prometheus:
+        configOverride:
+          metric_relabeling_configs:
+          - source_labels: [__name__]
+            regex: 'istio_.*'
+            target_label: __tmp_istio_metric
+          - source_labels: [__tmp_istio_metric]
+            regex: '.+'
+            target_label: __name__
+            replacement: '${1}'
+    defaultProviders:
+      tracing:
+      - jaeger
+      metrics:
+      - prometheus
+  pilot:
+    env:
+      PILOT_ENABLE_ALPHA_GATEWAY_API: true

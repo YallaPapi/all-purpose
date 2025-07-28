@@ -30,9 +30,17 @@
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "docker:clean": "docker-compose down -v --remove-orphans && docker system prune -f",
-    "mvs:start": "docker-compose up -d api-gateway factory-core domain-agents nats-broker observability",
+    "mvs:start": "docker-compose up -d api-gateway factory-core domain-agents uep-service nats-broker observability",
     "mvs:stop": "docker-compose down",
     "mvs:status": "docker-compose ps",
+    "microservices:start": "docker-compose -f docker-compose-microservices.yml up -d",
+    "microservices:stop": "docker-compose -f docker-compose-microservices.yml down",
+    "microservices:status": "docker-compose -f docker-compose-microservices.yml ps",
+    "microservices:logs": "docker-compose -f docker-compose-microservices.yml logs -f",
+    "microservices:build": "docker-compose -f docker-compose-microservices.yml build",
+    "k8s:deploy": "kubectl apply -f k8s/",
+    "k8s:delete": "kubectl delete -f k8s/",
+    "istio:install": "kubectl apply -f k8s/istio/",
     "health": "curl -f http://localhost:8080/health || exit 1"
   },
   "workspaces": [

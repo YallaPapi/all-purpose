@@ -19,6 +19,7 @@ services:
     depends_on:
       - factory-core
       - domain-agents
+      - uep-service
       - nats-broker
       - observability
     restart: unless-stopped
@@ -82,6 +83,38 @@ services:
       - "traefik.http.routers.agents.rule=Host(`agents.localhost`)"
       - "traefik.http.services.agents.loadbalancer.server.port=3001"
 
+  # UEP Service - Universal Execution Protocol
+  uep-service:
+    build:
+      context: ./containers/uep-service
+      dockerfile: Dockerfile
+    container_name: meta-agent-uep-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - NATS_URL=nats://nats-broker:4222
+      - FACTORY_CORE_URL=http://factory-core:3000
+      - DOMAIN_AGENTS_URL=http://domain-agents:3001
+      - UEP_MODE=strict
+      - UEP_VALIDATION_ENABLED=true
+      - UEP_ENFORCEMENT_ENABLED=true
+    volumes:
+      - ./data/uep-service:/app/data
+      - ./logs:/app/logs
+    networks:
+      - meta-agent-factory
+    depends_on:
+      - nats-broker
+      - factory-core
+      - domain-agents
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.uep.rule=Host(`uep.localhost`)"
+      - "traefik.http.services.uep.loadbalancer.server.port=3003"
+
   # NATS Broker - JetStream
   nats-broker:
     build:
@@ -108,7 +141,7 @@ services:
     container_name: meta-agent-observability
     ports:
       - "9090:9090"  # Prometheus
-      - "3000:3000"  # Grafana (conflicts with factory-core, need to adjust)
+      - "3004:3000"  # Grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
     volumes:

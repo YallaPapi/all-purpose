@@ -10,6 +10,45 @@ http:
           - "X-Auth-Roles"
           - "X-Auth-Permissions"
 
+    # UEP (Universal Execution Protocol) Validation
+    uep-validation:
+      forwardAuth:
+        address: "http://uep-service:3003/api/validate"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "X-UEP-Validated"
+          - "X-UEP-Compliance-Score"
+          - "X-UEP-Enforcement-Actions"
+          - "X-UEP-Violation-Count"
+        authRequestHeaders:
+          - "X-Forwarded-For"
+          - "X-Real-IP"
+          - "X-Request-ID"
+          - "Authorization"
+
+    # UEP Event Validation for meta-agent events
+    uep-event-validation:
+      forwardAuth:
+        address: "http://uep-service:3003/api/events/validate"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "X-UEP-Event-Valid"
+          - "X-UEP-Event-Normalized"
+        authRequestHeaders:
+          - "X-Event-Type"
+          - "X-Event-Source"
+          - "X-Correlation-ID"
+
+    # UEP Agent Wrapping for meta-agent execution
+    uep-agent-wrapping:
+      forwardAuth:
+        address: "http://uep-service:3003/api/agents/wrap"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "X-UEP-Agent-Wrapped"
+          - "X-UEP-Wrapper-Version"
+          - "X-UEP-Monitoring-Level"
+
     # Advanced Rate Limiting
     rate-limit-api:
       rateLimit:
@@ -137,6 +176,21 @@ http:
           cookie:
             name: "agents-session"
 
+    uep-service-enhanced:
+      loadBalancer:
+        servers:
+          - url: "http://uep-service:3003"
+        healthCheck:
+          path: "/health"
+          interval: "15s"
+          timeout: "5s"
+          scheme: "http"
+        sticky:
+          cookie:
+            name: "uep-session"
+            secure: true
+            httpOnly: true
+
     # Weighted routing for A/B testing
     factory-core-ab:
       weighted:
@@ -153,6 +207,7 @@ http:
       service: factory-core-enhanced
       middlewares:
         - auth-factory
+        - uep-validation
         - rate-limit-api
         - security-headers
         - strip-prefix-api
@@ -166,6 +221,7 @@ http:
       service: factory-core-enhanced
       middlewares:
         - auth-factory
+        - uep-validation
         - rate-limit-heavy
         - security-headers
         - buffering
@@ -189,5 +245,41 @@ http:
       middlewares:
         - auth-factory
         - rate-limit-api
+      tls:
+        certResolver: letsencrypt
+
+    # UEP Service Routes
+    uep-validation-api:
+      rule: "Host(`uep.localhost`) || (Host(`factory.localhost`) && PathPrefix(`/uep/api`))"
+      service: uep-service-enhanced
+      middlewares:
+        - auth-factory
+        - rate-limit-api
+        - security-headers
+        - compression
+      tls:
+        certResolver: letsencrypt
+
+    # Meta-agent event validation
+    uep-events:
+      rule: "Host(`events.localhost`) || (PathPrefix(`/api/events`) && Headers(`X-Event-Type`, `.*`))"
+      service: uep-service-enhanced
+      middlewares:
+        - auth-factory
+        - uep-event-validation
+        - rate-limit-api
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+
+    # Meta-agent wrapping
+    uep-agents:
+      rule: "Host(`agents.localhost`) && PathPrefix(`/wrap`) || (PathPrefix(`/api/agents/wrap`))"
+      service: uep-service-enhanced
+      middlewares:
+        - auth-factory
+        - uep-agent-wrapping
+        - rate-limit-api
+        - security-headers
       tls:
         certResolver: letsencrypt
