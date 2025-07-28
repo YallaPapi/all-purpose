@@ -1,0 +1,266 @@
+# Redis Service Registry Docker Compose Configuration
+# Task 191.2: Redis-Based Service Registry with Health Checking
+
+version: '3.8'
+
+# Shared configurations
+x-redis-base: &redis-base
+  restart: unless-stopped
+  networks:
+    - uep-network
+  healthcheck:
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 30s
+
+services:
+  # Development Redis Service Registry (Single Node)
+  redis-registry-dev:
+    <<: *redis-base
+    image: redis:7.2-alpine
+    container_name: redis-registry-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-dev-data:/data
+      - ./redis/redis-dev.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+    profiles:
+      - development
+      - dev
+
+  # Production Redis Service Registry (Cluster Mode)
+  redis-registry-master:
+    <<: *redis-base
+    image: redis:7.2-alpine
+    container_name: redis-registry-master
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-master-data:/data
+      - ./redis/redis-master.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+    profiles:
+      - production
+      - prod
+
+  redis-registry-replica-1:
+    <<: *redis-base
+    image: redis:7.2-alpine
+    container_name: redis-registry-replica-1
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-replica-1-data:/data
+      - ./redis/redis-replica.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-registry-master
+      - REDIS_MASTER_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_MASTER_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - redis-registry-master
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+    profiles:
+      - production
+      - prod
+
+  redis-registry-replica-2:
+    <<: *redis-base
+    image: redis:7.2-alpine
+    container_name: redis-registry-replica-2
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-replica-2-data:/data
+      - ./redis/redis-replica.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-registry-master
+      - REDIS_MASTER_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_MASTER_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - redis-registry-master
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+    profiles:
+      - production
+      - prod
+
+  # Redis Sentinel for High Availability
+  redis-sentinel-1:
+    <<: *redis-base
+    image: redis:7.2-alpine
+    container_name: redis-sentinel-1
+    ports:
+      - "26379:26379"
+    volumes:
+      - redis-sentinel-1-data:/data
+      - ./redis/sentinel.conf:/usr/local/etc/redis/sentinel.conf:ro
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    environment:
+      - REDIS_SENTINEL_PORT=26379
+      - REDIS_MASTER_NAME=uep-registry
+      - REDIS_MASTER_HOST=redis-registry-master
+      - REDIS_MASTER_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - redis-registry-master
+      - redis-registry-replica-1
+      - redis-registry-replica-2
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+    profiles:
+      - production
+      - prod
+
+  redis-sentinel-2:
+    <<: *redis-base
+    image: redis:7.2-alpine
+    container_name: redis-sentinel-2
+    ports:
+      - "26380:26379"
+    volumes:
+      - redis-sentinel-2-data:/data
+      - ./redis/sentinel.conf:/usr/local/etc/redis/sentinel.conf:ro
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    environment:
+      - REDIS_SENTINEL_PORT=26379
+      - REDIS_MASTER_NAME=uep-registry
+      - REDIS_MASTER_HOST=redis-registry-master
+      - REDIS_MASTER_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - redis-registry-master
+      - redis-registry-replica-1
+      - redis-registry-replica-2
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+    profiles:
+      - production
+      - prod
+
+  redis-sentinel-3:
+    <<: *redis-base
+    image: redis:7.2-alpine
+    container_name: redis-sentinel-3
+    ports:
+      - "26381:26379"
+    volumes:
+      - redis-sentinel-3-data:/data
+      - ./redis/sentinel.conf:/usr/local/etc/redis/sentinel.conf:ro
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    environment:
+      - REDIS_SENTINEL_PORT=26379
+      - REDIS_MASTER_NAME=uep-registry
+      - REDIS_MASTER_HOST=redis-registry-master
+      - REDIS_MASTER_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - redis-registry-master
+      - redis-registry-replica-1
+      - redis-registry-replica-2
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+    profiles:
+      - production
+      - prod
+
+  # Registry Health Monitor Service
+  redis-registry-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.registry-monitor
+    container_name: redis-registry-monitor
+    ports:
+      - "8090:8090"
+    environment:
+      - REDIS_HOST=redis-registry-dev
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONITOR_PORT=8090
+      - HEALTH_CHECK_INTERVAL=30000
+      - LOG_LEVEL=info
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - redis-registry-dev
+    networks:
+      - uep-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - development
+      - dev
+      - monitor
+
+  # Test Agent for Registry Validation
+  redis-registry-test-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-agent
+    container_name: redis-registry-test-agent
+    environment:
+      - REDIS_HOST=redis-registry-dev
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - AGENT_TYPE=test-agent
+      - AGENT_ID=test-agent-001
+      - HEALTH_PORT=3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - redis-registry-dev
+    networks:
+      - uep-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+    profiles:
+      - development
+      - dev
+      - test
+
+networks:
+  uep-network:
+    driver: bridge
+    name: uep-network
+    external: true
+
+volumes:
+  # Development volumes
+  redis-dev-data:
+    name: redis-registry-dev-data
+
+  # Production volumes
+  redis-master-data:
+    name: redis-registry-master-data
+  redis-replica-1-data:
+    name: redis-registry-replica-1-data
+  redis-replica-2-data:
+    name: redis-registry-replica-2-data
+
+  # Sentinel volumes
+  redis-sentinel-1-data:
+    name: redis-sentinel-1-data
+  redis-sentinel-2-data:
+    name: redis-sentinel-2-data
+  redis-sentinel-3-data:
+    name: redis-sentinel-3-data

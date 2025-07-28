@@ -1,0 +1,1169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://all-purpose.dev/schemas/agent-registration-v2.0.json",
+  "title": "UEP Agent Registration Data Model",
+  "description": "Complete data model for registering UEP agents with Consul service discovery, supporting containerized microservices architecture.",
+  "version": "2.0.0",
+  "type": "object",
+  "required": [
+    "id",
+    "name", 
+    "version",
+    "agentType",
+    "consul",
+    "uep",
+    "endpoints",
+    "health",
+    "container",
+    "capabilities",
+    "coordination",
+    "security"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+      "minLength": 3,
+      "maxLength": 63,
+      "description": "Unique agent identifier (DNS-compliant, globally unique across all agents)",
+      "examples": [
+        "meta-agent-factory",
+        "infra-orchestrator",
+        "backend-agent-001"
+      ]
+    },
+    
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Human-readable agent name for display and logging",
+      "examples": [
+        "Meta-Agent Factory",
+        "Infrastructure Orchestrator",
+        "Backend Development Agent"
+      ]
+    },
+    
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      "description": "Semantic version following semver specification",
+      "examples": ["1.0.0", "2.1.3-beta.1", "3.0.0-rc.1+build.123"]
+    },
+    
+    "agentType": {
+      "type": "string",
+      "enum": [
+        "meta-agent",
+        "domain-agent", 
+        "infrastructure-service",
+        "coordination-service",
+        "validation-service"
+      ],
+      "description": "Category of agent for organizational and routing purposes"
+    },
+    
+    "consul": {
+      "type": "object",
+      "description": "Consul-specific registration configuration",
+      "required": ["serviceName", "tags", "meta", "check"],
+      "properties": {
+        "serviceName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+          "description": "Service name in Consul (must be DNS-compliant)",
+          "examples": ["meta-agent-factory", "backend-agent"]
+        },
+        
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*$"
+          },
+          "uniqueItems": true,
+          "minItems": 2,
+          "description": "Tags for service discovery and filtering",
+          "examples": [
+            ["uep", "meta-agent", "v2.0", "production"],
+            ["uep", "domain-agent", "backend", "containerized"]
+          ]
+        },
+        
+        "meta": {
+          "type": "object",
+          "description": "Metadata for Consul service registration",
+          "required": ["uep_version", "uep_capabilities", "environment"],
+          "properties": {
+            "uep_version": {
+              "type": "string",
+              "pattern": "^[0-9]+\\.[0-9]+$",
+              "description": "Active UEP protocol version",
+              "examples": ["2.0", "1.5"]
+            },
+            "uep_capabilities": {
+              "type": "string",
+              "description": "Comma-separated list of agent capabilities",
+              "examples": [
+                "coordination,scaffolding,validation",
+                "backend-development,api-generation,testing"
+              ]
+            },
+            "environment": {
+              "type": "string",
+              "enum": ["development", "staging", "production"],
+              "description": "Deployment environment"
+            },
+            "load_balancing": {
+              "type": "string",
+              "enum": ["round-robin", "weighted", "least-connections", "random", "consistent-hash"],
+              "default": "round-robin",
+              "description": "Preferred load balancing strategy"
+            },
+            "namespace": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+              "description": "Kubernetes namespace (for containerized deployments)"
+            },
+            "cluster_role": {
+              "type": "string",
+              "enum": ["primary", "secondary", "follower"],
+              "description": "Role in multi-instance deployments"
+            }
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        
+        "check": {
+          "type": "object",
+          "description": "Health check configuration for Consul",
+          "required": ["http", "interval", "timeout"],
+          "properties": {
+            "http": {
+              "type": "string",
+              "format": "uri",
+              "description": "HTTP health check endpoint URL"
+            },
+            "interval": {
+              "type": "string",
+              "pattern": "^[0-9]+[smh]$",
+              "default": "30s",
+              "description": "Health check interval (e.g., '30s', '1m', '5m')"
+            },
+            "timeout": {
+              "type": "string", 
+              "pattern": "^[0-9]+[smh]$",
+              "default": "10s",
+              "description": "Health check timeout (e.g., '10s', '30s')"
+            },
+            "deregister_critical_service_after": {
+              "type": "string",
+              "pattern": "^[0-9]+[smh]$",
+              "default": "10m",
+              "description": "Time after which critical services are deregistered"
+            },
+            "tls_skip_verify": {
+              "type": "boolean",
+              "default": false,
+              "description": "Skip TLS certificate verification for health checks"
+            }
+          }
+        },
+        
+        "weights": {
+          "type": "object",
+          "description": "Service weights for load balancing",
+          "properties": {
+            "passing": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 65535,
+              "default": 1,
+              "description": "Weight when all health checks are passing"
+            },
+            "warning": {
+              "type": "integer", 
+              "minimum": 0,
+              "maximum": 65535,
+              "default": 1,
+              "description": "Weight when health checks are in warning state"
+            }
+          }
+        }
+      }
+    },
+    
+    "uep": {
+      "type": "object",
+      "description": "UEP protocol-specific configuration",
+      "required": ["supportedVersions", "activeVersion", "protocolCapabilities"],
+      "properties": {
+        "supportedVersions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+$"
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "List of supported UEP protocol versions",
+          "examples": [["2.0", "1.5"], ["2.0"]]
+        },
+        
+        "activeVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "Current active UEP protocol version"
+        },
+        
+        "protocolCapabilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "version", "messageTypes", "performance"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*[a-z0-9]$",
+                "description": "Unique capability identifier"
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-readable capability name"
+              },
+              "version": {
+                "type": "string",
+                "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+                "description": "Capability implementation version"
+              },
+              "messageTypes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["task", "command", "query", "event", "validation", "coordination"]
+                },
+                "minItems": 1,
+                "uniqueItems": true,
+                "description": "UEP message types supported by this capability"
+              },
+              "performance": {
+                "type": "object",
+                "required": ["maxThroughput", "averageLatency", "maxConcurrency"],
+                "properties": {
+                  "maxThroughput": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Maximum requests per second"
+                  },
+                  "averageLatency": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Average response time in milliseconds"
+                  },
+                  "maxConcurrency": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Maximum concurrent requests"
+                  }
+                }
+              },
+              "validationRules": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["ruleId", "mandatory"],
+                  "properties": {
+                    "ruleId": {
+                      "type": "string",
+                      "description": "Validation rule identifier"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Human-readable rule description"
+                    },
+                    "mandatory": {
+                      "type": "boolean",
+                      "description": "Whether this validation rule is required"
+                    },
+                    "parameters": {
+                      "type": "object",
+                      "description": "Rule-specific parameters"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        
+        "communicationPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["request-response", "publish-subscribe", "streaming", "event-driven"]
+          },
+          "uniqueItems": true,
+          "default": ["request-response"],
+          "description": "Supported communication patterns"
+        }
+      }
+    },
+    
+    "endpoints": {
+      "type": "object",
+      "description": "Network endpoints for agent communication",
+      "required": ["api", "health"],
+      "properties": {
+        "api": {
+          "type": "string",
+          "format": "uri",
+          "description": "Main API endpoint for agent interactions",
+          "examples": ["http://localhost:3000", "https://agent.service.consul:3000"]
+        },
+        "health": {
+          "type": "string",
+          "format": "uri",
+          "description": "Health check endpoint for monitoring",
+          "examples": ["http://localhost:3000/health", "https://agent.service.consul:3000/health"]
+        },
+        "metrics": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional metrics endpoint for observability",
+          "examples": ["http://localhost:3000/metrics", "https://agent.service.consul:3000/metrics"]
+        },
+        "admin": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional administrative endpoint for management"
+        },
+        "grpc": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional gRPC endpoint for high-performance communication"
+        }
+      }
+    },
+    
+    "health": {
+      "type": "object",
+      "description": "Health monitoring configuration",
+      "required": ["checkInterval", "timeout", "healthyThreshold", "unhealthyThreshold"],
+      "properties": {
+        "checkInterval": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 300,
+          "default": 30,
+          "description": "Health check interval in seconds"
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60,
+          "default": 10,
+          "description": "Health check timeout in seconds"
+        },
+        "healthyThreshold": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 2,
+          "description": "Number of consecutive successful checks to mark healthy"
+        },
+        "unhealthyThreshold": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10, 
+          "default": 3,
+          "description": "Number of consecutive failed checks to mark unhealthy"
+        },
+        "startupGracePeriod": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600,
+          "default": 60,
+          "description": "Grace period during startup (seconds) before health checks begin"
+        },
+        "customChecks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "config"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Custom health check name"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["tcp", "script", "grpc", "docker"],
+                "description": "Type of custom health check"
+              },
+              "config": {
+                "type": "object",
+                "description": "Type-specific configuration for the health check"
+              }
+            }
+          }
+        }
+      }
+    },
+    
+    "container": {
+      "type": "object",
+      "description": "Container and deployment configuration",
+      "required": ["image", "ports", "resources"],
+      "properties": {
+        "image": {
+          "type": "object",
+          "required": ["repository", "tag"],
+          "properties": {
+            "repository": {
+              "type": "string",
+              "description": "Container image repository",
+              "examples": ["uep/meta-agent-factory", "all-purpose/backend-agent"]
+            },
+            "tag": {
+              "type": "string",
+              "description": "Container image tag",
+              "examples": ["latest", "v2.0.0", "develop"]
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": ["Always", "IfNotPresent", "Never"],
+              "default": "IfNotPresent",
+              "description": "Container image pull policy"
+            }
+          }
+        },
+        
+        "ports": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "containerPort", "protocol"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+                "description": "Port name for reference"
+              },
+              "containerPort": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535,
+                "description": "Port number inside the container"
+              },
+              "protocol": {
+                "type": "string",
+                "enum": ["TCP", "UDP"],
+                "default": "TCP",
+                "description": "Port protocol"
+              },
+              "servicePort": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535,
+                "description": "Port number exposed by the service"
+              }
+            }
+          }
+        },
+        
+        "resources": {
+          "type": "object",
+          "required": ["requests"],
+          "properties": {
+            "requests": {
+              "type": "object",
+              "required": ["memory", "cpu"],
+              "properties": {
+                "memory": {
+                  "type": "string",
+                  "pattern": "^[0-9]+(Mi|Gi|Ki)$",
+                  "description": "Memory request (e.g., '512Mi', '1Gi')"
+                },
+                "cpu": {
+                  "type": "string",
+                  "pattern": "^[0-9]+(m)?$",
+                  "description": "CPU request (e.g., '500m', '1')"
+                }
+              }
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "memory": {
+                  "type": "string",
+                  "pattern": "^[0-9]+(Mi|Gi|Ki)$",
+                  "description": "Memory limit (e.g., '1Gi', '2Gi')"
+                },
+                "cpu": {
+                  "type": "string",
+                  "pattern": "^[0-9]+(m)?$",
+                  "description": "CPU limit (e.g., '1000m', '2')"
+                }
+              }
+            }
+          }
+        },
+        
+        "environment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "value"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]*$",
+                "description": "Environment variable name"
+              },
+              "value": {
+                "type": "string",
+                "description": "Environment variable value"
+              },
+              "valueFrom": {
+                "type": "object",
+                "description": "Source for environment variable value (ConfigMap, Secret, etc.)"
+              }
+            }
+          }
+        },
+        
+        "volumes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "mountPath"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Volume name"
+              },
+              "mountPath": {
+                "type": "string",
+                "description": "Path where volume is mounted in container"
+              },
+              "readOnly": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether volume is read-only"
+              },
+              "source": {
+                "type": "object",
+                "description": "Volume source configuration"
+              }
+            }
+          }
+        }
+      }
+    },
+    
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*[a-z0-9]$"
+      },
+      "uniqueItems": true,
+      "description": "List of capabilities provided by this agent",
+      "examples": [
+        ["agent-coordination", "project-scaffolding", "validation"],
+        ["backend-development", "api-generation", "database-design"]
+      ]
+    },
+    
+    "coordination": {
+      "type": "object",
+      "description": "Agent coordination and dependency configuration",
+      "required": ["loadBalancing", "retryPolicy"],
+      "properties": {
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["agentId", "dependencyType"],
+            "properties": {
+              "agentId": {
+                "type": "string",
+                "description": "ID of the dependent agent"
+              },
+              "dependencyType": {
+                "type": "string",
+                "enum": ["required", "optional", "fallback"],
+                "description": "Type of dependency relationship"
+              },
+              "healthCheckEnabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether to monitor dependency health"
+              },
+              "timeoutMs": {
+                "type": "integer",
+                "minimum": 100,
+                "maximum": 60000,
+                "description": "Timeout for dependency calls in milliseconds"
+              }
+            }
+          }
+        },
+        
+        "loadBalancing": {
+          "type": "string",
+          "enum": ["round-robin", "weighted", "least-connections", "random", "consistent-hash"],
+          "default": "round-robin",
+          "description": "Preferred load balancing strategy"
+        },
+        
+        "retryPolicy": {
+          "type": "object",
+          "required": ["maxAttempts", "baseDelayMs"],
+          "properties": {
+            "maxAttempts": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3,
+              "description": "Maximum retry attempts"
+            },
+            "baseDelayMs": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 10000,
+              "default": 1000,
+              "description": "Base delay between retries in milliseconds"
+            },
+            "maxDelayMs": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 60000,
+              "default": 30000,
+              "description": "Maximum delay between retries"
+            },
+            "backoffMultiplier": {
+              "type": "number",
+              "minimum": 1.0,
+              "maximum": 10.0,
+              "default": 2.0,
+              "description": "Backoff multiplier for exponential backoff"
+            },
+            "retryableErrors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": ["timeout", "connection-refused", "5xx"],
+              "description": "Error types that should trigger retries"
+            }
+          }
+        },
+        
+        "circuitBreaker": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether circuit breaker is enabled"
+            },
+            "failureThreshold": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 5,
+              "description": "Number of failures before opening circuit"
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 300000,
+              "default": 60000,
+              "description": "Circuit breaker timeout in milliseconds"
+            },
+            "resetTimeoutMs": {
+              "type": "integer",
+              "minimum": 5000,
+              "maximum": 600000,
+              "default": 300000,
+              "description": "Time before attempting to close circuit"
+            }
+          }
+        },
+        
+        "rateLimit": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether rate limiting is enabled"
+            },
+            "requestsPerSecond": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "description": "Maximum requests per second"
+            },
+            "burstSize": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "description": "Maximum burst size"
+            },
+            "windowSizeMs": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 60000,
+              "default": 60000,
+              "description": "Rate limit window size in milliseconds"
+            }
+          }
+        }
+      }
+    },
+    
+    "security": {
+      "type": "object",
+      "description": "Security and authentication configuration",
+      "required": ["authMethods"],
+      "properties": {
+        "authMethods": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["jwt", "mutual-tls", "api-key", "oauth2", "none"]
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Supported authentication methods"
+        },
+        
+        "tls": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether TLS is enabled"
+            },
+            "certPath": {
+              "type": "string",
+              "description": "Path to TLS certificate file"
+            },
+            "keyPath": {
+              "type": "string",
+              "description": "Path to TLS private key file"
+            },
+            "caPath": {
+              "type": "string",
+              "description": "Path to CA certificate file"
+            },
+            "verifyClient": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to verify client certificates"
+            }
+          }
+        },
+        
+        "allowedOrigins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "Allowed origins for CORS"
+        },
+        
+        "apiKeyRequired": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether API key authentication is required"
+        },
+        
+        "rbac": {
+          "type": "object",
+          "description": "Role-based access control configuration",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether RBAC is enabled"
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "permissions"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Role name"
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of permissions for this role"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    
+    "observability": {
+      "type": "object",
+      "description": "Monitoring and observability configuration",
+      "properties": {
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether metrics collection is enabled"
+            },
+            "format": {
+              "type": "string",
+              "enum": ["prometheus", "statsd", "opentelemetry"],
+              "default": "prometheus",
+              "description": "Metrics format"
+            },
+            "path": {
+              "type": "string",
+              "default": "/metrics",
+              "description": "Metrics endpoint path"
+            },
+            "interval": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 300,
+              "default": 15,
+              "description": "Metrics collection interval in seconds"
+            }
+          }
+        },
+        
+        "logging": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": ["debug", "info", "warn", "error"],
+              "default": "info",
+              "description": "Logging level"
+            },
+            "format": {
+              "type": "string",
+              "enum": ["json", "text"],
+              "default": "json",
+              "description": "Log format"
+            },
+            "output": {
+              "type": "string",
+              "enum": ["stdout", "stderr", "file"],
+              "default": "stdout",
+              "description": "Log output destination"
+            }
+          }
+        },
+        
+        "tracing": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether distributed tracing is enabled"
+            },
+            "sampler": {
+              "type": "string",
+              "enum": ["always", "never", "probabilistic"],
+              "default": "probabilistic",
+              "description": "Trace sampling strategy"
+            },
+            "samplingRate": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "default": 0.1,
+              "description": "Sampling rate for traces"
+            },
+            "exporter": {
+              "type": "string",
+              "enum": ["jaeger", "zipkin", "otlp"],
+              "description": "Trace exporter type"
+            }
+          }
+        }
+      }
+    },
+    
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata and configuration",
+      "properties": {
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Brief description of the agent's purpose and functionality"
+        },
+        
+        "documentation": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL to agent documentation"
+            },
+            "apiSpec": {
+              "type": "string",
+              "format": "uri", 
+              "description": "URL to OpenAPI/Swagger specification"
+            }
+          }
+        },
+        
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Key-value labels for organization and filtering"
+        },
+        
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional annotations for external tools"
+        },
+        
+        "created": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when registration was created"
+        },
+        
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when registration was last updated"
+        }
+      }
+    }
+  },
+  
+  "definitions": {
+    "ConsulService": {
+      "description": "Consul service registration format",
+      "type": "object",
+      "properties": {
+        "ID": {"type": "string"},
+        "Name": {"type": "string"},
+        "Tags": {"type": "array", "items": {"type": "string"}},
+        "Address": {"type": "string"},
+        "Port": {"type": "integer"},
+        "Meta": {"type": "object"},
+        "Check": {"type": "object"},
+        "Weights": {"type": "object"}
+      }
+    }
+  },
+  
+  "examples": [
+    {
+      "id": "meta-agent-factory",
+      "name": "Meta-Agent Factory",
+      "version": "2.0.0",
+      "agentType": "meta-agent",
+      "consul": {
+        "serviceName": "meta-agent-factory",
+        "tags": ["uep", "meta-agent", "factory", "v2.0", "production"],
+        "meta": {
+          "uep_version": "2.0",
+          "uep_capabilities": "coordination,scaffolding,validation,orchestration",
+          "environment": "production",
+          "load_balancing": "least-connections",
+          "namespace": "uep-system",
+          "cluster_role": "primary"
+        },
+        "check": {
+          "http": "http://meta-agent-factory:3000/health",
+          "interval": "30s",
+          "timeout": "10s",
+          "deregister_critical_service_after": "10m"
+        },
+        "weights": {
+          "passing": 10,
+          "warning": 1
+        }
+      },
+      "uep": {
+        "supportedVersions": ["2.0", "1.5"],
+        "activeVersion": "2.0",
+        "protocolCapabilities": [
+          {
+            "id": "coordination",
+            "name": "Agent Coordination",
+            "version": "2.0.0",
+            "messageTypes": ["task", "command", "coordination"],
+            "performance": {
+              "maxThroughput": 1000,
+              "averageLatency": 50,
+              "maxConcurrency": 100
+            },
+            "validationRules": [
+              {
+                "ruleId": "uep-header-validation",
+                "description": "Validate UEP headers are present",
+                "mandatory": true,
+                "parameters": {"required_headers": ["x-uep-version", "x-uep-agent-id"]}
+              }
+            ]
+          }
+        ],
+        "communicationPatterns": ["request-response", "event-driven"]
+      },
+      "endpoints": {
+        "api": "http://meta-agent-factory:3000",
+        "health": "http://meta-agent-factory:3000/health",
+        "metrics": "http://meta-agent-factory:3000/metrics",
+        "admin": "http://meta-agent-factory:3000/admin"
+      },
+      "health": {
+        "checkInterval": 30,
+        "timeout": 10,
+        "healthyThreshold": 2,
+        "unhealthyThreshold": 3,
+        "startupGracePeriod": 60
+      },
+      "container": {
+        "image": {
+          "repository": "uep/meta-agent-factory",
+          "tag": "v2.0.0",
+          "pullPolicy": "IfNotPresent"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "containerPort": 3000,
+            "protocol": "TCP",
+            "servicePort": 3000
+          },
+          {
+            "name": "grpc",
+            "containerPort": 8502,
+            "protocol": "TCP",
+            "servicePort": 8502
+          }
+        ],
+        "resources": {
+          "requests": {
+            "memory": "512Mi",
+            "cpu": "500m"
+          },
+          "limits": {
+            "memory": "1Gi",
+            "cpu": "1"
+          }
+        },
+        "environment": [
+          {"name": "NODE_ENV", "value": "production"},
+          {"name": "UEP_VERSION", "value": "2.0"},
+          {"name": "LOG_LEVEL", "value": "info"}
+        ]
+      },
+      "capabilities": [
+        "agent-coordination",
+        "project-scaffolding", 
+        "validation",
+        "orchestration"
+      ],
+      "coordination": {
+        "dependencies": [
+          {
+            "agentId": "uep-registry",
+            "dependencyType": "required",
+            "healthCheckEnabled": true,
+            "timeoutMs": 5000
+          }
+        ],
+        "loadBalancing": "least-connections",
+        "retryPolicy": {
+          "maxAttempts": 3,
+          "baseDelayMs": 1000,
+          "maxDelayMs": 30000,
+          "backoffMultiplier": 2.0,
+          "retryableErrors": ["timeout", "connection-refused", "5xx"]
+        },
+        "circuitBreaker": {
+          "enabled": true,
+          "failureThreshold": 5,
+          "timeoutMs": 60000,
+          "resetTimeoutMs": 300000
+        }
+      },
+      "security": {
+        "authMethods": ["jwt", "api-key"],
+        "tls": {
+          "enabled": true,
+          "verifyClient": false
+        },
+        "apiKeyRequired": false
+      },
+      "observability": {
+        "metrics": {
+          "enabled": true,
+          "format": "prometheus",
+          "path": "/metrics",
+          "interval": 15
+        },
+        "logging": {
+          "level": "info",
+          "format": "json",
+          "output": "stdout"
+        },
+        "tracing": {
+          "enabled": true,
+          "sampler": "probabilistic",
+          "samplingRate": 0.1,
+          "exporter": "jaeger"
+        }
+      },
+      "metadata": {
+        "description": "Central coordination agent for the UEP Meta-Agent Factory system",
+        "documentation": {
+          "url": "https://docs.all-purpose.dev/agents/meta-agent-factory",
+          "apiSpec": "https://api.all-purpose.dev/meta-agent-factory/openapi.json"
+        },
+        "labels": {
+          "component": "meta-agent",
+          "tier": "coordination",
+          "critical": "true"
+        },
+        "annotations": {
+          "prometheus.io/scrape": "true",
+          "prometheus.io/port": "3000",
+          "prometheus.io/path": "/metrics"
+        },
+        "created": "2025-01-28T10:00:00Z",
+        "lastUpdated": "2025-01-28T10:00:00Z"
+      }
+    }
+  ]
+}

@@ -1,0 +1,402 @@
+# =============================================================================
+# UEP Meta-Agent Factory - Base Agent .dockerignore Template
+# =============================================================================
+#
+# This file specifies what files and directories should be excluded from the
+# Docker build context to optimize build performance and reduce image size.
+#
+# Template Version: 1.0.0
+# Optimized for: Node.js applications with TypeScript support
+#
+# Usage:
+#   1. Copy this file to your agent directory as ".dockerignore"
+#   2. Customize the exclusions based on your specific agent requirements
+#   3. Ensure sensitive files are properly excluded
+#
+# =============================================================================
+
+# =============================================================================
+# Version Control and Git
+# =============================================================================
+.git
+.gitignore
+.gitkeep
+.gitattributes
+.gitmodules
+**/.git
+**/.gitignore
+
+# =============================================================================
+# Build and Distribution
+# =============================================================================
+dist/
+build/
+out/
+target/
+**/*.tgz
+**/*.tar.gz
+**/*.zip
+*.tar
+*.gz
+
+# =============================================================================
+# Dependencies and Package Managers
+# =============================================================================
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+yarn.lock
+package-lock.json
+.pnpm-debug.log*
+.npmignore
+.yarnrc
+.yarnrc.yml
+.yarn/
+.pnp.*
+
+# =============================================================================
+# Development and Testing
+# =============================================================================
+# Test files and directories
+test/
+tests/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+__tests__/
+__mocks__/
+coverage/
+.nyc_output/
+.coverage/
+jest.config.*
+vitest.config.*
+playwright.config.*
+
+# Development tools
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =============================================================================
+# TypeScript and JavaScript
+# =============================================================================
+# TypeScript build cache
+*.tsbuildinfo
+.tscache/
+
+# ESLint and Prettier
+.eslintrc.*
+.eslintignore
+.prettierrc.*
+.prettierignore
+.stylelintrc.*
+
+# Babel
+.babelrc
+.babelrc.*
+babel.config.*
+
+# =============================================================================
+# Environment and Configuration Files
+# =============================================================================
+# Environment files (CRITICAL: Never include in production images)
+.env
+.env.*
+.environment
+**/.env
+**/.env.*
+
+# Configuration files that shouldn't be in images
+.editorconfig
+.nvmrc
+.node-version
+.tool-versions
+.husky/
+.commitlintrc.*
+.renovaterc.*
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# =============================================================================
+# Logs and Runtime Files
+# =============================================================================
+logs/
+*.log
+log/
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+lib-cov/
+
+# Runtime data
+runtime/
+tmp/
+temp/
+.tmp/
+.temp/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+
+# =============================================================================
+# Documentation and Assets
+# =============================================================================
+# Documentation that's not needed in runtime
+README.md
+readme.md
+README.rst
+readme.rst
+CHANGELOG.md
+changelog.md
+CONTRIBUTING.md
+contributing.md
+LICENSE
+license
+LICENSE.md
+license.md
+NOTICE
+notice
+AUTHORS.md
+authors.md
+MAINTAINERS.md
+maintainers.md
+
+# Development documentation
+docs/
+documentation/
+wiki/
+examples/
+samples/
+demo/
+.storybook/
+
+# =============================================================================
+# Docker and Container Files
+# =============================================================================
+# Docker files that shouldn't be in the build context
+Dockerfile*
+.dockerignore*
+docker-compose*.yml
+docker-compose*.yaml
+.docker/
+kubernetes/
+k8s/
+helm/
+skaffold.yaml
+.skaffold/
+
+# =============================================================================
+# CI/CD and Deployment
+# =============================================================================
+# CI/CD configuration
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+azure-pipelines.yml
+bitbucket-pipelines.yml
+buildspec.yml
+cloudbuild.yaml
+Jenkinsfile
+.jenkins/
+
+# Terraform and infrastructure
+*.tf
+*.tfvars
+*.tfstate*
+.terraform/
+terraform.rc
+
+# Ansible
+*.yml
+*.yaml
+playbook*
+inventory*
+group_vars/
+host_vars/
+roles/
+ansible.cfg
+
+# =============================================================================
+# Security and Secrets
+# =============================================================================
+# Certificate files
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+
+# Security files
+secrets/
+.secrets/
+*.secret
+.gnupg/
+.ssh/
+
+# =============================================================================
+# Database and Storage
+# =============================================================================
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/
+database/
+.db/
+
+# =============================================================================
+# Platform Specific
+# =============================================================================
+# Windows
+desktop.ini
+*.lnk
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon?
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# IDE and Editor Files
+# =============================================================================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+atlassian-ide-plugin.xml
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+.vim/
+.viminfo
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# Monitoring and Profiling
+# =============================================================================
+# Performance profiling
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
+.clinic/
+clinic-*
+
+# =============================================================================
+# Agent-Specific Exclusions (Customize per agent type)
+# =============================================================================
+
+# Generated content that shouldn't be in image
+generated/
+output/
+artifacts/
+
+# Large files that should be downloaded at runtime
+*.zip
+*.tar.gz
+*.tgz
+models/
+training-data/
+datasets/
+
+# Development utilities
+scripts/dev/
+tools/dev/
+utilities/
+
+# =============================================================================
+# Cloud and Deployment Specific
+# =============================================================================
+# AWS
+.aws/
+*.pem
+
+# Google Cloud
+.gcloud/
+*.json
+
+# Azure
+.azure/
+
+# =============================================================================
+# Final Notes
+# =============================================================================
+#
+# Best Practices:
+# 1. Always exclude sensitive files like .env, certificates, keys
+# 2. Exclude development-only files to reduce image size
+# 3. Use specific patterns rather than broad wildcards when possible
+# 4. Regularly review and update exclusions based on project evolution
+# 5. Test build context size with: docker build --no-cache --progress=plain
+#
+# Security Reminders:
+# - Never include secrets, API keys, or sensitive configuration
+# - Exclude private keys, certificates, and authentication files
+# - Review the build context before pushing to registries
+#
+# =============================================================================

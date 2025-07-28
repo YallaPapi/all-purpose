@@ -1,0 +1,262 @@
+version: '3.8'
+
+services:
+  # Primary UEP Event Bus Node
+  uep-event-bus-primary:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uep-event-bus-primary
+    hostname: uep-event-bus-primary
+    ports:
+      - "4222:4222"    # NATS client connections
+      - "8222:8222"    # HTTP monitoring
+      - "6222:6222"    # Cluster routes
+      - "8443:8443"    # HTTPS monitoring
+    environment:
+      - CLUSTER_ADVERTISE=uep-event-bus-primary:6222
+      - NATS_SERVER_NAME=uep-event-bus-primary
+      - UEP_NODE_ID=1
+      - UEP_CLUSTER_ROLE=primary
+    volumes:
+      - uep_jetstream_primary:/data/jetstream
+      - uep_logs_primary:/logs/uep
+      - ./certs:/certs:ro
+    networks:
+      - uep-cluster
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "/scripts/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Secondary UEP Event Bus Node
+  uep-event-bus-secondary:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uep-event-bus-secondary
+    hostname: uep-event-bus-secondary
+    ports:
+      - "4223:4222"    # NATS client connections
+      - "8223:8222"    # HTTP monitoring
+      - "6223:6222"    # Cluster routes
+    environment:
+      - CLUSTER_ADVERTISE=uep-event-bus-secondary:6222
+      - NATS_SERVER_NAME=uep-event-bus-secondary
+      - UEP_NODE_ID=2
+      - UEP_CLUSTER_ROLE=secondary
+    volumes:
+      - uep_jetstream_secondary:/data/jetstream
+      - uep_logs_secondary:/logs/uep
+      - ./certs:/certs:ro
+    networks:
+      - uep-cluster
+    restart: unless-stopped
+    depends_on:
+      - uep-event-bus-primary
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "/scripts/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  # Tertiary UEP Event Bus Node
+  uep-event-bus-tertiary:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uep-event-bus-tertiary
+    hostname: uep-event-bus-tertiary
+    ports:
+      - "4224:4222"    # NATS client connections
+      - "8224:8222"    # HTTP monitoring
+      - "6224:6222"    # Cluster routes
+    environment:
+      - CLUSTER_ADVERTISE=uep-event-bus-tertiary:6222
+      - NATS_SERVER_NAME=uep-event-bus-tertiary
+      - UEP_NODE_ID=3
+      - UEP_CLUSTER_ROLE=tertiary
+    volumes:
+      - uep_jetstream_tertiary:/data/jetstream
+      - uep_logs_tertiary:/logs/uep
+      - ./certs:/certs:ro
+    networks:
+      - uep-cluster
+    restart: unless-stopped
+    depends_on:
+      - uep-event-bus-primary
+      - uep-event-bus-secondary
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "/scripts/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # UEP Protocol Validation Service
+  uep-validation-service:
+    build:
+      context: ../uep-service
+      dockerfile: Dockerfile
+    container_name: uep-validation-service
+    hostname: uep-validation-service
+    ports:
+      - "3001:3000"    # UEP validation API
+    environment:
+      - NATS_URL=nats://uep-event-bus-primary:4222,nats://uep-event-bus-secondary:4222,nats://uep-event-bus-tertiary:4222
+      - UEP_VALIDATION_ENABLED=true
+      - UEP_CIRCUIT_BREAKER_ENABLED=true
+      - UEP_AUDIT_ENABLED=true
+    volumes:
+      - uep_validation_logs:/logs
+    networks:
+      - uep-cluster
+    restart: unless-stopped
+    depends_on:
+      - uep-event-bus-primary
+      - uep-event-bus-secondary
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # UEP Metrics Exporter for Prometheus
+  uep-metrics-exporter:
+    image: natsio/prometheus-nats-exporter:0.12.0
+    container_name: uep-metrics-exporter
+    hostname: uep-metrics-exporter
+    ports:
+      - "7777:7777"    # Prometheus metrics
+    command:
+      - "-varz"
+      - "-connz"
+      - "-routez"
+      - "-subz"
+      - "-jsz=all"
+      - "http://uep-event-bus-primary:8222"
+    networks:
+      - uep-cluster
+    restart: unless-stopped
+    depends_on:
+      - uep-event-bus-primary
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
+
+  # UEP Stream Monitor (for development)
+  uep-stream-monitor:
+    image: nats:2.10-alpine
+    container_name: uep-stream-monitor
+    hostname: uep-stream-monitor
+    command: |
+      sh -c '
+        echo "UEP Stream Monitor - waiting for Event Bus..."
+        sleep 30
+        echo "Starting UEP stream monitoring..."
+        while true; do
+          echo "=== $(date) - UEP Streams Status ==="
+          nats --server=nats://uep-event-bus-primary:4222 stream list || echo "Connection failed"
+          echo "=== UEP Consumers Status ==="
+          nats --server=nats://uep-event-bus-primary:4222 consumer list UEP_PROTOCOL_MESSAGES || echo "No consumers"
+          sleep 60
+        done
+      '
+    networks:
+      - uep-cluster
+    restart: unless-stopped
+    depends_on:
+      - uep-event-bus-primary
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.05'
+    profiles:
+      - debug
+
+# Persistent volumes for UEP Event Bus data
+volumes:
+  uep_jetstream_primary:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/primary/jetstream
+  uep_jetstream_secondary:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/secondary/jetstream
+  uep_jetstream_tertiary:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/tertiary/jetstream
+  uep_logs_primary:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs/primary
+  uep_logs_secondary:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs/secondary
+  uep_logs_tertiary:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs/tertiary
+  uep_validation_logs:
+    driver: local
+
+# UEP Event Bus cluster network
+networks:
+  uep-cluster:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+    labels:
+      - "com.meta-agent-factory.network=uep-cluster"
+      - "com.meta-agent-factory.version=1.0.0"

@@ -1,0 +1,379 @@
+# Istio Service Mesh UEP Validation Policies
+# Implements UEP protocol validation at service-to-service communication level
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: uep-system
+  labels:
+    istio-injection: enabled
+    uep-validation: strict
+
+---
+# UEP Request Authentication Policy
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: uep-jwt-auth
+  namespace: uep-system
+spec:
+  selector:
+    matchLabels:
+      uep-validation: enabled
+  jwtRules:
+  - issuer: "https://uep-auth-service.uep-system.svc.cluster.local"
+    jwksUri: "https://uep-auth-service.uep-system.svc.cluster.local/.well-known/jwks.json"
+    audiences:
+    - "uep-agents"
+    - "uep-services"
+    outputClaimToHeaders:
+    - header: "x-uep-agent-id"
+      claim: "agent_id"
+    - header: "x-uep-agent-type"
+      claim: "agent_type"
+    - header: "x-uep-capabilities"
+      claim: "capabilities"
+
+---
+# UEP Authorization Policy
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: uep-validation-policy
+  namespace: uep-system
+spec:
+  selector:
+    matchLabels:
+      uep-validation: enabled
+  rules:
+  # Allow UEP-compliant requests
+  - from:
+    - source:
+        principals: ["cluster.local/ns/uep-system/sa/uep-agent"]
+    to:
+    - operation:
+        methods: ["POST", "GET", "PUT", "DELETE"]
+    when:
+    - key: request.headers[x-uep-version]
+      values: ["1.0", "1.1", "2.0"]
+    - key: request.headers[x-uep-message-type]
+      values: ["task", "response", "event", "query", "command"]
+    - key: request.headers[x-uep-agent-id]
+      notValues: [""]
+  
+  # Allow health checks without UEP validation
+  - from:
+    - source:
+        principals: ["cluster.local/ns/istio-system/sa/istio-proxy"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/health", "/metrics", "/ready"]
+
+  # Deny all other requests
+  - from:
+    - source: {}
+    to:
+    - operation: {}
+    when:
+    - key: request.headers[x-uep-bypass]
+      notValues: ["admin-override"]
+
+---
+# UEP Validation EnvoyFilter for WASM Plugin
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: uep-validation-filter
+  namespace: uep-system
+spec:
+  workloadSelector:
+    labels:
+      uep-validation: enabled
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.wasm
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+          config:
+            name: "uep_service_validation"
+            root_id: "uep_service_validation_root"
+            configuration:
+              "@type": type.googleapis.com/google.protobuf.StringValue
+              value: |
+                {
+                  "validation_level": "strict",
+                  "service_specific_rules": true,
+                  "circuit_breaker_enabled": true,
+                  "circuit_breaker_threshold": 5,
+                  "circuit_breaker_timeout": 30000,
+                  "inter_service_validation": true,
+                  "protocol_enforcement": {
+                    "require_uep_headers": true,
+                    "validate_message_structure": true,
+                    "enforce_agent_authorization": true,
+                    "validate_payload_size": true,
+                    "max_payload_size": 1048576
+                  },
+                  "logging": {
+                    "level": "info",
+                    "include_headers": true,
+                    "include_body": false
+                  }
+                }
+            vm_config:
+              vm_id: "uep_service_validation_vm"
+              runtime: "envoy.wasm.runtime.v8"
+              code:
+                local:
+                  inline_string: |
+                    class UEPServiceValidationFilter {
+                      constructor(rootContext) {
+                        this.config = JSON.parse(rootContext.getConfiguration());
+                        this.serviceName = this.getMetadata(['cluster_name']) || 'unknown';
+                      }
+
+                      onRequestHeaders() {
+                        // Skip validation for health checks
+                        const path = this.getRequestHeader(':path');
+                        if (this.isHealthCheck(path)) {
+                          return FilterHeadersStatus.Continue;
+                        }
+
+                        const validation = this.validateUEPHeaders();
+                        if (!validation.isValid) {
+                          this.logError(`UEP validation failed: ${validation.error}`);
+                          this.sendLocalResponse(400, validation.error, {}, []);
+                          return FilterHeadersStatus.StopIteration;
+                        }
+
+                        // Check circuit breaker
+                        if (this.isCircuitBreakerOpen()) {
+                          this.sendLocalResponse(503, "Service temporarily unavailable", {}, []);
+                          return FilterHeadersStatus.StopIteration;
+                        }
+
+                        return FilterHeadersStatus.Continue;
+                      }
+
+                      validateUEPHeaders() {
+                        const requiredHeaders = [
+                          'x-uep-version',
+                          'x-uep-agent-id', 
+                          'x-uep-message-type'
+                        ];
+
+                        for (const header of requiredHeaders) {
+                          const value = this.getRequestHeader(header);
+                          if (!value) {
+                            return { isValid: false, error: `Missing header: ${header}` };
+                          }
+                        }
+
+                        // Validate version
+                        const version = this.getRequestHeader('x-uep-version');
+                        if (!['1.0', '1.1', '2.0'].includes(version)) {
+                          return { isValid: false, error: `Unsupported UEP version: ${version}` };
+                        }
+
+                        // Validate agent ID format
+                        const agentId = this.getRequestHeader('x-uep-agent-id');
+                        if (!this.validateAgentId(agentId)) {
+                          return { isValid: false, error: `Invalid agent ID format: ${agentId}` };
+                        }
+
+                        return { isValid: true };
+                      }
+
+                      validateAgentId(agentId) {
+                        return /^[a-zA-Z0-9\-_]+$/.test(agentId) && 
+                               agentId.length >= 3 && 
+                               agentId.length <= 50;
+                      }
+
+                      isHealthCheck(path) {
+                        const healthPaths = ['/health', '/metrics', '/ready', '/live'];
+                        return healthPaths.some(hp => path.startsWith(hp));
+                      }
+
+                      isCircuitBreakerOpen() {
+                        // Simple in-memory circuit breaker state
+                        // In production, this would use shared state
+                        return false;
+                      }
+
+                      logError(message) {
+                        console.log(`[UEP-VALIDATION] ${this.serviceName}: ${message}`);
+                      }
+                    }
+
+---
+# UEP Telemetry Configuration
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: uep-validation-metrics
+  namespace: uep-system
+spec:
+  metrics:
+  - providers:
+    - name: prometheus
+  - overrides:
+    - match:
+        metric: ALL_METRICS
+      tagOverrides:
+        uep_agent_id:
+          value: "%{REQUEST_HEADERS['x-uep-agent-id']:'-'}"
+        uep_message_type:
+          value: "%{REQUEST_HEADERS['x-uep-message-type']:'-'}"
+        uep_version:
+          value: "%{REQUEST_HEADERS['x-uep-version']:'-'}"
+        uep_validation_result:
+          value: "%{RESPONSE_HEADERS['x-uep-validation-result']:'-'}"
+
+---
+# UEP Service Monitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: uep-validation-metrics
+  namespace: uep-system
+  labels:
+    app: uep-validation
+spec:
+  selector:
+    matchLabels:
+      uep-validation: enabled
+  endpoints:
+  - port: http-monitoring
+    path: /stats/prometheus
+    interval: 30s
+    scrapeTimeout: 10s
+
+---
+# UEP Peer Authentication (mTLS)
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: uep-mtls-strict
+  namespace: uep-system
+spec:
+  selector:
+    matchLabels:
+      uep-validation: enabled
+  mtls:
+    mode: STRICT
+
+---
+# UEP Destination Rule for Circuit Breaking
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: uep-circuit-breaker
+  namespace: uep-system
+spec:
+  host: "*.uep-system.svc.cluster.local"
+  trafficPolicy:
+    circuitBreaker:
+      consecutiveGateway5xxErrors: 5
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 30
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 10
+        maxRetries: 3
+        consecutiveGateway5xxErrors: 5
+        idleTimeout: 90s
+        h2UpgradePolicy: UPGRADE
+
+---
+# UEP Gateway for External Traffic
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: uep-gateway
+  namespace: uep-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "uep-api.example.com"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: uep-api-tls-secret
+    hosts:
+    - "uep-api.example.com"
+
+---
+# UEP Virtual Service
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: uep-api-routing
+  namespace: uep-system
+spec:
+  hosts:
+  - "uep-api.example.com"
+  gateways:
+  - uep-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/api/uep/"
+    route:
+    - destination:
+        host: uep-service.uep-system.svc.cluster.local
+        port:
+          number: 3000
+    headers:
+      request:
+        add:
+          x-uep-gateway-timestamp: "%START_TIME%"
+          x-uep-request-id: "%REQ_ID%"
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: gateway-error,connect-failure,refused-stream
+
+  - match:
+    - uri:
+        prefix: "/api/agents/"
+    route:
+    - destination:
+        host: agent-registry.uep-system.svc.cluster.local
+        port:
+          number: 3001
+    headers:
+      request:
+        add:
+          x-uep-gateway-timestamp: "%START_TIME%"
+          x-uep-request-id: "%REQ_ID%"
+    timeout: 30s

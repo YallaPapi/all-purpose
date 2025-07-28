@@ -54,76 +54,89 @@ This document provides a comprehensive plan to resolve the current documentation
 
 ---
 
-## 🎯 **CONSOLIDATION STRATEGY**
+## 🎯 **ZAD-DRIVEN CONSOLIDATION STRATEGY**
 
-### **Target Documentation Structure**
+### **Drastic Documentation Reduction Philosophy**
+**Core Principle**: Eliminate documentation bloat by maintaining only essential, comprehensive ZAD/GigaZAD documents that provide complete context without assumptions.
+
+**Decision Framework**:
+- **ZAD Document**: <2000 lines, complete context for specific topic
+- **GigaZAD Document**: 2000+ lines, comprehensive milestone/system documentation  
+- **Elimination**: Duplicate, outdated, or partial information gets removed entirely
+- **Archive**: Historical value preserved in read-only archive
+
+### **Target Minimal Documentation Structure**
 ```
 docs/
-├── standards/           # Documentation standards and templates
+├── SYSTEM_ARCHITECTURE.md          # GigaZAD: Complete system overview
+├── QUICK_START.md                   # ZAD: Zero-assumption getting started
+├── DEVELOPMENT_GUIDE.md             # ZAD: Complete development workflow
+├── TROUBLESHOOTING.md               # ZAD: Common issues and solutions
+├── standards/                       # Documentation standards only
 │   ├── ZAD_QUICK_REFERENCE.md
 │   ├── ZERO_ASSUMPTION_DOCUMENTATION.md
 │   └── GIGAZAD_REPORTING_GUIDE.md
-├── architecture/        # System architecture documentation
-│   ├── system-overview.md
-│   ├── containerization.md
-│   ├── service-mesh.md
-│   └── uep-protocol.md
-├── guides/             # User and developer guides
-│   ├── quick-start.md
-│   ├── setup/
-│   ├── troubleshooting/
-│   └── development/
-├── reference/          # API docs, command references
-│   ├── api/
-│   ├── commands/
-│   └── configuration/
-├── prds/              # Product Requirements Documents
-│   └── (existing PRDs)
-├── examples/          # Implementation examples
-└── archive/           # Historical documentation (read-only)
+└── prds/                           # Product Requirements Documents
+    └── (active PRDs only)
 
-gigazad-reports/        # Major milestone reports
+gigazad-reports/                     # Milestone documentation
 ├── 2025-01-28-containerization-foundation.md
-└── (future milestone reports)
+└── (future major milestones)
 
-post-work-reports/      # Session-level progress reports
+post-work-reports/                   # Session progress tracking
 ├── 2025-01-28-taskmaster-containerization-session.md
-└── (future session reports)
+└── (session summaries)
+
+archive/                            # Historical documentation (read-only)
+├── docs-consolidated/              # Previous consolidation attempt
+├── docs-archive/                   # Previous archive
+├── scattered-docs/                 # Root-level docs moved here
+└── reference-date-YYYY-MM-DD/     # Timestamped archive sections
 ```
 
-### **Consolidation Principles**
-1. **Single Source of Truth**: Each topic has ONE authoritative location
-2. **Clear Hierarchy**: Logical organization by document type and purpose
-3. **Archive Historical**: Move old/duplicate content to read-only archive
-4. **ZAD Compliance**: All docs follow zero-assumption standards
-5. **Living Documentation**: Current docs stay current, historical preserved
+### **ZAD Consolidation Principles**
+1. **Ruthless Elimination**: If it doesn't provide complete, actionable context, delete it
+2. **Zero Duplication**: Information exists in exactly one authoritative location
+3. **Complete Context**: Each document provides everything needed to understand/act
+4. **Assumption-Free**: Written for readers with no prior project knowledge
+5. **Comprehensive Coverage**: Few documents, but each covers its topic completely
 
 ---
 
-## 📊 **IMPLEMENTATION PLAN**
+## 📊 **ZAD CONSOLIDATION IMPLEMENTATION PLAN**
 
-### **Phase 1: Analysis and Mapping (30 minutes)**
-1. **Inventory Current Content**: Scan all documentation directories for content
-2. **Identify Duplicates**: Find files with identical or overlapping content
-3. **Classify Documents**: Categorize by type (architecture, guides, reference, etc.)
-4. **Map Target Locations**: Assign each document to target location in new structure
+### **Phase 1: Content Analysis & Triage (45 minutes)**
+1. **Inventory All Documentation**: Scan all 8+ directories for content
+2. **Apply ZAD Decision Framework**: Classify each document as ZAD, GigaZAD, Archive, or Delete
+3. **Identify Core Topics**: Determine 4-6 essential topics that need comprehensive coverage
+4. **Content Mapping**: Map scattered information to consolidated ZAD documents
 
-### **Phase 2: Structure Creation (15 minutes)**
-1. **Create Target Directories**: Build the clean documentation structure
-2. **Preserve Existing Standards**: Keep properly organized directories like `docs/standards/`
-3. **Create Archive Space**: Prepare archive directory for historical content
+**ZAD Triage Criteria**:
+- **Keep as ZAD**: Unique, essential information that can be made comprehensive
+- **Merge into GigaZAD**: Complex system information requiring extensive coverage  
+- **Archive**: Historical value but not current operational need
+- **Delete**: Duplicate, partial, or outdated information with no unique value
 
-### **Phase 3: Content Consolidation (45 minutes)**
-1. **Move Current Documents**: Relocate active documents to proper locations
-2. **Merge Duplicates**: Consolidate duplicate content into single authoritative versions
-3. **Archive Historical**: Move outdated/duplicate content to archive
-4. **Update Cross-References**: Fix internal links and references
+### **Phase 2: ZAD Document Creation (60 minutes)**
+1. **Create Core ZAD Documents**: Build 4 comprehensive documents following ZAD principles
+   - `SYSTEM_ARCHITECTURE.md` (GigaZAD): Complete system overview and technical specifications
+   - `QUICK_START.md` (ZAD): Zero-assumption setup and basic usage
+   - `DEVELOPMENT_GUIDE.md` (ZAD): Complete development workflow and processes
+   - `TROUBLESHOOTING.md` (ZAD): Comprehensive problem resolution guide
 
-### **Phase 4: Validation and Cleanup (15 minutes)**
-1. **Verify Structure**: Ensure all documents are properly categorized
-2. **Test Links**: Verify internal references work correctly
-3. **Remove Empty Directories**: Clean up abandoned documentation directories
-4. **Update Root Documentation**: Update README and CLAUDE.md with new structure
+2. **Consolidate Information**: Merge related content from multiple sources into single authoritative documents
+3. **Apply ZAD Standards**: Ensure each document provides complete context without assumptions
+
+### **Phase 3: Archive & Elimination (30 minutes)**
+1. **Mass Archive**: Move all existing documentation directories to timestamped archive
+2. **Preserve Standards**: Keep existing ZAD standards in place
+3. **Clean Root Directory**: Move scattered root-level docs to archive
+4. **Remove Empty Directories**: Delete abandoned documentation directories
+
+### **Phase 4: Validation & Integration (15 minutes)**
+1. **Test Completeness**: Verify each ZAD document provides sufficient context for its purpose
+2. **Update References**: Update CLAUDE.md and README.md with new minimal structure
+3. **Link Validation**: Ensure internal references work in new structure
 
 ---
 

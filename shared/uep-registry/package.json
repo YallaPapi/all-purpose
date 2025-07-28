@@ -1,0 +1,35 @@
+{
+  "name": "@all-purpose/uep-registry",
+  "version": "1.0.0",
+  "description": "UEP Registry Integration for service discovery and agent coordination",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@types/node": "^20.0.0",
+    "@all-purpose/agent-registry": "file:../agent-registry"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "keywords": [
+    "uep",
+    "registry",
+    "service-discovery",
+    "consul",
+    "etcd", 
+    "kubernetes",
+    "agent-coordination"
+  ],
+  "author": "All-Purpose Meta-Agent Factory",
+  "license": "MIT"
+}

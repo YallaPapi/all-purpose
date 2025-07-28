@@ -1,0 +1,518 @@
+# Default values for uep-meta-agent-factory
+# This is a YAML-formatted file.
+
+# Global configuration
+global:
+  # Image configuration
+  imageRegistry: ghcr.io
+  imagePullSecrets: []
+  storageClass: ""
+  
+  # Namespace configuration
+  namespaces:
+    system: uep-system
+    agents: uep-agents
+    monitoring: uep-monitoring
+  
+  # Service discovery configuration
+  serviceDiscovery:
+    type: kubernetes  # kubernetes, redis, consul, hybrid
+    fallback:
+      enabled: true
+      type: redis
+    cache:
+      enabled: true
+      ttl: 300
+  
+  # Network configuration
+  domain: uep-factory.local
+  clusterDomain: cluster.local
+
+# Service registry configuration
+registry:
+  # Redis registry (primary or fallback)
+  redis:
+    enabled: true
+    architecture: standalone
+    auth:
+      enabled: false
+      password: ""
+    master:
+      persistence:
+        enabled: true
+        storageClass: ""
+        size: 8Gi
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 250m
+        limits:
+          memory: 512Mi
+          cpu: 500m
+  
+  # Consul registry (alternative)
+  consul:
+    enabled: false
+    global:
+      datacenter: uep-k8s
+    server:
+      replicas: 3
+      storage: 10Gi
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 250m
+        limits:
+          memory: 512Mi
+          cpu: 500m
+
+# UEP Meta-Agents configuration
+agents:
+  # Common configuration for all agents
+  common:
+    image:
+      registry: ghcr.io/uep-factory
+      pullPolicy: IfNotPresent
+      pullSecrets: []
+    
+    # Resource defaults
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 250m
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+    
+    # Health check defaults
+    healthCheck:
+      enabled: true
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    
+    # Security context
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 2000
+    
+    # Service configuration
+    service:
+      type: ClusterIP
+      annotations: {}
+    
+    # Environment variables
+    env: []
+    envFrom: []
+    
+    # Volume mounts
+    volumeMounts: []
+    volumes: []
+
+  # Factory Core Agent
+  factoryCore:
+    enabled: true
+    name: factory-core
+    replicas: 1
+    image:
+      repository: uep/factory-core
+      tag: "latest"
+    
+    service:
+      port: 3000
+      targetPort: 3000
+    
+    capabilities:
+      - orchestration
+      - coordination
+      - factory-management
+    
+    env:
+      - name: AGENT_TYPE
+        value: factory-core
+      - name: SERVICE_PORT
+        value: "3000"
+    
+    ingress:
+      enabled: true
+      className: nginx
+      hosts:
+        - host: factory.uep-factory.local
+          paths:
+            - path: /
+              pathType: Prefix
+
+  # Infrastructure Orchestrator Agent
+  infraOrchestrator:
+    enabled: true
+    name: infra-orchestrator
+    replicas: 1
+    image:
+      repository: uep/infra-orchestrator
+      tag: "latest"
+    
+    service:
+      port: 3001
+      targetPort: 3001
+    
+    capabilities:
+      - orchestration
+      - infrastructure
+      - project-management
+    
+    persistence:
+      enabled: true
+      storageClass: ""
+      size: 5Gi
+      mountPath: /app/generated
+
+  # PRD Parser Agent
+  prdParser:
+    enabled: true
+    name: prd-parser
+    replicas: 2
+    image:
+      repository: uep/prd-parser
+      tag: "latest"
+    
+    service:
+      port: 3002
+      targetPort: 3002
+    
+    capabilities:
+      - parsing
+      - validation
+      - analysis
+    
+    # Horizontal Pod Autoscaler
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+
+  # Scaffold Generator Agent  
+  scaffoldGenerator:
+    enabled: true
+    name: scaffold-generator
+    replicas: 2
+    image:
+      repository: uep/scaffold-generator
+      tag: "latest"
+    
+    service:
+      port: 3003
+      targetPort: 3003
+    
+    capabilities:
+      - generation
+      - scaffolding
+      - templating
+    
+    persistence:
+      enabled: true
+      storageClass: ""
+      size: 10Gi
+      mountPath: /app/generated
+    
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 8
+      targetCPUUtilizationPercentage: 75
+
+  # Backend Agent
+  backendAgent:
+    enabled: true  
+    name: backend-agent
+    replicas: 1
+    image:
+      repository: uep/backend-agent
+      tag: "latest"
+    
+    service:
+      port: 3004
+      targetPort: 3004
+    
+    capabilities:
+      - backend-development
+      - api-creation
+      - database-integration
+
+  # Frontend Agent
+  frontendAgent:
+    enabled: true
+    name: frontend-agent
+    replicas: 1
+    image:
+      repository: uep/frontend-agent
+      tag: "latest"
+    
+    service:
+      port: 3005
+      targetPort: 3005
+    
+    capabilities:
+      - frontend-development
+      - ui-creation
+      - component-generation
+
+  # Domain Agents Manager
+  domainAgents:
+    enabled: true
+    name: domain-agents
+    replicas: 1
+    image:
+      repository: uep/domain-agents
+      tag: "latest"
+    
+    service:
+      port: 3010
+      targetPort: 3010
+    
+    capabilities:
+      - domain-management
+      - agent-coordination
+      - multi-domain
+    
+    config:
+      enabledDomains:
+        - backend
+        - frontend
+        - devops
+        - qa
+        - documentation
+
+# UEP Protocol Service
+uepService:
+  enabled: true
+  name: uep-service
+  replicas: 1
+  image:
+    registry: ghcr.io/uep-factory
+    repository: uep/uep-service
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  
+  service:
+    port: 3020
+    targetPort: 3020
+    type: ClusterIP
+  
+  capabilities:
+    - protocol-enforcement
+    - validation
+    - event-processing
+
+# Monitoring and Observability
+monitoring:
+  # Service Discovery Monitor
+  serviceDiscoveryMonitor:
+    enabled: true
+    name: service-discovery-monitor
+    image:
+      repository: uep/service-discovery-monitor
+      tag: "latest"
+    
+    service:
+      port: 8090
+      targetPort: 8090
+    
+    ingress:
+      enabled: true
+      hosts:
+        - host: monitor.uep-factory.local
+          paths:
+            - path: /
+              pathType: Prefix
+
+  # Prometheus
+  prometheus:
+    enabled: true
+    server:
+      persistentVolume:
+        enabled: true
+        size: 20Gi
+      retention: "30d"
+      resources:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 2Gi
+          cpu: 1000m
+    
+    # ServiceMonitor for agent metrics
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+
+  # Grafana
+  grafana:
+    enabled: true
+    adminPassword: admin
+    persistence:
+      enabled: true
+      size: 5Gi
+    
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-server.uep-monitoring.svc.cluster.local:80
+          access: proxy
+          isDefault: true
+    
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+        - name: 'uep-dashboards'
+          orgId: 1
+          folder: 'UEP Factory'
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/uep
+    
+    ingress:
+      enabled: true
+      hosts:
+        - host: grafana.uep-factory.local
+          paths:
+            - path: /
+              pathType: Prefix
+
+  # Observability Dashboard
+  observabilityDashboard:
+    enabled: true
+    name: observability-dashboard
+    image:
+      repository: uep/observability-dashboard
+      tag: "latest"
+    
+    service:
+      port: 3030
+      targetPort: 3030
+    
+    config:
+      prometheusUrl: http://prometheus-server.uep-monitoring.svc.cluster.local:80
+      grafanaUrl: http://grafana.uep-monitoring.svc.cluster.local:80
+
+# Networking and Ingress
+networking:
+  # Ingress configuration
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    
+    tls:
+      enabled: false
+      secretName: uep-factory-tls
+  
+  # Network policies
+  networkPolicies:
+    enabled: true
+    allowExternal: true
+    allowNamespaceSelector: {}
+
+# Security configuration
+security:
+  # Pod Security Standards
+  podSecurityStandards:
+    enabled: true
+    enforce: restricted
+    audit: restricted
+    warn: restricted
+  
+  # Service Accounts
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  
+  # RBAC
+  rbac:
+    create: true
+    clusterRole: true
+
+# Storage configuration
+persistence:
+  # Storage class for persistent volumes
+  storageClass: ""
+  
+  # Backup configuration
+  backup:
+    enabled: false
+    schedule: "0 2 * * *"
+    retention: "7d"
+
+# Resource quotas and limits
+resources:
+  quotas:
+    enabled: true
+    hard:
+      requests.cpu: "4"
+      requests.memory: 8Gi
+      limits.cpu: "8"
+      limits.memory: 16Gi
+      persistentvolumeclaims: "10"
+  
+  limitRanges:
+    enabled: true
+    limits:
+      - type: Container
+        default:
+          cpu: 500m
+          memory: 512Mi
+        defaultRequest:
+          cpu: 100m
+          memory: 128Mi
+
+# Development and testing
+development:
+  # Test agents
+  testAgent:
+    enabled: false
+    name: test-agent
+    image:
+      repository: uep/test-agent
+      tag: "latest"
+    service:
+      port: 3099
+      targetPort: 3099
+
+# Feature flags
+features:
+  enableMetrics: true
+  enableTracing: false
+  enableAuditLogging: true
+  enableCircuitBreaker: true
+  enableServiceMesh: false
+
+# Migration support
+migration:
+  # Support for migration from Docker Compose
+  dockerCompose:
+    enabled: false
+    registryHost: ""
+    registryPort: 6379
+  
+  # Gradual migration settings
+  gradual:
+    enabled: false
+    phases:
+      - infrastructure
+      - agents
+      - monitoring

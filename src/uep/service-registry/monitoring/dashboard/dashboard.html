@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UEP Service Registry Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-healthy { @apply bg-green-100 text-green-800 border-green-200; }
+        .status-degraded { @apply bg-yellow-100 text-yellow-800 border-yellow-200; }
+        .status-critical { @apply bg-red-100 text-red-800 border-red-200; }
+        .alert-critical { @apply bg-red-50 border-red-200 text-red-800; }
+        .alert-warning { @apply bg-yellow-50 border-yellow-200 text-yellow-800; }
+        .alert-info { @apply bg-blue-50 border-blue-200 text-blue-800; }
+        .metric-card { @apply bg-white rounded-lg shadow-sm border p-4; }
+        .chart-container { @apply bg-white rounded-lg shadow-sm border p-4; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">UEP Service Registry Dashboard</h1>
+            <p class="text-gray-600">Real-time monitoring and management of UEP meta-agents</p>
+            <div class="mt-4 flex items-center space-x-4">
+                <div id="system-status" class="px-4 py-2 rounded-full border text-sm font-medium">
+                    System Status: Loading...
+                </div>
+                <div class="text-sm text-gray-500">
+                    Last updated: <span id="last-updated">--:--:--</span>
+                </div>
+                <button id="refresh-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                    Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Metrics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="metric-card">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Total Agents</h3>
+                <div class="text-2xl font-bold text-gray-900" id="total-agents">--</div>
+                <div class="text-xs text-gray-500 mt-1">
+                    <span class="text-green-600" id="healthy-agents">--</span> healthy,
+                    <span class="text-red-600" id="unhealthy-agents">--</span> unhealthy
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Average Load</h3>
+                <div class="text-2xl font-bold text-gray-900" id="average-load">--%</div>
+                <div class="text-xs text-gray-500 mt-1">
+                    Total capacity: <span id="total-capacity">--</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Response Time</h3>
+                <div class="text-2xl font-bold text-gray-900" id="response-time">--ms</div>
+                <div class="text-xs text-gray-500 mt-1">
+                    Average across all agents
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Error Rate</h3>
+                <div class="text-2xl font-bold text-gray-900" id="error-rate">--%</div>
+                <div class="text-xs text-gray-500 mt-1">
+                    <span id="health-check-failures">--</span> health check failures/hour
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="chart-container">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Agents by Type</h3>
+                <canvas id="agents-by-type-chart" width="400" height="200"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Agents by Status</h3>
+                <canvas id="agents-by-status-chart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Active Alerts -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Active Alerts</h2>
+            <div id="active-alerts" class="space-y-3">
+                <!-- Alerts will be populated here -->
+            </div>
+        </div>
+
+        <!-- Agents Table -->
+        <div class="bg-white rounded-lg shadow-sm border">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Registered Agents</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Load</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Response Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Environment</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Heartbeat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agents-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Agent rows will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Event History -->
+        <div class="mt-8 bg-white rounded-lg shadow-sm border">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Recent Events</h2>
+            </div>
+            <div class="p-6">
+                <div id="event-history" class="space-y-2 max-h-64 overflow-y-auto">
+                    <!-- Events will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ServiceRegistryDashboard {
+            constructor() {
+                this.apiBase = '/api/registry';
+                this.refreshInterval = null;
+                this.charts = {};
+                this.init();
+            }
+
+            async init() {
+                this.setupEventListeners();
+                this.initCharts();
+                await this.loadData();
+                this.startAutoRefresh();
+            }
+
+            setupEventListeners() {
+                document.getElementById('refresh-btn').addEventListener('click', () => {
+                    this.loadData();
+                });
+            }
+
+            initCharts() {
+                // Agents by Type Chart
+                const typeCtx = document.getElementById('agents-by-type-chart').getContext('2d');
+                this.charts.agentsByType = new Chart(typeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: [
+                                '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+                                '#06B6D4', '#84CC16', '#F97316', '#EC4899'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+
+                // Agents by Status Chart
+                const statusCtx = document.getElementById('agents-by-status-chart').getContext('2d');
+                this.charts.agentsByStatus = new Chart(statusCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Healthy', 'Degraded', 'Unhealthy', 'Maintenance', 'Initializing'],
+                        datasets: [{
+                            label: 'Agent Count',
+                            data: [0, 0, 0, 0, 0],
+                            backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#6B7280', '#3B82F6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            async loadData() {
+                try {
+                    const [metrics, alerts, agents, events] = await Promise.all([
+                        this.fetchMetrics(),
+                        this.fetchAlerts(),
+                        this.fetchAgents(),
+                        this.fetchEvents()
+                    ]);
+
+                    this.updateMetrics(metrics);
+                    this.updateCharts(metrics);
+                    this.updateAlerts(alerts);
+                    this.updateAgentsTable(agents);
+                    this.updateEventHistory(events);
+                    this.updateSystemStatus(metrics);
+                    
+                    document.getElementById('last-updated').textContent = 
+                        new Date().toLocaleTimeString();
+
+                } catch (error) {
+                    console.error('Failed to load dashboard data:', error);
+                    this.showError('Failed to load dashboard data');
+                }
+            }
+
+            async fetchMetrics() {
+                // Mock data for demonstration
+                return {
+                    totalAgents: 8,
+                    healthyAgents: 6,
+                    unhealthyAgents: 2,
+                    agentsByType: {
+                        'prd-parser': 3,
+                        'scaffold-generator': 2,
+                        'infra-orchestrator': 2,
+                        'template-engine-factory': 1
+                    },
+                    agentsByStatus: {
+                        'healthy': 6,
+                        'degraded': 1,
+                        'unhealthy': 1,
+                        'maintenance': 0,
+                        'initializing': 0
+                    },
+                    averageLoad: 45.3,
+                    totalCapacity: 80,
+                    averageResponseTime: 187.5,
+                    totalErrorRate: 0.012,
+                    healthCheckFailures: 2,
+                    lastUpdated: new Date().toISOString()
+                };
+            }
+
+            async fetchAlerts() {
+                // Mock alerts data
+                return [
+                    {
+                        id: 'alert_001',
+                        ruleName: 'High Load Warning',
+                        severity: 'warning',
+                        message: 'Agent prd-parser-001 load exceeds 90%',
+                        timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+                        resolved: false
+                    }
+                ];
+            }
+
+            async fetchAgents() {
+                // Mock agents data
+                return [
+                    {
+                        agentId: 'prd-parser-001',
+                        agentName: 'PRD Parser 001',
+                        agentType: 'prd-parser',
+                        status: 'healthy',
+                        currentMetrics: { currentLoad: 35.2, averageResponseTime: 145.3 },
+                        environment: 'production',
+                        lastHeartbeat: new Date(Date.now() - 30 * 1000).toISOString()
+                    },
+                    {
+                        agentId: 'scaffold-gen-001',
+                        agentName: 'Scaffold Generator 001',
+                        agentType: 'scaffold-generator',
+                        status: 'healthy',
+                        currentMetrics: { currentLoad: 67.8, averageResponseTime: 245.7 },
+                        environment: 'production',
+                        lastHeartbeat: new Date(Date.now() - 25 * 1000).toISOString()
+                    },
+                    {
+                        agentId: 'infra-orch-001',
+                        agentName: 'Infrastructure Orchestrator 001',
+                        agentType: 'infra-orchestrator',
+                        status: 'degraded',
+                        currentMetrics: { currentLoad: 89.1, averageResponseTime: 567.2 },
+                        environment: 'production',
+                        lastHeartbeat: new Date(Date.now() - 45 * 1000).toISOString()
+                    }
+                ];
+            }
+
+            async fetchEvents() {
+                // Mock events data
+                return [
+                    {
+                        timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+                        event: 'agent_registered',
+                        data: { agentId: 'new-agent-001', agentType: 'prd-parser' }
+                    },
+                    {
+                        timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+                        event: 'health_check_failed',
+                        data: { agentId: 'infra-orch-001' }
+                    },
+                    {
+                        timestamp: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
+                        event: 'alert_triggered',
+                        data: { alertId: 'alert_001', severity: 'warning' }
+                    }
+                ];
+            }
+
+            updateMetrics(metrics) {
+                document.getElementById('total-agents').textContent = metrics.totalAgents;
+                document.getElementById('healthy-agents').textContent = metrics.healthyAgents;
+                document.getElementById('unhealthy-agents').textContent = metrics.unhealthyAgents;
+                document.getElementById('average-load').textContent = metrics.averageLoad.toFixed(1) + '%';
+                document.getElementById('total-capacity').textContent = metrics.totalCapacity;
+                document.getElementById('response-time').textContent = metrics.averageResponseTime.toFixed(0) + 'ms';
+                document.getElementById('error-rate').textContent = (metrics.totalErrorRate * 100).toFixed(2) + '%';
+                document.getElementById('health-check-failures').textContent = metrics.healthCheckFailures;
+            }
+
+            updateCharts(metrics) {
+                // Update agents by type chart
+                const typeChart = this.charts.agentsByType;
+                typeChart.data.labels = Object.keys(metrics.agentsByType);
+                typeChart.data.datasets[0].data = Object.values(metrics.agentsByType);
+                typeChart.update();
+
+                // Update agents by status chart
+                const statusChart = this.charts.agentsByStatus;
+                const statusData = [
+                    metrics.agentsByStatus.healthy || 0,
+                    metrics.agentsByStatus.degraded || 0,
+                    metrics.agentsByStatus.unhealthy || 0,
+                    metrics.agentsByStatus.maintenance || 0,
+                    metrics.agentsByStatus.initializing || 0
+                ];
+                statusChart.data.datasets[0].data = statusData;
+                statusChart.update();
+            }
+
+            updateAlerts(alerts) {
+                const container = document.getElementById('active-alerts');
+                
+                if (alerts.length === 0) {
+                    container.innerHTML = '<div class="text-gray-500 text-center py-4">No active alerts</div>';
+                    return;
+                }
+
+                container.innerHTML = alerts.map(alert => `
+                    <div class="alert-${alert.severity} border rounded-lg p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium">${alert.ruleName}</h4>
+                                <p class="text-sm mt-1">${alert.message}</p>
+                                <p class="text-xs mt-2">Triggered: ${new Date(alert.timestamp).toLocaleString()}</p>
+                            </div>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${alert.severity === 'critical' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${alert.severity.toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateAgentsTable(agents) {
+                const tbody = document.getElementById('agents-table-body');
+                
+                tbody.innerHTML = agents.map(agent => `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${agent.agentName}</div>
+                            <div class="text-sm text-gray-500">${agent.agentId}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${agent.agentType}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${this.getStatusClass(agent.status)}">
+                                ${agent.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${agent.currentMetrics.currentLoad.toFixed(1)}%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${agent.currentMetrics.averageResponseTime.toFixed(0)}ms</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${agent.environment}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${this.formatTimestamp(agent.lastHeartbeat)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            updateEventHistory(events) {
+                const container = document.getElementById('event-history');
+                
+                container.innerHTML = events.map(event => `
+                    <div class="flex items-center space-x-3 text-sm">
+                        <span class="text-gray-500">${this.formatTimestamp(event.timestamp)}</span>
+                        <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">${event.event}</span>
+                        <span class="text-gray-700">${this.formatEventData(event.data)}</span>
+                    </div>
+                `).join('');
+            }
+
+            updateSystemStatus(metrics) {
+                const statusElement = document.getElementById('system-status');
+                const healthyRatio = metrics.totalAgents > 0 ? metrics.healthyAgents / metrics.totalAgents : 1;
+                
+                let status, statusClass;
+                if (healthyRatio >= 0.8 && metrics.averageLoad < 80) {
+                    status = 'Healthy';
+                    statusClass = 'status-healthy';
+                } else if (healthyRatio >= 0.5 && metrics.averageLoad < 90) {
+                    status = 'Degraded';
+                    statusClass = 'status-degraded';
+                } else {
+                    status = 'Critical';
+                    statusClass = 'status-critical';
+                }
+                
+                statusElement.textContent = `System Status: ${status}`;
+                statusElement.className = `px-4 py-2 rounded-full border text-sm font-medium ${statusClass}`;
+            }
+
+            getStatusClass(status) {
+                const classes = {
+                    'healthy': 'bg-green-100 text-green-800',
+                    'degraded': 'bg-yellow-100 text-yellow-800',
+                    'unhealthy': 'bg-red-100 text-red-800',
+                    'maintenance': 'bg-blue-100 text-blue-800',
+                    'initializing': 'bg-gray-100 text-gray-800'
+                };
+                return classes[status] || 'bg-gray-100 text-gray-800';
+            }
+
+            formatTimestamp(timestamp) {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diff = now.getTime() - date.getTime();
+                
+                if (diff < 60000) {
+                    return Math.floor(diff / 1000) + 's ago';
+                } else if (diff < 3600000) {
+                    return Math.floor(diff / 60000) + 'm ago';
+                } else {
+                    return date.toLocaleTimeString();
+                }
+            }
+
+            formatEventData(data) {
+                if (!data) return '';
+                if (data.agentId) return `Agent: ${data.agentId}`;
+                if (data.alertId) return `Alert: ${data.alertId}`;
+                return JSON.stringify(data);
+            }
+
+            startAutoRefresh() {
+                this.refreshInterval = setInterval(() => {
+                    this.loadData();
+                }, 30000); // Refresh every 30 seconds
+            }
+
+            showError(message) {
+                // Simple error display - could be enhanced with toast notifications
+                console.error(message);
+            }
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new ServiceRegistryDashboard();
+        });
+    </script>
+</body>
+</html>

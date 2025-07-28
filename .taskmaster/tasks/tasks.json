@@ -79,8 +79,62 @@
         "dependencies": [
           190
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Research Service Discovery Patterns and Registry Requirements",
+            "description": "Investigate current best practices and patterns for service discovery and registry in containerized environments, focusing on both client-side and server-side models, DNS-based discovery, and registry schema requirements.",
+            "dependencies": [],
+            "details": "Analyze approaches such as DNS-based, client-side, and server-side service discovery. Identify essential registry schema fields (service name, type, health status, endpoints, metadata) and TTL-based health checking mechanisms. Document findings to inform implementation choices.",
+            "status": "done",
+            "testStrategy": "Review and validate research findings against recent industry standards and reference architectures. Peer review documentation for completeness and relevance."
+          },
+          {
+            "id": 2,
+            "title": "Implement Redis-Based Service Registry with Health Checking",
+            "description": "Develop a lightweight service registry using Redis (v7.2+) for the development environment, including schema design and TTL-based health check flows for registration and deregistration.",
+            "dependencies": [
+              "191.1"
+            ],
+            "details": "Design and implement the registry schema in Redis. Create registration and deregistration flows that leverage TTL for health status. Ensure the registry can handle temporary network issues and service restarts.",
+            "status": "done",
+            "testStrategy": "Write unit and integration tests for registration, deregistration, and health check flows. Simulate network interruptions and service restarts to verify resilience."
+          },
+          {
+            "id": 3,
+            "title": "Develop TypeScript Service Discovery Client Library",
+            "description": "Create a TypeScript client library (Node.js 18+) for service registration, discovery, and health reporting, supporting automatic registration with container metadata and flexible service lookup.",
+            "dependencies": [
+              "191.2"
+            ],
+            "details": "Implement client methods for registration, deregistration, health check reporting, and service lookup with filtering. Ensure robust error handling and compatibility with container metadata.",
+            "status": "done",
+            "testStrategy": "Achieve >90% code coverage with unit tests. Write integration tests for all client flows. Test error handling for registry unavailability and timeouts."
+          },
+          {
+            "id": 4,
+            "title": "Integrate Service Registry with Docker Compose Environment",
+            "description": "Configure Docker Compose to ensure correct service startup order, enable DNS-based discovery fallback, and manage environment variable configuration for registry connectivity.",
+            "dependencies": [
+              "191.3"
+            ],
+            "details": "Set up Docker Compose dependencies so the registry starts before dependent services. Implement fallback to Docker Compose DNS for basic discovery. Document environment variable usage for registry connection.",
+            "status": "done",
+            "testStrategy": "Test service startup sequencing, DNS fallback, and environment variable overrides in local and CI environments."
+          },
+          {
+            "id": 5,
+            "title": "Design for Kubernetes Compatibility and Migration Path",
+            "description": "Ensure the service discovery and registry system is compatible with Kubernetes, supporting both direct registry and Kubernetes-native discovery, and document the migration process.",
+            "dependencies": [
+              "191.4"
+            ],
+            "details": "Design interfaces and flows to support both Redis-based and Kubernetes-native service discovery. Document steps and considerations for migrating from Docker Compose to Kubernetes.",
+            "status": "done",
+            "testStrategy": "Validate compatibility by running services in a Kubernetes test cluster. Review migration documentation with the team and perform a dry-run migration."
+          }
+        ]
       },
       {
         "id": 192,
@@ -92,8 +146,67 @@
         "dependencies": [
           190
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Implement Base Agent Dockerfile Template",
+            "description": "Create a standardized, multi-stage Dockerfile template for base agents using Node.js 20 Alpine, incorporating best practices for security, health checks, signal handling, and environment configuration.",
+            "dependencies": [],
+            "details": "The template must use a multi-stage build, set NODE_ENV for both development and production, run as a non-root user (node:node), include HEALTHCHECK with reasonable intervals, and implement signal handling for graceful shutdown. Apply layer caching strategies, .dockerignore, security hardening, standardized labels, and documentation comments. Enable BuildKit features for optimal build performance and consistent environment variable handling.",
+            "status": "done",
+            "testStrategy": "Build test images and verify correct startup, run security scans, test health check functionality, and validate build performance and image size."
+          },
+          {
+            "id": 2,
+            "title": "Develop Meta-Agent Specific Dockerfile Templates",
+            "description": "Create specialized Dockerfile templates for each meta-agent type (e.g., Parameter Flow, Code Generation), including agent-specific dependencies, tools, resource limits, and file permissions.",
+            "dependencies": [
+              "192.1"
+            ],
+            "details": "Extend the base agent template to support meta-agent requirements. Configure resource limits based on workload profiles, add agent-specific dependencies and tools, and set up proper working directories and file permissions. Ensure all best practices from the base template are inherited.",
+            "status": "done",
+            "testStrategy": "Build and run images for each meta-agent type, verify resource constraints, and test agent-specific functionality."
+          },
+          {
+            "id": 3,
+            "title": "Develop Domain Agent Dockerfile Templates",
+            "description": "Create Dockerfile templates for domain-specific agents, addressing unique requirements such as environment variables, secrets management, and domain-specific dependencies.",
+            "dependencies": [
+              "192.1"
+            ],
+            "details": "Extend the base agent template to include domain-specific tools, dependencies, and configuration for environment variables and secrets management. Ensure security and compliance with best practices, including .dockerignore and metadata labeling.",
+            "status": "done",
+            "testStrategy": "Build and run images for each domain agent, verify correct environment variable and secret handling, and test domain-specific functionality."
+          },
+          {
+            "id": 4,
+            "title": "Implement Development vs Production Build Logic",
+            "description": "Integrate conditional logic into all templates to differentiate development and production builds, optimizing for debugging, source mapping, image size, and security.",
+            "dependencies": [
+              "192.1",
+              "192.2",
+              "192.3"
+            ],
+            "details": "Add build arguments and conditional instructions to enable source mapping and debugging tools in development, and optimize for minimal size and security in production. Ensure consistent environment variable handling and documentation for switching modes.",
+            "status": "done",
+            "testStrategy": "Build images in both development and production modes, verify inclusion/exclusion of debugging tools, and validate image size and security optimizations."
+          },
+          {
+            "id": 5,
+            "title": "Standardize Documentation, Validation, and Testing for Dockerfile Templates",
+            "description": "Establish documentation standards, automated validation, and testing procedures for all Dockerfile templates to ensure maintainability, correctness, and compliance with best practices.",
+            "dependencies": [
+              "192.1",
+              "192.2",
+              "192.3",
+              "192.4"
+            ],
+            "details": "Document all templates with comments explaining key decisions and usage. Implement automated syntax validation and pre-build checks. Integrate template testing into CI/CD pipelines, including security scanning, resource constraint verification, health check testing, and build performance validation.",
+            "status": "done",
+            "testStrategy": "Automate template validation and testing in CI/CD, verify documentation completeness, and ensure all best practices are enforced through automated checks."
+          }
+        ]
       },
       {
         "id": 193,
@@ -134,7 +247,7 @@
           191,
           194
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -163,7 +276,7 @@
           194,
           196
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -178,7 +291,7 @@
           194,
           196
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -206,7 +319,7 @@
         "testStrategy": "Validate the architecture design through peer review sessions with the development team. Create a proof-of-concept implementation with 2-3 containerized agents to validate the UEP validation flow. Measure latency impact of UEP validation at both API Gateway and service levels. Test protocol violation scenarios to ensure proper detection and handling.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -224,8 +337,8 @@
             "dependencies": [
               "200.1"
             ],
-            "details": "Create detailed architecture diagrams showing UEP validation flow through API Gateway (using Kong or Ambassador with custom plugins) and service-to-service communication with UEP validation. Design custom RequestAuthentication and AuthorizationPolicy resources for Istio integration. Specify implementation details for WebAssembly (WASM) plugins for Envoy 1.26+ that will perform UEP validation. Document the validation workflow, error handling, and performance considerations. Address the 7 UEP-specific research questions from the PRD with focus on validation architecture.",
-            "status": "in-progress",
+            "details": "Create detailed architecture diagrams showing UEP validation flow through API Gateway (using Kong or Ambassador with custom plugins) and service-to-service communication with UEP validation. Design custom RequestAuthentication and AuthorizationPolicy resources for Istio integration. Specify implementation details for WebAssembly (WASM) plugins for Envoy 1.26+ that will perform UEP validation. Document the validation workflow, error handling, and performance considerations. Address the 7 UEP-specific research questions from the PRD with focus on validation architecture.\n<info added on 2025-07-28T04:19:15.841Z>\nI've initiated the UEP validation architecture design process with focus on four key components:\n\n1. API Gateway Validation Architecture:\n   - Designing custom Kong and Ambassador plugins for UEP header validation\n   - Mapping authentication and authorization flows at the gateway level\n   - Documenting plugin configuration requirements and deployment patterns\n\n2. Service Mesh Validation with Istio:\n   - Creating specifications for RequestAuthentication and AuthorizationPolicy resources\n   - Developing WASM plugin architecture for Envoy 1.26+ proxies\n   - Designing sidecar injection configuration for seamless deployment\n\n3. Error Handling and Performance:\n   - Defining standardized error response formats for UEP validation failures\n   - Establishing performance benchmarks and optimization strategies\n   - Creating circuit breaking patterns for degraded validation scenarios\n\n4. Container Integration Strategy:\n   - Aligning with existing containerization approach\n   - Documenting sidecar resource requirements and scaling considerations\n   - Designing deployment manifests for Kubernetes integration\n\nResearch has begun on addressing the 7 UEP-specific validation questions from the PRD, with initial architecture diagrams in progress.\n</info added on 2025-07-28T04:19:15.841Z>",
+            "status": "done",
             "testStrategy": "Validate the architecture through peer review sessions. Create sequence diagrams to verify the validation flow logic. Develop a checklist to ensure all UEP validation requirements are addressed in the design."
           },
           {
@@ -237,7 +350,7 @@
               "200.2"
             ],
             "details": "Design the architecture for integrating etcd 3.5+ as the distributed UEP registry with watch capabilities. Create diagrams showing how the UEP registry interacts with service discovery mechanisms in the selected service mesh. Specify the data model for storing UEP protocol definitions, versioning information, and validation rules. Document the synchronization mechanism between the UEP registry and service mesh control plane. Design the watch API for real-time updates to UEP protocol definitions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Develop a proof-of-concept implementation to validate the registry integration design. Test the watch capabilities with simulated protocol updates. Measure latency of propagating UEP protocol changes throughout the service mesh."
           },
           {
@@ -248,7 +361,7 @@
               "200.2"
             ],
             "details": "Design circuit breaking patterns specifically for UEP validation failures. Create architecture diagrams showing failure scenarios and recovery mechanisms. Specify configuration for circuit breakers, including thresholds, timeout settings, and fallback behaviors. Design retry policies with exponential backoff for transient validation failures. Document strategies for graceful degradation when UEP validation services are unavailable. Include monitoring and alerting recommendations for circuit breaker events.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create failure scenario test cases to validate circuit breaking design. Develop chaos testing scenarios to verify resilience patterns. Measure recovery times and system stability during simulated validation failures."
           },
           {
@@ -260,7 +373,7 @@
               "200.3"
             ],
             "details": "Design a comprehensive versioning strategy for the UEP protocol using content negotiation with custom media types. Specify the format and structure of custom media types for different UEP protocol versions. Document the version negotiation flow between services, including backward compatibility mechanisms. Design the schema evolution strategy for UEP protocol definitions. Create architecture diagrams showing how multiple protocol versions can coexist within the service mesh. Specify how version compatibility is validated during service-to-service communication.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Develop test cases for protocol version negotiation between services. Create scenarios with mixed protocol versions to verify backward compatibility. Test version migration scenarios to ensure smooth transitions between protocol versions."
           }
         ]
@@ -273,8 +386,65 @@
         "testStrategy": "Test the event bus implementation with simulated high-throughput scenarios (1000+ messages/second). Validate protocol enforcement by intentionally sending malformed messages and verifying rejection. Measure message processing latency with and without UEP validation. Test failover scenarios by simulating broker node failures. Verify persistent storage of audit trails and recovery capabilities.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Deploy and Configure NATS JetStream Cluster",
+            "description": "Set up a horizontally scalable NATS JetStream cluster with appropriate resource limits, storage configuration, and multi-tenancy support for production use.",
+            "dependencies": [],
+            "details": "Install NATS servers, enable JetStream in the configuration, specify storage directories, set memory and file limits, and configure clustering for high availability and scalability. Ensure multi-tenancy is enabled if required for isolated environments.",
+            "status": "done",
+            "testStrategy": "Verify cluster formation, JetStream enablement, and resource limits by running cluster health checks and simulating node failures to ensure high availability."
+          },
+          {
+            "id": 2,
+            "title": "Implement UEP Protocol Validation Service",
+            "description": "Develop a NATS service that intercepts and validates messages according to the UEP protocol before they are processed or forwarded.",
+            "dependencies": [
+              "201.1"
+            ],
+            "details": "Create a middleware or service that listens to relevant NATS subjects, parses incoming messages, and applies UEP protocol validation logic. Integrate JSON Schema 2020-12 validation for message payloads and log or reject invalid messages.",
+            "status": "done",
+            "testStrategy": "Send both valid and malformed messages to the service and verify that only protocol-compliant messages are accepted. Measure validation latency and error handling."
+          },
+          {
+            "id": 3,
+            "title": "Define and Enforce UEP-Specific Subject Naming",
+            "description": "Establish and enforce a subject naming convention for UEP messages using the pattern 'UEP.{version}.{agent}.{capability}' to support subject-based filtering and routing.",
+            "dependencies": [
+              "201.1"
+            ],
+            "details": "Document the subject naming pattern, update agent and service code to publish and subscribe using the defined convention, and implement validation to ensure compliance.",
+            "status": "done",
+            "testStrategy": "Publish messages with both valid and invalid subject names and verify that only correctly named subjects are processed. Check that filtering and routing work as intended."
+          },
+          {
+            "id": 4,
+            "title": "Configure Persistent Streams and Audit Trails",
+            "description": "Set up JetStream persistent streams for UEP event subjects with configurable retention policies to enable audit trails and message replay.",
+            "dependencies": [
+              "201.1",
+              "201.3"
+            ],
+            "details": "Create JetStream streams for UEP subjects, configure storage type (file/memory), set retention and replication policies, and enable message replay for audit and recovery scenarios.",
+            "status": "done",
+            "testStrategy": "Publish events to streams, verify persistence and retention, and test message replay and audit log retrieval under various scenarios."
+          },
+          {
+            "id": 5,
+            "title": "Implement Monitoring, Circuit Breakers, and Fallback Mechanisms",
+            "description": "Integrate monitoring with Prometheus and Grafana, implement circuit breakers using NATS slow consumer detection, and configure RabbitMQ fallback with Shovel plugin for cross-datacenter replication if required.",
+            "dependencies": [
+              "201.1",
+              "201.2",
+              "201.4"
+            ],
+            "details": "Set up metrics collection for cluster health, message throughput, and validation errors. Configure circuit breaker logic to detect and handle slow consumers. Prepare RabbitMQ fallback with Shovel for enterprise deployments needing cross-datacenter replication.",
+            "status": "done",
+            "testStrategy": "Simulate high-throughput and failure scenarios, monitor system metrics and dashboards, trigger slow consumer conditions, and test failover to RabbitMQ if enabled."
+          }
+        ]
       },
       {
         "id": 202,
@@ -405,8 +575,65 @@
         "testStrategy": "Create architecture review checklist to validate against requirements. Develop proof-of-concept with two containerized agents communicating through UEP validation proxy. Measure performance overhead of validation layer. Verify that protocol violations are properly detected and handled. Test service discovery functionality to ensure agents can find each other through UEP registry.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Evaluate Service Mesh Technologies for UEP Integration",
+            "description": "Research and compare leading service mesh solutions (Istio, Linkerd, Consul Connect) to determine the most suitable platform for integrating UEP protocol validation and enforcement.",
+            "dependencies": [],
+            "details": "Assess each technology's compatibility with Envoy proxies, support for custom filters, extensibility, performance characteristics, and ease of integration with containerized environments.",
+            "status": "done",
+            "testStrategy": "Document a comparison matrix and recommend the best-fit service mesh based on UEP requirements. Validate findings with a prototype deployment."
+          },
+          {
+            "id": 2,
+            "title": "Design UEP Validation Proxy Sidecar Architecture",
+            "description": "Define the architecture for the UEP Validation Proxy as a sidecar container that intercepts and validates all agent communications using Envoy (v1.25+) with custom protocol validation filters.",
+            "dependencies": [
+              "210.1"
+            ],
+            "details": "Specify the integration points, traffic interception mechanisms, and custom filter logic for protocol validation. Ensure the design supports both ingress and egress validation at the service level.",
+            "status": "done",
+            "testStrategy": "Develop a proof-of-concept sidecar with Envoy and a sample custom filter. Test interception and validation of agent traffic in a controlled environment."
+          },
+          {
+            "id": 3,
+            "title": "Define UEP Control Plane and Data Plane Components",
+            "description": "Design the UEP Control Plane for managing validation rules and protocol definitions, and the UEP Data Plane for distributed enforcement via proxies.",
+            "dependencies": [
+              "210.1"
+            ],
+            "details": "Detail the responsibilities, interfaces, and communication flows between the control plane (centralized management) and data plane (sidecar proxies). Specify how updates to validation rules are propagated.",
+            "status": "done",
+            "testStrategy": "Simulate rule updates and protocol changes in a test environment. Verify correct propagation and enforcement across all proxies."
+          },
+          {
+            "id": 4,
+            "title": "Integrate UEP Registry for Service Discovery",
+            "description": "Design and integrate a UEP Registry component to enable service discovery and registration of agent capabilities within the mesh.",
+            "dependencies": [
+              "210.1",
+              "210.3"
+            ],
+            "details": "Specify the registry's data model, API, and integration points with the control and data planes. Ensure compatibility with chosen service mesh technology.",
+            "status": "done",
+            "testStrategy": "Implement a mock registry and validate agent registration, discovery, and capability queries. Test integration with the control plane."
+          },
+          {
+            "id": 5,
+            "title": "Develop Architecture Diagrams and Performance Validation Plan",
+            "description": "Create detailed architecture diagrams illustrating request flows, protocol enforcement points, service discovery integration, and failure handling. Define a plan to measure and optimize validation overhead.",
+            "dependencies": [
+              "210.2",
+              "210.3",
+              "210.4"
+            ],
+            "details": "Produce diagrams for all key flows and components. Specify performance targets (<50ms validation overhead) and select schema validation technologies (e.g., AJV, Protocol Buffers).",
+            "status": "done",
+            "testStrategy": "Review diagrams with stakeholders. Implement performance benchmarks using a prototype, measuring validation latency and failure handling under load."
+          }
+        ]
       },
       {
         "id": 211,
@@ -544,8 +771,54 @@
         "testStrategy": "1. Unit tests for service registration and deregistration functions\n2. Integration tests verifying agent registration data is correctly stored in Consul\n3. Performance tests measuring registration latency under various loads\n4. Chaos testing with network partitions to verify resilience\n5. Load tests simulating 50+ concurrent agent registrations\n6. Verify health check behavior with deliberately unhealthy services\n7. Test graceful deregistration during controlled and uncontrolled shutdowns",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Research Consul Service Registry Architecture and Best Practices",
+            "description": "Investigate the latest (2024) architectural patterns, deployment models, and best practices for designing a scalable and secure service registry using HashiCorp Consul v1.17+.",
+            "dependencies": [],
+            "details": "Review official Consul documentation, recent technical blogs, and case studies to understand core components (servers, agents, service mesh, health checks), multi-datacenter support, and integration patterns for agent discovery and coordination.",
+            "status": "done",
+            "testStrategy": "Validate findings by mapping them to real-world deployment scenarios and ensuring alignment with current industry standards."
+          },
+          {
+            "id": 2,
+            "title": "Design Consul Cluster Topology and Security Model",
+            "description": "Define the cluster topology (servers, clients, datacenters) and establish a security model including ACLs, TLS encryption, and authentication for both development and production environments.",
+            "dependencies": [],
+            "details": "Specify the number and roles of Consul servers and agents, network segmentation, and secure communication channels. Document procedures for ACL bootstrapping, token management, and certificate distribution.",
+            "status": "done",
+            "testStrategy": "Perform security audits and simulate unauthorized access attempts to verify enforcement of ACLs and TLS."
+          },
+          {
+            "id": 3,
+            "title": "Define Agent Registration Data Model and Metadata Schema",
+            "description": "Develop a comprehensive data model for agent registration, including required metadata fields for agent identification, capabilities, health checks, versioning, resource requirements, and load metrics.",
+            "dependencies": [],
+            "details": "Create a JSON schema or equivalent specification for agent registration objects, ensuring compatibility with Consul's catalog and extensibility for future agent attributes.",
+            "status": "done",
+            "testStrategy": "Validate the schema with sample agent registrations and ensure all required fields are enforced and correctly stored in Consul."
+          },
+          {
+            "id": 4,
+            "title": "Implement Service Registration, Health Checking, and Deregistration Patterns",
+            "description": "Develop and document robust patterns for agent registration, TTL-based health checks, metadata updates, and graceful deregistration using Consul's HTTP API for both internal and external services.",
+            "dependencies": [],
+            "details": "Implement code samples and configuration templates for registering agents, updating metadata, configuring health checks (15-30s intervals), and handling agent lifecycle events including shutdown.",
+            "status": "done",
+            "testStrategy": "Unit and integration tests to verify correct registration, health status updates, and deregistration under normal and failure scenarios."
+          },
+          {
+            "id": 5,
+            "title": "Set Up Monitoring, Visualization, and Operational Tooling",
+            "description": "Configure Consul UI and integrate monitoring tools to provide real-time visibility into service registrations, health status, and cluster state during development and production.",
+            "dependencies": [],
+            "details": "Deploy Consul UI, set up dashboards for key metrics, and document operational procedures for monitoring, troubleshooting, and maintaining the service registry.",
+            "status": "done",
+            "testStrategy": "Manual and automated tests to ensure accurate visualization of agent states and timely alerts for health or registration anomalies."
+          }
+        ]
       },
       {
         "id": 221,
@@ -557,8 +830,108 @@
         "dependencies": [
           220
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement AgentRegistrar Class Core Functionality",
+            "description": "Create the AgentRegistrar class with methods for initial registration, health reporting, deregistration, and capability updates.",
+            "dependencies": [],
+            "details": "Develop the TypeScript AgentRegistrar class with the following methods: register(), updateHealth(), deregister(), and updateCapabilities(). Implement the AgentRegistration interface as defined in the requirements. Create a singleton pattern to ensure consistent registration across the agent. Include proper TypeScript typing and documentation.",
+            "status": "done",
+            "testStrategy": "Write unit tests for each method of the AgentRegistrar class. Test the singleton pattern to ensure only one instance is created. Verify that the registration data structure conforms to the specified interface."
+          },
+          {
+            "id": 2,
+            "title": "Implement Retry Logic with Exponential Backoff",
+            "description": "Add robust retry logic with exponential backoff for handling registration failures and network issues.",
+            "dependencies": [
+              "221.1"
+            ],
+            "details": "Create a RetryStrategy class that implements exponential backoff algorithm. Integrate this with the AgentRegistrar to handle temporary network failures or service registry unavailability. Include configurable parameters for max retry attempts, initial delay, and maximum delay. Implement proper error handling and logging for retry attempts.",
+            "status": "done",
+            "testStrategy": "Test retry logic by simulating network failures. Verify exponential backoff timing is correct. Test edge cases like maximum retries exceeded and recovery after temporary failures."
+          },
+          {
+            "id": 3,
+            "title": "Develop Health Reporting Mechanism",
+            "description": "Create an automated health reporting system that periodically updates agent status based on internal checks.",
+            "dependencies": [
+              "221.1"
+            ],
+            "details": "Implement a HealthMonitor class that performs internal health checks at configurable intervals. Create a mechanism to update the agent's status between 'starting', 'healthy', 'degraded', and 'unhealthy' states based on check results. Implement customizable health check providers that can be registered with the monitor. Ensure thread-safe status updates.",
+            "status": "done",
+            "testStrategy": "Test health status transitions through all possible states. Verify periodic health check scheduling works correctly. Test with mock health check providers that simulate various health conditions."
+          },
+          {
+            "id": 4,
+            "title": "Implement Graceful Shutdown Hooks",
+            "description": "Add shutdown hooks to ensure proper deregistration of the agent from the service registry during application termination.",
+            "dependencies": [
+              "221.1"
+            ],
+            "details": "Implement process signal handlers (SIGTERM, SIGINT) to trigger graceful shutdown. Create a ShutdownManager class that coordinates the deregistration process before application exit. Ensure all pending operations complete before deregistration. Add timeout mechanism for shutdown operations to prevent hanging. Implement proper logging of the shutdown sequence.",
+            "status": "done",
+            "testStrategy": "Test graceful shutdown by simulating process termination signals. Verify proper deregistration occurs during shutdown. Test timeout mechanism works correctly for hanging operations."
+          },
+          {
+            "id": 5,
+            "title": "Implement Capability Advertisement System",
+            "description": "Create a system for agents to accurately advertise and dynamically update their capabilities in the service registry.",
+            "dependencies": [
+              "221.1",
+              "221.2"
+            ],
+            "details": "Develop a CapabilityManager class that maintains the agent's capability set. Implement methods to add, remove, and query capabilities. Create a mechanism to update the service registry when capabilities change. Design a capability schema that includes version information and dependency requirements. Implement validation for capability declarations.",
+            "status": "done",
+            "testStrategy": "Test adding, removing, and updating capabilities. Verify capability updates are correctly propagated to the service registry. Test capability validation with valid and invalid capability declarations."
+          },
+          {
+            "id": 6,
+            "title": "Design AgentRegistrar Class Structure",
+            "description": "Define the TypeScript class structure for AgentRegistrar, including methods for registration, health reporting, deregistration, and capability updates.",
+            "dependencies": [],
+            "details": "Specify the class interface, required properties, and method signatures to ensure all agent registration responsibilities are encapsulated. Ensure the design supports extensibility for future features.",
+            "status": "done",
+            "testStrategy": "Review class interface for completeness and alignment with the registration data structure. Write unit tests to verify method existence and correct TypeScript typings."
+          },
+          {
+            "id": 7,
+            "title": "Implement Registration and Retry Logic",
+            "description": "Develop the logic for initial agent registration with the service registry, including automatic retry with exponential backoff on failure.",
+            "dependencies": [],
+            "details": "Implement registration using the provided AgentRegistration interface. Integrate retry logic that handles transient network or registry errors, with exponential backoff and logging.",
+            "status": "done",
+            "testStrategy": "Simulate registration failures and verify that retries occur with increasing delays. Confirm successful registration after transient errors."
+          },
+          {
+            "id": 8,
+            "title": "Develop Health Status Monitoring and Reporting",
+            "description": "Create mechanisms for periodic health checks and status updates, ensuring the agent's health is accurately reflected in the registry.",
+            "dependencies": [],
+            "details": "Implement internal health checks and update the agent's status field accordingly. Ensure health status transitions (starting, healthy, degraded, unhealthy) are correctly reported.",
+            "status": "done",
+            "testStrategy": "Write unit and integration tests for health check logic. Simulate various health scenarios and verify correct status updates in the registry."
+          },
+          {
+            "id": 9,
+            "title": "Enable Dynamic Capability Advertisement and Updates",
+            "description": "Implement functionality for agents to declare and update their capabilities dynamically, ensuring the registry always reflects current agent abilities.",
+            "dependencies": [],
+            "details": "Allow runtime updates to the capabilities array and propagate these changes to the service registry. Ensure updates are atomic and consistent.",
+            "status": "done",
+            "testStrategy": "Test capability updates during agent runtime and verify that changes are reflected in the registry without data loss or inconsistency."
+          },
+          {
+            "id": 10,
+            "title": "Integrate Singleton Pattern and Graceful Shutdown Hooks",
+            "description": "Ensure AgentRegistrar is a singleton within the agent process and implement hooks for graceful shutdown and deregistration.",
+            "dependencies": [],
+            "details": "Apply the singleton pattern to prevent multiple registrar instances. Add process signal handlers to trigger deregistration and resource cleanup on shutdown.",
+            "status": "done",
+            "testStrategy": "Test for singleton enforcement by attempting multiple instantiations. Simulate shutdown signals and verify proper deregistration and cleanup."
+          }
+        ]
       },
       {
         "id": 222,
@@ -677,7 +1050,7 @@
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-07-28T02:29:41.161Z",
+      "updated": "2025-07-28T13:20:30.366Z",
       "description": "Tasks for master context"
     }
   }

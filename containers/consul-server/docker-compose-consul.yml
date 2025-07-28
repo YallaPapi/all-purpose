@@ -1,0 +1,247 @@
+# Docker Compose configuration for Consul Service Discovery
+# Supports both development and production deployments
+
+version: '3.8'
+
+# Shared configurations
+x-consul-base: &consul-base
+  image: consul-server:latest
+  restart: unless-stopped
+  networks:
+    - uep-network
+  volumes:
+    - consul-data:/consul/data
+    - consul-logs:/consul/logs
+    - consul-config:/consul/config
+  environment:
+    - CONSUL_BIND_INTERFACE=eth0
+    - CONSUL_CLIENT_INTERFACE=eth0
+    - CONSUL_DOMAIN=consul
+  healthcheck:
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 60s
+
+services:
+  # Development Consul Server (Single Node)
+  consul-dev:
+    <<: *consul-base
+    container_name: consul-dev-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "8500:8500"  # HTTP API and UI
+      - "8600:8600"  # DNS
+      - "8600:8600/udp"  # DNS UDP
+      - "8301:8301"  # Serf LAN
+      - "8301:8301/udp"  # Serf LAN UDP
+      - "8302:8302"  # Serf WAN
+      - "8302:8302/udp"  # Serf WAN UDP
+      - "8300:8300"  # Server RPC
+      - "8502:8502"  # gRPC
+    environment:
+      - CONSUL_DATACENTER=uep-dev
+      - CONSUL_NODE_NAME=consul-dev-server
+      - CONSUL_LOG_LEVEL=INFO
+      - CONSUL_BOOTSTRAP_EXPECT=1
+    command: ["consul", "agent", "-config-dir=/consul/config", "-data-dir=/consul/data"]
+    volumes:
+      - ./config/consul-dev.hcl:/consul/config/consul.hcl:ro
+      - consul-dev-data:/consul/data
+      - consul-dev-logs:/consul/logs
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+    profiles:
+      - development
+      - dev
+
+  # Production Consul Cluster (3 nodes)
+  consul-prod-1:
+    <<: *consul-base
+    container_name: consul-prod-server-1
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    hostname: consul-server-0
+    ports:
+      - "8500:8500"  # HTTP API and UI (primary node only)
+      - "8501:8501"  # HTTPS API
+      - "8600:8600"  # DNS
+      - "8600:8600/udp"  # DNS UDP
+    environment:
+      - CONSUL_DATACENTER=uep-prod
+      - CONSUL_NODE_NAME=consul-prod-server-1
+      - CONSUL_LOG_LEVEL=WARN
+      - CONSUL_BOOTSTRAP_EXPECT=3
+      - CONSUL_ENCRYPT_KEY=${CONSUL_ENCRYPT_KEY}
+      - CONSUL_ACL_INITIAL_MANAGEMENT_TOKEN=${CONSUL_ACL_INITIAL_MANAGEMENT_TOKEN}
+      - CONSUL_ACL_AGENT_TOKEN=${CONSUL_ACL_AGENT_TOKEN}
+    volumes:
+      - ./config/consul-prod.hcl:/consul/config/consul.hcl:ro
+      - ./config/acl-policy.hcl:/consul/config/acl-policy.hcl:ro
+      - ./scripts/consul-entrypoint.sh:/usr/local/bin/consul-entrypoint.sh:ro
+      - consul-prod-1-data:/consul/data
+      - consul-prod-1-logs:/consul/logs
+      - consul-prod-1-tls:/consul/tls
+    healthcheck:
+      test: ["CMD", "consul", "members", "-ca-file=/consul/tls/ca.pem", "-client-cert=/consul/tls/consul.pem", "-client-key=/consul/tls/consul-key.pem"]
+      start_period: 120s
+      retries: 5
+    profiles:
+      - production
+      - prod
+
+  consul-prod-2:
+    <<: *consul-base
+    container_name: consul-prod-server-2
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    hostname: consul-server-1
+    environment:
+      - CONSUL_DATACENTER=uep-prod
+      - CONSUL_NODE_NAME=consul-prod-server-2
+      - CONSUL_LOG_LEVEL=WARN
+      - CONSUL_BOOTSTRAP_EXPECT=3
+      - CONSUL_ENCRYPT_KEY=${CONSUL_ENCRYPT_KEY}
+      - CONSUL_ACL_AGENT_TOKEN=${CONSUL_ACL_AGENT_TOKEN}
+    volumes:
+      - ./config/consul-prod.hcl:/consul/config/consul.hcl:ro
+      - ./config/acl-policy.hcl:/consul/config/acl-policy.hcl:ro
+      - ./scripts/consul-entrypoint.sh:/usr/local/bin/consul-entrypoint.sh:ro
+      - consul-prod-2-data:/consul/data
+      - consul-prod-2-logs:/consul/logs
+      - consul-prod-2-tls:/consul/tls
+    healthcheck:
+      test: ["CMD", "consul", "members", "-ca-file=/consul/tls/ca.pem", "-client-cert=/consul/tls/consul.pem", "-client-key=/consul/tls/consul-key.pem"]
+      start_period: 120s
+      retries: 5
+    depends_on:
+      - consul-prod-1
+    profiles:
+      - production
+      - prod
+
+  consul-prod-3:
+    <<: *consul-base
+    container_name: consul-prod-server-3
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    hostname: consul-server-2
+    environment:
+      - CONSUL_DATACENTER=uep-prod
+      - CONSUL_NODE_NAME=consul-prod-server-3
+      - CONSUL_LOG_LEVEL=WARN
+      - CONSUL_BOOTSTRAP_EXPECT=3
+      - CONSUL_ENCRYPT_KEY=${CONSUL_ENCRYPT_KEY}
+      - CONSUL_ACL_AGENT_TOKEN=${CONSUL_ACL_AGENT_TOKEN}
+    volumes:
+      - ./config/consul-prod.hcl:/consul/config/consul.hcl:ro
+      - ./config/acl-policy.hcl:/consul/config/acl-policy.hcl:ro
+      - ./scripts/consul-entrypoint.sh:/usr/local/bin/consul-entrypoint.sh:ro
+      - consul-prod-3-data:/consul/data
+      - consul-prod-3-logs:/consul/logs
+      - consul-prod-3-tls:/consul/tls
+    healthcheck:
+      test: ["CMD", "consul", "members", "-ca-file=/consul/tls/ca.pem", "-client-cert=/consul/tls/consul.pem", "-client-key=/consul/tls/consul-key.pem"]
+      start_period: 120s
+      retries: 5
+    depends_on:
+      - consul-prod-1
+      - consul-prod-2
+    profiles:
+      - production
+      - prod
+
+  # Consul UI Proxy (for production access)
+  consul-ui-proxy:
+    image: nginx:alpine
+    container_name: consul-ui-proxy
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/consul-ui.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - consul-prod-1
+    networks:
+      - uep-network
+    profiles:
+      - production
+      - prod
+
+  # Agent Registration Test Service
+  consul-test-agent:
+    image: consul:1.18.0
+    container_name: consul-test-agent
+    networks:
+      - uep-network
+    environment:
+      - CONSUL_HTTP_ADDR=consul-dev:8500
+    command: |
+      sh -c "
+        echo 'Waiting for Consul server...'
+        sleep 30
+        echo 'Registering test UEP agent...'
+        consul services register -name=test-meta-agent -port=3000 -tag=uep -tag=meta-agent -tag=test
+        echo 'Test agent registered successfully'
+        sleep infinity
+      "
+    depends_on:
+      - consul-dev
+    profiles:
+      - development
+      - dev
+      - test
+
+networks:
+  uep-network:
+    driver: bridge
+    name: uep-network
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  # Development volumes
+  consul-dev-data:
+    name: consul-dev-data
+  consul-dev-logs:
+    name: consul-dev-logs
+  
+  # Production volumes
+  consul-prod-1-data:
+    name: consul-prod-1-data
+  consul-prod-1-logs:
+    name: consul-prod-1-logs
+  consul-prod-1-tls:
+    name: consul-prod-1-tls
+  
+  consul-prod-2-data:
+    name: consul-prod-2-data
+  consul-prod-2-logs:
+    name: consul-prod-2-logs
+  consul-prod-2-tls:
+    name: consul-prod-2-tls
+  
+  consul-prod-3-data:
+    name: consul-prod-3-data
+  consul-prod-3-logs:
+    name: consul-prod-3-logs
+  consul-prod-3-tls:
+    name: consul-prod-3-tls
+  
+  # Shared volumes
+  consul-data:
+    name: consul-data
+  consul-logs:
+    name: consul-logs
+  consul-config:
+    name: consul-config

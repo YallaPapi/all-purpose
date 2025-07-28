@@ -1,0 +1,422 @@
+# Kubernetes Resilience Policies for Circuit Breaking and Fault Tolerance
+# Implements circuit breaker patterns at the infrastructure level
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: resilience-system
+  labels:
+    istio-injection: enabled
+    resilience: enabled
+
+---
+# Circuit Breaker Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: circuit-breaker-config
+  namespace: resilience-system
+data:
+  config.yaml: |
+    circuitBreakers:
+      meta-agent-factory:
+        failureThreshold: 5
+        timeoutMs: 5000
+        resetTimeoutMs: 30000
+        halfOpenMaxCalls: 3
+        errorThresholdPercentage: 50
+      agent-registry:
+        failureThreshold: 3
+        timeoutMs: 3000
+        resetTimeoutMs: 20000
+        halfOpenMaxCalls: 2
+        errorThresholdPercentage: 40
+      uep-service:
+        failureThreshold: 8
+        timeoutMs: 10000
+        resetTimeoutMs: 45000
+        halfOpenMaxCalls: 5
+        errorThresholdPercentage: 60
+
+    retryPolicies:
+      default:
+        maxAttempts: 3
+        baseDelayMs: 1000
+        maxDelayMs: 10000
+        backoffMultiplier: 2
+        jitterMs: 500
+      critical:
+        maxAttempts: 5
+        baseDelayMs: 500
+        maxDelayMs: 5000
+        backoffMultiplier: 1.5
+        jitterMs: 250
+
+    bulkheadLimits:
+      meta-agent-factory:
+        maxConcurrentCalls: 20
+        maxQueueSize: 50
+        timeoutMs: 30000
+      agent-registry:
+        maxConcurrentCalls: 10
+        maxQueueSize: 25
+        timeoutMs: 15000
+
+---
+# Resilience Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resilience-service
+  namespace: resilience-system
+  labels:
+    app: resilience-service
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resilience-service
+  template:
+    metadata:
+      labels:
+        app: resilience-service
+        version: v1
+        resilience: enabled
+    spec:
+      containers:
+      - name: resilience-service
+        image: all-purpose/resilience-service:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: CIRCUIT_BREAKER_CONFIG
+          value: /config/config.yaml
+        - name: PROMETHEUS_PORT
+          value: "9090"
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+      volumes:
+      - name: config
+        configMap:
+          name: circuit-breaker-config
+
+---
+# Resilience Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: resilience-service
+  namespace: resilience-system
+  labels:
+    app: resilience-service
+spec:
+  selector:
+    app: resilience-service
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+
+---
+# Istio DestinationRule for Circuit Breaking
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: circuit-breaker-rules
+  namespace: resilience-system
+spec:
+  host: "*.resilience-system.svc.cluster.local"
+  trafficPolicy:
+    circuitBreaker:
+      # Connection pool settings
+      connectionPool:
+        tcp:
+          maxConnections: 100
+          connectTimeout: 30s
+          tcpKeepalive:
+            time: 7200s
+            interval: 75s
+        http:
+          http1MaxPendingRequests: 100
+          http2MaxRequests: 100
+          maxRequestsPerConnection: 10
+          maxRetries: 3
+          idleTimeout: 90s
+          h2UpgradePolicy: UPGRADE
+      
+      # Circuit breaker settings
+      consecutiveGateway5xxErrors: 5
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 30
+      splitExternalLocalOriginErrors: false
+  
+  # Service-specific overrides
+  exportTo:
+  - "."
+  - "istio-system"
+
+---
+# Service-specific DestinationRules
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: meta-agent-factory-circuit-breaker
+  namespace: resilience-system
+spec:
+  host: meta-agent-factory.uep-system.svc.cluster.local
+  trafficPolicy:
+    circuitBreaker:
+      consecutiveGateway5xxErrors: 5
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 30
+    connectionPool:
+      tcp:
+        maxConnections: 20
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 50
+        maxRequestsPerConnection: 10
+        maxRetries: 3
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: agent-registry-circuit-breaker
+  namespace: resilience-system
+spec:
+  host: agent-registry.uep-system.svc.cluster.local
+  trafficPolicy:
+    circuitBreaker:
+      consecutiveGateway5xxErrors: 3
+      consecutive5xxErrors: 3
+      interval: 20s
+      baseEjectionTime: 20s
+      maxEjectionPercent: 40
+      minHealthPercent: 50
+    connectionPool:
+      tcp:
+        maxConnections: 10
+      http:
+        http1MaxPendingRequests: 25
+        http2MaxRequests: 25
+        maxRequestsPerConnection: 5
+        maxRetries: 2
+
+---
+# Retry Policy
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: resilience-retry-policy
+  namespace: resilience-system
+spec:
+  hosts:
+  - "*.resilience-system.svc.cluster.local"
+  http:
+  - fault:
+      delay:
+        percentage:
+          value: 0.1  # 0.1% of requests
+        fixedDelay: 1s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: gateway-error,connect-failure,refused-stream,503
+      retryRemoteLocalities: true
+    timeout: 30s
+    route:
+    - destination:
+        host: resilience-service.resilience-system.svc.cluster.local
+
+---
+# Pod Disruption Budget for Resilience
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: resilience-service-pdb
+  namespace: resilience-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: resilience-service
+
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: resilience-service-hpa
+  namespace: resilience-system
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: resilience-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+
+---
+# Network Policy for Resilience Service
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: resilience-service-netpol
+  namespace: resilience-system
+spec:
+  podSelector:
+    matchLabels:
+      app: resilience-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: uep-system
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+    ports:
+    - protocol: TCP
+      port: 3000
+    - protocol: TCP
+      port: 9090
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: uep-system
+    ports:
+    - protocol: TCP
+      port: 3000
+    - protocol: TCP
+      port: 3001
+  - to: []  # Allow DNS resolution
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+# Service Monitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: resilience-service-monitor
+  namespace: resilience-system
+  labels:
+    app: resilience-service
+spec:
+  selector:
+    matchLabels:
+      app: resilience-service
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+
+---
+# PrometheusRule for Circuit Breaker Alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: circuit-breaker-alerts
+  namespace: resilience-system
+spec:
+  groups:
+  - name: circuit-breaker
+    rules:
+    - alert: CircuitBreakerOpen
+      expr: circuit_breaker_state{state="open"} == 1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Circuit breaker is open for {{ $labels.service_name }}"
+        description: "Circuit breaker for service {{ $labels.service_name }} has been open for more than 1 minute"
+    
+    - alert: HighFailureRate
+      expr: rate(circuit_breaker_failures_total[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High failure rate detected for {{ $labels.service_name }}"
+        description: "Service {{ $labels.service_name }} has a failure rate of {{ $value }} failures/second"
+    
+    - alert: CircuitBreakerStuckOpen
+      expr: circuit_breaker_state{state="open"} == 1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Circuit breaker stuck open for {{ $labels.service_name }}"
+        description: "Circuit breaker for service {{ $labels.service_name }} has been open for more than 5 minutes"
