@@ -10,7 +10,7 @@
 
 **Before writing ANY ZAD report, you MUST:**
 1. Use `task-master show <id>` to understand the actual task requirements
-2. Use `task-master expand --id=<id> --research` for complex tasks
+2. Use `task-master expand --id=<id> --research` for ALL TASKS
 3. Follow the research-driven approach with Context7 integration
 4. **NO EXCEPTIONS** - Previous methodology violations cannot be repeated
 
