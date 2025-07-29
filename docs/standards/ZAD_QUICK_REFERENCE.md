@@ -1,6 +1,22 @@
-# ZAD Quick Reference Guide
+# ZAD Quick Reference Guide - Zero-Assumption Documentation (ZAD) Standards
 
 ## 🎯 **Zero-Assumption Documentation (ZAD) Cheat Sheet**
+
+---
+
+## 🚨 **CRITICAL METHODOLOGY REQUIREMENT** 🚨
+
+**⚠️ MANDATORY: ALL ZAD REPORTS MUST FOLLOW TASKMASTER RESEARCH + CONTEXT7 METHODOLOGY ⚠️**
+
+**Before writing ANY ZAD report, you MUST:**
+1. Use `task-master show <id>` to understand the actual task requirements
+2. Use `task-master expand --id=<id> --research` for complex tasks
+3. Follow the research-driven approach with Context7 integration
+4. **NO EXCEPTIONS** - Previous methodology violations cannot be repeated
+
+**All ZAD reports must document that proper TaskMaster methodology was followed.**
+
+---
 
 ### **The Golden Formula**
 ```
@@ -213,10 +229,23 @@ CLEAR ANALOGY + DETAILED PROBLEM + TECHNICAL SOLUTION + CONCRETE BENEFITS + COMP
 ## 🎉 **ZAD in 5 Minutes**
 
 ### **Emergency ZAD Conversion**:
-1. **Add this to the top**: "The core problem this solves is [frustration]"
-2. **Replace technical terms** with analogies
-3. **Add one before/after example**
-4. **End with**: "Here's what actually happens step-by-step"
-5. **Test it** on someone unfamiliar
+1. **FIRST: Verify TaskMaster methodology was followed** - Document actual task-master commands used
+2. **Add this to the top**: "The core problem this solves is [frustration]"
+3. **Replace technical terms** with analogies
+4. **Add one before/after example**
+5. **End with**: "Here's what actually happens step-by-step"
+6. **Test it** on someone unfamiliar
 
-**Result**: Instantly more understandable documentation that people actually want to read.
+---
+
+## 🚨 **FINAL METHODOLOGY VERIFICATION** 🚨
+
+**⚠️ BEFORE PUBLISHING ANY ZAD REPORT ⚠️**
+
+**You MUST include in every ZAD report:**
+- Evidence of `task-master show <id>` usage
+- Documentation of research methodology followed
+- Confirmation that Context7 integration was used
+- **NO EXCEPTIONS** - Methodology compliance is mandatory
+
+**Result**: Instantly more understandable documentation that people actually want to read AND follows proper TaskMaster research methodology.
