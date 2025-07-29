@@ -71,6 +71,12 @@ services:
       - UEP_REGISTRY_URL=http://uep-registry:3001
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # OpenTelemetry Configuration
+      - OTEL_SERVICE_NAME=factory-core
+      - OTEL_SERVICE_VERSION=1.0.0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=factory-core,service.version=1.0.0,deployment.environment=production
     volumes:
       - ./data/factory-core:/app/data
       - ./logs:/app/logs
@@ -119,6 +125,12 @@ services:
       - UEP_REGISTRY_URL=http://uep-registry:3001
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # OpenTelemetry Configuration
+      - OTEL_SERVICE_NAME=domain-agents
+      - OTEL_SERVICE_VERSION=1.0.0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=domain-agents,service.version=1.0.0,deployment.environment=production
     volumes:
       - ./data/domain-agents:/app/data
       - ./logs:/app/logs
@@ -322,13 +334,24 @@ services:
     volumes:
       - prometheus_data:/prometheus
       - grafana_data:/var/lib/grafana
-      - ./containers/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./containers/observability/prometheus-enhanced.yml:/etc/prometheus/prometheus.yml:ro
+      - ./containers/observability/recording_rules.yml:/etc/prometheus/recording_rules.yml:ro
+      - ./containers/observability/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
       - ./containers/observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./containers/observability/grafana-dashboard-provisioning.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
       - ./containers/observability/grafana-dashboard-logs.json:/etc/grafana/provisioning/dashboards/logs.json:ro
+      - ./containers/observability/grafana-dashboard-system-overview.json:/etc/grafana/provisioning/dashboards/system-overview.json:ro
+      - ./containers/observability/grafana-dashboard-service-health.json:/etc/grafana/provisioning/dashboards/service-health.json:ro
+      - ./containers/observability/grafana-dashboard-agent-coordination.json:/etc/grafana/provisioning/dashboards/agent-coordination.json:ro
     networks:
       - meta-agent-factory
+      - monitoring
     depends_on:
       loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+      alertmanager:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -349,6 +372,134 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.metrics.rule=Host(`metrics.localhost`)"
       - "traefik.http.services.metrics.loadbalancer.server.port=3000"
+
+  # Tempo - Distributed Tracing Storage
+  tempo:
+    image: grafana/tempo:2.3.1
+    container_name: meta-agent-tempo
+    ports:
+      - "3200:3200"   # HTTP
+      - "9095:9095"   # gRPC
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    volumes:
+      - tempo_data:/tmp/tempo
+      - ./containers/observability/tempo.yml:/etc/tempo/tempo.yml:ro
+    networks:
+      - meta-agent-factory
+      - monitoring
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3200/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    command: ["-config.file=/etc/tempo/tempo.yml"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tempo.rule=Host(`tempo.localhost`)"
+      - "traefik.http.services.tempo.loadbalancer.server.port=3200"
+
+  # OpenTelemetry Collector - Trace Processing
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    container_name: meta-agent-otel-collector
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "8889:8889"   # Prometheus metrics exporter
+      - "13133:13133" # Health check
+      - "1777:1777"   # pprof
+      - "55679:55679" # zpages
+    volumes:
+      - ./containers/observability/otel-collector.yml:/etc/otelcol-contrib/otel-collector.yml:ro
+    networks:
+      - meta-agent-factory
+      - monitoring
+    depends_on:
+      tempo:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:13133"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    command: ["--config=/etc/otelcol-contrib/otel-collector.yml"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.otel.rule=Host(`otel.localhost`)"
+      - "traefik.http.services.otel.loadbalancer.server.port=13133"
+
+  # Alertmanager - Alert Management and Notifications
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: meta-agent-alertmanager
+    ports:
+      - "9093:9093"   # Alertmanager UI
+    environment:
+      # Email configuration
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com:587}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - ALERT_EMAIL_FROM=${ALERT_EMAIL_FROM:-alerts@meta-agent-factory.com}
+      - DEFAULT_EMAIL=${DEFAULT_EMAIL:-devops@meta-agent-factory.com}
+      - CRITICAL_EMAIL=${CRITICAL_EMAIL:-oncall@meta-agent-factory.com}
+      - AGENT_TEAM_EMAIL=${AGENT_TEAM_EMAIL:-agents@meta-agent-factory.com}
+      - PLATFORM_TEAM_EMAIL=${PLATFORM_TEAM_EMAIL:-platform@meta-agent-factory.com}
+      # Slack configuration
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      # PagerDuty configuration
+      - PAGERDUTY_INTEGRATION_KEY=${PAGERDUTY_INTEGRATION_KEY:-}
+    volumes:
+      - alertmanager_data:/alertmanager
+      - ./containers/observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    networks:
+      - meta-agent-factory
+      - monitoring
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+      - '--cluster.listen-address=0.0.0.0:9094'
+      - '--log.level=info'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alertmanager.rule=Host(`alerts.localhost`)"
+      - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
 
   # Loki - Log Aggregation
   loki:
@@ -518,6 +669,10 @@ volumes:
   grafana_data:
     driver: local
   loki_data:
+    driver: local
+  tempo_data:
+    driver: local
+  alertmanager_data:
     driver: local
   redis_data:
     driver: local

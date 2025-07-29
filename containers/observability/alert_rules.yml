@@ -1,0 +1,279 @@
+# Alert Rules for Meta-Agent Factory Monitoring
+# Production-ready alerting for proactive issue detection and resolution
+
+groups:
+  # Critical System Alerts
+  - name: critical_alerts
+    rules:
+      # Service Down Alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} on instance {{ $labels.instance }} has been down for more than 30 seconds."
+          runbook_url: "https://docs.example.com/runbooks/service-down"
+
+      # Critical Services Down (Factory Core, Domain Agents, UEP Service)
+      - alert: CriticalServiceDown
+        expr: up{job=~"factory-core|domain-agents|uep-service"} == 0
+        for: 15s
+        labels:
+          severity: critical
+          team: platform
+          pager: true
+        annotations:
+          summary: "CRITICAL: {{ $labels.job }} service is down"
+          description: "Critical service {{ $labels.job }} has been down for 15 seconds. This affects core system functionality."
+
+      # System Health Score Critical
+      - alert: SystemHealthCritical
+        expr: system:health_score < 70
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "System health score critically low: {{ $value }}%"
+          description: "Overall system health score has been below 70% for 2 minutes. Multiple issues may be affecting the system."
+
+  # Agent Performance Alerts
+  - name: agent_performance_alerts
+    rules:
+      # High Agent Error Rate
+      - alert: HighAgentErrorRate
+        expr: agent:error_rate_5m > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          team: agents
+        annotations:
+          summary: "High error rate in {{ $labels.job }}: {{ $value | humanizePercentage }}"
+          description: "Agent {{ $labels.job }} has an error rate above 10% for the last 2 minutes."
+
+      # Agent Response Time High
+      - alert: AgentResponseTimeHigh
+        expr: agent:response_time_p95_5m > 5
+        for: 3m
+        labels:
+          severity: warning
+          team: agents
+        annotations:
+          summary: "High response time in {{ $labels.job }}: {{ $value }}s"
+          description: "Agent {{ $labels.job }} 95th percentile response time is above 5 seconds for 3 minutes."
+
+      # Agent Capability Matching Failure
+      - alert: AgentCapabilityMatchingFailure
+        expr: agent:capability_match_success_rate_5m < 80
+        for: 1m
+        labels:
+          severity: critical
+          team: agents
+        annotations:
+          summary: "Agent capability matching failure: {{ $value }}% success rate"
+          description: "Agent capability matching success rate has dropped below 80% for 1 minute."
+
+      # Factory Coordination Failure
+      - alert: FactoryCoordinationFailure
+        expr: factory:coordination_success_rate_5m < 90
+        for: 1m
+        labels:
+          severity: warning
+          team: factory
+        annotations:
+          summary: "Factory coordination issues: {{ $value }}% success rate"
+          description: "Factory agent coordination success rate has dropped below 90% for 1 minute."
+
+  # UEP Protocol Alerts
+  - name: uep_protocol_alerts
+    rules:
+      # UEP Validation Failure Rate High
+      - alert: UEPValidationFailureHigh
+        expr: uep:validation_success_rate_5m < 95
+        for: 1m
+        labels:
+          severity: warning
+          team: protocol
+        annotations:
+          summary: "UEP validation failure rate high: {{ $value }}% success"
+          description: "UEP protocol validation success rate has dropped below 95% for 1 minute."
+
+      # UEP Protocol Compliance Low
+      - alert: UEPProtocolComplianceLow
+        expr: uep:compliance_ratio_5m < 90
+        for: 2m
+        labels:
+          severity: critical
+          team: protocol
+        annotations:
+          summary: "UEP protocol compliance low: {{ $value }}%"
+          description: "UEP protocol compliance ratio has been below 90% for 2 minutes."
+
+      # UEP Processing Latency High
+      - alert: UEPProcessingLatencyHigh
+        expr: uep:processing_latency_p95_5m > 1
+        for: 3m
+        labels:
+          severity: warning
+          team: protocol
+        annotations:
+          summary: "UEP processing latency high: {{ $value }}s"
+          description: "UEP message processing 95th percentile latency is above 1 second for 3 minutes."
+
+  # Infrastructure Alerts
+  - name: infrastructure_alerts
+    rules:
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: container:cpu_usage_avg_5m > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High CPU usage in {{ $labels.name }}: {{ $value }}%"
+          description: "Container {{ $labels.name }} CPU usage has been above 80% for 5 minutes."
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: container:memory_usage_percent > 85
+        for: 3m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High memory usage in {{ $labels.name }}: {{ $value }}%"
+          description: "Container {{ $labels.name }} memory usage has been above 85% for 3 minutes."
+
+      # Container Restarts
+      - alert: ContainerRestarting
+        expr: container:restart_rate_1h > 0
+        for: 0s
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "Container {{ $labels.name }} restarted {{ $value }} times in the last hour"
+          description: "Container {{ $labels.name }} has restarted {{ $value }} times in the last hour, indicating potential stability issues."
+
+      # API Gateway High Error Rate
+      - alert: APIGatewayHighErrorRate
+        expr: gateway:error_rate_5m > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          team: gateway
+        annotations:
+          summary: "API Gateway high error rate: {{ $value | humanizePercentage }}"
+          description: "API Gateway error rate has been above 5% for 2 minutes."
+
+  # Message Broker Alerts
+  - name: messaging_alerts
+    rules:
+      # NATS High Message Queue Depth
+      - alert: NATSHighQueueDepth
+        expr: nats_jetstream_consumer_num_pending > 1000
+        for: 2m
+        labels:
+          severity: warning
+          team: messaging
+        annotations:
+          summary: "NATS high queue depth: {{ $value }} pending messages"
+          description: "NATS JetStream consumer has {{ $value }} pending messages for 2 minutes."
+
+      # Redis High Memory Usage
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 3m
+        labels:
+          severity: warning
+          team: cache
+        annotations:
+          summary: "Redis high memory usage: {{ $value | humanizePercentage }}"
+          description: "Redis memory usage has been above 80% of limit for 3 minutes."
+
+      # Redis Low Hit Ratio
+      - alert: RedisLowHitRatio
+        expr: redis:hit_ratio_5m < 70
+        for: 5m
+        labels:
+          severity: warning
+          team: cache
+        annotations:
+          summary: "Redis low hit ratio: {{ $value }}%"
+          description: "Redis cache hit ratio has been below 70% for 5 minutes, indicating potential cache efficiency issues."
+
+  # Business Logic Alerts
+  - name: business_alerts
+    rules:
+      # Low Project Success Rate
+      - alert: LowProjectSuccessRate
+        expr: business:project_success_rate_by_complexity_1h < 85
+        for: 5m
+        labels:
+          severity: warning
+          team: business
+        annotations:
+          summary: "Low project success rate: {{ $value }}%"
+          description: "Project completion success rate has been below 85% for the last hour."
+
+      # High First Response Time
+      - alert: HighFirstResponseTime
+        expr: business:first_response_time_avg_5m > 3
+        for: 3m
+        labels:
+          severity: warning
+          team: agents
+        annotations:
+          summary: "High first response time: {{ $value }}s"
+          description: "Average time to first agent response has been above 3 seconds for 3 minutes."
+
+      # No Active Workflows
+      - alert: NoActiveWorkflows
+        expr: business:active_workflows == 0
+        for: 10m
+        labels:
+          severity: warning
+          team: business
+        annotations:
+          summary: "No active workflows detected"
+          description: "No active workflows have been detected for 10 minutes, which may indicate system issues."
+
+  # Observability Stack Alerts
+  - name: observability_alerts
+    rules:
+      # Prometheus Target Down
+      - alert: PrometheusTargetDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: observability
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus metrics collection is down. Monitoring capabilities are degraded."
+
+      # Loki Down
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          team: observability
+        annotations:
+          summary: "Loki log aggregation is down"
+          description: "Loki log aggregation service is down. Log collection and analysis capabilities are degraded."
+
+      # High Metrics Ingestion Rate
+      - alert: HighMetricsIngestionRate
+        expr: rate(prometheus_tsdb_symbol_table_size_bytes[5m]) > 1000000
+        for: 5m
+        labels:
+          severity: warning
+          team: observability
+        annotations:
+          summary: "High metrics ingestion rate detected"
+          description: "Prometheus metrics ingestion rate is unusually high, may indicate cardinality issues."

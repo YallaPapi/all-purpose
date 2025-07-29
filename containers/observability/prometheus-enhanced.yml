@@ -1,3 +1,6 @@
+# Enhanced Prometheus Configuration for Meta-Agent Factory
+# Production-ready configuration with comprehensive scraping, recording rules, and alerting
+
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
@@ -5,18 +8,21 @@ global:
     environment: 'production'
     cluster: 'meta-agent-factory'
 
+# Recording rules for efficient querying and alerting
 rule_files:
   - "recording_rules.yml"
   - "alert_rules.yml"
 
+# Scrape configurations for all Meta-Agent Factory components
 scrape_configs:
   # Prometheus self-monitoring
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
     scrape_interval: 15s
+    metrics_path: '/metrics'
 
-  # Factory Core - 11 Meta-Agents with enhanced metrics
+  # Factory Core - 11 Meta-Agents
   - job_name: 'factory-core'
     static_configs:
       - targets: ['factory-core:3000']
@@ -28,6 +34,10 @@ scrape_configs:
         regex: 'agent_.*'
         target_label: 'component'
         replacement: 'meta-agent'
+      - source_labels: [__name__]
+        regex: 'factory_.*'
+        target_label: 'component'  
+        replacement: 'factory-core'
 
   # Domain Agents - 5 Specialized Agents
   - job_name: 'domain-agents'
@@ -36,62 +46,101 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s
+    metrics_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'domain_.*'
+        target_label: 'component'
+        replacement: 'domain-agent'
 
-  # UEP Service - Protocol Validation
+  # UEP Service - Protocol Validation and Enforcement
   - job_name: 'uep-service'
     static_configs:
       - targets: ['uep-service:3002']
     metrics_path: '/metrics'
     scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'uep_.*'
+        target_label: 'component'
+        replacement: 'uep-service'
 
-  # UEP Registry - Service Discovery
+  # UEP Registry - Service Discovery and Agent Registration
   - job_name: 'uep-registry'
     static_configs:
       - targets: ['uep-registry:3001']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # API Gateway - Traefik
+  # API Gateway - Traefik Reverse Proxy
   - job_name: 'api-gateway'
     static_configs:
       - targets: ['api-gateway:8080']
     metrics_path: '/metrics'
     scrape_interval: 30s
+    scrape_timeout: 10s
 
-  # NATS Message Broker
+  # NATS Message Broker - Event Streaming
   - job_name: 'nats-broker'
     static_configs:
       - targets: ['nats-broker:8222']
     metrics_path: '/varz'
     scrape_interval: 30s
+    scrape_timeout: 10s
 
-  # Redis Cache
+  # Redis - Caching and Session Storage
   - job_name: 'redis'
     static_configs:
       - targets: ['redis:6379']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Loki Logs
+  # Node Exporter - System Metrics (if deployed)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Container Advisor - Container Metrics (if deployed)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Loki - Log Aggregation Service
   - job_name: 'loki'
     static_configs:
       - targets: ['loki:3100']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Grafana Dashboard
+  # Grafana - Dashboard and Visualization
   - job_name: 'grafana'
     static_configs:
       - targets: ['observability:3000']
     metrics_path: '/metrics'
     scrape_interval: 60s
 
+# Alerting configuration
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
           - 'alertmanager:9093'
       timeout: 10s
+      path_prefix: /
+      scheme: http
+
+# Remote write configuration for external monitoring (optional)
+# remote_write:
+#   - url: "https://prometheus-remote-write-endpoint"
+#     queue_config:
+#       max_samples_per_send: 1000
+#       max_shards: 200
+#       capacity: 2500
 
 # Storage configuration
 storage:

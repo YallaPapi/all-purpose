@@ -1,0 +1,198 @@
+# Recording Rules for Meta-Agent Factory Metrics
+# Pre-computed metrics for efficient querying and alerting
+
+groups:
+  # Agent Performance Metrics
+  - name: agent_performance
+    interval: 30s
+    rules:
+      # Agent request rate by service and status
+      - record: agent:request_rate_5m
+        expr: rate(agent_requests_total[5m])
+
+      # Agent error rate by service
+      - record: agent:error_rate_5m  
+        expr: rate(agent_requests_total{status=~"4..|5.."}[5m])
+
+      # Agent success rate percentage
+      - record: agent:success_rate_5m
+        expr: |
+          (
+            rate(agent_requests_total{status=~"2.."}[5m]) /
+            rate(agent_requests_total[5m])
+          ) * 100
+
+      # Agent response time percentiles
+      - record: agent:response_time_p95_5m
+        expr: histogram_quantile(0.95, rate(agent_response_time_seconds_bucket[5m]))
+
+      - record: agent:response_time_p50_5m
+        expr: histogram_quantile(0.50, rate(agent_response_time_seconds_bucket[5m]))
+
+      # Agent capability matching success rate
+      - record: agent:capability_match_success_rate_5m
+        expr: |
+          (
+            rate(agent_capability_matches_total{status="success"}[5m]) /
+            rate(agent_capability_matches_total[5m])
+          ) * 100
+
+  # Factory Core Metrics
+  - name: factory_core_performance
+    interval: 30s
+    rules:
+      # Factory throughput - projects generated per second
+      - record: factory:throughput_5m
+        expr: rate(factory_projects_generated_total[5m])
+
+      # Factory coordination success rate
+      - record: factory:coordination_success_rate_5m
+        expr: |
+          (
+            rate(factory_coordination_attempts_total{status="success"}[5m]) /
+            rate(factory_coordination_attempts_total[5m])
+          ) * 100
+
+      # Average project generation time
+      - record: factory:project_generation_time_avg_5m
+        expr: rate(factory_project_generation_duration_seconds_sum[5m]) / rate(factory_project_generation_duration_seconds_count[5m])
+
+      # Factory active agents count
+      - record: factory:active_agents_count
+        expr: count(up{job=~"factory-core|domain-agents"} == 1)
+
+  # UEP Protocol Metrics
+  - name: uep_protocol_performance
+    interval: 30s  
+    rules:
+      # UEP validation success rate
+      - record: uep:validation_success_rate_5m
+        expr: |
+          (
+            rate(uep_validation_attempts_total{status="success"}[5m]) /
+            rate(uep_validation_attempts_total[5m])
+          ) * 100
+
+      # UEP protocol compliance ratio
+      - record: uep:compliance_ratio_5m
+        expr: |
+          (
+            rate(uep_compliant_requests_total[5m]) /
+            rate(uep_total_requests_total[5m])
+          ) * 100
+
+      # UEP message processing latency
+      - record: uep:processing_latency_p95_5m
+        expr: histogram_quantile(0.95, rate(uep_processing_duration_seconds_bucket[5m]))
+
+      # UEP registry operation success rate
+      - record: uep:registry_success_rate_5m
+        expr: |
+          (
+            rate(uep_registry_operations_total{status="success"}[5m]) /
+            rate(uep_registry_operations_total[5m])
+          ) * 100
+
+  # Infrastructure Metrics
+  - name: infrastructure_performance
+    interval: 30s
+    rules:
+      # Container CPU utilization average
+      - record: container:cpu_usage_avg_5m
+        expr: avg(rate(container_cpu_usage_seconds_total[5m]) * 100) by (name, service)
+
+      # Container memory utilization percentage
+      - record: container:memory_usage_percent
+        expr: |
+          (
+            container_memory_usage_bytes / 
+            container_spec_memory_limit_bytes
+          ) * 100
+
+      # Container restart rate
+      - record: container:restart_rate_1h
+        expr: increase(container_last_seen[1h]) - increase(container_start_time_seconds[1h])
+
+      # API Gateway request rate
+      - record: gateway:request_rate_5m
+        expr: rate(traefik_requests_total[5m])
+
+      # API Gateway error rate
+      - record: gateway:error_rate_5m
+        expr: rate(traefik_requests_total{code=~"4..|5.."}[5m])
+
+  # Message Broker Performance
+  - name: messaging_performance
+    interval: 30s
+    rules:
+      # NATS message throughput
+      - record: nats:message_rate_5m
+        expr: rate(nats_stats_in_msgs[5m])
+
+      # NATS message size average
+      - record: nats:message_size_avg_5m
+        expr: rate(nats_stats_in_bytes[5m]) / rate(nats_stats_in_msgs[5m])
+
+      # Redis operation rate
+      - record: redis:ops_rate_5m
+        expr: rate(redis_commands_processed_total[5m])
+
+      # Redis hit ratio
+      - record: redis:hit_ratio_5m
+        expr: |
+          (
+            rate(redis_keyspace_hits_total[5m]) /
+            (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
+          ) * 100
+
+  # Business Logic Metrics
+  - name: business_metrics
+    interval: 60s
+    rules:
+      # Total active workflows
+      - record: business:active_workflows
+        expr: sum(factory_active_workflows)
+
+      # User session count
+      - record: business:active_sessions
+        expr: sum(factory_active_user_sessions)
+
+      # Project success rate by complexity
+      - record: business:project_success_rate_by_complexity_1h
+        expr: |
+          (
+            increase(factory_projects_completed_total[1h]) /
+            increase(factory_projects_started_total[1h])
+          ) * 100
+
+      # Average time to first agent response
+      - record: business:first_response_time_avg_5m
+        expr: rate(agent_first_response_duration_seconds_sum[5m]) / rate(agent_first_response_duration_seconds_count[5m])
+
+  # Aggregated Health Metrics
+  - name: health_metrics
+    interval: 30s
+    rules:
+      # Overall system health score (0-100)
+      - record: system:health_score
+        expr: |
+          (
+            (count(up == 1) / count(up)) * 30 +                          # Service availability (30%)
+            (agent:success_rate_5m * 0.25) +                             # Agent success rate (25%)
+            (uep:validation_success_rate_5m * 0.20) +                    # UEP compliance (20%)
+            (factory:coordination_success_rate_5m * 0.15) +              # Factory coordination (15%)
+            (min(100, (1 - avg(container:cpu_usage_avg_5m/100)) * 100) * 0.10)  # Resource efficiency (10%)
+          )
+
+      # Critical services count (services that must be up)
+      - record: system:critical_services_up
+        expr: |
+          count(up{job=~"factory-core|domain-agents|uep-service|api-gateway"} == 1)
+
+      # System SLA compliance (percentage of time above 95% health score)
+      - record: system:sla_compliance_24h
+        expr: |
+          (
+            count_over_time((system:health_score > 95)[24h:5m]) /
+            count_over_time(system:health_score[24h:5m])
+          ) * 100
