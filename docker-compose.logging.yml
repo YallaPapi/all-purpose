@@ -1,0 +1,144 @@
+# Docker Compose override for centralized logging
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.logging.yml up -d
+
+version: '3.8'
+
+services:
+  # Factory Core with structured logging
+  factory-core:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=json
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=factory-core"
+
+  # Domain Agents with structured logging
+  domain-agents:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=json
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=domain-agents"
+
+  # API Gateway with access logging
+  api-gateway:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=api-gateway"
+
+  # NATS Broker with debug logging
+  nats-broker:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=nats-broker"
+
+  # UEP Service with protocol logging
+  uep-service:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=json
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=uep-service"
+
+  # UEP Registry with service discovery logging
+  uep-registry:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=uep-registry"
+
+  # Observability services logging
+  observability:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=observability"
+
+  loki:
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=loki"
+
+  promtail:
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=promtail"
+
+  # Supporting services
+  redis:
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=redis"
+
+  etcd:
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=etcd"

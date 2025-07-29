@@ -369,8 +369,54 @@
           193,
           194
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Unified Observability Architecture",
+            "description": "Research and define the overall architecture for monitoring and observability in the containerized meta-agent factory, ensuring integration of logging, metrics, tracing, and alerting components.",
+            "dependencies": [],
+            "details": "Select and document the core observability stack (e.g., Loki, Prometheus, OpenTelemetry, Grafana, Alertmanager). Specify data flows, integration points, and requirements for scalability and security. Ensure the architecture supports correlation across logs, metrics, and traces for unified troubleshooting.",
+            "status": "pending",
+            "testStrategy": "Review architecture with stakeholders. Validate that all observability requirements are addressed. Simulate data flows to confirm integration feasibility."
+          },
+          {
+            "id": 2,
+            "title": "Implement Centralized Logging Infrastructure",
+            "description": "Deploy and configure a centralized logging system for all containers, standardizing log formats and ensuring reliable log collection, retention, and access.",
+            "dependencies": [],
+            "details": "Set up Loki (v2.9+) and Promtail for log aggregation. Enforce structured JSON logging across services. Define log retention and rotation policies. Integrate logs with Grafana for visualization and enable cross-correlation with metrics and traces.",
+            "status": "pending",
+            "testStrategy": "Verify log ingestion from all containers. Check log searchability and retention. Test log format compliance and cross-correlation with metrics."
+          },
+          {
+            "id": 3,
+            "title": "Deploy Metrics Collection and Aggregation",
+            "description": "Set up Prometheus (v2.45+) for collecting system, container, and custom service metrics, including exporters and recording rules for key queries.",
+            "dependencies": [],
+            "details": "Configure Prometheus to scrape metrics from all relevant sources. Deploy and configure exporters for custom and standard metrics. Implement recording rules for common queries and ensure metrics are labeled for multi-service environments. Integrate with Grafana for dashboarding.",
+            "status": "pending",
+            "testStrategy": "Validate metrics collection from all sources. Confirm accuracy of recording rules. Test dashboard queries and multi-service metric labeling."
+          },
+          {
+            "id": 4,
+            "title": "Enable Distributed Tracing and Service Mapping",
+            "description": "Implement distributed tracing using OpenTelemetry, configuring trace collection, sampling, and visualization to map service dependencies and performance bottlenecks.",
+            "dependencies": [],
+            "details": "Integrate OpenTelemetry SDKs into all services. Configure trace exporters and sampling policies. Set up Jaeger or Tempo for trace storage and visualization. Generate service dependency maps from trace data and ensure traces can be correlated with logs and metrics.",
+            "status": "pending",
+            "testStrategy": "Generate test traces across service boundaries. Validate trace completeness and accuracy. Confirm service dependency mapping and cross-correlation with logs/metrics."
+          },
+          {
+            "id": 5,
+            "title": "Configure Alerting, Dashboards, and Documentation",
+            "description": "Establish alerting rules, notification channels, and comprehensive dashboards. Document all configurations and provide guidelines for extending observability to new services.",
+            "dependencies": [],
+            "details": "Define and implement alerting rules for critical conditions using Prometheus Alertmanager. Set up notification channels (email, Slack, PagerDuty). Create Grafana dashboards for system overview, service health, and troubleshooting. Document all configuration files, Docker Compose integration, and extension procedures.",
+            "status": "pending",
+            "testStrategy": "Trigger test alerts and verify notifications. Review dashboard coverage and usability. Validate documentation by onboarding a new service into the observability stack."
+          }
+        ]
       },
       {
         "id": 197,
@@ -1432,7 +1478,7 @@
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-07-28T18:28:56.436Z",
+      "updated": "2025-07-29T00:25:32.432Z",
       "description": "Tasks for master context"
     }
   }

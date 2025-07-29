@@ -1,0 +1,95 @@
+# Log Retention Policy for Meta-Agent Factory
+# Defines retention periods and rotation policies for different log types
+
+retention_policies:
+  # Factory Core logs - Critical business logic
+  factory-core:
+    retention_period: "30d"  # 30 days
+    rotation_policy: "daily"
+    max_size: "100MB"
+    compression: true
+    priority: "high"
+    
+  # Domain Agents logs - Agent operations
+  domain-agents:
+    retention_period: "21d"  # 21 days
+    rotation_policy: "daily"
+    max_size: "50MB"
+    compression: true
+    priority: "high"
+    
+  # API Gateway logs - Access logs
+  api-gateway:
+    retention_period: "14d"  # 14 days
+    rotation_policy: "daily"
+    max_size: "200MB"
+    compression: true
+    priority: "medium"
+    
+  # NATS Broker logs - Message broker operations
+  nats-broker:
+    retention_period: "7d"   # 7 days
+    rotation_policy: "daily"
+    max_size: "25MB"
+    compression: true
+    priority: "medium"
+    
+  # UEP Service logs - Protocol validation
+  uep-service:
+    retention_period: "14d"  # 14 days
+    rotation_policy: "daily"
+    max_size: "50MB"
+    compression: true
+    priority: "high"
+    
+  # Service Discovery logs - Registry operations
+  service-discovery:
+    retention_period: "7d"   # 7 days
+    rotation_policy: "daily"
+    max_size: "25MB"
+    compression: true
+    priority: "low"
+    
+  # Error logs - All error level logs
+  error-logs:
+    retention_period: "90d"  # 90 days (compliance requirement)
+    rotation_policy: "daily"
+    max_size: "500MB"
+    compression: true
+    priority: "critical"
+    
+  # Security logs - Authentication and authorization
+  security-logs:
+    retention_period: "365d" # 1 year (compliance requirement)
+    rotation_policy: "daily"
+    max_size: "100MB"
+    compression: true
+    priority: "critical"
+
+# Global settings
+global:
+  default_retention: "7d"
+  max_disk_usage: "10GB"
+  cleanup_interval: "1h"
+  compression_algorithm: "gzip"
+  
+# Storage tiers
+storage_tiers:
+  hot:
+    period: "3d"
+    storage_class: "ssd"
+    
+  warm:
+    period: "30d"
+    storage_class: "hdd"
+    
+  cold:
+    period: "365d"
+    storage_class: "archive"
+
+# Alerting thresholds
+alerts:
+  disk_usage_warning: 80   # 80% disk usage
+  disk_usage_critical: 95  # 95% disk usage
+  log_ingestion_rate_warning: 1000  # logs per second
+  log_ingestion_rate_critical: 5000 # logs per second

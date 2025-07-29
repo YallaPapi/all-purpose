@@ -1,0 +1,19 @@
+FROM grafana/loki:2.9.0
+LABEL maintainer="meta-agent-factory"
+LABEL description="Loki log aggregation for Meta-Agent Factory MVS Architecture"
+
+# Copy custom configuration
+COPY loki.yml /etc/loki/loki.yml
+
+# Create data directories
+RUN mkdir -p /loki/chunks /loki/rules
+RUN chown -R 10001:10001 /loki
+
+# Expose Loki ports
+EXPOSE 3100 9096
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1
+
+CMD ["-config.file=/etc/loki/loki.yml"]

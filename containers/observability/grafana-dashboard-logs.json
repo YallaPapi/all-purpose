@@ -1,0 +1,133 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Meta-Agent Factory Logs",
+    "tags": ["meta-agent-factory", "logs"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Factory Core Logs",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"factory-core\"}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Domain Agents Logs",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"domain-agents\"}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "API Gateway Access Logs",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"api-gateway\"}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "NATS Broker Logs",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"nats-broker\"}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Error Logs (All Services)",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{service=\"meta-agent-factory\"} |= \"error\" or {service=\"meta-agent-factory\"} |= \"ERROR\" or {service=\"meta-agent-factory\"} |= \"Error\"",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "Log Volume by Service",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum by (job) (count_over_time({service=\"meta-agent-factory\"}[5m]))",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ]
+    },
+    "refresh": "10s",
+    "version": 1
+  }
+}
