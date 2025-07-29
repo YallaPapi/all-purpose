@@ -472,6 +472,7 @@ services:
     volumes:
       - alertmanager_data:/alertmanager
       - ./containers/observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./containers/observability/templates:/etc/alertmanager/templates:ro
     networks:
       - meta-agent-factory
       - monitoring

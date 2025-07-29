@@ -2,8 +2,11 @@
  * UEP Registry Service Main Entry Point
  * 
  * Bootstrap the NestJS application with gRPC and HTTP servers,
- * etcd integration, health checks, and monitoring capabilities.
+ * etcd integration, health checks, monitoring capabilities, and distributed tracing.
  */
+
+// Initialize tracing first - MUST be before any other imports
+import { uepRegistryTracingService } from './tracing/tracing.service';
 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
@@ -41,6 +44,9 @@ async function bootstrap() {
     
     // Performance middleware
     app.use(compression());
+
+    // Distributed tracing middleware
+    app.use(uepRegistryTracingService.getExpressMiddleware());
 
     // Global validation pipe
     app.use(ValidationPipe({
@@ -133,6 +139,7 @@ async function bootstrap() {
         await Promise.all([
           app.close(),
           grpcApp.close(),
+          uepRegistryTracingService.shutdown(),
         ]);
         
         logger.log('✅ Graceful shutdown completed');

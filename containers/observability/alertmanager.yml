@@ -101,83 +101,37 @@ receivers:
   - name: 'default'
     email_configs:
       - to: '${DEFAULT_EMAIL:-devops@meta-agent-factory.com}'
-        subject: '[Meta-Agent Factory] Alert: {{ .GroupLabels.alertname }}'
-        body: |
-          {{ range .Alerts }}
-          Alert: {{ .Annotations.summary }}
-          Description: {{ .Annotations.description }}
-          Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
-          Started: {{ .StartsAt }}
-          {{ end }}
-        html: |
-          <h2>Meta-Agent Factory Alert</h2>
-          {{ range .Alerts }}
-          <h3>{{ .Annotations.summary }}</h3>
-          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
-          <p><strong>Labels:</strong><br>
-          {{ range .Labels.SortedPairs }}&nbsp;&nbsp;{{ .Name }}: {{ .Value }}<br>{{ end }}
-          </p>
-          <p><strong>Started:</strong> {{ .StartsAt }}</p>
-          <hr>
-          {{ end }}
+        subject: '{{ template "email.default.subject" . }}'
+        body: '{{ template "email.default.text" . }}'
+        html: '{{ template "email.default.html" . }}'
 
   # Critical alerts with immediate paging
   - name: 'critical-alerts'
     email_configs:
       - to: '${CRITICAL_EMAIL:-oncall@meta-agent-factory.com}'
-        subject: '🚨 CRITICAL: [Meta-Agent Factory] {{ .GroupLabels.alertname }}'
-        body: |
-          🚨 CRITICAL ALERT 🚨
-          
-          {{ range .Alerts }}
-          Alert: {{ .Annotations.summary }}
-          Description: {{ .Annotations.description }}
-          
-          Service: {{ .Labels.service }}
-          Severity: {{ .Labels.severity }}
-          Environment: {{ .Labels.environment }}
-          
-          Started: {{ .StartsAt }}
-          
-          Dashboard: http://localhost:3004/d/meta-agent-overview
-          Runbook: {{ .Annotations.runbook_url }}
-          {{ end }}
+        subject: '{{ template "email.critical.subject" . }}'
+        body: '{{ template "email.default.text" . }}'
+        html: '{{ template "email.default.html" . }}'
     
     slack_configs:
       - api_url: '${SLACK_WEBHOOK_URL}'
         channel: '#alerts-critical'
-        color: 'danger'
-        title: '🚨 CRITICAL: Meta-Agent Factory Alert'
-        text: |
-          {{ range .Alerts }}
-          *{{ .Annotations.summary }}*
-          {{ .Annotations.description }}
-          
-          *Service:* {{ .Labels.service }}
-          *Started:* {{ .StartsAt }}
-          {{ end }}
-        actions:
-          - type: button
-            text: 'View Dashboard'
-            url: 'http://localhost:3004/d/meta-agent-overview'
-          - type: button
-            text: 'Silence Alert'
-            url: 'http://localhost:9093/#/silences/new'
+        color: '{{ template "slack.color" . }}'
+        pretext: '{{ template "slack.pretext" . }}'
+        title: '{{ template "slack.critical.title" . }}'
+        text: '{{ template "slack.critical.text" . }}'
+        footer: '{{ template "slack.footer" . }}'
+        actions: '{{ template "slack.actions" . }}'
 
   # PagerDuty integration for critical service down alerts
   - name: 'pagerduty-critical'
     pagerduty_configs:
       - routing_key: '${PAGERDUTY_INTEGRATION_KEY}'
-        description: '{{ .GroupLabels.alertname }}: {{ .CommonAnnotations.summary }}'
-        details:
-          summary: '{{ .CommonAnnotations.summary }}'
-          description: '{{ .CommonAnnotations.description }}'
-          service: '{{ .GroupLabels.service }}'
-          severity: '{{ .GroupLabels.severity }}'
-          environment: '{{ .GroupLabels.environment }}'
-          dashboard_url: 'http://localhost:3004/d/meta-agent-overview'
-        client: 'Meta-Agent Factory Alertmanager'
-        client_url: 'http://localhost:9093'
+        description: '{{ template "pagerduty.service_down.description" . }}'
+        incident_key: '{{ template "pagerduty.default.incident_key" . }}'
+        details: '{{ template "pagerduty.service_down.details" . }}'
+        client: '{{ template "pagerduty.default.client" . }}'
+        client_url: '{{ template "pagerduty.default.client_url" . }}'
 
   # Critical alerts with both email and Slack
   - name: 'critical-with-slack'
@@ -210,48 +164,44 @@ receivers:
   - name: 'agent-team'
     email_configs:
       - to: '${AGENT_TEAM_EMAIL:-agents@meta-agent-factory.com}'
-        subject: '[Agent Team] {{ .GroupLabels.alertname }} - {{ .GroupLabels.agent_type }}'
+        subject: '{{ template "email.team.subject" . }}'
+        body: '{{ template "email.default.text" . }}'
+        html: '{{ template "email.default.html" . }}'
     slack_configs:
       - api_url: '${SLACK_WEBHOOK_URL}'
         channel: '#team-agents'
-        color: 'warning'
-        title: '🤖 Agent Alert: {{ .GroupLabels.agent_type }}'
+        color: '{{ template "slack.color" . }}'
+        title: '{{ template "slack.agent.title" . }}'
+        text: '{{ template "slack.agent.text" . }}'
+        footer: '{{ template "slack.footer" . }}'
+        actions: '{{ template "slack.actions" . }}'
 
   # Platform team notifications
   - name: 'platform-team'
     email_configs:
       - to: '${PLATFORM_TEAM_EMAIL:-platform@meta-agent-factory.com}'
-        subject: '[Platform] {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        subject: '{{ template "email.team.subject" . }}'
+        body: '{{ template "email.default.text" . }}'
+        html: '{{ template "email.default.html" . }}'
     slack_configs:
       - api_url: '${SLACK_WEBHOOK_URL}'
         channel: '#team-platform'
-        color: 'warning'
-        title: '🏗️ Platform Alert: {{ .GroupLabels.service }}'
+        color: '{{ template "slack.color" . }}'
+        title: '{{ template "slack.platform.title" . }}'
+        text: '{{ template "slack.platform.text" . }}'
+        footer: '{{ template "slack.footer" . }}'
+        actions: '{{ template "slack.actions" . }}'
 
   # Factory-specific alerts
   - name: 'factory-alerts'
     slack_configs:
       - api_url: '${SLACK_WEBHOOK_URL}'
         channel: '#meta-agent-factory'
-        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
-        title: '🏭 Factory Alert: {{ .GroupLabels.service }}'
-        text: |
-          {{ range .Alerts }}
-          *{{ .Annotations.summary }}*
-          {{ .Annotations.description }}
-          
-          *Service:* {{ .Labels.service }}
-          *Severity:* {{ .Labels.severity }}
-          *Status:* {{ .Status }}
-          {{ if eq .Status "firing" }}*Started:* {{ .StartsAt }}{{ else }}*Resolved:* {{ .EndsAt }}{{ end }}
-          {{ end }}
-        actions:
-          - type: button
-            text: 'View Service Dashboard'
-            url: 'http://localhost:3004/d/service-{{ .GroupLabels.service }}'
-          - type: button
-            text: 'Check Logs'
-            url: 'http://localhost:3004/explore?left={"datasource":"loki","queries":[{"expr":"{service=\"{{ .GroupLabels.service }}\"}"}]}'
+        color: '{{ template "slack.color" . }}'
+        title: '{{ template "slack.factory.title" . }}'
+        text: '{{ template "slack.factory.text" . }}'
+        footer: '{{ template "slack.footer" . }}'
+        actions: '{{ template "slack.actions" . }}'
 
 # Templates for custom notification formatting
 templates:
