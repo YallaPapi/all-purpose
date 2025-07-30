@@ -1640,8 +1640,68 @@
           211,
           212
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Build UEP Agent Base Docker Image",
+            "description": "Create a Docker base image using Node.js 20 LTS with all required UEP client libraries pre-installed to serve as the foundation for UEP-compliant agent containers.",
+            "dependencies": [],
+            "details": "Define a Dockerfile that installs Node.js 20 LTS and UEP client libraries. Ensure the image is published to a registry for reuse by agent containers.",
+            "status": "done",
+            "testStrategy": "Build the image and verify that Node.js and UEP libraries are available and functional by running a sample UEP client command inside a container."
+          },
+          {
+            "id": 2,
+            "title": "Develop UEP Agent Wrapper Library",
+            "description": "Implement a TypeScript library that adapts existing agent logic to UEP protocols using decorators or higher-order functions, supporting both REST and event-based communication.",
+            "dependencies": [
+              "213.1"
+            ],
+            "details": "Design the wrapper to enforce UEP protocol validation for all incoming and outgoing messages. Provide clear interfaces for agent developers to integrate their logic.",
+            "status": "done",
+            "testStrategy": "Wrap a sample agent with the library and verify protocol compliance, message validation, and compatibility with both REST and event-driven patterns."
+          },
+          {
+            "id": 3,
+            "title": "Implement UEP Health Check Endpoint",
+            "description": "Add a standardized health check endpoint to the container template that verifies UEP connectivity and compliance.",
+            "dependencies": [
+              "213.1",
+              "213.2"
+            ],
+            "details": "Expose an HTTP endpoint that checks agent health, UEP protocol connectivity, and readiness. Ensure it meets UEP compliance requirements.",
+            "status": "done",
+            "testStrategy": "Deploy the container and verify the health check endpoint responds correctly under normal and failure scenarios, including UEP connectivity loss."
+          },
+          {
+            "id": 4,
+            "title": "Integrate UEP Registration and Deregistration Client",
+            "description": "Implement automatic registration with the UEP registry on container startup and graceful deregistration on shutdown.",
+            "dependencies": [
+              "213.1",
+              "213.2",
+              "213.3"
+            ],
+            "details": "Ensure the container template includes logic to register the agent with the UEP registry at startup and deregister on shutdown, handling retries and error cases.",
+            "status": "done",
+            "testStrategy": "Start and stop the container, verifying successful registration and deregistration events in the UEP registry. Simulate failures to test retry and error handling."
+          },
+          {
+            "id": 5,
+            "title": "Add Standard Logging and Metrics Endpoints",
+            "description": "Integrate standardized logging and metrics endpoints compatible with UEP monitoring requirements into the container template.",
+            "dependencies": [
+              "213.1",
+              "213.2",
+              "213.3",
+              "213.4"
+            ],
+            "details": "Implement endpoints for structured logs and metrics export, ensuring compatibility with UEP monitoring tools and protocols.",
+            "status": "done",
+            "testStrategy": "Deploy the container and verify that logs and metrics are correctly emitted and consumable by UEP monitoring systems. Validate output format and completeness."
+          }
+        ]
       },
       {
         "id": 214,
@@ -1654,8 +1714,67 @@
           211,
           212
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Implement API Gateway Validation Middleware",
+            "description": "Develop Express/Fastify middleware using AJV (v8.0+) to validate external agent requests at the API Gateway, enforcing UEP protocol compliance with JSON Schema draft 2020-12.",
+            "dependencies": [],
+            "details": "The middleware should validate request bodies, headers, and query parameters against UEP schemas. It must support progressive validation for critical fields and integrate validation caching for performance. Ensure compatibility with both Express and Fastify frameworks.",
+            "status": "done",
+            "testStrategy": "Create tests for valid and invalid requests, measure validation performance, and verify schema compliance for all API endpoints."
+          },
+          {
+            "id": 2,
+            "title": "Develop Service-Level Validation Interceptor",
+            "description": "Implement a TypeScript-based interceptor or middleware pattern for validating service-to-service communication, ensuring all internal messages conform to UEP protocol schemas.",
+            "dependencies": [
+              "214.1"
+            ],
+            "details": "Use TypeScript decorators or middleware to intercept and validate payloads between services. Integrate validation caching and progressive validation for efficiency. Ensure all service interfaces are covered.",
+            "status": "done",
+            "testStrategy": "Test with various service-to-service payloads, including complex nested objects. Measure performance and verify that protocol violations are detected and reported."
+          },
+          {
+            "id": 3,
+            "title": "Create Event Payload Validation Middleware",
+            "description": "Build middleware for validating event payloads on NATS subscriptions before processing, enforcing UEP compliance for all event-driven agent interactions.",
+            "dependencies": [
+              "214.2"
+            ],
+            "details": "Wrap NATS subscription handlers with pre-validation logic using AJV and JSON Schema draft 2020-12. Support validation caching and progressive validation for high-throughput event streams.",
+            "status": "done",
+            "testStrategy": "Simulate event streams with valid and invalid payloads, verify rejection of non-compliant events, and measure middleware impact on event processing latency."
+          },
+          {
+            "id": 4,
+            "title": "Implement Standardized Validation Error Handler",
+            "description": "Develop a centralized error handler that formats and returns standardized error responses for all validation failures across API Gateway, service, and event levels.",
+            "dependencies": [
+              "214.1",
+              "214.2",
+              "214.3"
+            ],
+            "details": "Define a consistent error response schema for protocol violations, including error codes, messages, and details. Integrate with all validation middleware components.",
+            "status": "done",
+            "testStrategy": "Trigger validation errors across all layers, verify error format consistency, and ensure correct HTTP status codes and error payloads are returned."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Validation Caching and Metrics Collection",
+            "description": "Add validation result caching to optimize repeated schema checks and implement metrics collection to monitor validation compliance rates and performance.",
+            "dependencies": [
+              "214.1",
+              "214.2",
+              "214.3",
+              "214.4"
+            ],
+            "details": "Implement in-memory or distributed caching for schema validation results. Integrate metrics collection (e.g., Prometheus) to track validation success/failure rates and latency across all middleware components.",
+            "status": "done",
+            "testStrategy": "Test cache hit/miss scenarios, measure performance improvements, and verify metrics accuracy under various load conditions."
+          }
+        ]
       },
       {
         "id": 215,
@@ -1668,8 +1787,63 @@
           211,
           213
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement UEP Registry Service",
+            "description": "Develop a central registry service using etcd (v3.5+) or Consul (v1.15+) to store and manage agent registrations, capabilities, and health status, ensuring high availability and consistency.",
+            "dependencies": [],
+            "details": "Design the registry schema to support agent metadata, capability descriptors, health check endpoints, and versioning. Ensure the registry supports dynamic updates and efficient queries for agent discovery.",
+            "status": "done",
+            "testStrategy": "Test registration, update, and deregistration flows with multiple agents. Simulate registry failures and verify data consistency and availability."
+          },
+          {
+            "id": 2,
+            "title": "Develop UEP Discovery Client Library",
+            "description": "Create a TypeScript client library that enables agents to discover and connect to other agents through the registry, supporting capability-based and version-aware queries.",
+            "dependencies": [
+              "215.1"
+            ],
+            "details": "Implement APIs for agent lookup by capability, version, and health status. Add caching for discovery results to improve performance and reduce registry load.",
+            "status": "done",
+            "testStrategy": "Unit test all discovery APIs. Perform integration tests with the registry service. Measure cache hit ratios and validate cache invalidation logic."
+          },
+          {
+            "id": 3,
+            "title": "Implement UEP Capability Advertising Mechanism",
+            "description": "Enable agents to publish, update, and remove their capabilities in the registry using standardized capability descriptors with semantic versioning.",
+            "dependencies": [
+              "215.1"
+            ],
+            "details": "Define and enforce a capability schema. Ensure agents can dynamically advertise and update their capabilities, and that the registry validates and stores these descriptors.",
+            "status": "done",
+            "testStrategy": "Test capability registration, update, and removal. Validate schema enforcement and version compatibility. Simulate concurrent capability updates from multiple agents."
+          },
+          {
+            "id": 4,
+            "title": "Integrate UEP Health Checking and Automatic Deregistration",
+            "description": "Implement regular health checks for registered agents, with automatic deregistration of unhealthy or unreachable agents to maintain registry accuracy.",
+            "dependencies": [
+              "215.1"
+            ],
+            "details": "Support both agent-provided health endpoints and registry-initiated health probes. Configure heartbeat intervals and failure thresholds. Ensure deregistration triggers capability removal.",
+            "status": "done",
+            "testStrategy": "Simulate agent failures and network partitions. Verify timely deregistration and registry cleanup. Test health check configuration options and failure handling."
+          },
+          {
+            "id": 5,
+            "title": "Add Versioning and Capability-Based Discovery Support",
+            "description": "Enhance the registry and discovery client to support versioned capability queries, allowing agents to find others based on specific capability versions and compatibility requirements.",
+            "dependencies": [
+              "215.2",
+              "215.3"
+            ],
+            "details": "Implement version negotiation logic in the discovery client and registry. Ensure agents can specify version constraints when searching for capabilities. Support backward and forward compatibility checks.",
+            "status": "done",
+            "testStrategy": "Test discovery with various version constraints and compatibility scenarios. Validate correct agent selection for different capability versions. Measure discovery performance with versioned queries."
+          }
+        ]
       },
       {
         "id": 216,
@@ -1682,8 +1856,65 @@
           212,
           215
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design UEP Workflow Definition Format",
+            "description": "Develop a standardized format (YAML/JSON) and schema for defining multi-agent workflow coordination patterns, including task sequencing, parallelism, and compensation logic.",
+            "dependencies": [],
+            "details": "Specify the structure and validation rules for workflow definitions, supporting both sequential and parallel execution paths, conditional logic, and compensation steps. Ensure compatibility with UEP protocol requirements.",
+            "status": "done",
+            "testStrategy": "Validate sample workflow definitions against the schema. Test parsing and error handling for invalid definitions. Ensure definitions support all required coordination patterns."
+          },
+          {
+            "id": 2,
+            "title": "Implement UEP Workflow Engine",
+            "description": "Develop the core orchestration engine using Temporal or Netflix Conductor to interpret workflow definitions, execute multi-agent processes, and enforce UEP protocol compliance.",
+            "dependencies": [
+              "216.1"
+            ],
+            "details": "Integrate the engine with the chosen workflow platform. Implement task execution, agent coordination, and protocol compliance checks at each workflow step. Support extensibility for new agent types.",
+            "status": "done",
+            "testStrategy": "Execute sample workflows with multiple agents. Verify correct task sequencing, parallelism, and protocol compliance. Test extensibility with new agent types."
+          },
+          {
+            "id": 3,
+            "title": "Develop UEP State Management Module",
+            "description": "Implement persistent state tracking for long-running workflows using the event sourcing pattern to ensure reliable recovery and auditability.",
+            "dependencies": [
+              "216.2"
+            ],
+            "details": "Design and implement a state store that records workflow progress, agent states, and event history. Ensure state can be reconstructed for recovery and auditing. Integrate with the workflow engine.",
+            "status": "done",
+            "testStrategy": "Simulate workflow interruptions and verify correct recovery. Test state reconstruction and audit log completeness for long-running workflows."
+          },
+          {
+            "id": 4,
+            "title": "Implement UEP Compensation Handling",
+            "description": "Create rollback and compensation mechanisms for failed workflow steps, supporting the Saga pattern for distributed transactions.",
+            "dependencies": [
+              "216.2",
+              "216.3"
+            ],
+            "details": "Define compensation logic in workflow definitions. Implement compensation handlers in the engine to trigger rollback actions on failure, ensuring system consistency and protocol compliance.",
+            "status": "done",
+            "testStrategy": "Induce failures at various workflow steps and verify correct compensation actions. Test rollback scenarios for both sequential and parallel workflows."
+          },
+          {
+            "id": 5,
+            "title": "Build Workflow Monitoring and Visualization Tools",
+            "description": "Develop real-time monitoring and visualization interfaces to track workflow execution, agent status, and protocol compliance metrics.",
+            "dependencies": [
+              "216.2",
+              "216.3",
+              "216.4"
+            ],
+            "details": "Implement dashboards and visualizations for workflow progress, agent interactions, and error states. Provide analytics for performance bottlenecks and compliance violations.",
+            "status": "done",
+            "testStrategy": "Monitor live workflows and verify accurate status updates. Test visualization of workflow graphs, error reporting, and compliance metrics under various scenarios."
+          }
+        ]
       },
       {
         "id": 217,
@@ -1696,8 +1927,65 @@
           212,
           214
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Implement UEP Metrics Collection",
+            "description": "Develop and deploy a metrics collection system for UEP protocol compliance, performance (latency, throughput, error rates), and coordination patterns across all containerized agents using Prometheus with custom UEP metrics.",
+            "dependencies": [],
+            "details": "Define custom UEP metrics, instrument agents for metrics export, and configure Prometheus (v2.45+) to scrape and store these metrics. Ensure metrics cover protocol compliance, agent performance, and coordination events.",
+            "status": "done",
+            "testStrategy": "Simulate agent interactions and protocol scenarios to verify metrics are accurately collected and exposed. Validate Prometheus scraping and data retention."
+          },
+          {
+            "id": 2,
+            "title": "Implement Distributed Tracing and Structured Logging",
+            "description": "Integrate distributed tracing using OpenTelemetry and Jaeger, and implement structured JSON logging with correlation IDs for all agent interactions.",
+            "dependencies": [
+              "217.1"
+            ],
+            "details": "Instrument agents with OpenTelemetry (v1.18+) SDKs to capture traces for UEP workflows, and configure Jaeger (v1.47+) as the tracing backend. Standardize logs in JSON format with correlation IDs to enable trace-log correlation.",
+            "status": "done",
+            "testStrategy": "Generate complex agent workflows and verify end-to-end traceability in Jaeger. Confirm logs are structured, correlated, and searchable."
+          },
+          {
+            "id": 3,
+            "title": "Develop UEP Compliance and Performance Dashboards",
+            "description": "Create Grafana dashboards with custom panels for real-time visualization of UEP protocol compliance, performance metrics, and coordination patterns.",
+            "dependencies": [
+              "217.1",
+              "217.2"
+            ],
+            "details": "Design and implement Grafana (v10.0+) dashboards that display compliance status, key performance indicators, and coordination visualizations using data from Prometheus and Jaeger.",
+            "status": "done",
+            "testStrategy": "Simulate protocol compliance and performance scenarios, and verify dashboards update in real time and accurately reflect system state."
+          },
+          {
+            "id": 4,
+            "title": "Implement UEP Violation Alerting and Notification",
+            "description": "Set up real-time alerting for UEP protocol violations and performance anomalies using Prometheus Alertmanager and integrate with notification channels.",
+            "dependencies": [
+              "217.1",
+              "217.3"
+            ],
+            "details": "Define alert rules for protocol violations and performance thresholds. Configure Alertmanager to send notifications (e.g., email, Slack) on alert triggers. Integrate anomaly detection for unusual coordination patterns.",
+            "status": "done",
+            "testStrategy": "Inject protocol violations and performance issues to verify alerts are triggered and notifications are delivered promptly."
+          },
+          {
+            "id": 5,
+            "title": "Establish UEP Audit Trail and Event Sourcing",
+            "description": "Implement a persistent audit trail of all agent interactions using an event sourcing pattern, ensuring complete and queryable historical records.",
+            "dependencies": [
+              "217.1",
+              "217.2"
+            ],
+            "details": "Design an event store to capture all UEP-relevant events with immutable records. Ensure audit data includes timestamps, agent IDs, event types, and correlation IDs for traceability.",
+            "status": "done",
+            "testStrategy": "Replay historical agent interactions and verify audit completeness, integrity, and correlation with metrics and traces."
+          }
+        ]
       },
       {
         "id": 218,
@@ -1710,8 +1998,62 @@
           214,
           216
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design UEP Protocol Compliance Test Suite",
+            "description": "Develop a suite of automated tests to verify strict adherence to the UEP protocol specification, including property-based and fuzz testing for edge cases.",
+            "dependencies": [],
+            "details": "Implement contract-based protocol compliance tests using Pact (v4.x). Incorporate property-based testing to validate protocol invariants and use fuzzing to uncover edge case violations. Ensure coverage of all protocol rules and error handling scenarios.",
+            "status": "done",
+            "testStrategy": "Run tests with both valid and invalid protocol messages. Verify that all protocol violations are detected and reported. Measure test coverage and mutation score for protocol logic."
+          },
+          {
+            "id": 2,
+            "title": "Develop UEP Agent Coordination Test Suite",
+            "description": "Create tests to validate multi-agent coordination patterns and workflows, ensuring correct sequencing, synchronization, and error propagation.",
+            "dependencies": [
+              "218.1"
+            ],
+            "details": "Use behavior-driven development (BDD) with Cucumber.js (v9.x) to define and automate coordination scenarios. Cover sequential, parallel, and conditional agent interactions, including failure and compensation flows.",
+            "status": "done",
+            "testStrategy": "Test with a variety of workflow definitions, including both valid and invalid coordination patterns. Verify that coordination logic enforces protocol compliance and handles errors as specified."
+          },
+          {
+            "id": 3,
+            "title": "Implement UEP System Resilience Testing",
+            "description": "Develop chaos engineering-based tests to assess system resilience and fault tolerance under various failure conditions.",
+            "dependencies": [
+              "218.2"
+            ],
+            "details": "Leverage Chaos Toolkit to inject faults such as network partitions, agent crashes, and message loss. Monitor system recovery, compensation actions, and error reporting. Ensure the system maintains protocol guarantees under stress.",
+            "status": "done",
+            "testStrategy": "Simulate a range of failure scenarios and verify that the system recovers gracefully, maintains data integrity, and surfaces actionable diagnostics."
+          },
+          {
+            "id": 4,
+            "title": "Create UEP Performance and Load Testing Suite",
+            "description": "Develop tests to measure system performance, scalability, and resource utilization under varying load conditions.",
+            "dependencies": [
+              "218.3"
+            ],
+            "details": "Use k6 (v0.46+) to simulate realistic and peak loads, capturing custom UEP metrics such as throughput, latency, and error rates. Analyze system bottlenecks and scalability limits.",
+            "status": "done",
+            "testStrategy": "Run load tests with increasing concurrency and data volumes. Validate that performance metrics meet defined thresholds and that the system remains stable under sustained load."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Continuous Testing, Reporting, and Visualization",
+            "description": "Establish a CI pipeline for automated execution of all test suites, with comprehensive result reporting and visualization.",
+            "dependencies": [
+              "218.4"
+            ],
+            "details": "Implement continuous testing using GitHub Actions or Jenkins. Aggregate and visualize test results, protocol violations, and performance trends. Ensure actionable feedback for developers and stakeholders.",
+            "status": "done",
+            "testStrategy": "Verify that all test suites run automatically on code changes. Confirm that test failures, protocol violations, and performance regressions are clearly reported and visualized."
+          }
+        ]
       },
       {
         "id": 219,
@@ -1980,8 +2322,62 @@
           220,
           221
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Develop Health Check Service with Consul Integration",
+            "description": "Implement a Node.js service that collects TTL-based health status from Consul, enriches it with additional performance metrics, and provides real-time updates via WebSockets (Socket.IO v4.7+). Store historical health data for trend analysis.",
+            "dependencies": [],
+            "details": "The service should poll Consul for agent health, aggregate performance metrics, broadcast updates to connected clients using WebSockets, and persist historical data for later analysis.",
+            "status": "done",
+            "testStrategy": "Unit test Consul polling and metric enrichment logic. Integration test WebSocket updates and historical data storage."
+          },
+          {
+            "id": 2,
+            "title": "Implement Health Metrics Collection and Prometheus Integration",
+            "description": "Collect key health metrics (response time averages, request success/failure rates, CPU/memory usage, and custom agent indicators) and expose them using the Prometheus client for Node.js.",
+            "dependencies": [
+              "223.1"
+            ],
+            "details": "Use prom-client to define counters, histograms, and gauges for the required metrics. Expose a /metrics endpoint for Prometheus scraping.",
+            "status": "done",
+            "testStrategy": "Unit test metric collection and normalization. Verify Prometheus endpoint exposes correct metrics."
+          },
+          {
+            "id": 3,
+            "title": "Design and Implement Health Dashboard API",
+            "description": "Create an API that provides current health status of all agents, historical health trends, and supports alerting on health degradation.",
+            "dependencies": [
+              "223.2"
+            ],
+            "details": "The API should aggregate real-time and historical data, support queries for trends, and trigger alerts based on configurable thresholds.",
+            "status": "done",
+            "testStrategy": "Integration test API endpoints for status, trends, and alerting. Simulate health degradation to verify alert triggers."
+          },
+          {
+            "id": 4,
+            "title": "Implement Adaptive Health Check Intervals and Anomaly Detection",
+            "description": "Develop logic to adjust health check intervals based on agent stability and add anomaly detection for early warning of potential issues.",
+            "dependencies": [
+              "223.3"
+            ],
+            "details": "Monitor agent stability and dynamically adjust polling frequency. Integrate anomaly detection algorithms to flag unusual patterns in health metrics.",
+            "status": "done",
+            "testStrategy": "Unit test interval adaptation logic and anomaly detection. Integration test with simulated unstable agents."
+          },
+          {
+            "id": 5,
+            "title": "Develop Health Score Algorithm and Integration",
+            "description": "Implement the health score algorithm that combines multiple metrics into a single score, and integrate it into the monitoring pipeline for use in coordination decisions.",
+            "dependencies": [
+              "223.4"
+            ],
+            "details": "Normalize and weight metrics as specified, calculate the composite health score, and expose it via the dashboard and API.",
+            "status": "done",
+            "testStrategy": "Unit test health score calculation and normalization. Integration test score updates in real-time and historical views."
+          }
+        ]
       },
       {
         "id": 224,
@@ -1994,8 +2390,64 @@
           222,
           223
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Workflow Schema and Versioning",
+            "description": "Design and implement a JSON Schema for workflow definitions, including step structure, error handling, and version compatibility checks.",
+            "dependencies": [],
+            "details": "Create TypeScript interfaces and JSON Schema for WorkflowDefinition and WorkflowStep. Implement versioning logic and compatibility validation for workflow updates.",
+            "status": "done",
+            "testStrategy": "Unit tests for schema validation, version parsing, and compatibility checks."
+          },
+          {
+            "id": 2,
+            "title": "Implement Distributed State Management with Redis",
+            "description": "Set up Redis-based structures for workflow metadata, step execution history, current step state, and real-time Pub/Sub updates.",
+            "dependencies": [
+              "224.1"
+            ],
+            "details": "Design Redis data models (hashes, lists, Pub/Sub channels) to persist workflow state and enable distributed coordination. Integrate with Node.js using a Redis client.",
+            "status": "done",
+            "testStrategy": "Integration tests for state persistence, recovery after restart, and Pub/Sub event delivery."
+          },
+          {
+            "id": 3,
+            "title": "Develop Workflow Executor and Agent Coordination",
+            "description": "Build the core engine that discovers agents, orchestrates step execution, manages state transitions, and updates workflow progress.",
+            "dependencies": [
+              "224.1",
+              "224.2"
+            ],
+            "details": "Implement agent discovery (using service registry), step scheduling (including parallel and conditional execution), and state updates. Ensure real-time status reporting and audit trail generation.",
+            "status": "done",
+            "testStrategy": "Integration tests with mock agents, step execution order validation, and audit log verification."
+          },
+          {
+            "id": 4,
+            "title": "Implement Error Recovery and Compensation Strategies",
+            "description": "Add robust error handling with retry policies, alternative agent selection, compensation transactions, and partial completion logic.",
+            "dependencies": [
+              "224.3"
+            ],
+            "details": "Support configurable retry strategies (e.g., exponential backoff), agent failover, and compensation workflows for rollback scenarios. Track and expose error and recovery events.",
+            "status": "done",
+            "testStrategy": "Simulated failure tests for each recovery strategy, compensation transaction validation, and error event logging."
+          },
+          {
+            "id": 5,
+            "title": "Expose Workflow Monitoring and Audit API",
+            "description": "Develop an API to provide workflow status, step history, error/recovery details, and performance metrics for monitoring and auditing.",
+            "dependencies": [
+              "224.3",
+              "224.4"
+            ],
+            "details": "Design RESTful endpoints for querying workflow progress, execution history, error states, and metrics. Ensure secure and efficient access to audit data.",
+            "status": "done",
+            "testStrategy": "API tests for all endpoints, data accuracy checks, and performance/load testing."
+          }
+        ]
       },
       {
         "id": 225,
@@ -2008,8 +2460,62 @@
           222,
           224
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Refactor Parameter Flow Agent for Discovery API Integration",
+            "description": "Replace direct file system scanning in the Parameter Flow Agent with capability-based agent discovery and health-aware selection using the new Discovery API.",
+            "dependencies": [],
+            "details": "Implement API calls for agent discovery, ensuring the agent can identify available specialist agents based on capabilities and health status. Remove legacy file system scanning logic.",
+            "status": "done",
+            "testStrategy": "Unit tests for API-based discovery logic; verify correct agent selection under various health and capability scenarios."
+          },
+          {
+            "id": 2,
+            "title": "Update Agent Initialization and Registration Sequence",
+            "description": "Modify the Parameter Flow Agent's initialization to register itself with the registry and discover meta-agents using the updated sequence.",
+            "dependencies": [
+              "225.1"
+            ],
+            "details": "Ensure the agent registers with the registry, advertises its capabilities and endpoints, and updates its health status post-initialization. Integrate discovery of meta-agents as part of startup.",
+            "status": "done",
+            "testStrategy": "Unit and integration tests for registration and initialization; verify correct status updates and meta-agent discovery."
+          },
+          {
+            "id": 3,
+            "title": "Implement Workflow-Based Coordination Logic",
+            "description": "Enable the Parameter Flow Agent to coordinate complex workflows using workflow definitions and a workflow engine, including error handling and recovery.",
+            "dependencies": [
+              "225.2"
+            ],
+            "details": "Define common coordination patterns, integrate with the workflow engine for multi-agent tasks, and implement robust error handling and recovery mechanisms.",
+            "status": "done",
+            "testStrategy": "Integration tests for workflow execution and error recovery; verify coordination with all 16 specialist agents."
+          },
+          {
+            "id": 4,
+            "title": "Integrate Real-Time Agent Availability Monitoring",
+            "description": "Add real-time monitoring of agent health and availability, adapting coordination strategies based on current agent status.",
+            "dependencies": [
+              "225.3"
+            ],
+            "details": "Subscribe to health status updates, implement fallback strategies for unavailable agents, and ensure coordination logic adapts dynamically to agent availability.",
+            "status": "done",
+            "testStrategy": "Simulated tests for agent availability changes; verify fallback and adaptation logic under various scenarios."
+          },
+          {
+            "id": 5,
+            "title": "Enable Dynamic, Capability-Based Workflow Generation and Routing",
+            "description": "Update coordination logic to use capability-based routing and dynamically generate workflows based on available agents and their capabilities.",
+            "dependencies": [
+              "225.4"
+            ],
+            "details": "Remove agent-type assumptions, implement dynamic workflow generation, and ensure routing decisions are based on real-time capabilities and health.",
+            "status": "done",
+            "testStrategy": "End-to-end tests for dynamic workflow generation and routing; verify correct agent selection and workflow execution with varying agent sets."
+          }
+        ]
       },
       {
         "id": 226,
@@ -2022,8 +2528,63 @@
           221,
           222
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Capability Schema with Semantic Versioning",
+            "description": "Define a standardized schema for agent capabilities, including fields for semantic versioning, deprecation, and compatibility metadata.",
+            "dependencies": [],
+            "details": "Develop a TypeScript interface for capabilities, ensuring support for semantic versioning, deprecation flags, replacement references, and extensible parameter/return type definitions.",
+            "status": "done",
+            "testStrategy": "Create unit tests to validate schema correctness, required fields, and semantic version parsing."
+          },
+          {
+            "id": 2,
+            "title": "Implement Capability Registry Service",
+            "description": "Develop a service to store, manage, and validate capability definitions, supporting versioning and compatibility checks.",
+            "dependencies": [
+              "226.1"
+            ],
+            "details": "Build a registry that allows agents to register, update, and query capabilities. Implement logic for semantic version compatibility and deprecation handling.",
+            "status": "done",
+            "testStrategy": "Write integration tests for capability registration, update, discovery, and compatibility validation."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Capability Advertisement in Agent Registration",
+            "description": "Enable agents to advertise their capabilities, including version and compatibility information, during the registration process.",
+            "dependencies": [
+              "226.2"
+            ],
+            "details": "Extend agent registration workflows to include capability advertisement, ensuring the registry is updated and compatibility is checked.",
+            "status": "done",
+            "testStrategy": "Test agent registration with various capability sets and verify correct advertisement and registry updates."
+          },
+          {
+            "id": 4,
+            "title": "Develop Capability Matching and Negotiation Algorithms",
+            "description": "Create algorithms for matching agent capabilities, supporting exact and range-based version compatibility, substitution, and deprecation handling.",
+            "dependencies": [
+              "226.2"
+            ],
+            "details": "Implement logic for matching requested capabilities to available agent capabilities, including negotiation for optimal version selection and graceful handling of mismatches.",
+            "status": "done",
+            "testStrategy": "Unit test matching and negotiation logic with diverse capability and version scenarios, including deprecated and substituted capabilities."
+          },
+          {
+            "id": 5,
+            "title": "Generate Capability Documentation and Compatibility Matrices",
+            "description": "Automate the generation of API documentation, usage examples, and compatibility matrices for all registered capabilities.",
+            "dependencies": [
+              "226.1",
+              "226.2"
+            ],
+            "details": "Develop a documentation generator that produces up-to-date API docs, example usage patterns, and visual compatibility matrices for each capability and its versions.",
+            "status": "pending",
+            "testStrategy": "Verify documentation output for completeness, accuracy, and correct reflection of capability versions and compatibility."
+          }
+        ]
       },
       {
         "id": 227,
@@ -2316,11 +2877,261 @@
             "testStrategy": "Review dashboards to confirm presence and quality of documentation in text panels and panel descriptions. Solicit user feedback to ensure documentation is helpful and complete."
           }
         ]
+      },
+      {
+        "id": 236,
+        "title": "Develop Node.js Docker Container Template with Automatic Service Registration, Health Checks, Protocol Compliance, and OpenTelemetry Integration",
+        "description": "Design and implement a reusable Docker container template for Node.js microservices that includes automatic service registration, robust health checks, protocol compliance (UEP), OpenTelemetry instrumentation, and graceful shutdown patterns.",
+        "details": "1. Base the Dockerfile on a minimal, secure Node.js image (e.g., node:20-alpine or node:22-alpine if stable), using multi-stage builds to minimize image size and attack surface. \n2. Implement automatic service registration and deregistration by integrating with the existing service registry (e.g., Consul or Redis) via a startup script or entrypoint, ensuring the service registers itself on startup and deregisters on shutdown. Use environment variables for registry endpoints and service metadata.\n3. Add a health check endpoint (e.g., /healthz) in the Node.js application, and configure Docker HEALTHCHECK instructions to periodically probe this endpoint. Ensure health checks cover both liveness and readiness semantics.\n4. Integrate UEP protocol compliance by including the UEP validation library and enforcing protocol checks on all incoming/outgoing service communications.\n5. Instrument the application with OpenTelemetry for distributed tracing and metrics, ensuring trace context propagation is compatible with UEP and Context7 methodology. Export traces and metrics to a configurable backend (e.g., OTLP, Jaeger, Prometheus).\n6. Implement graceful shutdown logic in the Node.js application to handle SIGTERM/SIGINT, ensuring the service deregisters from the registry, completes in-flight requests, flushes telemetry, and exits cleanly.\n7. Provide a template docker-compose.yml for local development, demonstrating service registration, health checks, and observability integration.\n8. Document environment variables, configuration options, and extension points for downstream services.",
+        "testStrategy": "1. Build the container image and verify it is minimal, secure, and reproducible using tools like Trivy and Docker Scout.\n2. Deploy the container in a local or CI environment with a running service registry and observability stack (e.g., Consul, Prometheus, Jaeger).\n3. Confirm automatic registration and deregistration in the registry by starting and stopping the container.\n4. Validate Docker health checks by simulating healthy and unhealthy states and observing container status transitions.\n5. Test UEP protocol compliance by sending valid and invalid protocol messages and verifying enforcement.\n6. Generate distributed traces and metrics, and confirm they are exported and visible in the observability backend.\n7. Simulate shutdown (SIGTERM/SIGINT) and verify graceful deregistration, completion of requests, and telemetry flush.\n8. Peer review Dockerfile, entrypoint scripts, and documentation for clarity, security, and extensibility.",
+        "status": "pending",
+        "dependencies": [
+          190,
+          191,
+          194,
+          196,
+          233
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 237,
+        "title": "Research and Design TypeScript Agent Wrapper Patterns for UEP Enforcement, Service Registration, Health Checks, and OpenTelemetry Integration",
+        "description": "Research and document TypeScript libraries and design patterns for building agent wrappers that enforce the UEP protocol, support automatic service registration, expose health check endpoints, and integrate with OpenTelemetry, focusing on decorator, higher-order function, and middleware approaches for Node.js.",
+        "details": "1. **Survey Existing Libraries and Frameworks**: \n   - Evaluate TypeScript libraries such as `agentops` for OpenTelemetry-based instrumentation and agent lifecycle management[3].\n   - Review patterns from projects like `worker-agent` for abstraction and protocol enforcement[1].\n   - Assess OpenTelemetry Node.js SDKs for distributed tracing and metrics.\n   - Investigate service registration libraries compatible with Consul and Redis, and health check middleware for Express/Koa.\n\n2. **Pattern Analysis and Selection**:\n   - Compare the use of **decorators** (e.g., `@ValidateUEP`, `@RegisterService`, `@HealthCheck`) for enforcing protocol and registration logic at the class/method level.\n   - Explore **higher-order functions** to wrap agent handlers, injecting UEP validation, registration, and telemetry logic.\n   - Analyze **middleware** approaches for HTTP/gRPC endpoints, ensuring UEP protocol compliance and health check exposure.\n\n3. **Design Reference Implementations**:\n   - Provide code samples for each pattern:\n     - TypeScript decorators for protocol enforcement and telemetry instrumentation.\n     - Higher-order function wrappers for agent lifecycle hooks (registration, health, shutdown).\n     - Middleware for Express/Koa/Fastify to expose `/health` endpoints and inject OpenTelemetry context.\n   - Document trade-offs (testability, composability, performance) for each approach.\n\n4. **Integration Guidance**:\n   - Outline how to combine these patterns for a robust agent wrapper that:\n     - Enforces UEP protocol on all agent communications (using validation decorators or middleware).\n     - Automatically registers/deregisters with the service registry (Consul/Redis) on startup/shutdown.\n     - Exposes health check endpoints compatible with service mesh and registry health probes.\n     - Integrates OpenTelemetry for distributed tracing and metrics, ensuring context propagation (see Context7 methodology in related tasks).\n   - Highlight best practices for error handling, extensibility, and observability.\n\n5. **Documentation**:\n   - Summarize findings in a technical design document with code snippets, library recommendations, and integration diagrams.\n   - Include a comparison matrix of patterns and libraries for quick reference.",
+        "testStrategy": "1. Validate that reference implementations:\n   - Enforce UEP protocol compliance on all agent endpoints (unit tests for decorator/middleware logic).\n   - Automatically register and deregister with the service registry (integration tests with Consul/Redis, verify presence and removal in registry).\n   - Expose `/health` endpoints that return correct status and are compatible with service mesh health checks (HTTP tests, simulate failure scenarios).\n   - Correctly emit OpenTelemetry traces and metrics (instrument sample agent, verify traces in Jaeger/Tempo and metrics in Prometheus).\n2. Peer review the design document for completeness, clarity, and alignment with project architecture.\n3. Prototype integration in a sample Node.js/TypeScript agent, demonstrating all core features working together.",
+        "status": "pending",
+        "dependencies": [
+          191,
+          194,
+          196,
+          233
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 238,
+        "title": "Research and Design Protocol Validation Middleware Patterns for Node.js with AJV, TypeScript, and Observability",
+        "description": "Research and document best practices for implementing protocol validation middleware in Node.js applications, focusing on JSON Schema validation with AJV, Express middleware and TypeScript decorator patterns, performance optimizations, and metrics collection for compliance monitoring across API Gateway, service-to-service, and event payload validation.",
+        "details": "1. **Survey Current Best Practices and Technologies**:\n   - Review the latest approaches for protocol validation in Node.js, emphasizing the use of AJV (v8+) for JSON Schema validation due to its performance and ecosystem support.\n   - Evaluate Express middleware patterns for request/response validation, including modular middleware composition and error handling strategies.\n   - Investigate TypeScript decorator-based validation (e.g., using class-validator, custom decorators) for enforcing schema compliance at the controller or method level, ensuring strong typing and developer ergonomics.\n   \n2. **Design Middleware Patterns for Multiple Validation Contexts**:\n   - **API Gateway Validation**: Document patterns for integrating AJV-based validation at the API Gateway layer (e.g., Express, Fastify, or via custom plugins for Kong/Traefik), ensuring all inbound/outbound traffic conforms to defined schemas before reaching internal services.\n   - **Service-to-Service Validation**: Define middleware or interceptor patterns for validating inter-service HTTP/gRPC requests and responses, leveraging shared schema repositories and versioning strategies.\n   - **Event Payload Validation**: Outline approaches for validating event/message payloads in event-driven architectures (e.g., with NATS, Kafka), including schema registry integration and runtime validation hooks.\n\n3. **Performance Optimization Techniques**:\n   - Research and recommend caching strategies for compiled AJV schemas to minimize validation overhead in high-throughput scenarios.\n   - Explore schema pre-compilation, lazy loading, and memory management best practices for production workloads.\n   - Assess the impact of validation on request latency and propose mitigation strategies (e.g., selective validation, async validation for non-blocking flows).\n\n4. **Metrics Collection and Compliance Monitoring**:\n   - Design a metrics collection strategy to track protocol compliance rates, validation errors, and schema drift using OpenTelemetry or Prometheus-compatible metrics.\n   - Define key metrics (e.g., validation success/failure counts, schema version mismatches, average validation latency) and recommend instrumentation points within middleware.\n   - Propose alerting and dashboard patterns for monitoring protocol validation health across the stack.\n\n5. **Security and Error Handling Considerations**:\n   - Document best practices for secure error reporting (avoiding sensitive data leakage), input sanitization, and defense-in-depth validation layers[1][3].\n   - Recommend testable error handling strategies for both synchronous and asynchronous validation failures.\n\n6. **Provide Reference Implementations and Code Samples**:\n   - Include code snippets demonstrating AJV middleware integration in Express, TypeScript decorator usage, and metrics instrumentation.\n   - Reference open-source libraries and patterns where appropriate.\n\n7. **Documentation and Knowledge Sharing**:\n   - Compile findings into a comprehensive technical document or knowledge base article for team adoption.\n   - Highlight trade-offs, limitations, and future research areas (e.g., support for evolving schema standards, integration with service mesh validation proxies).\n",
+        "testStrategy": "1. Review the technical document for completeness, clarity, and alignment with current Node.js, TypeScript, and observability best practices.\n2. Validate reference code samples by integrating them into a sample Express/TypeScript service and verifying:\n   - Correct schema validation for API Gateway, service-to-service, and event payloads.\n   - Performance improvements from schema caching and pre-compilation (benchmark validation throughput and latency).\n   - Accurate collection and export of protocol compliance metrics (using OpenTelemetry/Prometheus).\n   - Secure error handling and no sensitive data leakage in validation errors.\n3. Peer review findings with backend, security, and observability engineers.\n4. Ensure all recommendations are compatible with the existing UEP protocol enforcement and monitoring stack.",
+        "status": "pending",
+        "dependencies": [
+          194,
+          196,
+          237
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 239,
+        "title": "Research and Document Comprehensive Service-to-Service Validation Patterns for Node.js TypeScript Microservices",
+        "description": "Research, design, and document advanced service-to-service validation patterns for Node.js microservices using TypeScript, covering HTTP client interceptors, gRPC middleware, message queue validation, circuit breaker and retry logic integration, distributed validation caching, and service mesh integration, all with OpenTelemetry observability.",
+        "details": "1. **HTTP Client Interceptors**: Survey best practices for implementing request/response validation in HTTP clients (e.g., Axios, node-fetch) using TypeScript. Document how to use interceptors to enforce schema validation (with AJV or Zod), propagate trace context, and capture validation failures as OpenTelemetry spans or metrics.\n\n2. **gRPC Middleware**: Research middleware patterns for gRPC in Node.js (using @grpc/grpc-js or grpc-tools), focusing on request/response validation, error propagation, and observability hooks. Provide example implementations of validation middleware that integrates with OpenTelemetry for distributed tracing and error metrics.\n\n3. **Message Queue Validation**: Analyze validation strategies for message brokers (e.g., NATS, RabbitMQ, Kafka) in Node.js. Document how to validate message payloads before publishing and upon consumption, using schema validation libraries. Include patterns for dead-letter queue handling and OpenTelemetry instrumentation for message flows.\n\n4. **Circuit Breaker and Retry Logic with Validation**: Research integration of validation logic with circuit breaker (e.g., opossum, cockatiel) and retry libraries. Document how to ensure that only valid requests are retried, and how to record validation failures and circuit breaker events as observability signals.\n\n5. **Distributed Validation Caching**: Investigate caching strategies (e.g., Redis, in-memory LRU) for validation results to optimize repeated validations in high-throughput scenarios. Document cache invalidation patterns and observability of cache hit/miss rates.\n\n6. **Service Mesh Integration Patterns**: Review service mesh solutions (Istio, Linkerd, Consul Connect) and document how to offload or augment validation at the mesh layer (e.g., via Envoy WASM filters or external authorization). Provide guidance on correlating mesh-level validation events with application-level OpenTelemetry traces.\n\n7. **OpenTelemetry Observability**: For each pattern, specify how to instrument validation logic with OpenTelemetry (tracing, metrics, logs), ensuring end-to-end visibility of validation outcomes, error rates, and performance impact. Include code snippets and configuration examples for Node.js OpenTelemetry SDK integration.\n\n8. **Reference Implementations**: Provide TypeScript code samples for each pattern, demonstrating integration with popular libraries (AJV, @grpc/grpc-js, opossum, OpenTelemetry JS SDK, etc.).\n\n9. **Documentation**: Produce a technical document summarizing the patterns, trade-offs, and recommended practices for Node.js/TypeScript microservices.",
+        "testStrategy": "1. Review the technical document for completeness, clarity, and alignment with current Node.js, TypeScript, and observability best practices.\n2. Validate reference code samples by integrating them into sample microservices (REST, gRPC, and message-driven) and verifying:\n   - Correct enforcement of schema validation in all communication paths (HTTP, gRPC, message queues).\n   - Proper functioning of circuit breaker and retry logic with validation-aware behavior.\n   - Accurate propagation and correlation of OpenTelemetry traces, metrics, and logs for validation events.\n   - Effectiveness of distributed validation caching (cache hit/miss rates, invalidation correctness).\n   - Service mesh validation integration by deploying sample services in a mesh (e.g., Istio with Envoy) and verifying validation at both mesh and application layers.\n3. Peer review findings with architects and observability engineers.\n4. Document lessons learned and update patterns based on feedback.",
+        "status": "pending",
+        "dependencies": [
+          194,
+          196,
+          210,
+          237,
+          238
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 240,
+        "title": "Research and Recommend Service Discovery Patterns and Technologies for UEP Service Discovery and Registry",
+        "description": "Conduct a comprehensive evaluation of service discovery patterns and technologies (etcd, Consul, DNS-based discovery) to determine the optimal approach for implementing UEP Service Discovery and Registry.",
+        "details": "1. **Survey Service Discovery Patterns:**\n   - Analyze the core service discovery patterns: client-side discovery, server-side discovery, and DNS-based discovery. Document their trade-offs in terms of scalability, fault tolerance, operational complexity, and integration with containerized Node.js/TypeScript microservices.\n\n2. **Evaluate Technologies:**\n   - **Consul:** Assess Consul's built-in service registry, health checking, multi-datacenter support, DNS and HTTP APIs, and integration with Docker and Kubernetes. Highlight its strengths in health monitoring, distributed key-value storage, and Web UI for service visualization[2][3][4][5].\n   - **etcd:** Examine etcd's simplicity, strong consistency, and native integration with Kubernetes. Evaluate its suitability as a lightweight, reliable key-value store for service registration and discovery, and discuss the need for additional tooling (e.g., SkyDNS) for DNS-based discovery[1][2][4].\n   - **DNS-based Discovery:** Review DNS-based service discovery approaches, including native Docker/Kubernetes DNS, and how they compare to dedicated registries in terms of latency, dynamic updates, and operational overhead.\n\n3. **Comparison Matrix:**\n   - Create a comparison matrix summarizing each technology's features: health checks, multi-datacenter support, operational complexity, ecosystem integration, and community adoption.\n\n4. **Best Practice Recommendations:**\n   - Recommend the most suitable technology and pattern for UEP Service Discovery and Registry, considering the project's requirements for dynamic registration, health monitoring, multi-environment support, and ease of integration with Node.js/TypeScript agents.\n   - Provide architectural diagrams and example registration/discovery flows for the recommended approach.\n   - Document fallback and migration strategies (e.g., starting with etcd for simplicity, migrating to Consul for advanced features as needed).\n\n5. **Implementation Guidance:**\n   - Outline integration steps for the chosen technology, including client library selection, service registration/deregistration flows, health check configuration, and security considerations (ACLs, TLS).\n   - Reference proven open-source libraries and patterns for Node.js/TypeScript environments.",
+        "testStrategy": "1. Review the research document for completeness, clarity, and alignment with UEP architectural requirements.\n2. Validate the comparison matrix and recommendations with technical leads and architects.\n3. Prototype service registration and discovery using the recommended technology in a sample Node.js/TypeScript microservice, verifying:\n   - Successful dynamic registration and deregistration\n   - Accurate health check propagation\n   - Service discovery via both API and DNS (if applicable)\n   - Integration with container orchestration (Docker/Kubernetes)\n4. Document lessons learned and any operational caveats discovered during prototyping.",
+        "status": "pending",
+        "dependencies": [
+          191,
+          237
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 241,
+        "title": "Research and Design Capability-Based Service Discovery and Agent Capability Descriptor Frameworks",
+        "description": "Research, design, and document patterns and frameworks that enable UEP agents to discover and select services based on advertised capabilities rather than static service names, including capability descriptor schemas and discovery protocols.",
+        "details": "1. Survey current best practices and academic literature on capability-based service discovery, focusing on distributed systems, agent-based architectures, and semantic service registries (e.g., OWL-S, WSDL, Linked Data, and modern alternatives).\n\n2. Analyze and compare existing capability descriptor frameworks (such as OWL-S, WSDL, and custom JSON-LD schemas) for expressing agent and service capabilities, including extensibility, expressiveness, and machine-readability.\n\n3. Define a capability descriptor schema suitable for UEP agents, leveraging JSON Schema or JSON-LD for interoperability, and specify required fields (e.g., capability type, supported protocols, constraints, versioning, and metadata).\n\n4. Research and document patterns for capability-based service discovery, including:\n   - Registry-based discovery (where agents register capabilities with a central registry)\n   - Peer-to-peer and decentralized discovery (using distributed hash tables or gossip protocols)\n   - Query and matching algorithms for capability negotiation (e.g., semantic matching, tag-based, or constraint-based filtering)\n\n5. Provide implementation guidance for integrating capability descriptors into the existing UEP service registry (e.g., extending Redis schema to support capability indexing and queries), and outline how agents should advertise and query for capabilities at runtime.\n\n6. Include code samples and reference implementations for capability descriptor registration, discovery queries, and matching logic in TypeScript.\n\n7. Address security and validation considerations, such as capability spoofing prevention and schema validation using AJV or similar tools.\n\n8. Document interoperability strategies with existing service discovery mechanisms (client-side/server-side patterns) and how capability-based discovery can coexist or augment name-based discovery in the UEP ecosystem.",
+        "testStrategy": "1. Review the technical document for completeness, clarity, and alignment with current best practices in capability-based discovery and agent frameworks.\n2. Validate the capability descriptor schema by registering sample agent capabilities in the service registry and querying for them using capability-based filters.\n3. Implement and test sample TypeScript code for capability registration, discovery, and matching, ensuring correct results for various query scenarios (e.g., partial matches, multiple capabilities, version constraints).\n4. Test schema validation and error handling using AJV or equivalent tools.\n5. Evaluate security measures by attempting to register invalid or spoofed capabilities and verifying that the system rejects them appropriately.\n6. Peer review the approach with domain experts in distributed systems and agent architectures.",
+        "status": "pending",
+        "dependencies": [
+          191,
+          237
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 242,
+        "title": "Research and Recommend Workflow Orchestration Patterns and Technology for UEP Workflow Orchestration System",
+        "description": "Conduct a comprehensive evaluation of modern workflow orchestration patterns and leading platforms (Temporal, Netflix Conductor, Apache Airflow) to determine the optimal approach for implementing the UEP Workflow Orchestration system.",
+        "details": "1. **Survey Current Workflow Orchestration Patterns:**\n   - Analyze synchronous vs. asynchronous orchestration, event-driven and real-time processing, and state management strategies for distributed workflows[1][2][3].\n   - Identify best practices for error handling, conditional logic, scalability, observability, and integration with heterogeneous systems[1][3][4].\n\n2. **Evaluate Leading Orchestration Technologies:**\n   - **Temporal:** Assess its support for durable execution, stateful workflows, multi-agent coordination, and real-time/event-driven triggers. Review its developer experience, scalability, and TypeScript/Node.js SDK maturity[3].\n   - **Netflix Conductor:** Examine its suitability for microservice orchestration, asynchronous task management, extensibility, and integration with cloud-native environments[2][3].\n   - **Apache Airflow:** Evaluate its strengths in data pipeline orchestration, recent improvements for event-driven scheduling, and suitability for UEP's use cases[3].\n   - Compare with emerging alternatives (e.g., Kestra, Prefect) if relevant to UEP requirements[3].\n\n3. **Assess Integration and Extensibility:**\n   - Analyze how each platform integrates with Node.js/TypeScript microservices, containerized environments, and service discovery/registration mechanisms defined in UEP architecture.\n   - Consider support for observability (metrics, tracing), governance (audit trails, compliance), and low-code/no-code extensibility for future-proofing[3][4].\n\n4. **Document Findings and Recommendation:**\n   - Summarize strengths, weaknesses, and suitability of each platform for UEP's workflow orchestration needs.\n   - Provide a clear recommendation with rationale, including architectural diagrams and integration patterns for the selected approach.\n   - Outline migration or adoption considerations, including training, operational overhead, and future scalability.\n\n**Key Considerations:**\n- Prioritize event-driven, real-time, and AI/LLM integration capabilities as these are current industry trends[3][4].\n- Ensure the recommended solution aligns with UEP's containerized, microservice-based architecture and supports robust monitoring and error handling.\n- Address governance, compliance, and extensibility requirements for long-term maintainability.",
+        "testStrategy": "1. Review the technical document for completeness, clarity, and alignment with UEP architectural requirements and industry best practices.\n2. Validate the evaluation matrix by mapping UEP workflow requirements to platform features and scoring each candidate.\n3. Peer review the recommendation with UEP architects and stakeholders.\n4. Prototype a minimal workflow using the recommended platform, integrating with a sample Node.js/TypeScript microservice, and verify:\n   - Correct execution and state management of workflows\n   - Integration with service discovery/registration and observability stack\n   - Error handling, retry, and conditional logic capabilities\n5. Document lessons learned and any gaps identified during prototyping.",
+        "status": "pending",
+        "dependencies": [
+          191,
+          237
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 243,
+        "title": "Compose Comprehensive ZAD Report for Tasks 213–216 Completion",
+        "description": "Produce a detailed ZAD (Zero-Architecture Drift) report documenting the completion of Tasks 213, 214, 215, and 216, including all technical details, implementation specifics, and architectural decisions.",
+        "details": "The report must provide a thorough, structured account of the completion of Tasks 213 (Implement UEP Protocol Compliance Layer), 214 (Implement UEP Validation Middleware), 215 (Implement UEP Coordination Layer), and 216 (Implement UEP Workflow Orchestration). For each task, include:\n\n- **Technical Implementation Details:** Describe the architecture, technologies, frameworks, and libraries used. Include diagrams (e.g., sequence, component, and deployment diagrams) where appropriate. Detail how each component integrates with the overall system, referencing code structure, configuration, and deployment patterns.\n- **Architectural Decisions:** Document key architectural choices, such as protocol selection (e.g., OpenAPI/AsyncAPI for UEP), validation strategies, middleware placement, state management, compensation mechanisms, and workflow orchestration patterns. Justify decisions with reference to best practices (e.g., use of middleware for protocol enforcement, persistent state for long-running workflows, compensation for distributed transactions).\n- **Implementation Specifics:** Provide code snippets or pseudocode for critical logic (e.g., validation handlers, workflow definitions, error handling). Include configuration examples for deployment (e.g., Kubernetes manifests, environment variables).\n- **Integration Points:** Explain how each component interacts with others, including API contracts, event flows, and error propagation. Highlight how observability (logging, metrics, tracing) is integrated, referencing industry standards such as the Four Golden Signals and RED method where relevant.\n- **Testing and Validation:** Summarize the testing strategies employed for each task, including unit, integration, and end-to-end tests. Reference how protocol compliance, workflow correctness, and error handling were validated.\n- **Lessons Learned and Recommendations:** Capture any challenges encountered, solutions adopted, and recommendations for future iterations.\n\nFollow best practices for technical documentation: use clear sectioning, tables for comparisons, and diagrams for clarity. Ensure the report is suitable for both technical stakeholders and future maintainers.",
+        "testStrategy": "1. Peer review the report for completeness, technical accuracy, and clarity, ensuring all required sections are present and well-documented.\n2. Cross-check reported implementation details and architectural decisions against actual codebases, configuration, and deployment manifests.\n3. Validate that all integration points and testing strategies are accurately described and reflect the implemented system.\n4. Solicit feedback from both developers and architects to ensure the report is actionable and understandable.\n5. Confirm that the report enables a new team member to understand the architecture and rationale without additional context.",
+        "status": "done",
+        "dependencies": [
+          213,
+          214,
+          215,
+          216
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 244,
+        "title": "Research and Document Best Practices for OpenTelemetry Distributed Tracing with Jaeger, Structured JSON Logging, and UEP Protocol Integration in Node.js Microservices",
+        "description": "Research and document comprehensive best practices for implementing OpenTelemetry-based distributed tracing with a Jaeger backend in Node.js microservices, including structured JSON logging with correlation IDs, trace-log correlation, and integration with the UEP protocol.",
+        "details": "1. **OpenTelemetry and Jaeger Integration**:\n   - Survey the latest OpenTelemetry Node.js SDKs and instrumentation libraries, focusing on automatic and manual instrumentation patterns for HTTP, gRPC, and message-driven microservices.\n   - Document setup and configuration for exporting traces to Jaeger, including Docker Compose examples for local development and production-ready deployment patterns[2][3].\n   - Provide code samples for initializing OpenTelemetry tracers, propagating context across async boundaries, and exporting spans to Jaeger using the OTLP exporter.\n\n2. **Structured JSON Logging with Correlation IDs**:\n   - Research logging libraries (e.g., pino, bunyan, winston) that support structured JSON output and high-performance logging in Node.js.\n   - Define a logging schema that includes trace IDs, span IDs, and correlation IDs, ensuring logs can be correlated with traces in Jaeger[3].\n   - Document middleware/interceptor patterns for injecting trace context into logs automatically, leveraging OpenTelemetry context propagation APIs.\n   - Provide code examples for integrating logging with OpenTelemetry context, ensuring every log entry within a request includes the relevant trace and span identifiers.\n\n3. **Trace-Log Correlation**:\n   - Outline best practices for correlating logs and traces, including the use of trace IDs as a primary key for cross-system observability.\n   - Document how to filter and search logs by trace ID, and how to navigate from a trace in Jaeger to the corresponding logs in a centralized logging system (e.g., Loki, Elasticsearch).\n   - Include recommendations for log enrichment and context propagation in distributed and asynchronous workflows.\n\n4. **UEP Protocol Integration**:\n   - Analyze requirements for integrating UEP protocol enforcement and metadata into OpenTelemetry traces and logs.\n   - Document patterns for capturing UEP protocol validation results as trace attributes or events, and for logging UEP-specific context alongside trace information.\n   - Provide guidance on instrumenting UEP protocol middleware to emit trace spans and log entries for protocol validation, errors, and enforcement actions.\n\n5. **Security and Performance Considerations**:\n   - Summarize best practices for securing trace and log data, including sensitive data redaction, access controls, and compliance with data retention policies.\n   - Document performance tuning tips for minimizing tracing and logging overhead in high-throughput Node.js microservices.\n\n6. **Reference Architectures and Code Samples**:\n   - Include reference Docker Compose files, OpenTelemetry configuration snippets, and sample Node.js microservice codebases demonstrating the above patterns.\n   - Provide architecture diagrams showing trace and log flows, context propagation, and integration points with UEP protocol enforcement.\n\nAll recommendations should be aligned with current (2024-2025) OpenTelemetry, Jaeger, and Node.js ecosystem best practices, and should reference authoritative sources and real-world examples where possible.",
+        "testStrategy": "1. Review the technical documentation for completeness, clarity, and alignment with current OpenTelemetry and Node.js best practices.\n2. Validate reference code samples by instrumenting a sample Node.js microservice with OpenTelemetry tracing, Jaeger backend, and structured JSON logging.\n3. Verify that trace IDs and span IDs are correctly propagated and appear in both logs and traces, enabling trace-log correlation.\n4. Test UEP protocol middleware integration by simulating protocol validation events and confirming their presence in both traces and logs.\n5. Use Jaeger UI and centralized logging (e.g., Loki, Elasticsearch) to search for logs by trace ID and confirm end-to-end correlation.\n6. Measure tracing and logging overhead under load to ensure performance targets are met.\n7. Peer review the documentation and code samples with observability and Node.js experts.",
+        "status": "pending",
+        "dependencies": [
+          196,
+          237
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 245,
+        "title": "Research and Document Best Practices for Grafana Dashboards for Microservices Monitoring (UEP, Prometheus, Jaeger, Custom Panels)",
+        "description": "Research and document best practices for designing Grafana dashboards to monitor microservices, including UEP protocol compliance visualization, Prometheus metrics integration, Jaeger trace correlation, and custom panel development for agent coordination patterns.",
+        "details": "1. Survey current Grafana documentation and community resources for dashboard design patterns relevant to microservices monitoring, focusing on modular, reusable, and role-based dashboards.\n\n2. Document step-by-step integration of Prometheus as a data source in Grafana, including best practices for metric naming, label usage, and dashboard templating for dynamic environments. Reference pre-built dashboards (e.g., Node Exporter Full, Prometheus 2.0 Overview) and outline customization strategies for UEP-specific metrics and compliance indicators[1][2][3][5].\n\n3. Research and describe methods for visualizing UEP protocol compliance, including:\n   - Defining and exposing UEP compliance metrics in Prometheus format.\n   - Creating Grafana panels (e.g., status, heatmaps, tables) to highlight protocol violations, compliance trends, and agent-specific compliance rates.\n   - Leveraging Grafana alerting for real-time compliance breach notifications.\n\n4. Investigate best practices for integrating Jaeger traces into Grafana, including:\n   - Using the Grafana Jaeger data source plugin to visualize distributed traces.\n   - Correlating trace data with Prometheus metrics and UEP compliance events for root cause analysis.\n   - Designing dashboards that link trace spans to specific agent actions or protocol steps.\n\n5. Document approaches for developing custom Grafana panels (using React/TypeScript) to visualize agent coordination patterns, such as message flows, leader election, or distributed consensus states. Include guidance on plugin development, security, and maintainability.\n\n6. Summarize dashboard governance practices: version control, dashboard-as-code (e.g., using Grafana JSON or Terraform), and access control for sensitive compliance data.\n\n7. Provide annotated dashboard examples and code snippets for key patterns, ensuring all recommendations align with current Grafana (v10+) and Prometheus (v2.45+) capabilities.",
+        "testStrategy": "1. Validate documentation by building a reference Grafana dashboard integrating Prometheus metrics, Jaeger traces, and custom UEP compliance panels in a test environment.\n2. Confirm that UEP protocol compliance metrics are accurately visualized and that alerts trigger on simulated violations.\n3. Verify that Jaeger trace panels display end-to-end request flows and correlate with compliance events.\n4. Test custom panel plugins for correct rendering, performance, and security (e.g., XSS prevention).\n5. Review dashboard JSON or Terraform definitions for reproducibility and version control compatibility.\n6. Solicit peer review from observability and microservices experts to ensure completeness and alignment with best practices.",
+        "status": "pending",
+        "dependencies": [
+          196,
+          237,
+          244
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 246,
+        "title": "Research and Document Comprehensive Alerting Strategies for Microservices (Prometheus Alertmanager, Multi-Channel Notifications, Anomaly Detection, Escalation, Fatigue Prevention)",
+        "description": "Research and document best practices for designing and implementing robust alerting strategies for microservices, including Prometheus Alertmanager configuration, multi-channel notification systems, anomaly detection for protocol violations, escalation policies, and alert fatigue prevention.",
+        "details": "1. Survey current best practices for microservices alerting, focusing on Prometheus Alertmanager as the central alert routing and notification component. Document how to configure Alertmanager for grouping, deduplication, silencing, inhibition, and routing of alerts based on severity and context.\n\n2. Provide detailed configuration examples for multi-channel notifications (Slack, PagerDuty, email, and webhooks), including secure credential management and fallback receiver strategies. Explain how to use Alertmanager's YAML configuration to define receivers, routes, and escalation paths for critical and non-critical alerts.\n\n3. Research and document anomaly detection techniques for protocol violations, leveraging Prometheus recording rules, custom metrics, and integration with protocol validation middleware. Include strategies for detecting outliers, threshold breaches, and unexpected patterns in protocol compliance metrics.\n\n4. Define escalation policies using Alertmanager's routing and inhibition features, ensuring that critical alerts are prioritized and routed to on-call engineers, while lower-severity alerts are grouped or suppressed to reduce noise.\n\n5. Document alert fatigue prevention best practices, such as alert deduplication, grouping, rate-limiting, scheduled silencing during maintenance, and actionable alert design. Reference current literature and industry guidance on reducing cognitive overload for operators.\n\n6. Include guidance on high-availability Alertmanager deployment, integration with existing monitoring and tracing systems (e.g., Grafana, Jaeger), and continuous improvement of alerting rules based on post-incident reviews.\n\n7. Provide sample Alertmanager configuration files and Prometheus alerting rules relevant to microservices environments, with inline comments explaining key sections.",
+        "testStrategy": "1. Review the documentation for completeness, clarity, and alignment with current Prometheus, Alertmanager, and microservices alerting best practices.\n2. Validate sample Alertmanager configurations by deploying them in a test environment with Prometheus, simulating alert conditions (e.g., protocol violations, latency spikes) and verifying correct routing, grouping, and notification delivery to all configured channels (Slack, PagerDuty, email).\n3. Test escalation and inhibition logic by generating multiple simultaneous alerts of varying severities and confirming correct prioritization and suppression behavior.\n4. Simulate maintenance windows and verify that silencing and rate-limiting features prevent alert fatigue.\n5. Review integration with protocol validation middleware and confirm that anomaly detection alerts are triggered on protocol violations.",
+        "status": "pending",
+        "dependencies": [
+          237,
+          238,
+          244
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 247,
+        "title": "Research and Document Best Practices for UEP Protocol Compliance Testing with Pact v4.x, Property-Based Testing, and Protocol Fuzzing",
+        "description": "Research and document a comprehensive methodology for UEP protocol compliance testing using Pact v4.x contract testing, property-based testing with fast-check, and protocol fuzzing techniques to discover edge cases and ensure robust protocol adherence.",
+        "details": "1. **Survey Current Best Practices**: Review the latest literature and community guidance on compliance testing for protocol-driven microservices, focusing on the UEP protocol context. Identify how contract testing (Pact v4.x), property-based testing (fast-check), and fuzzing are used in modern Node.js/TypeScript environments.\n\n2. **Pact v4.x Contract Testing**:\n   - Document how to define and maintain consumer and provider contracts for UEP protocol endpoints using Pact v4.x, including advanced features such as message-based contracts and bi-directional contract verification.\n   - Provide code examples for integrating Pact tests into CI pipelines, ensuring that contract tests are run automatically on pull requests and merges.\n   - Outline strategies for managing contract versioning and backward compatibility.\n\n3. **Property-Based Testing with fast-check**:\n   - Explain the principles of property-based testing and its application to protocol validation, focusing on generating diverse and unexpected payloads to test UEP protocol invariants.\n   - Provide sample fast-check test cases that assert protocol properties (e.g., schema adherence, state transitions, error handling) and demonstrate how to minimize failing cases for easier debugging.\n   - Discuss integration with TypeScript type definitions and schema validation libraries (e.g., AJV, Zod) for automated property generation.\n\n4. **Protocol Fuzzing for Edge Case Discovery**:\n   - Research and document fuzzing tools and techniques suitable for Node.js/TypeScript microservices (e.g., jazzer.js, custom input generators).\n   - Describe how to design fuzzing campaigns targeting UEP protocol endpoints, including strategies for maximizing code coverage and triggering edge-case failures.\n   - Provide guidance on monitoring, logging, and triaging fuzzing results, and integrating fuzzing into CI/CD workflows for continuous protocol robustness assessment.\n\n5. **Compliance Testing Methodology**:\n   - Synthesize the above approaches into a unified compliance testing methodology, including risk-based prioritization of protocol features, test scheduling, and remediation workflows in line with industry best practices[1][2][3][4].\n   - Include recommendations for documenting test coverage, tracking discovered issues, and reporting compliance status to stakeholders.\n\n6. **Documentation and Knowledge Sharing**:\n   - Produce a technical document with code samples, workflow diagrams, and actionable checklists for engineering teams.\n   - Recommend tools and practices for maintaining and evolving the compliance testing suite as the UEP protocol evolves.",
+        "testStrategy": "1. Review the documentation for completeness, clarity, and alignment with current best practices in contract testing, property-based testing, and fuzzing for protocol compliance.\n2. Validate reference code samples by:\n   - Running Pact v4.x contract tests against sample UEP consumer and provider implementations, verifying detection of contract violations and backward compatibility issues.\n   - Executing fast-check property-based tests to confirm that protocol invariants are enforced and edge cases are minimized and reproducible.\n   - Running protocol fuzzing campaigns against UEP endpoints, ensuring that unexpected or malformed inputs are handled gracefully and that any discovered issues are logged and triaged.\n3. Confirm that the methodology includes risk-based prioritization, test scheduling, and clear remediation workflows.\n4. Peer review the methodology and code samples with protocol and testing experts to ensure technical accuracy and practical applicability.",
+        "status": "pending",
+        "dependencies": [
+          237,
+          238,
+          239
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 248,
+        "title": "Develop UEP Performance and Load Testing Suite with k6 Integration",
+        "description": "Design and implement a comprehensive performance and load testing suite for UEP distributed agent systems, integrating k6 for distributed load generation, automated bottleneck analysis, and performance regression detection.",
+        "details": "1. **k6 Integration and Distributed Load Testing**: Integrate k6 as the primary load testing tool, leveraging its scripting capabilities (JavaScript-based) for realistic UEP protocol scenarios. Use the k6-operator for Kubernetes to enable distributed test execution, allowing simulation of large-scale, multi-agent environments. Provide reusable k6 test scripts for common UEP workflows and agent interactions. \n\n2. **CI/CD Automation**: Integrate k6 load tests into the CI/CD pipeline (e.g., GitHub Actions, Jenkins) to automatically trigger performance tests on new deployments. Configure pass/fail thresholds based on latency, throughput, and error rates to catch regressions early[2][3].\n\n3. **Bottleneck Analysis**: Collect and aggregate detailed performance metrics (response times, resource utilization, error rates) from k6 and the UEP monitoring system. Implement automated analysis scripts to identify bottlenecks, such as slow endpoints, resource contention, or coordination delays. Integrate with observability dashboards for real-time visualization[5].\n\n4. **Performance Regression Detection**: Store historical performance baselines and compare new test results to detect regressions. Implement automated alerts for significant deviations. Support trend analysis and reporting for ongoing optimization.\n\n5. **Scalability and Extensibility**: Ensure the suite supports scaling tests from local development to distributed clusters (Kubernetes, Testkube, or k6 Cloud). Provide documentation and templates for extending test scenarios as new agent types or workflows are added[1][4].\n\n6. **Best Practices**: Follow best practices for distributed load testing, including test data management, environment isolation, and reproducibility. Ensure tests are idempotent and can be run repeatedly without side effects.",
+        "testStrategy": "1. Validate k6 integration by running sample load tests against a staging UEP environment and verifying correct execution and metric collection.\n2. Execute distributed load tests using the k6-operator in Kubernetes, confirming the ability to generate and coordinate high load across multiple agents.\n3. Simulate known bottleneck scenarios (e.g., artificial delays, resource limits) and verify that the analysis scripts correctly identify them.\n4. Introduce controlled performance regressions and confirm that the regression detection mechanism triggers alerts and reports deviations.\n5. Run the suite as part of the CI/CD pipeline and verify that it blocks deployments on performance threshold violations.\n6. Review extensibility by adding a new agent type or workflow and confirming that the suite can be easily updated to test it.",
+        "status": "pending",
+        "dependencies": [
+          207,
+          217
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate k6 and Set Up Distributed Load Testing Environment",
+            "description": "Install and configure k6 as the primary load testing tool for UEP distributed agent systems. Deploy the k6-operator in Kubernetes to enable distributed test execution, and prepare reusable k6 test scripts for common UEP workflows and agent interactions.",
+            "dependencies": [],
+            "details": "Set up the k6-operator in the Kubernetes cluster, configure parallelism for distributed test runs, and organize test scripts as ConfigMaps or PersistentVolumes. Ensure the environment supports large-scale, multi-agent load simulation.",
+            "status": "pending",
+            "testStrategy": "Validate k6 integration by running sample distributed load tests against a staging UEP environment and verifying correct execution and metric collection."
+          },
+          {
+            "id": 2,
+            "title": "Automate Load Testing in CI/CD Pipeline",
+            "description": "Integrate k6 load tests into the CI/CD pipeline (e.g., GitHub Actions, Jenkins) to automatically trigger performance tests on new deployments. Configure pass/fail thresholds for latency, throughput, and error rates.",
+            "dependencies": [
+              "248.1"
+            ],
+            "details": "Set up CI/CD jobs to execute k6 tests on deployment events. Define and enforce performance thresholds to catch regressions early. Ensure test results are accessible within the CI/CD system.",
+            "status": "pending",
+            "testStrategy": "Trigger automated load tests on deployment to a test environment and verify that failures are detected and reported when thresholds are exceeded."
+          },
+          {
+            "id": 3,
+            "title": "Implement Automated Bottleneck Analysis and Observability Integration",
+            "description": "Collect and aggregate detailed performance metrics from k6 and the UEP monitoring system. Develop automated scripts to analyze results and identify bottlenecks, integrating with observability dashboards for real-time visualization.",
+            "dependencies": [
+              "248.2"
+            ],
+            "details": "Configure k6 to export metrics to Prometheus or similar systems. Implement scripts to process metrics, highlight slow endpoints, resource contention, or coordination delays, and visualize findings in Grafana or equivalent dashboards.",
+            "status": "pending",
+            "testStrategy": "Run load tests and verify that bottleneck analysis scripts correctly identify known performance issues and that metrics are visualized in real time."
+          },
+          {
+            "id": 4,
+            "title": "Develop Performance Regression Detection and Alerting",
+            "description": "Store historical performance baselines and compare new test results to detect regressions. Implement automated alerts for significant deviations and support trend analysis and reporting.",
+            "dependencies": [
+              "248.3"
+            ],
+            "details": "Maintain a database or storage for historical test results. Automate comparison logic to flag regressions and configure alerting mechanisms (e.g., email, Slack) for deviations. Generate periodic performance trend reports.",
+            "status": "pending",
+            "testStrategy": "Simulate performance regressions in test runs and verify that alerts are triggered and reports reflect the changes accurately."
+          },
+          {
+            "id": 5,
+            "title": "Ensure Scalability, Extensibility, and Documentation",
+            "description": "Design the testing suite to support scaling from local to distributed clusters and provide documentation and templates for extending test scenarios as new agent types or workflows are added.",
+            "dependencies": [
+              "248.4"
+            ],
+            "details": "Validate that the suite can run on local machines, Kubernetes clusters, and cloud environments. Create clear documentation and templates for adding new test cases and agent workflows. Follow best practices for test data management, environment isolation, and reproducibility.",
+            "status": "pending",
+            "testStrategy": "Test the suite in various environments (local, Kubernetes, cloud) and verify that new scenarios can be added using provided templates and documentation."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-07-29T03:41:18.310Z",
+      "updated": "2025-07-30T02:03:14.606Z",
       "description": "Tasks for master context"
     }
   }

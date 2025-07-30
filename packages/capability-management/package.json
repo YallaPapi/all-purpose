@@ -1,0 +1,78 @@
+{
+  "name": "@uep/capability-management",
+  "version": "1.0.0",
+  "description": "UEP Agent Capability Management System with Registry Service, Discovery API, and Semantic Versioning",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "capability-registry": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "start:dev": "tsx src/server.ts",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ioredis": "^5.3.2",
+    "uuid": "^9.0.1",
+    "chalk": "^5.3.0",
+    "cors": "^2.8.5",
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/uuid": "^9.0.7",
+    "@types/cors": "^2.8.16",
+    "@types/semver": "^7.5.6",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "tsx": "^4.6.0",
+    "vitest": "^1.0.4",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "rimraf": "^5.0.5"
+  },
+  "optionalDependencies": {
+    "consul": "^0.40.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "uep",
+    "capability-management",
+    "service-discovery",
+    "registry",
+    "semantic-versioning",
+    "agent-coordination",
+    "microservices",
+    "enterprise",
+    "typescript"
+  ],
+  "author": "UEP Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/allpurp.git",
+    "directory": "packages/capability-management"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ]
+}

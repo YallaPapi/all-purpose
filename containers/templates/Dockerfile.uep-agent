@@ -1,0 +1,423 @@
+# =============================================================================
+# UEP Meta-Agent Factory - UEP Agent Container Template
+# =============================================================================
+# 
+# Enhanced Dockerfile template that extends the base agent template with
+# UEP protocol compliance, automatic registration, and monitoring integration.
+#
+# Template Version: 1.0.0
+# Base Template: Dockerfile.base-agent v1.0.0
+# UEP Protocol: v2.0.0
+# Security Level: Hardened with UEP extensions
+#
+# Key UEP Features:
+#   - Automatic UEP Registry registration/deregistration
+#   - UEP protocol validation middleware
+#   - Built-in health checks with UEP compliance
+#   - OpenTelemetry tracing integration
+#   - UEP-compliant logging and metrics
+#   - Graceful shutdown with UEP deregistration
+#
+# Usage:
+#   1. Copy this template to your UEP agent directory
+#   2. Customize the UEP_AGENT_TYPE, UEP_AGENT_NAME, and capabilities
+#   3. Build with: docker build --target uep-production -t uep-agent-name .
+#
+# =============================================================================
+
+# Enable BuildKit features for enhanced build performance
+# syntax=docker/dockerfile:1.7-labs
+
+# =============================================================================
+# Build Arguments (UEP Agent Specific)
+# =============================================================================
+ARG NODE_VERSION=20.11.1
+ARG ALPINE_VERSION=alpine3.19
+ARG UEP_AGENT_TYPE=uep-base-agent
+ARG UEP_AGENT_NAME="UEP Base Agent"
+ARG UEP_AGENT_VERSION=1.0.0
+ARG UEP_PROTOCOL_VERSION=2.0.0
+ARG BUILD_DATE
+ARG GIT_COMMIT
+ARG BUILD_NUMBER
+
+# UEP-specific configuration
+ARG UEP_REGISTRY_URL=http://uep-registry:3000
+ARG UEP_SERVICE_URL=http://uep-service:3001
+ARG OTEL_COLLECTOR_URL=http://otel-collector:4318
+
+# =============================================================================
+# Stage 1: UEP Base Environment Setup
+# =============================================================================
+FROM node:${NODE_VERSION}-${ALPINE_VERSION} AS uep-base
+
+# Install system dependencies, security updates, and UEP-specific tools
+RUN apk update && apk upgrade && \
+    apk add --no-cache \
+        dumb-init \
+        tini \
+        curl \
+        jq \
+        ca-certificates \
+        tzdata \
+        # UEP-specific monitoring tools
+        netcat-openbsd \
+        tcpdump \
+        strace && \
+    # Remove package manager cache
+    rm -rf /var/cache/apk/* && \
+    # Create non-root user for security
+    addgroup -g 1000 -S uepagent && \
+    adduser -u 1000 -S -G uepagent -h /app -s /sbin/nologin uepagent && \
+    # Set up secure directories with UEP structure
+    mkdir -p /app /app/logs /app/tmp /app/config /app/uep /app/data && \
+    chown -R uepagent:uepagent /app
+
+# Set working directory
+WORKDIR /app
+
+# Configure UEP environment variables
+ENV NODE_ENV=production \
+    NPM_CONFIG_CACHE=/tmp/.npm \
+    NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false \
+    AGENT_USER=uepagent \
+    AGENT_UID=1000 \
+    AGENT_GID=1000 \
+    # UEP Protocol Configuration
+    UEP_PROTOCOL_VERSION=${UEP_PROTOCOL_VERSION} \
+    UEP_REGISTRY_URL=${UEP_REGISTRY_URL} \
+    UEP_SERVICE_URL=${UEP_SERVICE_URL} \
+    UEP_VALIDATION_ENABLED=true \
+    UEP_AUTO_REGISTER=true \
+    UEP_HEALTH_CHECK_INTERVAL=30000 \
+    UEP_REGISTRATION_RETRY_ATTEMPTS=5 \
+    UEP_REGISTRATION_RETRY_DELAY=5000
+
+# =============================================================================
+# Stage 2: UEP Dependencies Installation
+# =============================================================================
+FROM uep-base AS uep-dependencies
+
+# Switch to agent user for dependency installation
+USER uepagent
+
+# Copy package files with proper ownership
+COPY --chown=uepagent:uepagent package*.json ./
+
+# Install production dependencies with UEP libraries
+RUN npm ci --only=production --silent --no-progress && \
+    # Clean npm cache for security
+    npm cache clean --force && \
+    # Remove unnecessary files for smaller image
+    find node_modules -name "*.md" -delete && \
+    find node_modules -name "test" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -name "*.test.js" -delete && \
+    find node_modules -name "*.spec.js" -delete
+
+# =============================================================================
+# Stage 3: UEP Development Build (for debugging and testing)
+# =============================================================================
+FROM uep-dependencies AS uep-development
+
+# Override environment for development
+ENV NODE_ENV=development \
+    LOG_LEVEL=debug \
+    ENABLE_DEBUG=true \
+    UEP_VALIDATION_STRICT=false \
+    UEP_LOG_LEVEL=debug
+
+# Install development dependencies
+RUN npm ci --silent --no-progress
+
+# Copy source code
+COPY --chown=uepagent:uepagent . .
+
+# Create UEP development startup script
+RUN echo '#!/bin/sh' > /app/start-uep-dev.sh && \
+    echo 'set -e' >> /app/start-uep-dev.sh && \
+    echo 'echo "Starting UEP ${UEP_AGENT_TYPE} in development mode..."' >> /app/start-uep-dev.sh && \
+    echo 'echo "UEP Protocol Version: ${UEP_PROTOCOL_VERSION}"' >> /app/start-uep-dev.sh && \
+    echo 'echo "Registry URL: ${UEP_REGISTRY_URL}"' >> /app/start-uep-dev.sh && \
+    echo 'echo "Validation: ${UEP_VALIDATION_ENABLED}"' >> /app/start-uep-dev.sh && \
+    echo 'exec node --inspect=0.0.0.0:9229 src/index.js "$@"' >> /app/start-uep-dev.sh && \
+    chmod +x /app/start-uep-dev.sh
+
+# Expose development debugging port
+EXPOSE 9229
+
+# Development startup command
+CMD ["/app/start-uep-dev.sh"]
+
+# =============================================================================
+# Stage 4: UEP Production Build
+# =============================================================================
+FROM uep-dependencies AS uep-production
+
+# Copy source code with proper ownership
+COPY --chown=uepagent:uepagent src/ ./src/
+COPY --chown=uepagent:uepagent config/ ./config/ 2>/dev/null || true
+COPY --chown=uepagent:uepagent public/ ./public/ 2>/dev/null || true
+COPY --chown=uepagent:uepagent scripts/ ./scripts/ 2>/dev/null || true
+
+# Create UEP registration script
+RUN echo '#!/bin/sh' > /app/uep-register.sh && \
+    echo 'set -e' >> /app/uep-register.sh && \
+    echo '' >> /app/uep-register.sh && \
+    echo '# UEP Agent Registration Function' >> /app/uep-register.sh && \
+    echo 'register_with_uep() {' >> /app/uep-register.sh && \
+    echo '  echo "Registering with UEP Registry: ${UEP_REGISTRY_URL}"' >> /app/uep-register.sh && \
+    echo '  REGISTRATION_PAYLOAD=$(cat <<EOF' >> /app/uep-register.sh && \
+    echo '{' >> /app/uep-register.sh && \
+    echo '  "agentId": "${HOSTNAME}-${UEP_AGENT_TYPE}",' >> /app/uep-register.sh && \
+    echo '  "agentType": "${UEP_AGENT_TYPE}",' >> /app/uep-register.sh && \
+    echo '  "agentName": "${UEP_AGENT_NAME}",' >> /app/uep-register.sh && \
+    echo '  "version": "${UEP_AGENT_VERSION}",' >> /app/uep-register.sh && \
+    echo '  "protocolVersion": "${UEP_PROTOCOL_VERSION}",' >> /app/uep-register.sh && \
+    echo '  "hostname": "${HOSTNAME}",' >> /app/uep-register.sh && \
+    echo '  "port": ${SERVICE_PORT},' >> /app/uep-register.sh && \
+    echo '  "healthCheckPath": "${HEALTH_CHECK_PATH}",' >> /app/uep-register.sh && \
+    echo '  "metricsPath": "${METRICS_PATH}",' >> /app/uep-register.sh && \
+    echo '  "capabilities": ["http", "health", "metrics", "tracing"],' >> /app/uep-register.sh && \
+    echo '  "metadata": {' >> /app/uep-register.sh && \
+    echo '    "startTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",' >> /app/uep-register.sh && \
+    echo '    "nodeVersion": "${NODE_VERSION}",' >> /app/uep-register.sh && \
+    echo '    "containerImage": "${AGENT_TYPE}:${AGENT_VERSION}"' >> /app/uep-register.sh && \
+    echo '  }' >> /app/uep-register.sh && \
+    echo '}' >> /app/uep-register.sh && \
+    echo 'EOF' >> /app/uep-register.sh && \
+    echo ')' >> /app/uep-register.sh && \
+    echo '' >> /app/uep-register.sh && \
+    echo '  for attempt in $(seq 1 ${UEP_REGISTRATION_RETRY_ATTEMPTS}); do' >> /app/uep-register.sh && \
+    echo '    echo "Registration attempt $attempt of ${UEP_REGISTRATION_RETRY_ATTEMPTS}"' >> /app/uep-register.sh && \
+    echo '    if curl -f -X POST "${UEP_REGISTRY_URL}/api/registry/register" \' >> /app/uep-register.sh && \
+    echo '         -H "Content-Type: application/json" \' >> /app/uep-register.sh && \
+    echo '         -d "$REGISTRATION_PAYLOAD" \' >> /app/uep-register.sh && \
+    echo '         --max-time 10 --silent; then' >> /app/uep-register.sh && \
+    echo '      echo "Successfully registered with UEP Registry"' >> /app/uep-register.sh && \
+    echo '      return 0' >> /app/uep-register.sh && \
+    echo '    fi' >> /app/uep-register.sh && \
+    echo '    echo "Registration attempt $attempt failed, retrying in ${UEP_REGISTRATION_RETRY_DELAY}ms"' >> /app/uep-register.sh && \
+    echo '    sleep $((UEP_REGISTRATION_RETRY_DELAY / 1000))' >> /app/uep-register.sh && \
+    echo '  done' >> /app/uep-register.sh && \
+    echo '  echo "Failed to register with UEP Registry after ${UEP_REGISTRATION_RETRY_ATTEMPTS} attempts"' >> /app/uep-register.sh && \
+    echo '  return 1' >> /app/uep-register.sh && \
+    echo '}' >> /app/uep-register.sh && \
+    echo '' >> /app/uep-register.sh && \
+    echo '# Execute registration if auto-register is enabled' >> /app/uep-register.sh && \
+    echo 'if [ "${UEP_AUTO_REGISTER}" = "true" ]; then' >> /app/uep-register.sh && \
+    echo '  register_with_uep' >> /app/uep-register.sh && \
+    echo 'else' >> /app/uep-register.sh && \
+    echo '  echo "UEP auto-registration disabled"' >> /app/uep-register.sh && \
+    echo 'fi' >> /app/uep-register.sh && \
+    chmod +x /app/uep-register.sh
+
+# Create UEP deregistration script
+RUN echo '#!/bin/sh' > /app/uep-deregister.sh && \
+    echo 'set -e' >> /app/uep-deregister.sh && \
+    echo '' >> /app/uep-deregister.sh && \
+    echo '# UEP Agent Deregistration Function' >> /app/uep-deregister.sh && \
+    echo 'deregister_from_uep() {' >> /app/uep-deregister.sh && \
+    echo '  AGENT_ID="${HOSTNAME}-${UEP_AGENT_TYPE}"' >> /app/uep-deregister.sh && \
+    echo '  echo "Deregistering ${AGENT_ID} from UEP Registry"' >> /app/uep-deregister.sh && \
+    echo '  curl -f -X DELETE "${UEP_REGISTRY_URL}/api/registry/deregister/${AGENT_ID}" \' >> /app/uep-deregister.sh && \
+    echo '       --max-time 10 --silent || echo "Deregistration failed or already deregistered"' >> /app/uep-deregister.sh && \
+    echo '  echo "UEP deregistration completed"' >> /app/uep-deregister.sh && \
+    echo '}' >> /app/uep-deregister.sh && \
+    echo '' >> /app/uep-deregister.sh && \
+    echo 'deregister_from_uep' >> /app/uep-deregister.sh && \
+    chmod +x /app/uep-deregister.sh
+
+# Create enhanced UEP health check script
+RUN echo '#!/bin/sh' > /app/uep-health-check.sh && \
+    echo 'set -e' >> /app/uep-health-check.sh && \
+    echo '' >> /app/uep-health-check.sh && \
+    echo '# UEP-compliant health check with registry verification' >> /app/uep-health-check.sh && \
+    echo 'HEALTH_URL="http://localhost:${SERVICE_PORT:-3000}${HEALTH_CHECK_PATH:-/health}"' >> /app/uep-health-check.sh && \
+    echo 'AGENT_ID="${HOSTNAME}-${UEP_AGENT_TYPE}"' >> /app/uep-health-check.sh && \
+    echo '' >> /app/uep-health-check.sh && \
+    echo '# Check local health endpoint' >> /app/uep-health-check.sh && \
+    echo 'if ! curl -f --max-time 5 --silent "$HEALTH_URL" > /dev/null; then' >> /app/uep-health-check.sh && \
+    echo '  echo "Local health check failed for $HEALTH_URL"' >> /app/uep-health-check.sh && \
+    echo '  exit 1' >> /app/uep-health-check.sh && \
+    echo 'fi' >> /app/uep-health-check.sh && \
+    echo '' >> /app/uep-health-check.sh && \
+    echo '# Verify UEP registry connectivity (optional)' >> /app/uep-health-check.sh && \
+    echo 'if [ "${UEP_VALIDATION_ENABLED}" = "true" ]; then' >> /app/uep-health-check.sh && \
+    echo '  if ! curl -f --max-time 3 --silent "${UEP_REGISTRY_URL}/health" > /dev/null; then' >> /app/uep-health-check.sh && \
+    echo '    echo "Warning: UEP Registry not accessible, but local health OK"' >> /app/uep-health-check.sh && \
+    echo '  fi' >> /app/uep-health-check.sh && \
+    echo 'fi' >> /app/uep-health-check.sh && \
+    echo '' >> /app/uep-health-check.sh && \
+    echo 'echo "UEP health check passed"' >> /app/uep-health-check.sh && \
+    chmod +x /app/uep-health-check.sh
+
+# Create production startup script with UEP integration
+RUN echo '#!/bin/sh' > /app/start-uep.sh && \
+    echo 'set -e' >> /app/start-uep.sh && \
+    echo '' >> /app/start-uep.sh && \
+    echo '# UEP Agent Startup Script with Registration and Signal Handling' >> /app/start-uep.sh && \
+    echo 'echo "Starting UEP Agent: ${UEP_AGENT_NAME} (${UEP_AGENT_TYPE} v${UEP_AGENT_VERSION})"' >> /app/start-uep.sh && \
+    echo 'echo "Protocol Version: ${UEP_PROTOCOL_VERSION}"' >> /app/start-uep.sh && \
+    echo 'echo "Environment: ${NODE_ENV}"' >> /app/start-uep.sh && \
+    echo 'echo "Process ID: $$"' >> /app/start-uep.sh && \
+    echo 'echo "Registry: ${UEP_REGISTRY_URL}"' >> /app/start-uep.sh && \
+    echo '' >> /app/start-uep.sh && \
+    echo '# Signal handling for graceful shutdown with UEP deregistration' >> /app/start-uep.sh && \
+    echo 'shutdown() {' >> /app/start-uep.sh && \
+    echo '  echo "Received shutdown signal, initiating graceful UEP shutdown..."' >> /app/start-uep.sh && \
+    echo '  ' >> /app/start-uep.sh && \
+    echo '  # Deregister from UEP registry first' >> /app/start-uep.sh && \
+    echo '  if [ "${UEP_AUTO_REGISTER}" = "true" ]; then' >> /app/start-uep.sh && \
+    echo '    /app/uep-deregister.sh || echo "Deregistration failed, continuing shutdown"' >> /app/start-uep.sh && \
+    echo '  fi' >> /app/start-uep.sh && \
+    echo '  ' >> /app/start-uep.sh && \
+    echo '  # Gracefully stop the application' >> /app/start-uep.sh && \
+    echo '  kill -TERM "$child" 2>/dev/null' >> /app/start-uep.sh && \
+    echo '  wait "$child"' >> /app/start-uep.sh && \
+    echo '  echo "UEP Agent stopped gracefully"' >> /app/start-uep.sh && \
+    echo '  exit 0' >> /app/start-uep.sh && \
+    echo '}' >> /app/start-uep.sh && \
+    echo '' >> /app/start-uep.sh && \
+    echo '# Set up signal traps' >> /app/start-uep.sh && \
+    echo 'trap shutdown SIGTERM SIGINT' >> /app/start-uep.sh && \
+    echo '' >> /app/start-uep.sh && \
+    echo '# Register with UEP if auto-registration is enabled' >> /app/start-uep.sh && \
+    echo 'if [ "${UEP_AUTO_REGISTER}" = "true" ]; then' >> /app/start-uep.sh && \
+    echo '  /app/uep-register.sh || {' >> /app/start-uep.sh && \
+    echo '    echo "Failed to register with UEP Registry, but continuing startup"' >> /app/start-uep.sh && \
+    echo '    echo "Agent will operate in standalone mode"' >> /app/start-uep.sh && \
+    echo '  }' >> /app/start-uep.sh && \
+    echo 'fi' >> /app/start-uep.sh && \
+    echo '' >> /app/start-uep.sh && \
+    echo '# Start the Node.js application with proper signal forwarding' >> /app/start-uep.sh && \
+    echo 'node src/index.js "$@" &' >> /app/start-uep.sh && \
+    echo 'child=$!' >> /app/start-uep.sh && \
+    echo 'wait "$child"' >> /app/start-uep.sh && \
+    chmod +x /app/start-uep.sh
+
+# Set secure file permissions
+RUN find /app -type f -exec chmod 644 {} + && \
+    find /app -type d -exec chmod 755 {} + && \
+    chmod +x /app/start-uep.sh /app/uep-health-check.sh /app/uep-register.sh /app/uep-deregister.sh
+
+# =============================================================================
+# Final UEP Stage Configuration
+# =============================================================================
+
+# Define OCI-compliant labels with UEP extensions
+LABEL org.opencontainers.image.title="${UEP_AGENT_NAME}" \
+      org.opencontainers.image.description="UEP Meta-Agent Factory ${UEP_AGENT_TYPE}" \
+      org.opencontainers.image.version="${UEP_AGENT_VERSION}" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.revision="${GIT_COMMIT}" \
+      org.opencontainers.image.vendor="UEP Meta-Agent Factory" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.source="https://github.com/uep-factory/meta-agents" \
+      \
+      # UEP-specific labels
+      uep.agent.type="${UEP_AGENT_TYPE}" \
+      uep.agent.name="${UEP_AGENT_NAME}" \
+      uep.agent.version="${UEP_AGENT_VERSION}" \
+      uep.protocol.version="${UEP_PROTOCOL_VERSION}" \
+      uep.build.number="${BUILD_NUMBER}" \
+      uep.security.user="uepagent:1000" \
+      uep.template.version="1.0.0" \
+      uep.capabilities="http,health,metrics,tracing,registration"
+
+# Define UEP runtime environment variables
+ENV UEP_AGENT_TYPE=${UEP_AGENT_TYPE} \
+    UEP_AGENT_NAME=${UEP_AGENT_NAME} \
+    UEP_AGENT_VERSION=${UEP_AGENT_VERSION} \
+    UEP_PROTOCOL_VERSION=${UEP_PROTOCOL_VERSION} \
+    SERVICE_PORT=3000 \
+    HEALTH_CHECK_PORT=3000 \
+    HEALTH_CHECK_PATH=/health \
+    METRICS_PORT=3000 \
+    METRICS_PATH=/metrics \
+    LOG_LEVEL=info \
+    SHUTDOWN_TIMEOUT=30000 \
+    STARTUP_TIMEOUT=60000 \
+    # UEP-specific environment
+    UEP_REGISTRY_URL=${UEP_REGISTRY_URL} \
+    UEP_SERVICE_URL=${UEP_SERVICE_URL} \
+    OTEL_COLLECTOR_URL=${OTEL_COLLECTOR_URL} \
+    OTEL_SERVICE_NAME=${UEP_AGENT_TYPE} \
+    OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_COLLECTOR_URL}
+
+# Expose default ports
+EXPOSE ${SERVICE_PORT} ${HEALTH_CHECK_PORT} ${METRICS_PORT}
+
+# Configure UEP-compliant health check
+HEALTHCHECK --interval=30s \
+            --timeout=10s \
+            --start-period=60s \
+            --retries=3 \
+            CMD ["/app/uep-health-check.sh"]
+
+# Set resource limits (UEP recommendations)
+ENV MEMORY_LIMIT=512M \
+    CPU_LIMIT=1000m \
+    CPU_REQUEST=250m \
+    MEMORY_REQUEST=256M
+
+# Switch to non-root user for security
+USER uepagent
+
+# Set up proper working directory
+WORKDIR /app
+
+# Configure volume mount points for UEP agent data
+VOLUME ["/app/logs", "/app/data", "/app/tmp", "/app/uep"]
+
+# Initialize with tini for proper process handling
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Default UEP startup command
+CMD ["/app/start-uep.sh"]
+
+# =============================================================================
+# UEP Build Instructions and Usage Examples
+# =============================================================================
+#
+# UEP Development Build:
+#   docker build --target uep-development \
+#     --build-arg UEP_AGENT_TYPE=my-uep-agent \
+#     --build-arg UEP_AGENT_NAME="My UEP Agent" \
+#     --tag my-uep-agent:dev .
+#   docker run -p 3000:3000 -p 9229:9229 \
+#     -e NODE_ENV=development \
+#     -e UEP_REGISTRY_URL=http://localhost:3001 \
+#     my-uep-agent:dev
+#
+# UEP Production Build:
+#   docker build --target uep-production \
+#     --build-arg UEP_AGENT_TYPE=my-uep-agent \
+#     --build-arg UEP_AGENT_NAME="My UEP Agent" \
+#     --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+#     --build-arg GIT_COMMIT=$(git rev-parse HEAD) \
+#     --tag my-uep-agent:latest .
+#
+# Running with UEP Configuration:
+#   docker run -d \
+#     --name my-uep-agent \
+#     --network uep-network \
+#     -p 3000:3000 \
+#     -e UEP_REGISTRY_URL=http://uep-registry:3000 \
+#     -e UEP_SERVICE_URL=http://uep-service:3001 \
+#     -e UEP_AUTO_REGISTER=true \
+#     -e UEP_VALIDATION_ENABLED=true \
+#     -e LOG_LEVEL=info \
+#     -v uep-agent-logs:/app/logs \
+#     -v uep-agent-data:/app/data \
+#     --restart unless-stopped \
+#     my-uep-agent:latest
+#
+# UEP Registry Integration Test:
+#   docker exec my-uep-agent /app/uep-register.sh
+#   docker exec my-uep-agent /app/uep-health-check.sh
+#   docker exec my-uep-agent /app/uep-deregister.sh
+#
+# =============================================================================

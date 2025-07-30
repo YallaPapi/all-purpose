@@ -537,3 +537,46 @@ And additional specialized references:
 **This comprehensive Claude Code guide consolidates all session startup knowledge from archived documentation to provide immediate productivity in every new session.**
 
 **Status**: Ready for ES module fixes to enable full Meta-Agent Factory productivity with proven autonomous project generation capabilities.
+
+---
+
+## 📄 ZAD DOCUMENTATION METHODOLOGY
+
+### **Writing ZAD Reports - Critical Process** [47]
+
+When asked to write a ZAD (Zero-Assumption Documentation) report, follow this precise methodology to ensure accurate coverage of completed work:
+
+**ZAD Writing Process**:
+1. **Check File Timestamps**: Look at the file timestamps in the `zad-reports/` folder to identify files by actual creation time
+2. **Find Most Recent ZAD**: Identify the most recently created ZAD file by timestamp (not by task number or filename)
+3. **Read Previous Coverage**: Read that most recent ZAD thoroughly to understand exactly what work it covers
+4. **Identify New Work**: Check what tasks have been completed SINCE that ZAD was written
+5. **Verify Implementation**: Verify the completed tasks actually have source files and implementations (not just claims)
+6. **Document Gap Coverage**: Write a new ZAD covering ONLY the work completed since the most recent ZAD
+7. **Maintain Continuity**: Ensure the new ZAD provides clear continuity from the previous report
+
+**Critical Context**: ZAD reports are **chronological documentation** that must maintain perfect continuity. Each ZAD should build upon the previous one, covering only the incremental work completed. Never duplicate coverage from previous ZADs, and always verify that claimed completions have actual source code implementations.
+
+**Example Workflow**:
+```bash
+# Find most recent ZAD by timestamp
+ls -la zad-reports/ | sort -k6,7
+
+# Read the most recent ZAD to understand coverage
+# Check task completion status
+task-master list
+
+# Verify implementations exist
+ls -la packages/capability-management/src/algorithms/  # Example verification
+
+# Write ZAD covering only new work since last report
+```
+
+**ZAD Quality Standards**:
+- ✅ **Accurate Coverage**: Only document work actually completed since last ZAD
+- ✅ **Source Verification**: Verify all claimed completions have real implementations  
+- ✅ **Clear Continuity**: Reference previous ZAD and build upon it chronologically
+- ✅ **Technical Detail**: Provide sufficient technical detail for future sessions
+- ✅ **Progress Tracking**: Clear progress metrics and next steps
+
+This methodology ensures ZAD reports maintain accurate project continuity and prevent documentation drift or duplication [47].
