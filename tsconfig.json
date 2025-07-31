@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "node",
     "declaration": true,
@@ -32,12 +35,22 @@
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "src/**/*",
     "packages/**/*",
-    "apps/**/*"
+    "apps/**/*",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
