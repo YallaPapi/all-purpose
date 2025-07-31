@@ -1,0 +1,220 @@
+./packages/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:50:      const initializingSpy = jest.fn();
+./packages/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:51:      const initializedSpy = jest.fn();
+./packages/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:152:      const timeoutSpy = jest.fn();
+./packages/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:172:      const startSpy = jest.fn();
+./packages/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:173:      const stepSpy = jest.fn();
+./packages/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:174:      const completeSpy = jest.fn();
+./packages/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:350:      const errorSpy = jest.fn();
+./services/health/UEPHealthMonitoring.test.ts:25:jest.mock('consul', () => {
+./services/health/UEPHealthMonitoring.test.ts:26:  return jest.fn().mockImplementation(() => ({
+./services/health/UEPHealthMonitoring.test.ts:28:      leader: jest.fn().mockResolvedValue('localhost:8300')
+./services/health/UEPHealthMonitoring.test.ts:32:        list: jest.fn().mockResolvedValue({
+./services/health/UEPHealthMonitoring.test.ts:39:      service: jest.fn().mockResolvedValue([
+./services/health/UEPHealthMonitoring.test.ts:59:        register: jest.fn().mockResolvedValue(undefined),
+./services/health/UEPHealthMonitoring.test.ts:60:        deregister: jest.fn().mockResolvedValue(undefined)
+./services/health/UEPHealthMonitoring.test.ts:63:        pass: jest.fn().mockResolvedValue(undefined),
+./services/health/UEPHealthMonitoring.test.ts:64:        warn: jest.fn().mockResolvedValue(undefined),
+./services/health/UEPHealthMonitoring.test.ts:65:        fail: jest.fn().mockResolvedValue(undefined)
+./services/health/UEPHealthMonitoring.test.ts:72:global.fetch = jest.fn().mockImplementation((url: string) => {
+./services/health/UEPHealthMonitoring.test.ts:146:    // Clear all mocks
+./services/health/UEPHealthMonitoring.test.ts:156:      const consulInstance = Consul.mock.results[0].value;
+./services/health/UEPHealthMonitoring.test.ts:191:      const consulInstance = Consul.mock.results[0].value;
+./services/health/UEPHealthMonitoring.test.ts:229:      const consulInstance = Consul.mock.results[0].value;
+./services/health/UEPHealthMonitoring.test.ts:247:      const consulInstance = Consul.mock.results[0].value;
+./services/health/UEPHealthMonitoring.test.ts:320:      // The mocked fetch should return metrics
+./services/health/UEPHealthMonitoring.test.ts:422:      const consulInstance = Consul.mock.results[0].value;
+./services/health/UEPHealthMonitoring.test.ts:423:      consulInstance.status.leader.mockRejectedValueOnce(new Error('Connection refused'));
+./services/health/UEPHealthMonitoring.test.ts:432:      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+./services/health/UEPHealthMonitoring.test.ts:486:      const consulInstance = Consul.mock.results[0].value;
+./services/health/UEPHealthMonitoring.test.ts:625:    const mockAgents = [
+./services/health/UEPHealthMonitoring.test.ts:632:    client['handleInitialHealthData'](mockAgents);
+./services/health/UEPHealthMonitoring.test.ts:651:    const mockAgents = [
+./services/health/UEPHealthMonitoring.test.ts:656:    client['handleInitialHealthData'](mockAgents);
+./services/health/UEPMetricsCollection.test.ts:25:jest.mock('prom-client', () => {
+./services/health/UEPMetricsCollection.test.ts:30:    collectDefaultMetrics: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:31:    Registry: jest.fn().mockImplementation(() => ({
+./services/health/UEPMetricsCollection.test.ts:32:      resetMetrics: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:33:      clear: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:34:      metrics: jest.fn().mockResolvedValue('# Mocked metrics output'),
+./services/health/UEPMetricsCollection.test.ts:35:      setDefaultLabels: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:36:      registerMetric: jest.fn()
+./services/health/UEPMetricsCollection.test.ts:38:    Counter: jest.fn().mockImplementation((config) => ({
+./services/health/UEPMetricsCollection.test.ts:42:      inc: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:43:      get: jest.fn().mockReturnValue({ values: [] })
+./services/health/UEPMetricsCollection.test.ts:45:    Histogram: jest.fn().mockImplementation((config) => ({
+./services/health/UEPMetricsCollection.test.ts:50:      observe: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:51:      get: jest.fn().mockReturnValue({ values: [] })
+./services/health/UEPMetricsCollection.test.ts:53:    Gauge: jest.fn().mockImplementation((config) => ({
+./services/health/UEPMetricsCollection.test.ts:57:      set: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:58:      inc: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:59:      dec: jest.fn(),
+./services/health/UEPMetricsCollection.test.ts:60:      get: jest.fn().mockReturnValue({ values: [] })
+./services/health/UEPMetricsCollection.test.ts:137:      const mockCounter = metricsCollector['requestsTotal'];
+./services/health/UEPMetricsCollection.test.ts:148:      expect(mockCounter.inc).toHaveBeenCalledWith({
+./services/health/UEPMetricsCollection.test.ts:158:      const mockHistogram = metricsCollector['responseTimeHistogram'];
+./services/health/UEPMetricsCollection.test.ts:169:      expect(mockHistogram.observe).toHaveBeenCalledWith(
+./services/health/UEPMetricsCollection.test.ts:176:      const mockCounter = metricsCollector['errorsTotal'];
+./services/health/UEPMetricsCollection.test.ts:185:      expect(mockCounter.inc).toHaveBeenCalledWith({
+./services/health/UEPMetricsCollection.test.ts:194:      const mockCounter = metricsCollector['protocolViolationsTotal'];
+./services/health/UEPMetricsCollection.test.ts:202:      expect(mockCounter.inc).toHaveBeenCalledWith({
+./services/health/UEPMetricsCollection.test.ts:210:      const mockGauge = metricsCollector['healthScoreGauge'];
+./services/health/UEPMetricsCollection.test.ts:214:      expect(mockGauge.set).toHaveBeenCalledWith(
+./services/health/UEPMetricsCollection.test.ts:221:      expect(mockGauge.set).toHaveBeenCalledWith(
+./services/health/UEPMetricsCollection.test.ts:228:      expect(mockGauge.set).toHaveBeenCalledWith(
+./services/health/UEPMetricsCollection.test.ts:235:      const mockGauge = metricsCollector['uepComplianceGauge'];
+./services/health/UEPMetricsCollection.test.ts:239:      expect(mockGauge.set).toHaveBeenCalledWith(
+./services/health/UEPMetricsCollection.test.ts:246:      expect(mockGauge.set).toHaveBeenCalledWith(
+./services/health/UEPMetricsCollection.test.ts:255:      const mockCounter = metricsCollector['healthChecksTotal'];
+./services/health/UEPMetricsCollection.test.ts:256:      const mockHistogram = metricsCollector['healthCheckDurationHistogram'];
+./services/health/UEPMetricsCollection.test.ts:265:      expect(mockCounter.inc).toHaveBeenCalledWith({
+./services/health/UEPMetricsCollection.test.ts:271:      expect(mockHistogram.observe).toHaveBeenCalledWith(
+./services/health/UEPMetricsCollection.test.ts:278:      const mockCounter = metricsCollector['coordinationEventsTotal'];
+./services/health/UEPMetricsCollection.test.ts:279:      const mockHistogram = metricsCollector['coordinationLatencyHistogram'];
+./services/health/UEPMetricsCollection.test.ts:288:      expect(mockCounter.inc).toHaveBeenCalledWith({
+./services/health/UEPMetricsCollection.test.ts:294:      expect(mockHistogram.observe).toHaveBeenCalledWith({
+./services/health/UEPMetricsCollection.test.ts:304:      const mockRegistry = metricsCollector.getRegistry();
+./services/health/UEPMetricsCollection.test.ts:305:      mockRegistry.metrics = jest.fn().mockResolvedValue('# HELP test_metric Test metric\n# TYPE test_metric counter\ntest_metric 1');
+./services/health/UEPMetricsCollection.test.ts:351:      const mockRegistry = metricsCollector.getRegistry();
+./services/health/UEPMetricsCollection.test.ts:352:      expect(mockRegistry.resetMetrics).toHaveBeenCalled();
+./services/health/UEPMetricsCollection.test.ts:361:  const mockHealthStatus = {
+./services/health/UEPMetricsCollection.test.ts:410:      integration.processHealthStatusUpdate(mockHealthStatus);
+./services/health/UEPMetricsCollection.test.ts:413:      const mockHealthScoreGauge = metricsCollector['healthScoreGauge'];
+./services/health/UEPMetricsCollection.test.ts:414:      expect(mockHealthScoreGauge.set).toHaveBeenCalledWith(
+./services/health/UEPMetricsCollection.test.ts:421:      integration.processHealthStatusUpdate(mockHealthStatus);
+./services/health/UEPMetricsCollection.test.ts:424:      const healthScore = integration['calculateHealthScore'](mockHealthStatus);
+./services/health/UEPMetricsCollection.test.ts:431:      integration.processHealthStatusUpdate(mockHealthStatus);
+./services/health/UEPMetricsCollection.test.ts:444:          ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:461:          ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:465:            ...mockHealthStatus.metrics,
+./services/health/UEPMetricsCollection.test.ts:508:          ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:512:            ...mockHealthStatus.metrics,
+./services/health/UEPMetricsCollection.test.ts:561:          ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:562:          metrics: { ...mockHealthStatus.metrics, responseTime: 100 }
+./services/health/UEPMetricsCollection.test.ts:575:        ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:576:        metrics: { ...mockHealthStatus.metrics, responseTime: 500 } // 5x higher
+./services/health/UEPMetricsCollection.test.ts:585:          ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:586:          metrics: { ...mockHealthStatus.metrics, successRate: 99 }
+./services/health/UEPMetricsCollection.test.ts:599:        ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:600:        metrics: { ...mockHealthStatus.metrics, successRate: 70 } // Significant drop
+./services/health/UEPMetricsCollection.test.ts:609:          ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:611:            ...mockHealthStatus.metrics,
+./services/health/UEPMetricsCollection.test.ts:625:        ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:627:          ...mockHealthStatus.metrics,
+./services/health/UEPMetricsCollection.test.ts:665:      integration.processHealthStatusUpdate(mockHealthStatus);
+./services/health/UEPMetricsCollection.test.ts:667:        ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:672:        ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:694:          ...mockHealthStatus,
+./services/health/UEPMetricsCollection.test.ts:710:            ...mockHealthStatus,
+./services/monitoring/tests/UEPMetricsCollector.test.ts:72:    // Reset all mocks
+./services/monitoring/tests/UEPMetricsCollector.test.ts:436:        const mockApp = {
+./services/monitoring/tests/UEPMetricsCollector.test.ts:437:          use: jest.fn(),
+./services/monitoring/tests/UEPMetricsCollector.test.ts:438:          get: jest.fn()
+./services/monitoring/tests/UEPMetricsCollector.test.ts:441:        metricsIntegration.integrateWithExpress(mockApp);
+./services/monitoring/tests/UEPMetricsCollector.test.ts:444:        expect(mockApp.use).toHaveBeenCalled();
+./services/monitoring/tests/UEPMetricsCollector.test.ts:445:        expect(mockApp.get).toHaveBeenCalledWith('/metrics', expect.any(Function));
+./services/monitoring/tests/UEPMetricsCollector.test.ts:446:        expect(mockApp.get).toHaveBeenCalledWith('/metrics/system', expect.any(Function));
+./services/monitoring/tests/UEPMetricsCollector.test.ts:447:        expect(mockApp.get).toHaveBeenCalledWith('/metrics/agent/:agentId', expect.any(Function));
+./services/monitoring/tests/UEPMetricsCollector.test.ts:453:        const mockProcessor = {
+./services/monitoring/tests/UEPMetricsCollector.test.ts:454:          on: jest.fn()
+./services/monitoring/tests/UEPMetricsCollector.test.ts:457:        metricsIntegration.integrateWithMessageProcessor(mockProcessor);
+./services/monitoring/tests/UEPMetricsCollector.test.ts:459:        expect(mockProcessor.on).toHaveBeenCalledWith('message:received', expect.any(Function));
+./services/monitoring/tests/UEPMetricsCollector.test.ts:460:        expect(mockProcessor.on).toHaveBeenCalledWith('message:processed', expect.any(Function));
+./services/monitoring/tests/UEPMetricsCollector.test.ts:461:        expect(mockProcessor.on).toHaveBeenCalledWith('message:error', expect.any(Function));
+./services/monitoring/tests/UEPMetricsCollector.test.ts:465:        const mockEngine = {
+./services/monitoring/tests/UEPMetricsCollector.test.ts:466:          on: jest.fn()
+./services/monitoring/tests/UEPMetricsCollector.test.ts:469:        metricsIntegration.integrateWithWorkflowEngine(mockEngine);
+./services/monitoring/tests/UEPMetricsCollector.test.ts:471:        expect(mockEngine.on).toHaveBeenCalledWith('workflow:started', expect.any(Function));
+./services/monitoring/tests/UEPMetricsCollector.test.ts:472:        expect(mockEngine.on).toHaveBeenCalledWith('workflow:completed', expect.any(Function));
+./services/monitoring/tests/UEPMetricsCollector.test.ts:473:        expect(mockEngine.on).toHaveBeenCalledWith('workflow:failed', expect.any(Function));
+./services/observability/tests/UEPObservabilityIntegration.test.ts:97:    // Reset all mocks
+./services/observability/tests/UEPObservabilityIntegration.test.ts:492:      const mockProcessor = {
+./services/observability/tests/UEPObservabilityIntegration.test.ts:493:        on: jest.fn()
+./services/observability/tests/UEPObservabilityIntegration.test.ts:496:      observabilityIntegration.integrateWithMessageProcessor(mockProcessor);
+./services/observability/tests/UEPObservabilityIntegration.test.ts:498:      expect(mockProcessor.on).toHaveBeenCalledWith('message:received', expect.any(Function));
+./services/observability/tests/UEPObservabilityIntegration.test.ts:499:      expect(mockProcessor.on).toHaveBeenCalledWith('message:processed', expect.any(Function));
+./services/observability/tests/UEPObservabilityIntegration.test.ts:500:      expect(mockProcessor.on).toHaveBeenCalledWith('message:error', expect.any(Function));
+./services/observability/tests/UEPObservabilityIntegration.test.ts:504:      const mockEngine = {
+./services/observability/tests/UEPObservabilityIntegration.test.ts:505:        on: jest.fn()
+./services/observability/tests/UEPObservabilityIntegration.test.ts:508:      observabilityIntegration.integrateWithWorkflowEngine(mockEngine);
+./services/observability/tests/UEPObservabilityIntegration.test.ts:510:      expect(mockEngine.on).toHaveBeenCalledWith('workflow:started', expect.any(Function));
+./services/observability/tests/UEPObservabilityIntegration.test.ts:511:      expect(mockEngine.on).toHaveBeenCalledWith('workflow:step:started', expect.any(Function));
+./services/observability/tests/UEPObservabilityIntegration.test.ts:512:      expect(mockEngine.on).toHaveBeenCalledWith('workflow:completed', expect.any(Function));
+./services/observability/tests/UEPObservabilityIntegration.test.ts:513:      expect(mockEngine.on).toHaveBeenCalledWith('workflow:failed', expect.any(Function));
+./services/observability/tests/UEPObservabilityIntegration.test.ts:519:      const mockReq = {
+./services/observability/tests/UEPObservabilityIntegration.test.ts:531:      const mockRes = {
+./services/observability/tests/UEPObservabilityIntegration.test.ts:533:        on: jest.fn(),
+./services/observability/tests/UEPObservabilityIntegration.test.ts:534:        get: jest.fn().mockReturnValue('100')
+./services/observability/tests/UEPObservabilityIntegration.test.ts:537:      const mockNext = jest.fn();
+./services/observability/tests/UEPObservabilityIntegration.test.ts:541:        middleware(mockReq, mockRes, mockNext);
+./services/observability/tests/UEPObservabilityIntegration.test.ts:544:      expect(mockNext).toHaveBeenCalled();
+./services/observability/tests/UEPObservabilityIntegration.test.ts:545:      expect(mockRes.on).toHaveBeenCalledWith('finish', expect.any(Function));
+./services/workflow/WorkflowSchema.test.ts:41:jest.mock('fs/promises');
+./services/workflow/WorkflowSchema.test.ts:42:const mockFs = fs as jest.Mocked<typeof fs>;
+./services/workflow/WorkflowSchema.test.ts:365:      mockFs.readFile.mockResolvedValue(JSON.stringify(workflow));
+./services/workflow/WorkflowSchema.test.ts:370:      expect(mockFs.readFile).toHaveBeenCalledWith('./test-workflow.json', 'utf-8');
+./services/workflow/WorkflowSchema.test.ts:373:      mockFs.writeFile.mockResolvedValue();
+./services/workflow/WorkflowSchema.test.ts:377:      expect(mockFs.writeFile).toHaveBeenCalledWith(
+./services/workflow/WorkflowSchema.test.ts:386:      mockFs.readFile.mockRejectedValue(new Error('File not found'));
+./services/workflow/WorkflowSchema.test.ts:393:      mockFs.writeFile.mockRejectedValue(new Error('Permission denied'));
+./services/workflow/WorkflowSchema.test.ts:532:      mockFs.readFile.mockResolvedValue('{ invalid json }');
+./services/workflow/WorkflowSchema.test.ts:571:      mockFs.writeFile.mockResolvedValue();
+./services/workflow/WorkflowSchema.test.ts:764:      const migrationFunction = jest.fn((workflow: any) => ({
+./services/workflow/WorkflowSchema.test.ts:802:      const failingMigration = jest.fn(() => {
+./services/workflow/WorkflowSchema.test.ts:824:      const deprecationSpy = jest.fn();
+./services/workflow/WorkflowSchema.test.ts:872:      const registrationSpy = jest.fn();
+./services/workflow/WorkflowSchema.test.ts:887:      const migrationSpy = jest.fn();
+./services/workflow/WorkflowSchema.test.ts:904:      const appliedSpy = jest.fn();
+./shared/uep-event-bus/tests/UEPObservabilitySystem.test.ts:674:      // Force an error during shutdown (this would require mocking internal components)
+./shared/uep-event-bus/tests/UEPValidationSystem.test.ts:407:  let mockValidator: jest.Mocked<UEPMessageValidator>;
+./shared/uep-event-bus/tests/UEPValidationSystem.test.ts:561:      // This test would require mocking the validator to throw errors
+./src/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:50:      const initializingSpy = jest.fn();
+./src/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:51:      const initializedSpy = jest.fn();
+./src/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:152:      const timeoutSpy = jest.fn();
+./src/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:172:      const startSpy = jest.fn();
+./src/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:173:      const stepSpy = jest.fn();
+./src/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:174:      const completeSpy = jest.fn();
+./src/meta-agents/thirty-minute-rule/tests/core/ThirtyMinuteRuleAgent.test.ts:350:      const errorSpy = jest.fn();
+./src/uep/tests/ProjectContextSystem.test.ts:189:  let mockRedis: MockRedis;
+./src/uep/tests/ProjectContextSystem.test.ts:191:  let mockUEPFactory: MockUEPFactory;
+./src/uep/tests/ProjectContextSystem.test.ts:192:  let mockIOA: MockIOA;
+./src/uep/tests/ProjectContextSystem.test.ts:205:    // Initialize mocks
+./src/uep/tests/ProjectContextSystem.test.ts:206:    mockRedis = new MockRedis();
+./src/uep/tests/ProjectContextSystem.test.ts:207:    mockUEPFactory = new MockUEPFactory();
+./src/uep/tests/ProjectContextSystem.test.ts:208:    mockIOA = new MockIOA();
+./src/uep/tests/ProjectContextSystem.test.ts:212:      Redis: jest.fn(() => mockRedis)
+./src/uep/tests/ProjectContextSystem.test.ts:277:    mockRedis.clear();
+./src/uep/tests/ProjectContextSystem.test.ts:405:      await projectContextIntegration.integrateWithUEPFactory(mockUEPFactory);
+./src/uep/tests/ProjectContextSystem.test.ts:408:      const uepAgent = mockUEPFactory.createAgent('test-agent', 'test-agent-1', {});
+./src/uep/tests/ProjectContextSystem.test.ts:419:      await projectContextIntegration.integrateWithUEPFactory(mockUEPFactory);
+./src/uep/tests/ProjectContextSystem.test.ts:422:      mockUEPFactory.createAgent('test-agent', 'test-agent-1', {});
+./src/uep/tests/ProjectContextSystem.test.ts:425:      mockUEPFactory.simulateProcessing('test-agent-1', true);
+./src/uep/tests/ProjectContextSystem.test.ts:437:      await projectContextIntegration.integrateWithUEPFactory(mockUEPFactory);
+./src/uep/tests/ProjectContextSystem.test.ts:440:      mockUEPFactory.createAgent('test-agent', 'test-agent-1', {});
+./src/uep/tests/ProjectContextSystem.test.ts:443:      mockUEPFactory.simulateError('test-agent-1', 'Test error');
+./src/uep/tests/ProjectContextSystem.test.ts:457:      await ioaIntegration.connectToIOA(mockIOA);
+./src/uep/tests/ProjectContextSystem.test.ts:465:      await ioaIntegration.connectToIOA(mockIOA);
+./src/uep/tests/ProjectContextSystem.test.ts:468:      mockIOA.simulateComplianceIssue();
+./src/uep/tests/ProjectContextSystem.test.ts:479:      await ioaIntegration.connectToIOA(mockIOA);
+./src/uep/tests/ProjectContextSystem.test.ts:518:      const mockEvent: ProjectContextEvent = {
+./src/uep/tests/ProjectContextSystem.test.ts:528:      await escalationEngine['evaluateEscalationTriggers'](mockEvent);
+./src/uep/tests/ProjectContextSystem.test.ts:588:      const mockIncident = {
+./src/uep/tests/ProjectContextSystem.test.ts:604:      await escalationEngine['executeEscalationLevel'](mockIncident, 1);
+./src/uep/tests/ProjectContextSystem.test.ts:606:      expect(mockIncident.currentLevel).toBe(1);
+./src/uep/tests/ProjectContextSystem.test.ts:607:      expect(mockIncident.actions.length).toBeGreaterThan(0);
+./src/uep/tests/ProjectContextSystem.test.ts:614:      await projectContextIntegration.integrateWithUEPFactory(mockUEPFactory);
+./src/uep/tests/ProjectContextSystem.test.ts:615:      await ioaIntegration.connectToIOA(mockIOA);
+./src/uep/tests/ProjectContextSystem.test.ts:618:      const uepAgent = mockUEPFactory.createAgent('test-agent', 'e2e-agent', {});
+./src/uep/tests/ProjectContextSystem.test.ts:629:      mockUEPFactory.simulateProcessing('e2e-agent', true);
+./src/uep/tests/ProjectContextSystem.test.ts:640:      mockUEPFactory.removeAgent('e2e-agent');
+./src/uep/tests/ProjectContextSystem.test.ts:652:      await projectContextIntegration.integrateWithUEPFactory(mockUEPFactory);
+./src/uep/tests/ProjectContextSystem.test.ts:653:      await ioaIntegration.connectToIOA(mockIOA);
+./src/uep/tests/ProjectContextSystem.test.ts:658:        mockUEPFactory.createAgent('test-agent', agentId, {});
+./src/uep/tests/ProjectContextSystem.test.ts:666:        mockUEPFactory.simulateError(agentId, 'Cascade failure');
+./src/uep/tests/ProjectContextSystem.test.ts:687:      await projectContextIntegration.integrateWithUEPFactory(mockUEPFactory);
+./src/uep/tests/ProjectContextSystem.test.ts:688:      await ioaIntegration.connectToIOA(mockIOA);
+./src/uep/tests/ProjectContextSystem.test.ts:693:        mockUEPFactory.createAgent('test-agent', agentId, {});
+./src/uep/tests/ProjectContextSystem.test.ts:697:          mockUEPFactory.simulateProcessing(agentId, true);
+./src/uep/tests/ProjectContextSystem.test.ts:803:      const originalGet = mockRedis.get;
+./src/uep/tests/ProjectContextSystem.test.ts:804:      mockRedis.get = jest.fn().mockRejectedValue(new Error('Redis connection failed'));
+./src/uep/tests/ProjectContextSystem.test.ts:818:      mockRedis.get = originalGet;
+./src/uep/tests/ProjectContextSystem.test.ts:827:      await mockRedis.setex(`project:context:${testProjectId}`, 3600, 'invalid-json');
