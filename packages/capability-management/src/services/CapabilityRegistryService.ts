@@ -41,6 +41,11 @@ import {
   validateSemVer,
   semVerToString
 } from '../utils/CapabilityVersioning.js';
+import { 
+  integrateContext7Middleware,
+  createContext7RouteHandlers,
+  Context7RedisWrapper 
+} from '../context7-integration.js';
 
 /**
  * Redis data model keys
@@ -94,6 +99,7 @@ export interface RegistryMetrics {
 export class CapabilityRegistryService {
   private app: express.Application;
   private redis: Redis;
+  private context7Redis: Context7RedisWrapper;
   private consul?: any; // Consul client (optional dependency)
   private config: CapabilityRegistryConfig;
   private server?: any;
@@ -101,22 +107,31 @@ export class CapabilityRegistryService {
   private heartbeatInterval?: NodeJS.Timeout;
   private metricsInterval?: NodeJS.Timeout;
   private serviceId: string;
+  private context7RouteHandlers: any;
 
   constructor(config: CapabilityRegistryConfig) {
     this.config = config;
     this.serviceId = `capability-registry-${uuidv4()}`;
     
     this.app = express();
-    this.setupMiddleware();
-    this.setupRoutes();
     
-    // Initialize Redis connection
+    // Initialize Redis connection with Context7 wrapper
     this.redis = new Redis(config.storage.connectionString || 'redis://localhost:6379', {
       keyPrefix: config.storage.keyPrefix || 'uep:',
       retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
       lazyConnect: true
     });
+    
+    // Create Context7-enhanced Redis wrapper
+    this.context7Redis = new Context7RedisWrapper(this.redis);
+    
+    // Create Context7 route handlers
+    this.context7RouteHandlers = createContext7RouteHandlers();
+    
+    // Setup middleware and routes (Context7 integration happens in setupMiddleware)
+    this.setupMiddleware();
+    this.setupRoutes();
 
     this.setupRedisEventHandlers();
     
@@ -226,11 +241,26 @@ export class CapabilityRegistryService {
    * Setup Express middleware
    */
   private setupMiddleware(): void {
+    console.log(chalk.blue('🔗 Integrating Context7 middleware for trace context propagation...'));
+    
+    // Integrate Context7 middleware stack FIRST (before other middleware)
+    integrateContext7Middleware(this.app);
+    
     // CORS configuration
     this.app.use(cors({
       origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Agent-ID', 'X-Request-ID'],
+      allowedHeaders: [
+        'Content-Type', 
+        'Authorization', 
+        'X-Agent-ID', 
+        'X-Request-ID',
+        'X-Trace-ID',
+        'X-Span-ID',
+        'traceparent',
+        'tracestate',
+        'baggage'
+      ],
       credentials: true
     }));
 
@@ -238,20 +268,21 @@ export class CapabilityRegistryService {
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-    // Request logging middleware
+    // Enhanced request logging middleware with Context7 support
     this.app.use((req, res, next) => {
       const startTime = Date.now();
       const requestId = req.headers['x-request-id'] || uuidv4();
+      const traceId = req.headers['x-trace-id'] || 'unknown';
       
       req.requestId = requestId;
       req.startTime = startTime;
       
-      console.log(chalk.cyan(`📨 ${req.method} ${req.path} [${requestId}]`));
+      console.log(chalk.cyan(`📨 ${req.method} ${req.path} [${requestId}] [trace:${traceId.substring(0, 8)}...]`));
       
       res.on('finish', () => {
         const duration = Date.now() - startTime;
         const statusColor = res.statusCode >= 400 ? chalk.red : chalk.green;
-        console.log(statusColor(`📤 ${req.method} ${req.path} [${requestId}] - ${res.statusCode} (${duration}ms)`));
+        console.log(statusColor(`📤 ${req.method} ${req.path} [${requestId}] - ${res.statusCode} (${duration}ms) [trace:${traceId.substring(0, 8)}...]`));
       });
       
       next();
@@ -259,6 +290,8 @@ export class CapabilityRegistryService {
 
     // Health check endpoint (must be before authentication)
     this.app.get('/health', this.handleHealthCheck.bind(this));
+    
+    console.log(chalk.green('✅ Context7 middleware integration completed'));
   }
 
   /**
@@ -267,11 +300,15 @@ export class CapabilityRegistryService {
   private setupRoutes(): void {
     const router = express.Router();
 
-    // Agent registration routes
+    // Agent registration routes with Context7 integration
     router.post('/agents/register', this.handleAgentRegistration.bind(this));
     router.put('/agents/:agentId/capabilities', this.handleUpdateCapabilities.bind(this));
     router.post('/agents/:agentId/heartbeat', this.handleHeartbeat.bind(this));
     router.delete('/agents/:agentId', this.handleAgentDeregistration.bind(this));
+
+    // Context7-enhanced capability routes
+    router.post('/capabilities/register', this.context7RouteHandlers.registerCapability.bind(this.context7RouteHandlers));
+    router.post('/capabilities/search', this.context7RouteHandlers.searchCapabilities.bind(this.context7RouteHandlers));
 
     // Discovery API routes
     router.get('/capabilities', this.handleCapabilitySearch.bind(this));

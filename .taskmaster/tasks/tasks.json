@@ -1358,8 +1358,63 @@
           203,
           204
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Declarative Workflow Definition Schema",
+            "description": "Develop a YAML-based schema for defining multi-agent workflows, supporting sequential, parallel, and conditional execution paths, and specifying agent capabilities and dependencies.",
+            "dependencies": [],
+            "details": "The schema must allow users to declaratively specify workflow steps, agent assignments, input/output mappings, and execution logic (including retries and compensation actions). It should be extensible for future protocol requirements.",
+            "status": "done",
+            "testStrategy": "Validate schema correctness with sample workflows, including edge cases for parallel and conditional paths. Ensure schema supports all required execution patterns and is compatible with YAML parsers."
+          },
+          {
+            "id": 2,
+            "title": "Implement UEP-Compliant Workflow Engine",
+            "description": "Develop the core orchestration engine that parses workflow definitions, coordinates agent execution via the UEP event bus, and enforces protocol compliance at each step.",
+            "dependencies": [
+              "205.1"
+            ],
+            "details": "The engine must support event-driven execution, manage step dependencies, and integrate with the UEP validation middleware to ensure all agent interactions adhere to protocol requirements.",
+            "status": "done",
+            "testStrategy": "Test execution of workflows with various agent configurations. Inject protocol violations to verify enforcement. Measure engine performance and correctness under load."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Saga Pattern with Compensation Logic",
+            "description": "Implement distributed transaction management using the Saga pattern, enabling compensation actions for rollback and failure recovery across multi-agent workflows.",
+            "dependencies": [
+              "205.2"
+            ],
+            "details": "Each workflow step must support definition of compensation actions. The engine should trigger compensations automatically on failure, ensuring atomicity and consistency across distributed agents.",
+            "status": "done",
+            "testStrategy": "Simulate step failures and verify that compensation actions are executed in the correct order. Test partial rollbacks and ensure system state remains consistent after recovery."
+          },
+          {
+            "id": 4,
+            "title": "Enable Workflow Persistence and Long-Running Execution",
+            "description": "Implement persistence for workflow state, enabling support for long-running workflows, recovery after failures, and resumption from checkpoints.",
+            "dependencies": [
+              "205.2"
+            ],
+            "details": "Integrate with a durable storage backend to persist workflow definitions, execution state, and event logs. Ensure the engine can recover and resume workflows after process restarts or crashes.",
+            "status": "done",
+            "testStrategy": "Test workflow execution across process restarts and simulated crashes. Verify that workflows resume correctly and no steps are lost or duplicated."
+          },
+          {
+            "id": 5,
+            "title": "Develop Workflow Monitoring, Visualization, and Retry Policies",
+            "description": "Build real-time workflow status tracking, visualization dashboards, and configurable retry policies with exponential backoff for failed steps.",
+            "dependencies": [
+              "205.2",
+              "205.4"
+            ],
+            "details": "Provide a UI or API for monitoring workflow progress, visualizing execution paths, and inspecting step statuses. Implement retry logic with exponential backoff and allow configuration per step.",
+            "status": "done",
+            "testStrategy": "Test visualization with complex workflows. Simulate failures to verify retry and backoff behavior. Ensure monitoring accurately reflects real-time workflow state."
+          }
+        ]
       },
       {
         "id": 206,
@@ -1373,8 +1428,62 @@
           201,
           203
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Distributed Tracing with OpenTelemetry",
+            "description": "Set up distributed tracing across all containerized agents using OpenTelemetry 1.15+ and enrich traces with UEP-specific attributes to monitor protocol compliance and coordination flows.",
+            "dependencies": [],
+            "details": "Configure the OpenTelemetry Collector with custom processors for UEP telemetry. Ensure all agents emit trace data with UEP protocol version and relevant context. Integrate with Jaeger for trace visualization.",
+            "status": "done",
+            "testStrategy": "Simulate agent workflows and protocol violations. Verify trace completeness, UEP attribute enrichment, and end-to-end traceability in Jaeger."
+          },
+          {
+            "id": 2,
+            "title": "Develop Prometheus Metrics Collection for UEP Compliance",
+            "description": "Instrument agents and the monitoring system to expose Prometheus metrics for UEP validation success/failure rates, protocol violation types, coordination latency, event bus throughput, and workflow completion statistics.",
+            "dependencies": [
+              "206.1"
+            ],
+            "details": "Define and implement custom Prometheus metrics for all specified UEP compliance and performance indicators. Configure the OpenTelemetry Collector to export metrics to Prometheus.",
+            "status": "done",
+            "testStrategy": "Generate test traffic with varying compliance scenarios. Validate metric accuracy and completeness in Prometheus. Confirm correct labeling and aggregation."
+          },
+          {
+            "id": 3,
+            "title": "Create Real-Time Grafana Dashboards for UEP Monitoring",
+            "description": "Design and implement Grafana dashboards that provide real-time visualization of UEP compliance metrics, protocol violations, and agent coordination performance, with drill-down capabilities for investigation.",
+            "dependencies": [
+              "206.2"
+            ],
+            "details": "Develop custom dashboard panels for each key metric. Implement drill-down views for protocol violations and agent-specific performance. Ensure dashboards update in real time and support historical analysis.",
+            "status": "done",
+            "testStrategy": "Populate dashboards with simulated and real data. Verify correct visualization, filtering, and drill-down functionality. Test dashboard responsiveness and usability."
+          },
+          {
+            "id": 4,
+            "title": "Configure Alerting and Log Aggregation for Compliance Violations",
+            "description": "Set up alerting rules in Prometheus and Grafana for protocol violations and performance degradation. Implement centralized log aggregation with structured logging for all agents and monitoring components.",
+            "dependencies": [
+              "206.3"
+            ],
+            "details": "Define alert thresholds for each compliance and performance metric. Integrate alerting with notification channels. Aggregate structured logs using a centralized logging solution (e.g., Loki, ELK stack) and ensure logs include UEP context.",
+            "status": "done",
+            "testStrategy": "Trigger protocol violations and performance issues to test alert delivery and log aggregation. Validate alert accuracy, log completeness, and searchability."
+          },
+          {
+            "id": 5,
+            "title": "Generate UEP Compliance Reports with Historical Trends",
+            "description": "Develop automated reporting capabilities that summarize UEP compliance status, protocol violations, and performance trends over time, supporting audits and continuous improvement.",
+            "dependencies": [
+              "206.4"
+            ],
+            "details": "Implement scheduled report generation using collected metrics and logs. Include historical trend analysis, violation summaries, and recommendations. Provide export options (PDF, CSV) for compliance audits.",
+            "status": "done",
+            "testStrategy": "Run report generation on historical data sets. Verify accuracy, completeness, and clarity of reports. Validate export functionality and audit readiness."
+          }
+        ]
       },
       {
         "id": 207,
@@ -1388,7 +1497,7 @@
           203,
           204
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -1403,7 +1512,7 @@
           203,
           204
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -1422,7 +1531,7 @@
           207,
           208
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -2528,7 +2637,7 @@
           221,
           222
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2581,8 +2690,63 @@
               "226.2"
             ],
             "details": "Develop a documentation generator that produces up-to-date API docs, example usage patterns, and visual compatibility matrices for each capability and its versions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify documentation output for completeness, accuracy, and correct reflection of capability versions and compatibility."
+          },
+          {
+            "id": 6,
+            "title": "Design and Implement Capability Schema with Semantic Versioning",
+            "description": "Define and implement a standardized capability schema that includes semantic versioning, detailed descriptions, parameters, return types, usage examples, and deprecation metadata.",
+            "dependencies": [],
+            "details": "Develop the TypeScript interface for capabilities, ensuring support for semantic versioning and all required metadata fields. Validate schema extensibility for future capability evolution.",
+            "status": "done",
+            "testStrategy": "Write unit tests to validate schema conformance, version parsing, and correct handling of optional and deprecated fields."
+          },
+          {
+            "id": 7,
+            "title": "Develop Capability Registry Service",
+            "description": "Create a service to store, manage, and validate capability definitions, supporting versioning, compatibility checks, and discovery operations.",
+            "dependencies": [
+              "226.1"
+            ],
+            "details": "Implement a backend service that registers capabilities, enforces schema validation, manages version history, and provides APIs for capability discovery and compatibility validation.",
+            "status": "done",
+            "testStrategy": "Develop integration tests for capability registration, update, discovery, and compatibility validation. Simulate version conflicts and ensure correct resolution."
+          },
+          {
+            "id": 8,
+            "title": "Integrate Capability Advertisement into Agent Registration",
+            "description": "Extend the agent registration process to support dynamic advertisement and update of agent capabilities, including version and deprecation status.",
+            "dependencies": [
+              "226.1",
+              "226.2"
+            ],
+            "details": "Modify agent onboarding workflows to require capability advertisement. Ensure agents can update or deprecate capabilities and that changes propagate to the registry.",
+            "status": "done",
+            "testStrategy": "Test agent registration with various capability sets, including updates and deprecations. Verify registry reflects all changes in real time."
+          },
+          {
+            "id": 9,
+            "title": "Implement Capability Matching and Compatibility Algorithms",
+            "description": "Develop algorithms for matching agent capabilities, supporting exact version, version range compatibility, substitution, and deprecated capability handling.",
+            "dependencies": [
+              "226.2",
+              "226.3"
+            ],
+            "details": "Design and implement matching logic that can resolve capability requests to the most appropriate agent, considering semantic versioning and compatibility rules.",
+            "status": "done",
+            "testStrategy": "Create unit and integration tests for all matching scenarios, including edge cases with version ranges, substitutions, and deprecated capabilities."
+          },
+          {
+            "id": 10,
+            "title": "Enable Capability Negotiation and Evolution Tracking",
+            "description": "Implement negotiation mechanisms for workflow steps to select optimal agent capabilities and track capability evolution over time.",
+            "dependencies": [
+              "226.4"
+            ],
+            "details": "Develop negotiation protocols to select agents based on capability requirements and version constraints. Track and record capability changes, substitutions, and deprecations for audit and evolution analysis.",
+            "status": "done",
+            "testStrategy": "Test negotiation logic with workflows requiring different capability versions. Validate evolution tracking by simulating capability updates and replacements."
           }
         ]
       },
@@ -2597,7 +2761,7 @@
           224,
           225
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -2611,8 +2775,63 @@
           223,
           224
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Intelligent Load Balancing Algorithm",
+            "description": "Develop an algorithm that selects agents based on current load, historical performance, resource utilization, and workflow priority.",
+            "dependencies": [],
+            "details": "The algorithm must dynamically evaluate agent metrics and prioritize agent selection to optimize throughput and reliability. It should support extensibility for new metrics and integrate with real-time monitoring data.",
+            "status": "done",
+            "testStrategy": "Unit test the algorithm with synthetic agent metrics and verify correct agent selection under varying load and performance scenarios."
+          },
+          {
+            "id": 2,
+            "title": "Implement Multiple Load Balancing Strategies",
+            "description": "Develop and integrate round-robin, least-connection, resource-aware, and capability-weighted strategies for agent selection.",
+            "dependencies": [
+              "228.1"
+            ],
+            "details": "Each strategy must be selectable via configuration and operate according to its defined logic. The system should allow seamless switching between strategies and support custom weighting for specialized tasks.",
+            "status": "done",
+            "testStrategy": "Unit test each strategy for correctness; integration test with simulated agent pools to verify expected distribution and failover behavior."
+          },
+          {
+            "id": 3,
+            "title": "Develop Load Prediction and Scaling Trigger Mechanisms",
+            "description": "Create a time-series-based load prediction model and implement triggers for dynamic scaling based on real-time and predicted metrics.",
+            "dependencies": [
+              "228.1"
+            ],
+            "details": "The model should analyze historical load data to forecast demand and proactively trigger scaling actions. Triggers must include thresholds for load, queue depth, response time, and predicted spikes.",
+            "status": "done",
+            "testStrategy": "Test prediction accuracy with historical datasets; simulate load surges to verify timely and appropriate scaling trigger activation."
+          },
+          {
+            "id": 4,
+            "title": "Integrate Scaling Actions and Orchestration Notifications",
+            "description": "Implement mechanisms to notify external orchestrators (e.g., Kubernetes), provide scaling recommendations, and track scaling effectiveness.",
+            "dependencies": [
+              "228.3"
+            ],
+            "details": "The system must support both automated and manual scaling actions, maintain an audit trail of scaling events, and expose scaling recommendations via API or dashboard.",
+            "status": "done",
+            "testStrategy": "Integration test with orchestration platforms; verify notification delivery, scaling action execution, and effectiveness tracking under simulated scaling events."
+          },
+          {
+            "id": 5,
+            "title": "Build Load Simulation and Configuration API Tools",
+            "description": "Develop a load simulation tool for testing and a configuration API for managing load balancing strategies and thresholds.",
+            "dependencies": [
+              "228.2",
+              "228.4"
+            ],
+            "details": "The simulation tool should generate realistic workflow patterns and stress-test the system. The configuration API must allow runtime updates to balancing strategies, thresholds, and agent preferences.",
+            "status": "done",
+            "testStrategy": "Test simulation tool by generating diverse load scenarios; verify configuration API correctness and dynamic reconfiguration without downtime."
+          }
+        ]
       },
       {
         "id": 229,
@@ -2703,13 +2922,67 @@
         "description": "Design, implement, and document a suite of Grafana dashboards for the Meta-Agent Factory, covering system overview, service health, agent coordination monitoring, troubleshooting, and integrated alerting.",
         "details": "1. **Requirements Gathering**: Collaborate with stakeholders to define key metrics and KPIs for each dashboard category: system overview (infrastructure, resource usage, uptime), service health (per-service status, error rates, latency), agent coordination (event bus activity, protocol compliance, coordination failures), and troubleshooting (ad-hoc issue dashboards, drill-downs, log/trace correlation).\n\n2. **Dashboard Architecture**: Organize dashboards into logical folders (e.g., Overview, Health, Coordination, Troubleshooting). Use Grafana best practices: clear naming, consistent time ranges, templated variables for filtering by agent/service, and annotation support for incident tracking.\n\n3. **Panel Design**: For each dashboard, select appropriate visualizations (stat panels, time series, heatmaps, tables). Leverage Prometheus and Loki as data sources for metrics and logs. For coordination monitoring, include panels for NATS/Kafka event rates, UEP protocol validation errors, and service registry state. For troubleshooting, enable ad-hoc query panels and log/trace drill-downs.\n\n4. **Alerting Integration**: Integrate with Prometheus Alertmanager (see Task 230). Ensure alert panels display current alert states, and link to relevant runbooks or incident management tools. Use Grafana's alerting UI to define dashboard-level alerts for critical metrics.\n\n5. **Meta-Monitoring**: Include a meta-monitoring dashboard for the observability stack itself (Prometheus, Loki, Alertmanager, Grafana Agent), following best practices for monitoring the monitoring system.\n\n6. **Documentation**: Document dashboard structure, key panels, and usage guidelines. Provide onboarding materials for new users and troubleshooting playbooks for incident response.\n\n7. **Automation**: Use infrastructure-as-code (e.g., Jsonnet, Terraform, or Grafana provisioning) to version and deploy dashboards. Include example Jsonnet/Terraform snippets for reproducibility.\n\nReferences: Grafana dashboard design best practices (2024), meta-monitoring patterns, and dynamic dashboarding with scenes and variables.",
         "testStrategy": "1. Review dashboards with stakeholders to ensure all required metrics and KPIs are covered.\n2. Validate data sources and panel queries for accuracy and performance.\n3. Simulate service failures and verify that dashboards surface issues and trigger alerts as expected.\n4. Test dashboard variables and filters for usability and correctness.\n5. Confirm alert panels reflect real-time Alertmanager state and link to incident response documentation.\n6. Run onboarding sessions with new users to ensure documentation is clear and dashboards are discoverable.\n7. Use automated tests (where supported) to validate dashboard provisioning and versioning workflows.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           196,
           230
         ],
         "priority": "medium",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Dashboard Requirements and Metrics",
+            "description": "Collaborate with stakeholders to identify and document key metrics, KPIs, and use cases for each dashboard category: system overview, service health, agent coordination, troubleshooting, and alerting.",
+            "dependencies": [],
+            "details": "Conduct interviews and workshops with engineering, operations, and product teams to gather requirements. Document the metrics and KPIs needed for each dashboard, ensuring alignment with observability goals and best practices for actionable insights.",
+            "status": "done",
+            "testStrategy": "Review requirements with stakeholders for completeness and clarity. Validate that all critical monitoring and troubleshooting needs are captured."
+          },
+          {
+            "id": 2,
+            "title": "Design Dashboard Architecture and Structure",
+            "description": "Organize dashboards into logical folders and categories, applying Grafana best practices for naming, layout, and variable usage to ensure clarity and scalability.",
+            "dependencies": [
+              "231.1"
+            ],
+            "details": "Create a folder structure (e.g., Overview, Health, Coordination, Troubleshooting). Define dashboard templates, consistent time ranges, and templated variables for filtering. Plan for annotation support and incident tracking integration.",
+            "status": "done",
+            "testStrategy": "Present architecture to stakeholders for feedback. Validate that the structure supports easy navigation and future extensibility."
+          },
+          {
+            "id": 3,
+            "title": "Implement Dashboards and Panels",
+            "description": "Develop Grafana dashboards using Prometheus and Loki as data sources, selecting appropriate visualizations and configuring panels for each monitoring scenario.",
+            "dependencies": [
+              "231.2"
+            ],
+            "details": "For each dashboard, implement panels such as stat panels, time series, heatmaps, and tables. Configure panels for NATS/Kafka event rates, UEP protocol errors, service registry state, and log/trace drill-downs. Enable ad-hoc queries for troubleshooting.",
+            "status": "done",
+            "testStrategy": "Validate panel queries for accuracy and performance. Simulate data scenarios to ensure dashboards display expected results and support troubleshooting workflows."
+          },
+          {
+            "id": 4,
+            "title": "Integrate Alerting and Meta-Monitoring",
+            "description": "Configure dashboard-level alerts using Grafana's alerting UI and integrate with Prometheus Alertmanager. Implement a meta-monitoring dashboard for the observability stack itself.",
+            "dependencies": [
+              "231.3"
+            ],
+            "details": "Define alert rules for critical metrics and display current alert states on dashboards. Link alert panels to runbooks and incident management tools. Build a meta-monitoring dashboard covering Prometheus, Loki, Alertmanager, and Grafana Agent health.",
+            "status": "done",
+            "testStrategy": "Trigger test alerts and verify dashboard visibility and notification flow. Confirm meta-monitoring panels accurately reflect observability stack status."
+          },
+          {
+            "id": 5,
+            "title": "Document Dashboards and Automate Deployment",
+            "description": "Create comprehensive documentation for dashboard usage, onboarding, and troubleshooting. Implement infrastructure-as-code for dashboard provisioning and versioning.",
+            "dependencies": [
+              "231.4"
+            ],
+            "details": "Write user guides, onboarding materials, and troubleshooting playbooks. Use Jsonnet, Terraform, or Grafana provisioning to automate dashboard deployment, including example code snippets for reproducibility.",
+            "status": "done",
+            "testStrategy": "Review documentation with new users for clarity. Test automated deployment in a staging environment to ensure reproducibility and version control."
+          }
+        ]
       },
       {
         "id": 232,
@@ -2717,13 +2990,67 @@
         "description": "Research and develop a detailed taxonomy of observability metrics for containerized microservices, incorporating industry standards such as the RED and USE methods, the four golden signals, and meta-agent specific KPIs.",
         "details": "Conduct an in-depth review of current industry standards and best practices for container observability, focusing on microservices deployed in containerized environments. The taxonomy should:\n\n- **Integrate the Four Golden Signals** (latency, traffic, errors, saturation) as defined by Google SRE, ensuring each is mapped to relevant container and microservice metrics (e.g., request latency, error rates, resource saturation).\n- **Apply the RED Method** (Rate, Errors, Duration) to all HTTP/gRPC endpoints and service interactions, specifying how to instrument and collect these metrics at both the container and service level.\n- **Apply the USE Method** (Utilization, Saturation, Errors) to all container infrastructure resources (CPU, memory, disk, network), detailing how to collect these metrics from container runtimes and orchestrators (e.g., Kubernetes cAdvisor, node-exporter).\n- **Define Meta-Agent Specific KPIs**, including metrics for agent lifecycle (startup time, crash frequency), protocol compliance (UEP validation success/failure rates), and service discovery/registration health.\n- **Include eBPF-based and agent-based collection patterns** for high-fidelity, low-overhead metrics gathering, referencing current best practices for kernel-level and sidecar-based observability[2].\n- **Document metric naming conventions, labels, and cardinality guidelines** to ensure scalability and consistency across the observability stack.\n- **Provide mapping to Prometheus metric types and exporters** for each metric category, with code examples for instrumenting Node.js/TypeScript services.\n- **Reference open standards** (OpenMetrics, OpenTelemetry) and recommend integration patterns for distributed tracing and log correlation.\n- **Deliverables:**\n  - A comprehensive metrics taxonomy document (Markdown/Notion page)\n  - Example Prometheus metric definitions and sample queries\n  - Guidance for integrating metrics into existing observability pipelines\n  - Recommendations for alerting thresholds and SLO/SLA mapping\n\nConsider the dynamic and ephemeral nature of containers, ensuring the taxonomy addresses challenges such as short-lived containers, label churn, and multi-tenant environments[1][2].",
         "testStrategy": "1. Peer review the taxonomy with observability and SRE experts for completeness and alignment with industry standards.\n2. Validate metric definitions by instrumenting a sample Node.js/TypeScript microservice and deploying it in a containerized environment (e.g., Kubernetes).\n3. Use Prometheus to scrape and visualize all defined metrics, verifying correct labeling, cardinality, and data integrity.\n4. Simulate common failure and scaling scenarios (e.g., container restarts, resource saturation) and confirm that metrics accurately reflect system state and events.\n5. Review integration with existing logging and tracing pipelines to ensure end-to-end observability coverage.\n6. Confirm that meta-agent KPIs are measurable and actionable for operational use.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           190,
           196
         ],
         "priority": "medium",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Review and Synthesize Industry Standards for Container Observability Metrics",
+            "description": "Conduct a comprehensive review of current industry standards and best practices for container observability in microservices, focusing on the Four Golden Signals, RED and USE methods, and meta-agent KPIs.",
+            "dependencies": [],
+            "details": "Survey authoritative sources such as Google SRE documentation, OpenMetrics, OpenTelemetry, and recent literature to extract definitions, metric categories, and instrumentation guidelines relevant to containerized microservices.",
+            "status": "done",
+            "testStrategy": "Validate completeness by cross-referencing with leading observability frameworks and peer-reviewed publications."
+          },
+          {
+            "id": 2,
+            "title": "Map Observability Methods to Container and Microservice Metrics",
+            "description": "Develop a detailed mapping of the Four Golden Signals, RED, and USE methods to specific container and microservice metrics, including instrumentation and collection strategies for both application and infrastructure layers.",
+            "dependencies": [
+              "232.1"
+            ],
+            "details": "For each method, specify which metrics apply at the container, service, and endpoint levels; include guidance for collecting these metrics using tools like Kubernetes cAdvisor, node-exporter, and application-level instrumentation.",
+            "status": "done",
+            "testStrategy": "Peer review mappings with SRE/observability experts and validate against sample microservice deployments."
+          },
+          {
+            "id": 3,
+            "title": "Define Meta-Agent KPIs and Advanced Collection Patterns",
+            "description": "Specify key performance indicators for observability agents (e.g., lifecycle, protocol compliance, discovery health) and document eBPF-based and agent-based collection patterns for high-fidelity, low-overhead metrics.",
+            "dependencies": [
+              "232.2"
+            ],
+            "details": "Detail metrics such as agent startup time, crash frequency, protocol validation rates, and service registration health; compare eBPF and sidecar agent approaches, referencing best practices for kernel-level and user-space data collection.",
+            "status": "done",
+            "testStrategy": "Instrument a sample agent in a test environment and verify metric collection accuracy and overhead."
+          },
+          {
+            "id": 4,
+            "title": "Establish Metric Naming, Labeling, and Exporter Integration Guidelines",
+            "description": "Document conventions for metric names, labels, and cardinality to ensure scalability and consistency, and provide mappings to Prometheus metric types and exporters, including code examples for Node.js/TypeScript services.",
+            "dependencies": [
+              "232.3"
+            ],
+            "details": "Define naming and labeling standards, address challenges like label churn and multi-tenancy, and supply Prometheus metric definitions and exporter integration patterns with sample code.",
+            "status": "done",
+            "testStrategy": "Apply conventions to a sample service, review for scalability, and test Prometheus scraping and querying."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Open Standards and Deliver Final Taxonomy with Implementation Guidance",
+            "description": "Reference open standards (OpenMetrics, OpenTelemetry), recommend integration patterns for distributed tracing and log correlation, and compile the comprehensive taxonomy document with implementation and alerting guidance.",
+            "dependencies": [
+              "232.4"
+            ],
+            "details": "Produce a Markdown/Notion taxonomy document, include Prometheus metric examples, sample queries, integration recommendations, and SLO/SLA mapping; address container lifecycle challenges and provide actionable guidance for observability pipelines.",
+            "status": "done",
+            "testStrategy": "Peer review the final document, validate implementation guidance in a real-world containerized microservice environment, and solicit feedback from observability practitioners."
+          }
+        ]
       },
       {
         "id": 233,
@@ -2731,7 +3058,7 @@
         "description": "Research and implement the Context7 methodology for robust OpenTelemetry trace context propagation across Node.js microservices, ensuring seamless integration with the Unified Execution Protocol (UEP) for distributed tracing and observability.",
         "details": "1. **Research Context7 Methodology**: Investigate the Context7 approach for distributed context propagation, focusing on its principles for trace context management, propagation semantics, and compatibility with OpenTelemetry standards. Document how Context7 enhances trace context fidelity, especially in asynchronous and multi-hop microservice environments.\n\n2. **OpenTelemetry Setup in Node.js**: \n   - Install and configure the latest OpenTelemetry SDKs and instrumentation libraries for Node.js (e.g., @opentelemetry/api, @opentelemetry/sdk-node, @opentelemetry/auto-instrumentations-node, @opentelemetry/exporter-trace-otlp-http)[1][4].\n   - Set up the OpenTelemetry Collector or compatible backend for trace data aggregation and analysis.\n   - Ensure auto-instrumentation is enabled for HTTP, gRPC, and custom UEP protocol handlers.\n\n3. **Context Propagation Implementation**:\n   - Implement context propagation using OpenTelemetry’s Context API, ensuring that trace and span contexts are correctly injected and extracted across service boundaries, including custom UEP protocol messages.\n   - Extend or adapt OpenTelemetry propagators (e.g., W3C Trace Context) to support Context7-specific requirements, such as custom context fields or propagation rules.\n   - Integrate context propagation into UEP protocol handlers, ensuring that trace context is serialized, transmitted, and restored in all UEP message flows.\n\n4. **UEP Protocol Integration**:\n   - Modify UEP protocol libraries to support OpenTelemetry context injection and extraction, ensuring that all inter-service UEP communications carry the correct trace context.\n   - Validate that context propagation works for both synchronous (HTTP/gRPC) and asynchronous (NATS, message broker) UEP flows.\n\n5. **Documentation and Best Practices**:\n   - Document the Context7 propagation model, integration patterns, and any customizations made to OpenTelemetry or UEP libraries.\n   - Provide code examples and usage guidelines for developers to ensure consistent context propagation in new and existing microservices.\n\n6. **Security and Performance Considerations**:\n   - Ensure that context propagation does not leak sensitive information and complies with security best practices.\n   - Benchmark the performance impact of context propagation and optimize as needed.",
         "testStrategy": "1. **Unit and Integration Testing**:\n   - Write unit tests for context injection, extraction, and propagation logic, covering both OpenTelemetry and UEP protocol flows.\n   - Develop integration tests with multiple Node.js microservices communicating via HTTP, gRPC, and UEP, verifying that trace context is preserved end-to-end.\n\n2. **Distributed Trace Validation**:\n   - Deploy instrumented services in a containerized environment and generate distributed traces using synthetic and real traffic.\n   - Use OpenTelemetry-compatible tracing backends (e.g., Jaeger, Honeycomb) to visualize and verify that traces span all relevant microservices and UEP protocol boundaries.\n   - Confirm that context fields required by Context7 are present and accurate in all trace segments.\n\n3. **Protocol Compliance and Edge Cases**:\n   - Test context propagation in scenarios with message retries, failures, and asynchronous processing to ensure robustness.\n   - Validate that context propagation works with both standard and custom UEP protocol messages.\n\n4. **Performance and Security Testing**:\n   - Measure the overhead introduced by context propagation and optimize as necessary.\n   - Review context data for potential leakage of sensitive information and ensure compliance with security guidelines.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           194,
           196
@@ -2744,7 +3071,7 @@
             "description": "Investigate the Context7 methodology, focusing on its principles for distributed context propagation, trace context management, propagation semantics, and compatibility with OpenTelemetry standards. Document how Context7 enhances trace context fidelity, especially in asynchronous and multi-hop Node.js microservice environments.",
             "dependencies": [],
             "details": "Perform a literature review and technical analysis of Context7, including its integration points with OpenTelemetry and the UEP protocol. Summarize findings in a technical document for reference by the implementation team.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Peer review the documentation for completeness and technical accuracy. Validate that all Context7 requirements for context propagation are clearly captured."
           },
           {
@@ -2755,7 +3082,7 @@
               "233.1"
             ],
             "details": "Integrate @opentelemetry/api, @opentelemetry/sdk-node, @opentelemetry/auto-instrumentations-node, and @opentelemetry/exporter-trace-otlp-http. Configure the OpenTelemetry Collector with appropriate receivers, processors, and exporters for distributed tracing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify that traces are generated and exported for HTTP, gRPC, and UEP protocol flows using sample microservices. Confirm trace data is visible in the backend (e.g., Jaeger, Uptrace)."
           },
           {
@@ -2766,7 +3093,7 @@
               "233.2"
             ],
             "details": "Develop or customize propagators to handle Context7-specific fields and propagation rules. Integrate context propagation logic into UEP protocol handlers, ensuring trace context is serialized, transmitted, and restored in all UEP message flows.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write unit and integration tests for context injection, extraction, and propagation logic, covering both OpenTelemetry and UEP protocol flows. Use distributed test scenarios to verify context fidelity across multiple hops."
           },
           {
@@ -2777,7 +3104,7 @@
               "233.3"
             ],
             "details": "Update UEP protocol handlers to serialize and deserialize trace context according to Context7 and OpenTelemetry requirements. Test propagation in HTTP, gRPC, and message broker-based UEP flows.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Develop integration tests with multiple Node.js microservices communicating via HTTP, gRPC, and UEP. Verify that trace context is preserved and correctly linked across all communication patterns."
           },
           {
@@ -2788,7 +3115,7 @@
               "233.4"
             ],
             "details": "Create comprehensive developer documentation covering setup, integration, and troubleshooting. Include best practices for secure context propagation and performance optimization.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review documentation for clarity and completeness. Conduct developer onboarding sessions to validate usability. Benchmark context propagation for performance and audit for security compliance."
           }
         ]
@@ -3131,7 +3458,7 @@
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-07-30T02:03:14.606Z",
+      "updated": "2025-07-31T01:52:36.709Z",
       "description": "Tasks for master context"
     }
   }

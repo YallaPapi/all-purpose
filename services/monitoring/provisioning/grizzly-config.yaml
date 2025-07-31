@@ -1,0 +1,391 @@
+# Grizzly Configuration for Meta-Agent Factory Grafana Dashboards
+# Task 231.3 - Implement Dashboards and Panels
+# GitOps-based dashboard provisioning using Grizzly
+
+# Grizzly Configuration
+config:
+  grafana:
+    url: "http://grafana:3000"
+    user: "admin"
+    token: "${GRAFANA_TOKEN}"
+  output:
+    format: "yaml"
+    jsonnet: false
+  watch: true
+  context: "meta-agent-factory"
+
+---
+# Data Sources Configuration
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DataSource
+metadata:
+  name: prometheus-datasource
+spec:
+  name: Prometheus
+  type: prometheus
+  access: proxy
+  url: http://prometheus-server:80
+  isDefault: true
+  basicAuth: false
+  jsonData:
+    timeInterval: "5s"
+    queryTimeout: "60s"
+    httpMethod: "POST"
+  secureJsonData:
+    httpHeaderValue1: "Bearer ${PROMETHEUS_TOKEN}"
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DataSource
+metadata:
+  name: loki-datasource
+spec:
+  name: Loki
+  type: loki
+  access: proxy
+  url: http://loki:3100
+  basicAuth: false
+  jsonData:
+    maxLines: 1000
+    timeout: "60s"
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DataSource
+metadata:
+  name: tempo-datasource
+spec:
+  name: Tempo
+  type: tempo
+  access: proxy
+  url: http://tempo:3200
+  basicAuth: false
+  jsonData:
+    httpMethod: "GET"
+    tracesToLogsV2:
+      datasourceUid: "loki-datasource"
+      tags: ["job", "instance", "pod", "namespace"]
+      mapTagNamesEnabled: true
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DataSource
+metadata:
+  name: alertmanager-datasource
+spec:
+  name: Alertmanager
+  type: alertmanager
+  access: proxy
+  url: http://alertmanager:9093
+  basicAuth: false
+  jsonData:
+    implementation: prometheus
+---
+# Dashboard Folders
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+  name: system-overview
+spec:
+  title: "01-System-Overview"
+  uid: "system-overview"
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+  name: service-health
+spec:
+  title: "02-Service-Health"
+  uid: "service-health"
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+  name: agent-coordination
+spec:
+  title: "03-Agent-Coordination"
+  uid: "agent-coordination"
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+  name: service-mesh
+spec:
+  title: "04-Service-Mesh"
+  uid: "service-mesh"
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+  name: troubleshooting
+spec:
+  title: "05-Troubleshooting"
+  uid: "troubleshooting"
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+  name: meta-monitoring
+spec:
+  title: "06-Meta-Monitoring"
+  uid: "meta-monitoring"
+---
+# Dashboards
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+  folder: system-overview
+  name: meta-agent-factory-overview
+spec:
+  title: Meta-Agent Factory System Overview
+  uid: meta-agent-factory-overview
+  tags:
+    - meta-agent-factory
+    - overview
+    - system-health
+    - executive
+  refresh: "30s"
+  time:
+    from: "now-1h"
+    to: "now"
+  templating:
+    list:
+      - name: environment
+        type: custom
+        query: "production,staging,development"
+        current:
+          value: "production"
+          text: "Production"
+        includeAll: false
+        multi: false
+      - name: prometheus_datasource
+        type: datasource
+        query: prometheus
+        current:
+          value: "Prometheus"
+          text: "Prometheus"
+        hide: 2
+      - name: loki_datasource
+        type: datasource
+        query: loki
+        current:
+          value: "Loki"
+          text: "Loki"
+        hide: 2
+      - name: alertmanager_datasource
+        type: datasource
+        query: alertmanager
+        current:
+          value: "Alertmanager"
+          text: "Alertmanager"
+        hide: 2
+  # Dashboard JSON content would be embedded here
+  # For brevity, using file reference
+  json: |
+    {{ readFile "../dashboards/01-system-overview/meta-agent-factory-overview.json" | indent 4 }}
+---
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+  folder: service-health
+  name: service-registry-health
+spec:
+  title: Service Registry Health
+  uid: service-registry-health
+  tags:
+    - meta-agent-factory
+    - service-health
+    - service-registry
+    - operations
+  refresh: "15s"
+  time:
+    from: "now-1h"
+    to: "now"
+  templating:
+    list:
+      - name: environment
+        type: custom
+        query: "production,staging,development"
+        current:
+          value: "production"
+          text: "Production"
+        includeAll: false
+        multi: false
+      - name: service_instance
+        type: query
+        datasource: "Prometheus"
+        query: 'label_values(up{environment="$environment", job="service-registry"}, instance)'
+        current:
+          value: "$__all"
+          text: "All"
+        includeAll: true
+        multi: true
+        refresh: 2
+      - name: prometheus_datasource
+        type: datasource
+        query: prometheus
+        hide: 2
+      - name: loki_datasource
+        type: datasource
+        query: loki
+        hide: 2
+  # Dashboard JSON content reference
+  json: |
+    {{ readFile "../dashboards/02-service-health/service-registry-health.json" | indent 4 }}
+---
+# Library Panels (Reusable Components)
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: LibraryPanel
+metadata:
+  name: system-health-score
+spec:
+  title: "System Health Score"
+  type: "stat"
+  description: "Composite health score for Meta-Agent Factory system"
+  version: 1
+  model:
+    datasource:
+      type: prometheus
+      uid: "${prometheus_datasource}"
+    fieldConfig:
+      defaults:
+        color:
+          mode: "thresholds"
+        max: 100
+        min: 0
+        thresholds:
+          mode: "absolute"
+          steps:
+            - color: "#F2495C"
+              value: null
+            - color: "#FADE2A"
+              value: 70
+            - color: "#73BF69"
+              value: 90
+        unit: "percent"
+    options:
+      colorMode: "background"
+      graphMode: "area"
+      justifyMode: "center"
+      orientation: "horizontal"
+      reduceOptions:
+        calcs:
+          - "lastNotNull"
+        fields: ""
+        values: false
+      textMode: "auto"
+    targets:
+      - expr: |
+          (
+            (
+              avg(up{environment="$environment",job=~"meta-agent-.*"}) * 0.3 +
+              (1 - avg(rate(http_request_errors_total{environment="$environment"}[5m]) / rate(http_requests_total{environment="$environment"}[5m]))) * 0.25 +
+              (1 - avg(cpu_usage_percent{environment="$environment"}) / 100) * 0.2 +
+              (1 - avg(memory_usage_percent{environment="$environment"}) / 100) * 0.15 +
+              avg(agent_coordination_success_rate{environment="$environment"}) * 0.1
+            ) * 100
+          )
+        legendFormat: "System Health Score"
+        refId: "A"
+---
+# Alert Rules Integration
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRule
+metadata:
+  name: system-health-score-low
+spec:
+  title: "System Health Score Low"
+  condition: "A"
+  data:
+    - refId: "A"
+      queryType: ""
+      relativeTimeRange:
+        from: 300
+        to: 0
+      datasourceUid: "prometheus-datasource"
+      model:
+        expr: |
+          (
+            (
+              avg(up{job=~"meta-agent-.*"}) * 0.3 +
+              (1 - avg(rate(http_request_errors_total[5m]) / rate(http_requests_total[5m]))) * 0.25 +
+              (1 - avg(cpu_usage_percent) / 100) * 0.2 +
+              (1 - avg(memory_usage_percent) / 100) * 0.15 +
+              avg(agent_coordination_success_rate) * 0.1
+            ) * 100
+          ) < 70
+        refId: "A"
+  intervalSeconds: 60
+  maxDataPoints: 43200
+  noDataState: "NoData"
+  execErrState: "Alerting"
+  folderUID: "system-overview"
+  ruleGroup: "system-health"
+  annotations:
+    description: "Meta-Agent Factory system health score has dropped below 70%"
+    summary: "System health degraded"
+    runbook_url: "https://runbooks.company.com/meta-agent-factory/system-health"
+  labels:
+    severity: "warning"
+    team: "platform"
+    service: "meta-agent-factory"
+---
+# Contact Points
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: ContactPoint
+metadata:
+  name: meta-agent-factory-alerts
+spec:
+  name: "meta-agent-factory-alerts"
+  receivers:
+    - uid: "slack-alerts"
+      type: "slack"
+      settings:
+        url: "${SLACK_WEBHOOK_URL}"
+        channel: "#meta-agent-factory-alerts"
+        title: "Meta-Agent Factory Alert"
+        text: |
+          {{ range .Alerts }}
+          **{{ .Annotations.summary }}**
+          {{ .Annotations.description }}
+          Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+          {{ end }}
+    - uid: "email-alerts"
+      type: "email"
+      settings:
+        addresses: "platform-team@company.com"
+        subject: "Meta-Agent Factory Alert: {{ .GroupLabels.alertname }}"
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+          Silence: {{ .SilenceURL }}
+          Dashboard: {{ .DashboardURL }}
+          {{ end }}
+---
+# Notification Policies
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: NotificationPolicy
+metadata:
+  name: meta-agent-factory-policy
+spec:
+  receiver: "meta-agent-factory-alerts"
+  group_by:
+    - "alertname"
+    - "service"
+  group_wait: "10s"
+  group_interval: "10s"
+  repeat_interval: "1h"
+  routes:
+    - receiver: "meta-agent-factory-alerts"
+      matchers:
+        - service = "meta-agent-factory"
+      group_by:
+        - "severity"
+      group_wait: "5s"
+      group_interval: "5s"
+      repeat_interval: "30m"
+      routes:
+        - receiver: "critical-alerts"
+          matchers:
+            - severity = "critical"
+          group_wait: "0s"
+          repeat_interval: "5m"

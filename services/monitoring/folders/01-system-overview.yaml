@@ -1,0 +1,99 @@
+# Grafana Folder Configuration for System Overview Dashboards
+# Task 231.3 - Implement Dashboards and Panels
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+  name: system-overview
+  labels:
+    category: "overview"
+    environment: "all"
+    team: "platform"
+spec:
+  title: "01-System-Overview"
+  uid: "system-overview"
+  permissions:
+    - role: "Admin"
+      permission: "Admin"
+    - role: "Editor" 
+      permission: "Edit"
+    - role: "Viewer"
+      permission: "View"
+  annotations:
+    description: "High-level overview dashboards for Meta-Agent Factory system health, performance, and operational metrics"
+    category: "system-overview"
+    audience: "executives,operations,devops"
+    refresh: "30s"
+---
+# Kubernetes GrafanaFolder CRD (Alternative provisioning method)
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: system-overview
+  namespace: monitoring
+  labels:
+    app: grafana
+    component: dashboard-folder
+    category: system-overview
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  name: "01-System-Overview"
+  permissions:
+    - role: "Admin"
+      permission: "Admin"
+      team: "platform-team"
+    - role: "Editor" 
+      permission: "Edit" 
+      team: "operations-team"
+    - role: "Viewer"
+      permission: "View"
+      team: "development-team"
+---
+# Terraform Configuration (Alternative provisioning method)
+# terraform/folders/system-overview.tf
+resource "grafana_folder" "system_overview" {
+  title = "01-System-Overview"
+  uid   = "system-overview"
+  
+  tags = [
+    "meta-agent-factory",
+    "system-overview", 
+    "executive",
+    "operations"
+  ]
+}
+
+resource "grafana_folder_permission" "system_overview_permissions" {
+  folder_uid = grafana_folder.system_overview.uid
+  
+  permissions {
+    role       = "Admin"
+    permission = "Admin"
+  }
+  
+  permissions {
+    role       = "Editor"
+    permission = "Edit"
+  }
+  
+  permissions {
+    role       = "Viewer"
+    permission = "View"
+  }
+  
+  permissions {
+    team       = "platform-team"
+    permission = "Admin"
+  }
+  
+  permissions {
+    team       = "operations-team"
+    permission = "Edit"
+  }
+  
+  permissions {
+    team       = "development-team"
+    permission = "View"
+  }
+}

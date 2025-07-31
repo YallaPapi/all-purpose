@@ -1,0 +1,251 @@
+openapi: 3.0.3
+info:
+  title: UEP Capability Management API
+  description: |
+    Enterprise-grade capability management system for the Universal Execution Protocol (UEP).
+    
+    This API provides comprehensive capability registration, discovery, and management services
+    for UEP agents with semantic versioning, compatibility checking, and health monitoring.
+    
+    ## Features
+    - Agent registration and lifecycle management
+    - Capability discovery and version negotiation
+    - Health monitoring with heartbeat management
+    - Semantic versioning and compatibility checking
+    - Redis-backed storage with TTL support
+    - Consul integration for service discovery
+    
+  version: 1.0.0
+  contact:
+    name: UEP Team
+    url: https://github.com/your-org/allpurp
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3001
+    description: Development server
+  - url: https://uep-capability-registry.example.com
+    description: Production server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the capability registry service
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/agents/register:
+    post:
+      summary: Register agent with capabilities
+      description: Register a new agent or update existing agent capabilities
+      operationId: registerAgent
+      tags:
+        - Agent Registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRegistrationRequest'
+      responses:
+        '201':
+          description: Agent registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentRegistrationResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/capabilities:
+    get:
+      summary: Search capabilities
+      description: Search for capabilities with optional filtering
+      operationId: searchCapabilities
+      tags:
+        - Capability Discovery
+      parameters:
+        - name: name
+          in: query
+          description: Filter by capability name (supports wildcards)
+          schema:
+            type: string
+            example: "process-data"
+        - name: version
+          in: query
+          description: Filter by version or version range
+          schema:
+            type: string
+            example: "^1.0.0"
+        - name: agentType
+          in: query
+          description: Filter by agent type
+          schema:
+            type: string
+            example: "data-processor"
+        - name: includeDeprecated
+          in: query
+          description: Include deprecated capabilities
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          description: Maximum number of results to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Capability search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapabilitySearchResults'
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+    AgentCapability:
+      type: object
+      required:
+        - id
+        - name
+        - version
+      properties:
+        id:
+          type: string
+          description: Unique capability identifier
+          example: "process-data-v1.2.0"
+        name:
+          type: string
+          description: Human-readable capability name
+          example: "Process Data"
+        version:
+          $ref: '#/components/schemas/SemVer'
+        description:
+          type: string
+          description: Detailed capability description
+
+    SemVer:
+      type: object
+      required:
+        - major
+        - minor
+        - patch
+      properties:
+        major:
+          type: integer
+          minimum: 0
+        minor:
+          type: integer
+          minimum: 0
+        patch:
+          type: integer
+          minimum: 0
+        prerelease:
+          type: string
+        build:
+          type: string
+
+    AgentRegistrationRequest:
+      type: object
+      required:
+        - agentId
+        - agentType
+        - capabilities
+      properties:
+        agentId:
+          type: string
+          description: Unique identifier for the agent
+          example: "agent-001"
+        agentType:
+          type: string
+          description: Type/category of the agent
+          example: "data-processor"
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentCapability'
+
+    AgentRegistrationResponse:
+      type: object
+      properties:
+        agentId:
+          type: string
+        status:
+          type: string
+          enum: [registered, updated]
+        registrationTime:
+          type: string
+          format: date-time
+
+    CapabilitySearchResults:
+      type: object
+      properties:
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentCapability'
+        total:
+          type: integer
+        hasMore:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type identifier
+        message:
+          type: string
+          description: Human-readable error message
+        timestamp:
+          type: string
+          format: date-time
+
+tags:
+  - name: Health
+    description: Service health monitoring
+  - name: Agent Registration
+    description: Agent registration and lifecycle management
+  - name: Capability Discovery
+    description: Capability search and discovery

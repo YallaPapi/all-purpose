@@ -1,0 +1,396 @@
+# Alertmanager Configuration for Meta-Agent Factory
+# Task 231.4 - Integrate Alerting and Meta-Monitoring
+# Dynamic routing based on alert labels with proper notification policies
+
+global:
+  # SMTP configuration for email notifications
+  smtp_smarthost: 'mail.company.com:587'
+  smtp_from: 'alerts@company.com'
+  smtp_auth_username: 'alerts@company.com'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+  # Default notification templates
+  templates:
+    - '/etc/alertmanager/templates/*.tmpl'
+
+# Route configuration with dynamic routing based on labels
+route:
+  # Default grouping and timing
+  group_by: ['alertname', 'app', 'severity']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default-receiver'
+
+  # Sub-routes for specific alert routing
+  routes:
+    # Critical alerts - immediate notification
+    - matchers:
+        - severity = "critical"
+      group_wait: 0s
+      group_interval: 5s
+      repeat_interval: 15m
+      receiver: 'critical-alerts'
+      routes:
+        # Platform team - system and infrastructure alerts
+        - matchers:
+            - team = "platform"
+          receiver: 'platform-critical'
+        
+        # Meta-agent team - agent coordination alerts  
+        - matchers:
+            - team = "meta-agent"
+          receiver: 'meta-agent-critical'
+
+    # Warning alerts - standard notification
+    - matchers:
+        - severity = "warning"
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 1h
+      receiver: 'warning-alerts'
+      routes:
+        # Platform team warnings
+        - matchers:
+            - team = "platform"
+          receiver: 'platform-warnings'
+        
+        # Meta-agent team warnings
+        - matchers:
+            - team = "meta-agent"
+          receiver: 'meta-agent-warnings'
+
+    # Service-specific routing
+    - matchers:
+        - service = "service-registry"
+      receiver: 'service-registry-alerts'
+      
+    - matchers:
+        - service = "uep-protocol"
+      receiver: 'uep-protocol-alerts'
+
+    # Alert type-specific routing
+    - matchers:
+        - alert_type = "deadman"
+      receiver: 'deadman-switch'
+      group_wait: 0s
+      repeat_interval: 12h  # Only notify twice a day for deadman switch
+
+    - matchers:
+        - alert_type = "heartbeat"
+      receiver: 'heartbeat-alerts'
+      group_wait: 0s
+      repeat_interval: 5m
+
+    # Meta-monitoring alerts (observability stack)
+    - matchers:
+        - app = "meta-agent-factory"
+        - service =~ "prometheus|loki|grafana|alertmanager"
+      receiver: 'observability-alerts'
+      group_wait: 30s
+      repeat_interval: 30m
+
+# Inhibition rules to prevent alert spam
+inhibit_rules:
+  # Inhibit warning alerts when critical alerts are active
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity = "warning"
+    equal: ['alertname', 'app', 'service']
+
+  # Inhibit service alerts when the entire system is down
+  - source_matchers:
+      - alertname = "MetaAgentFactorySystemHealthCritical"
+    target_matchers:
+      - app = "meta-agent-factory"
+    equal: ['environment']
+
+  # Inhibit individual service alerts when Prometheus is down
+  - source_matchers:
+      - alertname = "PrometheusDown"
+    target_matchers:
+      - severity =~ "warning|critical"
+    equal: ['environment']
+
+# Receiver definitions with multiple notification channels
+receivers:
+  # Default receiver (fallback)
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'platform-team@company.com'
+        subject: '[{{ .Status | toUpper }}] Meta-Agent Factory Alert'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ if .Annotations.dashboard_url }}Dashboard: {{ .Annotations.dashboard_url }}{{ end }}
+          {{ end }}
+
+  # Critical alerts - multiple channels with escalation
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'platform-oncall@company.com'
+        subject: '[CRITICAL] Meta-Agent Factory - {{ .GroupLabels.alertname }}'
+        body: |
+          🚨 CRITICAL ALERT 🚨
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Started: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+          
+          🔗 Actions:
+          {{ if .Annotations.runbook_url }}📖 Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ if .Annotations.dashboard_url }}📊 Dashboard: {{ .Annotations.dashboard_url }}{{ end }}
+          🔕 Silence: {{ .SilenceURL }}
+          {{ end }}
+        
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-critical'
+        title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          
+          *Labels:* {{ range .Labels.SortedPairs }}`{{ .Name }}={{ .Value }}` {{ end }}
+          {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+          {{ if .Annotations.dashboard_url }}*Dashboard:* {{ .Annotations.dashboard_url }}{{ end }}
+          {{ end }}
+        send_resolved: true
+
+    pagerduty_configs:
+      - routing_key: '${PAGERDUTY_INTEGRATION_KEY}'
+        description: '{{ .GroupLabels.alertname }}: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        details:
+          alertname: '{{ .GroupLabels.alertname }}'
+          app: '{{ .GroupLabels.app }}'
+          severity: '{{ .GroupLabels.severity }}'
+          team: '{{ .GroupLabels.team }}'
+        links:
+          - href: '{{ range .Alerts }}{{ .Annotations.dashboard_url }}{{ end }}'
+            text: 'Grafana Dashboard'
+          - href: '{{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}'
+            text: 'Runbook'
+
+  # Platform team critical alerts
+  - name: 'platform-critical'
+    email_configs:
+      - to: 'platform-team@company.com'
+        subject: '[CRITICAL] Platform Issue - {{ .GroupLabels.alertname }}'
+        body: |
+          🏗️ PLATFORM CRITICAL ALERT
+          
+          {{ range .Alerts }}
+          Service: {{ .Labels.service }}
+          Issue: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          Immediate action required for platform stability.
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#platform-alerts'
+        title: '🏗️ Platform Critical: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Service:* {{ .Labels.service }}
+          *Issue:* {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+
+  # Meta-agent team critical alerts
+  - name: 'meta-agent-critical'
+    email_configs:
+      - to: 'meta-agent-team@company.com'
+        subject: '[CRITICAL] Agent System Issue - {{ .GroupLabels.alertname }}'
+        body: |
+          🤖 META-AGENT CRITICAL ALERT
+          
+          {{ range .Alerts }}
+          Component: {{ .Labels.service }}
+          Issue: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          Agent coordination or protocol issue requiring immediate attention.
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#meta-agent-alerts'
+        title: '🤖 Meta-Agent Critical: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Component:* {{ .Labels.service }}
+          *Issue:* {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+
+  # Warning alerts
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'platform-team@company.com'
+        subject: '[WARNING] Meta-Agent Factory - {{ .GroupLabels.alertname }}'
+        body: |
+          ⚠️ WARNING ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-warning'
+        title: '⚠️ Warning: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}{{ .Annotations.summary }}
+          {{ .Annotations.description }}{{ end }}
+
+  # Platform team warnings
+  - name: 'platform-warnings'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#platform-alerts'
+        title: '⚠️ Platform Warning: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}*Service:* {{ .Labels.service }}
+          {{ .Annotations.summary }}{{ end }}
+
+  # Meta-agent team warnings
+  - name: 'meta-agent-warnings'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#meta-agent-alerts'
+        title: '⚠️ Meta-Agent Warning: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}*Component:* {{ .Labels.service }}
+          {{ .Annotations.summary }}{{ end }}
+
+  # Service-specific receivers
+  - name: 'service-registry-alerts'
+    email_configs:
+      - to: 'platform-team@company.com'
+        subject: '[{{ .Status | toUpper }}] Service Registry - {{ .GroupLabels.alertname }}'
+        body: |
+          🗂️ SERVICE REGISTRY ALERT
+          
+          {{ range .Alerts }}
+          Issue: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          Service discovery and registration may be affected.
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ if .Annotations.dashboard_url }}Dashboard: {{ .Annotations.dashboard_url }}{{ end }}
+          {{ end }}
+
+  - name: 'uep-protocol-alerts'
+    email_configs:
+      - to: 'meta-agent-team@company.com'
+        subject: '[{{ .Status | toUpper }}] UEP Protocol - {{ .GroupLabels.alertname }}'
+        body: |
+          🔌 UEP PROTOCOL ALERT
+          
+          {{ range .Alerts }}
+          Issue: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          Agent communication protocol issue detected.
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ end }}
+
+  # Deadman switch receiver (special handling)
+  - name: 'deadman-switch'
+    email_configs:
+      - to: 'platform-oncall@company.com'
+        subject: '[INFO] Monitoring System Alive - Deadman Switch'
+        body: |
+          ✅ DEADMAN SWITCH NOTIFICATION
+          
+          This is a regular notification confirming the monitoring system is operational.
+          If you stop receiving these notifications, the monitoring system may be down.
+          
+          System Status: Operational
+          Last Check: {{ .Alerts | len }} alert(s) processed
+
+  # Heartbeat alerts receiver
+  - name: 'heartbeat-alerts'
+    email_configs:
+      - to: 'platform-oncall@company.com'
+        subject: '[CRITICAL] Heartbeat Missing - {{ .GroupLabels.alertname }}'
+        body: |
+          💓 HEARTBEAT ALERT
+          
+          {{ range .Alerts }}
+          Issue: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          The system heartbeat is missing, indicating a potential system failure.
+          {{ end }}
+
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-critical'
+        title: '💓 Heartbeat Missing: System May Be Down'
+        text: |
+          {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+
+  # Observability stack alerts
+  - name: 'observability-alerts'
+    email_configs:
+      - to: 'platform-team@company.com'
+        subject: '[{{ .Status | toUpper }}] Observability Stack - {{ .GroupLabels.alertname }}'
+        body: |
+          📊 OBSERVABILITY STACK ALERT
+          
+          {{ range .Alerts }}
+          Component: {{ .Labels.service }}
+          Issue: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          Monitoring infrastructure issue detected.
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ if .Annotations.dashboard_url }}Dashboard: {{ .Annotations.dashboard_url }}{{ end }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#observability-alerts'
+        title: '📊 Observability: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}*Component:* {{ .Labels.service }}
+          *Issue:* {{ .Annotations.summary }}
+          {{ .Annotations.description }}{{ end }}
+
+# Mute timing configurations for maintenance windows
+mute_time_intervals:
+  - name: maintenance
+    time_intervals:
+      - times:
+          - start_time: '02:00'
+            end_time: '04:00'
+        weekdays: ['sunday']
+        months: ['1:12']
+
+  - name: business-hours
+    time_intervals:
+      - times:
+          - start_time: '09:00'
+            end_time: '17:00'
+        weekdays: ['monday:friday']
+        months: ['1:12']
+
+  - name: weekend
+    time_intervals:
+      - weekdays: ['saturday', 'sunday']
+        months: ['1:12']

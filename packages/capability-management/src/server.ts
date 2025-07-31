@@ -10,6 +10,9 @@
  * @author TaskMaster Research Implementation - Task 226.2
  */
 
+// Initialize OpenTelemetry FIRST - Context7 Methodology
+import './otel.js';
+
 import { CapabilityRegistryService } from './services/CapabilityRegistryService.js';
 import { CapabilityRegistryConfig } from './types/CapabilitySchema.js';
 import chalk from 'chalk';
