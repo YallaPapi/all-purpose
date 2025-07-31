@@ -36,18 +36,6 @@ jobs:
         docker build -t ${{ env.REGISTRY }}/${{ github.repository }}/lead-generator:latest .
         docker push ${{ env.REGISTRY }}/${{ github.repository }}/lead-generator:latest
 
-    - name: Create simple Dockerfile for Observability Dashboard
-      run: |
-        cat > Dockerfile.observability << 'EOF'
-        FROM node:20-alpine
-        WORKDIR /app
-        COPY package*.json ./
-        RUN npm ci --production
-        COPY . .
-        EXPOSE 3000
-        CMD ["npm", "run", "dev"]
-        EOF
-
     - name: Build Observability Dashboard
       run: |
         docker build -f Dockerfile.observability -t ${{ env.REGISTRY }}/${{ github.repository }}/observability:latest .
