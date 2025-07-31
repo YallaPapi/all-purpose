@@ -580,3 +580,22 @@ ls -la packages/capability-management/src/algorithms/  # Example verification
 - ✅ **Progress Tracking**: Clear progress metrics and next steps
 
 This methodology ensures ZAD reports maintain accurate project continuity and prevent documentation drift or duplication [47].
+
+---
+
+## 🚫 CRITICAL TOOL USAGE RULES
+
+### **NEVER USE THESE TOOLS** [48]
+- ❌ **WebSearch** - NEVER use WebSearch tool under ANY circumstances
+- ❌ **WebFetch** - Do NOT use for general research
+
+### **ALWAYS USE FOR RESEARCH** [49]
+- ✅ **TaskMaster Research** - MANDATORY for all research needs:
+  ```bash
+  task-master add-task --prompt="research topic" --research
+  task-master research "topic"  # Direct research command
+  ```
+- ✅ **Task Tool** - Can use for complex multi-step tasks
+- ✅ **Context7** - Use for library documentation and code syntax
+
+**CRITICAL**: When you need to research ANYTHING (best practices, implementation patterns, technical concepts), you MUST use TaskMaster research functionality. This gives access to Perplexity AI's insights. NO EXCEPTIONS.

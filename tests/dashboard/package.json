@@ -1,0 +1,54 @@
+{
+  "name": "test-dashboard",
+  "version": "1.0.0",
+  "description": "Real-time test execution monitoring dashboard with comprehensive reporting",
+  "main": "test-dashboard-server.js",
+  "scripts": {
+    "start": "node test-dashboard-server.js",
+    "dev": "nodemon test-dashboard-server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "aggregator": "node test-result-aggregator.js",
+    "build": "npm install",
+    "clean": "rm -rf node_modules package-lock.json",
+    "healthcheck": "curl -f http://localhost:3001/api/health || exit 1"
+  },
+  "keywords": [
+    "testing",
+    "dashboard",
+    "real-time",
+    "monitoring",
+    "jest",
+    "mocha",
+    "cypress",
+    "reporting",
+    "websocket",
+    "redis"
+  ],
+  "author": "All-Purpose Meta-Agent Factory",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "ioredis": "^5.3.2",
+    "uuid": "^9.0.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.6.2",
+    "@types/node": "^20.4.8"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/all-purpose/meta-agent-factory.git"
+  },
+  "bugs": {
+    "url": "https://github.com/all-purpose/meta-agent-factory/issues"
+  },
+  "homepage": "https://github.com/all-purpose/meta-agent-factory#readme"
+}

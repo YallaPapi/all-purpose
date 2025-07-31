@@ -3359,3 +3359,25 @@
 {"contextItems":3,"contextLength":964,"enhancementTime":1052,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-27 16:30:29:3029"}
 {"args":2,"command":"research","level":"info","message":"Executing TaskMaster command","timestamp":"2025-07-27 16:30:29:3029"}
 {"command":"research","exitCode":1,"level":"info","message":"TaskMaster command completed","timestamp":"2025-07-27 16:30:30:3030"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-31 16:04:08:48"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-31 16:04:08:48"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-31 16:04:08:48"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-31 16:04:08:48","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"batchSize":10,"level":"info","message":"[EMBEDDING] OpenAI Embeddings service initialized","model":"text-embedding-3-small","timestamp":"2025-07-31 16:04:08:48"}
+{"level":"info","message":"[EMBEDDING] Embedding Adapter initialized","method":"truncate","sourceModel":"text-embedding-3-small","targetDimension":1024,"timestamp":"2025-07-31 16:04:08:48"}
+{"level":"info","message":"Upstash Vector client initialized","timestamp":"2025-07-31 16:04:08:48","url":"https://select-wolf-56126-us1-vector.upstash.io"}
+{"autoEnhancement":true,"level":"info","maxContextLength":4000,"message":"[API] Context API initialized","timestamp":"2025-07-31 16:04:08:48"}
+{"enableContextInjection":true,"enhancedCommands":5,"level":"info","message":"TaskMaster integration initialized","timestamp":"2025-07-31 16:04:08:48"}
+{"command":"research","level":"info","message":"Enhancing TaskMaster command with context","timestamp":"2025-07-31 16:04:08:48"}
+{"level":"info","message":"[API] Enhancing prompt with context","prompt":"meta-agent development research methodology\n\nOriginal request: Chaos Mesh NetworkChaos YAML configur...","timestamp":"2025-07-31 16:04:08:48"}
+{"level":"info","maxResults":3,"message":"[API] Searching for context","prompt":"meta-agent development research methodology\n\nOriginal request: Chaos Mesh NetworkChaos YAML configur...","timestamp":"2025-07-31 16:04:08:48"}
+{"level":"info","message":"[EMBEDDING] Generating adapted embeddings","targetDimension":1024,"textCount":1,"timestamp":"2025-07-31 16:04:08:48"}
+{"level":"info","message":"[EMBEDDING] Starting embedding generation","model":"text-embedding-3-small","textCount":1,"timestamp":"2025-07-31 16:04:08:48"}
+{"attempt":1,"batchSize":1,"level":"debug","message":"[EMBEDDING] Processing embedding batch","timestamp":"2025-07-31 16:04:08:48"}
+{"estimatedCost":4.800000000000001e-7,"level":"info","message":"[EMBEDDING] Embedding generation completed","model":"text-embedding-3-small","processedTexts":1,"timestamp":"2025-07-31 16:04:08:48","totalTokens":24}
+{"level":"info","message":"[EMBEDDING] Embedding adaptation completed","method":"truncate","originalDim":1536,"processed":1,"targetDim":1024,"timestamp":"2025-07-31 16:04:08:48"}
+{"level":"debug","message":"Vector search completed","resultCount":3,"timestamp":"2025-07-31 16:04:09:49","topK":3}
+{"level":"info","message":"[API] Context search completed","resultsFound":3,"searchTime":1065,"timestamp":"2025-07-31 16:04:09:49"}
+{"contextItems":3,"contextLength":330,"enhancementTime":1065,"level":"info","message":"[API] Prompt enhancement completed","timestamp":"2025-07-31 16:04:09:49"}
+{"args":2,"command":"research","level":"info","message":"Executing TaskMaster command","timestamp":"2025-07-31 16:04:09:49"}
+{"command":"research","exitCode":1,"level":"info","message":"TaskMaster command completed","timestamp":"2025-07-31 16:04:09:49"}
