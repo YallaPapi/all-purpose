@@ -17,7 +17,7 @@
     "test:integration": "jest --testPathPattern=integration",
     "lint": "eslint src/ apps/ packages/ --ext .js,.ts,.tsx",
     "lint:fix": "eslint src/ apps/ packages/ --ext .js,.ts,.tsx --fix",
-    "start": "next start",
+    "start": "next start -p ${PORT:-3000}",
     "dev": "next dev",
     "dev:factory": "node src/autonomous-factory.js",
     "clean": "rimraf dist node_modules/.cache",
