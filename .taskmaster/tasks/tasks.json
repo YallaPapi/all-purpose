@@ -1002,8 +1002,62 @@
           197,
           198
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Draft Quick Start Guide for Containerized Meta-Agent Factory",
+            "description": "Create a concise Quick Start Guide with step-by-step instructions for first-time deployment, minimal configuration, basic usage, and troubleshooting common startup issues.",
+            "dependencies": [],
+            "details": "Include prerequisites, installation steps, minimal configuration, example commands, and a troubleshooting section for common setup errors. Use Markdown formatting and provide code/configuration snippets.",
+            "status": "done",
+            "testStrategy": "Have a new team member follow the guide in a clean environment and report any ambiguities or missing steps. Validate that all steps result in a working deployment."
+          },
+          {
+            "id": 2,
+            "title": "Develop System Architecture and Component Documentation",
+            "description": "Document the overall architecture, including diagrams, component interactions, network topology, data flow, and security boundaries of the containerized meta-agent factory.",
+            "dependencies": [
+              "199.1"
+            ],
+            "details": "Produce clear diagrams (e.g., system, network, and data flow), describe each component's role, and explain security models. Cross-reference relevant sections for deeper technical details.",
+            "status": "done",
+            "testStrategy": "Review diagrams and descriptions with the engineering team for accuracy and completeness. Ensure all components and interactions are represented and security boundaries are clearly defined."
+          },
+          {
+            "id": 3,
+            "title": "Compile Configuration Reference and Tuning Guide",
+            "description": "Create a comprehensive reference for all configuration options, including environment variables, Docker Compose settings, service-specific parameters, and performance/scaling recommendations.",
+            "dependencies": [
+              "199.2"
+            ],
+            "details": "List and describe each configuration option, provide example configuration files, and include guidance for scaling and tuning performance. Ensure all options are up-to-date with the latest system version.",
+            "status": "pending",
+            "testStrategy": "Validate each configuration option in a test environment. Confirm that all documented settings are recognized by the system and that example configurations work as described."
+          },
+          {
+            "id": 4,
+            "title": "Write Operational and Troubleshooting Guides",
+            "description": "Document operational procedures for monitoring, log analysis, backup/recovery, and troubleshooting, including a reference of common issues, diagnostic steps, and escalation processes.",
+            "dependencies": [
+              "199.3"
+            ],
+            "details": "Provide step-by-step operational tasks, log file locations, monitoring tool usage, backup/restore instructions, and a troubleshooting matrix for known issues and solutions.",
+            "status": "pending",
+            "testStrategy": "Simulate operational scenarios and common failures to verify the accuracy and clarity of procedures. Ensure troubleshooting steps resolve documented issues."
+          },
+          {
+            "id": 5,
+            "title": "Develop Development and Testing Guides",
+            "description": "Produce guides for local development setup, testing procedures, adding/extending agents, and integrating new features, including recommended frameworks and best practices.",
+            "dependencies": [
+              "199.4"
+            ],
+            "details": "Include instructions for setting up a local environment, running and writing tests, contributing new agents, and extending system functionality. Reference relevant configuration and operational sections.",
+            "status": "pending",
+            "testStrategy": "Have developers follow the guides to set up local environments and add new agents. Validate that testing procedures are reproducible and effective."
+          }
+        ]
       },
       {
         "id": 200,
@@ -3809,7 +3863,7 @@
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-08-01T02:36:09.812Z",
+      "updated": "2025-08-01T03:06:18.032Z",
       "description": "Tasks for master context"
     }
   }
