@@ -1,0 +1,107 @@
+{{!-- 
+Dynamic Conditional Template
+Replaces hardcoded conditionals with configuration-driven rule engine
+Following All-Purpose Pattern: Eliminates hardcoded business logic
+--}}
+
+{{!-- Generate config-driven conditional logic --}}
+{{#if config.useRuleEngine}}
+// Rule-based conditional logic
+const ruleEngine = new ConfigurableRuleEngine({{config.configPath}}?.{{config.configKey}});
+const conditionResult = ruleEngine.evaluate({{config.contextVariable}});
+
+if (conditionResult.matches) {
+  {{config.thenBlock}}
+} else {
+  {{config.elseBlock}}
+}
+{{else}}
+// Simple config-driven conditional
+const conditionalConfig = {{config.configPath}}?.{{config.configKey}} || {};
+const shouldExecute = evaluateCondition({{config.contextVariable}}, conditionalConfig);
+
+if (shouldExecute) {
+  {{config.thenBlock}}
+}{{#if config.elseBlock}} else {
+  {{config.elseBlock}}
+}{{/if}}
+
+// Configuration-driven condition evaluator
+function evaluateCondition(value: any, config: any): boolean {
+  if (!config) return false;
+  
+  // Support different condition types
+  if (config.equals !== undefined) {
+    return value === config.equals;
+  }
+  
+  if (config.in && Array.isArray(config.in)) {
+    return config.in.includes(value);
+  }
+  
+  if (config.matches && typeof config.matches === 'string') {
+    return new RegExp(config.matches).test(String(value));
+  }
+  
+  if (config.custom && typeof config.custom === 'function') {
+    return config.custom(value);
+  }
+  
+  return false;
+}
+{{/if}}
+
+{{!-- Add type definitions for TypeScript --}}
+{{#ifEquals project.language "typescript"}}
+{{#if config.useRuleEngine}}
+// Rule engine interface
+interface Rule {
+  condition: string | RegExp | ((value: any) => boolean);
+  action?: string;
+  priority?: number;
+}
+
+interface RuleEngineConfig {
+  {{config.configKey}}: Rule[];
+}
+{{else}}
+// Simple conditional config interface
+interface ConditionalConfig {
+  equals?: any;
+  in?: any[];
+  matches?: string;
+  custom?: (value: any) => boolean;
+}
+
+interface {{pascalCase config.configKey}}Config {
+  {{config.configKey}}: ConditionalConfig;
+}
+{{/if}}
+{{/ifEquals}}
+
+/**
+ * Configuration-driven conditional logic
+ * 
+ * Add to your config file (config.json, .env, or similar):
+ * {
+ *   "{{config.configKey}}": {
+ *     {{#if config.useRuleEngine}}
+ *     "rules": [
+ *       {
+ *         "condition": "value => value === 'premium'",
+ *         "action": "allowAccess",
+ *         "priority": 1
+ *       }
+ *     ]
+ *     {{else}}
+ *     "equals": "expectedValue",
+ *     // OR
+ *     "in": ["value1", "value2", "value3"],
+ *     // OR
+ *     "matches": "^pattern.*"
+ *     {{/if}}
+ *   }
+ * }
+ * 
+ * This eliminates hardcoded business logic and follows All-Purpose Pattern
+ */

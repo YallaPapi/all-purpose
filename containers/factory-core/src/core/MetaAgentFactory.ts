@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { Logger } from '../utils/Logger.js';
-import { EventBus } from '../../../../shared/messaging/EventBus.js';
+import { EventBus } from '../utils/EventBus.js';
 
 interface MetaAgent {
   id: string;
@@ -72,13 +72,13 @@ export class MetaAgentFactory extends EventEmitter {
     this.logger.info(`Created meta-agent: ${agentId} of type: ${type}`);
     
     // Publish agent creation event
-    if (this.eventBus.isConnected_()) {
+    if (this.eventBus.isConnected()) {
       await this.eventBus.publish('meta.agent.created', {
         agentId,
         type,
         status: 'created',
         config
-      }, { source: 'factory-core' });
+      });
     }
     
     this.emit('agentCreated', agent);
@@ -116,24 +116,24 @@ export class MetaAgentFactory extends EventEmitter {
     this.logger.info(`Executing task ${taskId} on agent ${agentId}`);
 
     // Publish task assignment event
-    if (this.eventBus.isConnected_()) {
+    if (this.eventBus.isConnected()) {
       await this.eventBus.publish('factory.task.assigned', {
         taskId,
         agentId,
         task
-      }, { source: 'factory-core' });
+      });
     }
 
     try {
       agentTask.status = 'running';
       
       // Publish task start event
-      if (this.eventBus.isConnected_()) {
+      if (this.eventBus.isConnected()) {
         await this.eventBus.publish('meta.agent.started', {
           agentId,
           taskId,
           status: 'running'
-        }, { source: 'factory-core' });
+        });
       }
 
       const result = await this.executeAgentLogic(agent, task);
@@ -144,13 +144,13 @@ export class MetaAgentFactory extends EventEmitter {
       agent.status = 'idle';
 
       // Publish task completion event
-      if (this.eventBus.isConnected_()) {
+      if (this.eventBus.isConnected()) {
         await this.eventBus.publish('meta.agent.completed', {
           agentId,
           taskId,
           result,
           status: 'completed'
-        }, { source: 'factory-core' });
+        });
       }
 
       this.emit('taskCompleted', agentTask);
@@ -159,18 +159,18 @@ export class MetaAgentFactory extends EventEmitter {
       return agentTask;
     } catch (error) {
       agentTask.status = 'failed';
-      agentTask.error = error.message;
+      agentTask.error = (error as Error).message;
       agentTask.completedAt = new Date();
       agent.status = 'error';
 
       // Publish task failure event
-      if (this.eventBus.isConnected_()) {
+      if (this.eventBus.isConnected()) {
         await this.eventBus.publish('meta.agent.failed', {
           agentId,
           taskId,
-          error: error.message,
+          error: (error as Error).message,
           status: 'failed'
-        }, { source: 'factory-core' });
+        });
       }
 
       this.emit('taskFailed', agentTask);

@@ -4,12 +4,12 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { config } from './config/environment.js';
-import { MetaAgentFactory } from './core/MetaAgentFactory.js';
+import { RealMetaAgentFactory } from './core/RealMetaAgentFactory.js';
 import { HealthCheckService } from './services/HealthCheckService.js';
 import { AuthService } from './services/AuthService.js';
 import { MetricsService } from './services/MetricsService.js';
 import { Logger } from './utils/Logger.js';
-import { EventBus } from '../../../shared/messaging/EventBus.js';
+import { EventBus } from './utils/EventBus.js';
 
 const app = express();
 const server = createServer(app);
@@ -28,7 +28,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 const eventBus = new EventBus(config.nats.url);
-const metaAgentFactory = new MetaAgentFactory(eventBus);
+const metaAgentFactory = new RealMetaAgentFactory(eventBus);
 const healthService = new HealthCheckService();
 const authService = new AuthService();
 const metricsService = new MetricsService();
@@ -52,7 +52,7 @@ app.post('/api/factory/meta-agents', async (req, res) => {
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('Meta-agent creation failed:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -62,7 +62,7 @@ app.get('/api/factory/meta-agents', async (req, res) => {
     res.json({ success: true, data: agents });
   } catch (error) {
     logger.error('Failed to list meta-agents:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -74,11 +74,11 @@ app.post('/api/factory/meta-agents/:id/execute', async (req, res) => {
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('Meta-agent execution failed:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
-app.use((err, req, res, next) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error('Unhandled error:', err);
   res.status(500).json({ success: false, error: 'Internal server error' });
 });

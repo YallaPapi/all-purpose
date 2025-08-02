@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Create package.json inline
+RUN echo '{"name":"uep-registry","version":"1.0.0","main":"simple-registry.js","dependencies":{"express":"^4.18.2"}}' > package.json
+
+# Install dependencies
+RUN npm install
+
+# Copy server file
+COPY src/simple-registry.js .
+
+EXPOSE 3003
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget -q -O - http://localhost:3003/health || exit 1
+
+CMD ["node", "simple-registry.js"]

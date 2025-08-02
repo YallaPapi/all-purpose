@@ -20,6 +20,8 @@ import {
   BackendAgentConfig
 } from '../types/index.js';
 
+import { Context7Client } from '../services/Context7Client.js';
+
 /**
  * API Design Engine for generating backend API endpoints
  */
@@ -29,6 +31,7 @@ export default class APIDesignEngine extends EventEmitter implements BackendEngi
   private config: BackendAgentConfig;
   private isInitialized = false;
   private templates = new Map<string, HandlebarsTemplateDelegate>();
+  private context7Client: Context7Client;
 
   constructor(options: {
     logger: Logger;
@@ -39,6 +42,7 @@ export default class APIDesignEngine extends EventEmitter implements BackendEngi
     
     this.logger = options.logger;
     this.config = options.config;
+    this.context7Client = new Context7Client(this.logger);
 
     this.logger.info('API Design Engine created');
   }
@@ -82,14 +86,18 @@ export default class APIDesignEngine extends EventEmitter implements BackendEngi
     try {
       const { endpoints = [], framework = 'express', authentication = false } = task.requirements;
 
+      // Fetch library documentation from Context7
+      const libraryDocs = await this.fetchLibraryDocumentation(framework, authentication);
+
       // Generate API endpoints based on requirements and context
-      const generatedEndpoints = await this.generateEndpoints(endpoints, task);
+      const generatedEndpoints = await this.generateEndpoints(endpoints, task, libraryDocs);
 
       // Generate API files
       const generatedFiles = await this.generateAPIFiles(generatedEndpoints, {
         framework,
         authentication,
-        projectName: 'backend-api'
+        projectName: 'backend-api',
+        libraryDocs
       });
 
       // Generate middleware files
@@ -137,9 +145,71 @@ export default class APIDesignEngine extends EventEmitter implements BackendEngi
   }
 
   /**
+   * Fetch library documentation from Context7
+   */
+  private async fetchLibraryDocumentation(framework: string, authentication: boolean): Promise<Map<string, any>> {
+    const docs = new Map<string, any>();
+
+    try {
+      // Fetch framework documentation
+      this.logger.info(`📚 Fetching ${framework} documentation from Context7...`);
+      const frameworkLibrary = await this.context7Client.resolveLibraryId(framework);
+      
+      if (frameworkLibrary) {
+        const frameworkDocs = await this.context7Client.getLibraryDocs(
+          frameworkLibrary.libraryId,
+          'routing middleware api',
+          5000
+        );
+        if (frameworkDocs) {
+          docs.set(framework, frameworkDocs);
+          this.logger.info(`✅ Retrieved ${frameworkDocs.snippets.length} snippets for ${framework}`);
+        }
+      }
+
+      // Fetch authentication library documentation if needed
+      if (authentication) {
+        const authLibs = ['jsonwebtoken', 'bcrypt'];
+        for (const libName of authLibs) {
+          const authLibrary = await this.context7Client.resolveLibraryId(libName);
+          if (authLibrary) {
+            const authDocs = await this.context7Client.getLibraryDocs(
+              authLibrary.libraryId,
+              'authentication security',
+              2000
+            );
+            if (authDocs) {
+              docs.set(libName, authDocs);
+              this.logger.info(`✅ Retrieved ${authDocs.snippets.length} snippets for ${libName}`);
+            }
+          }
+        }
+      }
+
+      // Fetch validation library documentation
+      const validationLib = await this.context7Client.resolveLibraryId('joi');
+      if (validationLib) {
+        const validationDocs = await this.context7Client.getLibraryDocs(
+          validationLib.libraryId,
+          'validation schemas',
+          2000
+        );
+        if (validationDocs) {
+          docs.set('joi', validationDocs);
+        }
+      }
+
+    } catch (error) {
+      this.logger.error('Failed to fetch library documentation', { error });
+    }
+
+    return docs;
+  }
+
+  /**
    * Generate API endpoints based on requirements and context
    */
-  private async generateEndpoints(requirements: any[], task: BackendTask): Promise<APIEndpoint[]> {
+  private async generateEndpoints(requirements: any[], task: BackendTask, libraryDocs: Map<string, any>): Promise<APIEndpoint[]> {
     const endpoints: APIEndpoint[] = [];
 
     // Analyze existing endpoints from context
@@ -345,6 +415,15 @@ export default class APIDesignEngine extends EventEmitter implements BackendEngi
    * Load template content (fallback to inline templates if files don't exist)
    */
   private async loadTemplateContent(templateFile: string): Promise<string> {
+    // Try to load from file system first
+    try {
+      const templatePath = path.join(__dirname, '..', 'templates', 'api', templateFile);
+      const content = await fs.readFile(templatePath, 'utf-8');
+      this.logger.debug(`Loaded template from file: ${templateFile}`);
+      return content;
+    } catch (error) {
+      this.logger.debug(`Template file not found, using inline template: ${templateFile}`);
+    }
     // Inline templates as fallback
     const inlineTemplates: Record<string, string> = {
       'express-router.hbs': `

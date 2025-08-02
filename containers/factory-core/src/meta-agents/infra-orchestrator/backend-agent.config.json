@@ -1,0 +1,168 @@
+{
+  "project": {
+    "name": "Backend Agent - Domain-Specific Development Assistant",
+    "type": "meta-agent",
+    "description": "Intelligent backend development agent with Context7 integration for API design, database modeling, security implementation, and testing assistance",
+    "priority": "high",
+    "requirements": {
+      "framework": "TypeScript/Node.js",
+      "architecture": "UEP (Universal Execution Protocol)",
+      "integration": "Context7 codebase scanning",
+      "database": "Redis + Vector Database",
+      "deployment": "Vercel",
+      "features": [
+        "Context7-enhanced codebase scanning for backend patterns",
+        "API design and generation (REST, GraphQL)",
+        "Database schema design and migration generation",
+        "Authentication and authorization middleware",
+        "Security review and vulnerability scanning",
+        "Backend testing framework integration",
+        "OpenAPI/Swagger documentation generation",
+        "Real-time coordination with other domain agents",
+        "RAG-powered contextual assistance",
+        "All-Purpose Pattern compliance for unlimited extensibility"
+      ]
+    }
+  },
+  "orchestration": {
+    "agents": {
+      "prd-parser": {
+        "priority": 1,
+        "task": "Parse Backend Agent specifications from domain-specific-agents-prd.md",
+        "input": "../../../domain-specific-agents-prd.md"
+      },
+      "all-purpose-pattern": {
+        "priority": 2,
+        "task": "Apply All-Purpose Pattern to eliminate backend development limitations"
+      },
+      "scaffold-generator": {
+        "priority": 3,
+        "task": "Generate Backend Agent TypeScript project structure with UEP integration"
+      },
+      "template-engine-factory": {
+        "priority": 4,
+        "task": "Create backend development components: API generators, database designers, security analyzers"
+      },
+      "parameter-flow": {
+        "priority": 5,
+        "task": "Configure data flow between Context7 scanner, RAG system, and UEP coordination"
+      },
+      "vercel-native-architecture": {
+        "priority": 6,
+        "task": "Setup integration with existing Vercel architecture and meta-agent factory"
+      },
+      "five-document-framework": {
+        "priority": 7,
+        "task": "Generate comprehensive backend agent documentation and usage guides"
+      },
+      "thirty-minute-rule": {
+        "priority": 8,
+        "task": "Validate backend agent tasks follow 30-minute complexity rule"
+      }
+    }
+  },
+  "capabilities": {
+    "apiDesign": {
+      "restfulEndpoints": true,
+      "graphqlSchema": true,
+      "middlewareGeneration": true,
+      "errorHandling": true,
+      "inputValidation": true
+    },
+    "database": {
+      "schemaDesign": true,
+      "migrationGeneration": true,
+      "queryOptimization": true,
+      "relationshipModeling": true,
+      "ormIntegration": ["Prisma", "TypeORM", "Sequelize"]
+    },
+    "security": {
+      "authenticationFlow": true,
+      "authorizationMiddleware": true,
+      "securityAudit": true,
+      "rateLimiting": true,
+      "jwtImplementation": true,
+      "oauthIntegration": true
+    },
+    "testing": {
+      "unitTestGeneration": true,
+      "integrationTests": true,
+      "mockDataCreation": true,
+      "apiTesting": true,
+      "loadTesting": true
+    },
+    "documentation": {
+      "apiDocumentation": true,
+      "schemaDocumentation": true,
+      "deploymentGuides": true,
+      "swaggerGeneration": true
+    },
+    "context7Integration": {
+      "codebaseScanning": true,
+      "patternRecognition": true,
+      "securityPatternDetection": true,
+      "apiPatternAnalysis": true,
+      "databasePatternAnalysis": true
+    }
+  },
+  "integration": {
+    "uepProtocol": {
+      "enabled": true,
+      "messageFormat": "standardized",
+      "validationRequired": true
+    },
+    "context7": {
+      "enabled": true,
+      "scanPatterns": [
+        "**/*.{ts,js}",
+        "**/api/**/*",
+        "**/routes/**/*",
+        "**/models/**/*",
+        "**/middleware/**/*",
+        "**/controllers/**/*",
+        "**/services/**/*",
+        "**/*.sql",
+        "**/migrations/**/*",
+        "**/tests/**/*"
+      ],
+      "priority": "high"
+    },
+    "ragSystem": {
+      "enabled": true,
+      "contextRetrieval": true,
+      "documentationSearch": true,
+      "patternMemory": true
+    },
+    "metaAgentCoordination": {
+      "enabled": true,
+      "coordinatesWith": ["frontend-agent", "devops-agent", "qa-agent", "documentation-agent"],
+      "realTimeUpdates": true
+    }
+  },
+  "compliance": {
+    "securityStandards": ["OWASP Top 10", "GDPR", "SOC2"],
+    "codeQuality": {
+      "typescriptStrict": true,
+      "testCoverage": ">80%",
+      "documentationCoverage": "100%"
+    },
+    "performance": {
+      "responseTime": "<1s for simple tasks",
+      "context7Scanning": "<2s for medium codebases",
+      "ragContextRelevance": ">0.8"
+    }
+  },
+  "outputs": {
+    "targetDirectory": "../../../generated/backend-agent",
+    "codeGeneration": true,
+    "documentation": true,
+    "testing": true,
+    "deployment": true,
+    "patterns": {
+      "allPurposePattern": true,
+      "zeroHardcodedLimitations": true,
+      "uepCompliance": true,
+      "context7Integration": true
+    }
+  }
+}

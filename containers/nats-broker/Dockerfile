@@ -82,8 +82,10 @@ echo "Monitoring: http://localhost:8222"\n\
 wait $NATS_PID\n\
 ' > /scripts/start-uep-event-bus.sh && chmod +x /scripts/start-uep-event-bus.sh
 
-# Set proper permissions for UEP data persistence
-RUN chown -R nats:nats /data /logs /app /scripts
+# Create nats user and set proper permissions for UEP data persistence
+RUN addgroup -g 1000 -S nats && \
+    adduser -S -u 1000 -G nats nats && \
+    chown -R nats:nats /data /logs /app /scripts
 USER nats
 
 # Health check for UEP Event Bus

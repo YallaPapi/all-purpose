@@ -21,7 +21,8 @@ import {
   UEPContext,
   Context7ScanResult,
   BackendAgentEvents,
-  AgentMetrics
+  AgentMetrics,
+  GeneratedFile
 } from '../types/index.js';
 
 import { createLogger } from '../utils/logger.js';
@@ -143,17 +144,19 @@ export class BackendAgent extends EventEmitter {
    */
   private async initializeEngines(): Promise<void> {
     const engineConfigs = [
-      { name: 'APIDesignEngine', path: '../engines/APIDesignEngine.js' },
-      { name: 'DatabaseSchemaEngine', path: '../engines/DatabaseSchemaEngine.js' },
-      { name: 'SecurityAnalysisEngine', path: '../engines/SecurityAnalysisEngine.js' },
-      { name: 'TestingFrameworkEngine', path: '../engines/TestingFrameworkEngine.js' },
-      { name: 'DocumentationEngine', path: '../engines/DocumentationEngine.js' }
+      { name: 'APIDesignEngine', module: () => import('../engines/APIDesignEngine.js') },
+      { name: 'DatabaseSchemaEngine', module: () => import('../engines/DatabaseSchemaEngine.js') },
+      { name: 'SecurityAnalysisEngine', module: () => import('../engines/SecurityAnalysisEngine.js') },
+      { name: 'TestingFrameworkEngine', module: () => import('../engines/TestingFrameworkEngine.js') },
+      { name: 'DocumentationEngine', module: () => import('../engines/DocumentationEngine.js') }
     ];
 
     for (const engineConfig of engineConfigs) {
       try {
-        const EngineClass = await import(engineConfig.path);
-        const engine = new EngineClass.default({
+        const EngineModule = await engineConfig.module();
+        // Handle double default export from TypeScript compilation
+        const EngineClass = (EngineModule as any).default?.default || (EngineModule as any).default;
+        const engine = new EngineClass({
           logger: this.logger,
           config: this.config,
           projectRoot: this.config.projectRoot
@@ -166,7 +169,10 @@ export class BackendAgent extends EventEmitter {
         this.logger.info(`✅ ${engineConfig.name} initialized`);
 
       } catch (error) {
-        this.logger.warn(`⚠️ Failed to initialize ${engineConfig.name}`, { error });
+        this.logger.warn(`⚠️ Failed to initialize ${engineConfig.name}`, { 
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
+        });
         // Continue with other engines - All-Purpose Pattern allows partial functionality
       }
     }
@@ -244,6 +250,38 @@ export class BackendAgent extends EventEmitter {
   }
 
   /**
+   * Write generated files to disk
+   */
+  private async writeGeneratedFiles(files: GeneratedFile[], baseOutputPath?: string): Promise<void> {
+    const outputPath = baseOutputPath || this.config.outputDir;
+    
+    for (const file of files) {
+      try {
+        const fullPath = path.join(outputPath, file.path);
+        const dirPath = path.dirname(fullPath);
+        
+        // Ensure directory exists
+        await fs.mkdir(dirPath, { recursive: true });
+        
+        // Write file content
+        await fs.writeFile(fullPath, file.content, 'utf8');
+        
+        this.logger.info(`✅ Written file: ${file.path} (${file.type})`);
+        this.emit('file-written', { path: fullPath, type: file.type });
+        
+      } catch (error) {
+        this.logger.error(`❌ Failed to write file: ${file.path}`, { error });
+        throw new BackendAgentError(
+          `Failed to write file ${file.path}: ${error instanceof Error ? error.message : String(error)}`,
+          'processing'
+        );
+      }
+    }
+    
+    this.logger.info(`✅ Written ${files.length} files to ${outputPath}`);
+  }
+
+  /**
    * Generate API endpoints based on requirements
    */
   async generateAPI(requirements: {
@@ -251,11 +289,19 @@ export class BackendAgent extends EventEmitter {
     framework?: string;
     database?: string;
     authentication?: boolean;
+    outputPath?: string;
   }): Promise<ProcessingResult> {
-    return this.processTask('Generate API endpoints with full implementation', {
+    const result = await this.processTask('Generate API endpoints with full implementation', {
       type: 'api-design',
       ...requirements
     });
+    
+    // Write generated files to disk if successful
+    if (result.success && result.generatedFiles && result.generatedFiles.length > 0) {
+      await this.writeGeneratedFiles(result.generatedFiles, requirements.outputPath);
+    }
+    
+    return result;
   }
 
   /**
@@ -266,11 +312,19 @@ export class BackendAgent extends EventEmitter {
     relationships: any[];
     migrations?: boolean;
     database?: string;
+    outputPath?: string;
   }): Promise<ProcessingResult> {
-    return this.processTask('Design database schema with migrations', {
+    const result = await this.processTask('Design database schema with migrations', {
       type: 'database-design',
       ...requirements
     });
+    
+    // Write generated files to disk if successful
+    if (result.success && result.generatedFiles && result.generatedFiles.length > 0) {
+      await this.writeGeneratedFiles(result.generatedFiles, requirements.outputPath);
+    }
+    
+    return result;
   }
 
   /**

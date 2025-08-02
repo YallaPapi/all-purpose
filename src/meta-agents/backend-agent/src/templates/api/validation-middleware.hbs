@@ -1,0 +1,54 @@
+/**
+ * Request Validation Middleware
+ * Validates incoming requests against defined schemas
+ */
+
+import { Request, Response, NextFunction } from 'express';
+import { validationSchemas } from '../validation/schemas.js';
+
+export const validateRequest = (schemaName: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const schema = validationSchemas[schemaName];
+    
+    if (!schema) {
+      return next(new Error(`Validation schema '${schemaName}' not found`));
+    }
+
+    // Validate request parts
+    const validationErrors: string[] = [];
+
+    // Validate body
+    if (schema.body && req.body) {
+      const { error } = schema.body.validate(req.body);
+      if (error) {
+        validationErrors.push(...error.details.map(d => `body.${d.path.join('.')}: ${d.message}`));
+      }
+    }
+
+    // Validate query
+    if (schema.query && req.query) {
+      const { error } = schema.query.validate(req.query);
+      if (error) {
+        validationErrors.push(...error.details.map(d => `query.${d.path.join('.')}: ${d.message}`));
+      }
+    }
+
+    // Validate params
+    if (schema.params && req.params) {
+      const { error } = schema.params.validate(req.params);
+      if (error) {
+        validationErrors.push(...error.details.map(d => `params.${d.path.join('.')}: ${d.message}`));
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validationErrors
+      });
+    }
+
+    next();
+  };
+};

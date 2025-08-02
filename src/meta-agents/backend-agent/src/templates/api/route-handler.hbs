@@ -1,0 +1,44 @@
+/**
+ * Route Handler: {{endpoint.method}} {{endpoint.path}}
+ * {{endpoint.description}}
+ */
+
+import { Request, Response, NextFunction } from 'express';
+{{#if authentication}}
+import { AuthenticatedRequest } from '../types/auth.js';
+{{/if}}
+
+export const {{camelCase (concat endpoint.method endpoint.path)}}Handler = async (
+  req: {{#if authentication}}AuthenticatedRequest{{else}}Request{{/if}},
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    {{#if endpoint.handler}}
+    {{endpoint.handler}}
+    {{else}}
+    // Extract parameters
+    {{#if (includes endpoint.path ':')}}
+    const { {{#each (extractParams endpoint.path)}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} } = req.params;
+    {{/if}}
+    {{#if endpoint.queryParams}}
+    const { {{#each endpoint.queryParams}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} } = req.query;
+    {{/if}}
+    {{#if endpoint.bodyParams}}
+    const { {{#each endpoint.bodyParams}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} } = req.body;
+    {{/if}}
+
+    // TODO: Implement business logic
+
+    // Return response
+    res.status(200).json({
+      success: true,
+      data: {
+        // TODO: Return actual data
+      }
+    });
+    {{/if}}
+  } catch (error) {
+    next(error);
+  }
+};

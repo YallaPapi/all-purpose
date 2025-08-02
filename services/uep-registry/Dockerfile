@@ -19,10 +19,9 @@ RUN npm install --save-dev @types/node
 
 # Copy source code
 COPY src/ ./src/
-COPY shared/ ./shared/
 
-# Build the application
-RUN npm run build
+# Build the application (skip build for now as we don't have build script)
+# RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS runtime
@@ -36,8 +35,8 @@ RUN apk add --no-cache curl
 
 WORKDIR /app
 
-# Copy built application
-COPY --from=builder --chown=uep-registry:nodejs /app/dist ./dist
+# Copy application source (no build for now)
+COPY --from=builder --chown=uep-registry:nodejs /app/src ./src
 COPY --from=builder --chown=uep-registry:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=uep-registry:nodejs /app/package*.json ./
 
@@ -54,5 +53,5 @@ EXPOSE 3001 50051
 HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
   CMD curl -f http://localhost:3001/health || exit 1
 
-# Start the application
-CMD ["node", "dist/main.js"]
+# Start the application (run directly with ts-node for now)
+CMD ["npx", "ts-node", "src/main.ts"]

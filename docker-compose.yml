@@ -56,9 +56,7 @@ services:
 
   # Factory Core - 11 Meta-Agents
   factory-core:
-    build:
-      context: .
-      dockerfile: ./containers/factory-core/Dockerfile
+    image: meta-agent-factory-core:fixed
     container_name: meta-agent-factory-core
     ports:
       - "3000:3000"
@@ -576,7 +574,7 @@ services:
     image: redis:7-alpine
     container_name: meta-agent-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     networks:

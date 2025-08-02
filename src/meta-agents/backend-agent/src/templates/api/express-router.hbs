@@ -1,0 +1,44 @@
+/**
+ * {{projectName}} API Router
+ * Generated on {{timestamp}}
+ * Framework: {{framework}}
+ */
+
+import express from 'express';
+{{#if authentication}}
+import { authenticateToken } from '../middleware/auth.js';
+{{/if}}
+import { validateRequest } from '../middleware/validation.js';
+import { errorHandler } from '../middleware/errorHandler.js';
+
+const router = express.Router();
+
+{{#each endpoints}}
+/**
+ * {{method}} {{path}}
+{{#if description}}
+ * {{description}}
+{{/if}}
+ */
+router.{{toLowerCase method}}('{{path}}'{{#if middleware}}, {{#each middleware}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}, async (req, res, next) => {
+  try {
+    {{#if handler}}
+    {{handler}}
+    {{else}}
+    // TODO: Implement {{camelCase (concat method path)}} logic
+    res.json({
+      success: true,
+      message: '{{method}} {{path}}',
+      data: {}
+    });
+    {{/if}}
+  } catch (error) {
+    next(error);
+  }
+});
+
+{{/each}}
+
+router.use(errorHandler);
+
+export default router;

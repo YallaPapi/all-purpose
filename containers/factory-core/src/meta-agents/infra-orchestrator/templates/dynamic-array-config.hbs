@@ -1,0 +1,40 @@
+{{!-- 
+Dynamic Array Configuration Template
+Replaces hardcoded arrays with configuration-driven alternatives
+Following All-Purpose Pattern: Eliminates hardcoded business constraints
+--}}
+
+{{!-- Generate config-driven array access --}}
+const {{config.arrayName}} = {{config.configPath}}?.{{config.configKey}} || {{#if config.fallbackArray}}{{json config.fallbackArray}}{{else}}[]{{/if}};
+
+{{!-- Add validation if needed --}}
+{{#if config.enableValidation}}
+if (!Array.isArray({{config.arrayName}})) {
+  console.warn('Configuration error: {{config.configKey}} should be an array, falling back to default');
+  {{config.arrayName}} = {{#if config.fallbackArray}}{{json config.fallbackArray}}{{else}}[]{{/if}};
+}
+{{/if}}
+
+{{!-- Add type checking for TypeScript --}}
+{{#ifEquals project.language "typescript"}}
+// Type definition for configuration
+interface {{pascalCase config.arrayName}}Config {
+  {{config.configKey}}: string[];
+}
+{{/ifEquals}}
+
+{{!-- Usage example in comments --}}
+/**
+ * Configuration-driven {{config.arrayName}} implementation
+ * 
+ * Add to your config file (config.json, .env, or similar):
+ * {
+ *   "{{config.configKey}}": [
+ *     "value1",
+ *     "value2",
+ *     "value3"
+ *   ]
+ * }
+ * 
+ * This eliminates hardcoded business constraints and follows All-Purpose Pattern
+ */

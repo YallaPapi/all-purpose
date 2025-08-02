@@ -1,35 +1,36 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 LABEL maintainer="meta-agent-factory"
-LABEL description="Factory Core - 11 Meta-Agents Container for MVS Architecture"
+LABEL description="Factory Core - 11 Meta-Agents Container"
 
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
 COPY tsconfig.json ./
-RUN npm ci --only=production
 
-COPY src/ ./src/
-COPY packages/meta-agents/ ./packages/meta-agents/
-COPY rag-system/ ./rag-system/
+# Install all dependencies
+RUN npm install
 
-RUN npm run build:factory
+# Copy source code
+COPY . .
 
-FROM node:20-alpine AS runtime
+# Build TypeScript to JavaScript
+RUN npm run build
 
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S factory -u 1001
-
-WORKDIR /app
-
-COPY --from=builder --chown=factory:nodejs /app/dist ./dist
-COPY --from=builder --chown=factory:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=factory:nodejs /app/package*.json ./
-
-USER factory
+# Create directories for logs and data
+RUN mkdir -p /app/logs /app/data
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD node dist/health-check.js || exit 1
 
+# Set environment
+ENV NODE_ENV=development
+ENV PORT=3000
+ENV REDIS_URL=redis://redis:6379
+ENV NATS_URL=nats://nats-broker:4222
+
+# Run compiled JavaScript directly
 CMD ["node", "dist/factory-core.js"]

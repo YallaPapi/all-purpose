@@ -4016,11 +4016,140 @@
         ],
         "priority": "medium",
         "subtasks": []
+      },
+      {
+        "id": 257,
+        "title": "Fix Backend Agent Engine Initialization Failures for Core Engines",
+        "description": "Diagnose and resolve initialization failures in the APIDesignEngine, DatabaseSchemaEngine, SecurityAnalysisEngine, TestingFrameworkEngine, and DocumentationEngine within the backend agent system.",
+        "details": "1. Collect and analyze initialization logs for each failing engine to identify root causes (e.g., missing dependencies, misconfigurations, race conditions, or resource contention).\n2. Review and refactor the initialization sequence to ensure proper dependency ordering and error handling, leveraging event-driven patterns and state management as established in the workflow orchestration engine (see Task 224)[1][5].\n3. For each engine:\n   - APIDesignEngine: Verify schema loading, API contract validation, and external service connectivity.\n   - DatabaseSchemaEngine: Ensure database connection pooling, schema migration checks, and transactional safety during startup.\n   - SecurityAnalysisEngine: Confirm that security policies, static analysis tools, and credential stores are accessible and initialized in the correct order.\n   - TestingFrameworkEngine: Validate that test runner discovery, environment setup, and metrics hooks are correctly registered (align with research from Task 256 and Task 253).\n   - DocumentationEngine: Check for documentation source availability, template rendering engine readiness, and output directory permissions.\n4. Implement robust error reporting and retry logic for transient failures, and ensure that all engines emit standardized health and readiness events for orchestration.\n5. Add integration tests to simulate cold starts, partial failures, and recovery scenarios, ensuring all engines reach a healthy state before workflow execution begins.\n6. Update documentation to reflect new initialization requirements, error codes, and troubleshooting steps.",
+        "testStrategy": "1. Run automated integration tests that start the backend agent system from a clean state, verifying that all five engines initialize successfully and emit readiness events.\n2. Simulate common failure scenarios (e.g., missing configuration, unavailable dependencies) and confirm that errors are logged, reported, and retried as appropriate.\n3. Validate that the workflow orchestration engine (from Task 224) can successfully coordinate workflows involving all five engines after initialization.\n4. Use health check endpoints or event logs to confirm that each engine reports its status accurately and recovers from transient failures.\n5. Perform regression testing to ensure that fixes do not introduce new initialization issues or break existing workflows.",
+        "status": "pending",
+        "dependencies": [
+          224,
+          253,
+          256
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 258,
+        "title": "Implement File System Persistence for APIDesignEngine Generated Files",
+        "description": "Extend the APIDesignEngine to write generated API files to disk in the project directory, implementing configurable persistence mechanisms with proper error handling and path resolution.",
+        "details": "1. **Analyze Current Implementation**:\n   - Review the APIDesignEngine's current file generation process to understand the in-memory representation of generated files\n   - Identify all file types being generated (e.g., OpenAPI specs, route definitions, controller templates)\n   - Map the logical structure of generated files to determine appropriate directory structure\n\n2. **Design File System Persistence Layer**:\n   - Create a `FileSystemPersistenceService` class responsible for writing files to disk\n   - Implement configurable output paths with sensible defaults (e.g., `./src/api/`, `./docs/api/`)\n   - Support both absolute and project-relative paths with proper resolution\n   - Add configuration options for file overwrite protection and backup of existing files\n\n3. **Implement Core Functionality**:\n   ```typescript\n   interface FileDescriptor {\n     path: string;           // Relative path within the project\n     filename: string;       // Name of the file with extension\n     content: string;        // File content to be written\n     encoding?: string;      // Optional encoding (defaults to 'utf8')\n     overwrite?: boolean;    // Whether to overwrite existing files\n   }\n\n   class FileSystemPersistenceService {\n     constructor(\n       private baseOutputPath: string,\n       private projectRoot: string,\n       private options: {\n         createDirectories?: boolean,\n         backupExisting?: boolean,\n         defaultOverwrite?: boolean\n       } = {}\n     ) {}\n\n     async writeFile(descriptor: FileDescriptor): Promise<void> {\n       // Resolve full path\n       const fullPath = path.resolve(\n         this.projectRoot,\n         this.baseOutputPath,\n         descriptor.path\n       );\n       \n       // Create directories if needed\n       if (this.options.createDirectories) {\n         await fs.promises.mkdir(path.dirname(fullPath), { recursive: true });\n       }\n       \n       // Check if file exists and handle accordingly\n       const fileExists = await fs.promises.access(fullPath)\n         .then(() => true)\n         .catch(() => false);\n         \n       if (fileExists) {\n         if (this.options.backupExisting) {\n           await this.createBackup(fullPath);\n         }\n         \n         if (!(descriptor.overwrite ?? this.options.defaultOverwrite)) {\n           throw new Error(`File already exists: ${fullPath}`);\n         }\n       }\n       \n       // Write the file\n       await fs.promises.writeFile(\n         fullPath,\n         descriptor.content,\n         descriptor.encoding || 'utf8'\n       );\n     }\n     \n     private async createBackup(filePath: string): Promise<void> {\n       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');\n       const backupPath = `${filePath}.${timestamp}.bak`;\n       await fs.promises.copyFile(filePath, backupPath);\n     }\n   }\n   ```\n\n4. **Integrate with APIDesignEngine**:\n   - Modify the APIDesignEngine to use the FileSystemPersistenceService after generating files in memory\n   - Add configuration options to control file persistence behavior\n   - Implement proper error handling for file system operations\n   - Add logging for file operations (creation, overwrite, backup)\n\n5. **Add Transaction Support**:\n   - Implement atomic write operations to ensure all files are written successfully or none at all\n   - Add rollback capability to restore previous state if file writing fails\n   - Consider using temporary files and rename operations for safer writes\n\n6. **Configuration Management**:\n   - Add persistence configuration to the APIDesignEngine settings\n   - Support environment-specific output paths (development, testing, production)\n   - Allow for custom file naming patterns and directory structures\n   - Implement path templating (e.g., `{projectRoot}/src/api/{version}/`)\n\n7. **Event System Integration**:\n   - Emit events for file system operations (beforeWrite, afterWrite, writeError)\n   - Allow for event-based hooks to modify file content or paths before writing\n   - Integrate with the existing event system established in Task 224",
+        "testStrategy": "1. **Unit Tests**:\n   - Create unit tests for the FileSystemPersistenceService class:\n     - Test path resolution for different input types (relative, absolute)\n     - Test directory creation functionality\n     - Test file overwrite protection\n     - Test backup functionality\n     - Test error handling for various scenarios (permissions, disk full, etc.)\n   - Mock the file system using libraries like mock-fs or jest-mock-fs\n\n2. **Integration Tests**:\n   - Test the integration between APIDesignEngine and FileSystemPersistenceService:\n     - Verify that all generated files are correctly written to disk\n     - Test with various API definitions to ensure all file types are handled\n     - Verify directory structure matches expectations\n     - Test configuration options affect output as expected\n\n3. **End-to-End Tests**:\n   - Create a test that generates a complete API and verifies all files are written correctly\n   - Test the generated files can be used by the application (e.g., routes are loadable)\n   - Verify file content matches what was generated in memory\n\n4. **Edge Case Testing**:\n   - Test with very large API definitions to ensure performance\n   - Test with special characters in paths and filenames\n   - Test with concurrent file operations\n   - Test recovery from partial writes\n\n5. **Manual Verification**:\n   - Generate an API definition using the CLI or UI\n   - Verify files are written to the expected locations\n   - Inspect file content to ensure it matches the API definition\n   - Modify and regenerate to test overwrite and backup functionality\n\n6. **CI Pipeline Integration**:\n   - Add automated tests to the CI pipeline\n   - Verify file persistence works across different operating systems (Windows, Linux, macOS)\n   - Test with different Node.js versions",
+        "status": "pending",
+        "dependencies": [
+          257
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 259,
+        "title": "Research Context7 MCP Server Integration with Backend Agent Engines for Library Documentation Retrieval",
+        "description": "Research and document integration approaches for connecting Context7 MCP server with backend agent engines to fetch and utilize library documentation before code generation, focusing on API interfaces, documentation indexing, and real-time retrieval patterns.",
+        "details": "1. **Survey Context7 MCP Server Architecture and Capabilities**:\n   - Research the Context7 MCP (Model Control Protocol) server architecture, focusing on its API endpoints, authentication mechanisms, and data exchange formats\n   - Document the server's capabilities for storing, indexing, and retrieving library documentation\n   - Analyze performance characteristics and rate limiting considerations for high-volume documentation requests\n\n2. **Evaluate Backend Agent Engine Integration Patterns**:\n   - Research current best practices for integrating documentation services with code generation agents\n   - Document RESTful and GraphQL API patterns for documentation retrieval\n   - Analyze WebSocket-based approaches for real-time documentation streaming during code generation\n   - Evaluate pub/sub patterns using Redis or Kafka for asynchronous documentation updates\n\n3. **Documentation Indexing and Search Strategies**:\n   - Research efficient indexing techniques for library documentation (e.g., inverted indexes, vector embeddings)\n   - Document approaches for semantic search across documentation using embeddings and similarity metrics\n   - Analyze techniques for context-aware documentation retrieval based on code generation context\n   - Evaluate caching strategies to optimize repeated documentation access patterns\n\n4. **Authentication and Authorization Frameworks**:\n   - Research secure authentication patterns between agent engines and the Context7 MCP server\n   - Document OAuth 2.0 or JWT-based approaches for maintaining secure sessions\n   - Analyze role-based access control for documentation resources\n   - Evaluate API key rotation and management strategies\n\n5. **Documentation Pre-fetching and Caching Patterns**:\n   - Research predictive pre-fetching techniques based on code generation patterns\n   - Document local caching strategies for frequently accessed documentation\n   - Analyze cache invalidation approaches when documentation is updated\n   - Evaluate distributed caching using Redis for multi-agent environments\n\n6. **Implementation Recommendations**:\n   - Provide TypeScript interface definitions for the integration points\n   - Document recommended error handling and retry strategies\n   - Analyze logging and telemetry approaches for monitoring integration health\n   - Recommend deployment patterns that optimize for low-latency documentation access",
+        "testStrategy": "1. **Validate Research Findings**:\n   - Create a comprehensive technical document summarizing research findings and integration recommendations\n   - Conduct peer review with team members familiar with both Context7 MCP and agent engines\n   - Verify that all integration patterns address authentication, performance, and error handling concerns\n\n2. **Prototype Key Integration Patterns**:\n   - Implement a proof-of-concept integration between a test Context7 MCP server instance and a sample agent engine\n   - Test documentation retrieval using both synchronous (REST/GraphQL) and asynchronous (WebSocket/pub-sub) patterns\n   - Measure and document latency and throughput metrics for different integration approaches\n\n3. **Benchmark Documentation Retrieval Performance**:\n   - Create test scenarios with varying documentation sizes and complexity\n   - Measure retrieval times for different indexing and caching strategies\n   - Document optimal approaches for different types of documentation (API references, tutorials, examples)\n\n4. **Security Validation**:\n   - Perform security review of proposed authentication and authorization mechanisms\n   - Test token-based authentication flows between agent engines and Context7 MCP\n   - Validate that proper access controls prevent unauthorized documentation access\n\n5. **Integration Testing with Code Generation Workflow**:\n   - Test end-to-end workflow from documentation retrieval through code generation\n   - Validate that retrieved documentation improves code generation quality\n   - Measure impact on code generation latency with and without documentation integration",
+        "status": "pending",
+        "dependencies": [
+          252,
+          254,
+          241
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze Context7 MCP Server Architecture and API Interfaces",
+            "description": "Research the architecture of the Context7 MCP server, focusing on its API endpoints, supported protocols (HTTP, stdio, command-line), authentication mechanisms, and data exchange formats for documentation retrieval.",
+            "dependencies": [],
+            "details": "Survey official documentation and configuration examples for Context7 MCP server integration with various clients (e.g., Copilot, Cursor, VS Code). Document available API endpoints, supported commands (such as get-library-docs), and authentication or session management requirements.",
+            "status": "pending",
+            "testStrategy": "Validate findings by configuring a test MCP client to connect to a Context7 MCP server instance and successfully retrieve documentation for a sample library."
+          },
+          {
+            "id": 2,
+            "title": "Document Backend Agent Engine Integration Patterns",
+            "description": "Identify and document integration patterns for connecting backend agent engines to the Context7 MCP server, including RESTful, GraphQL, WebSocket, and command-line invocation approaches.",
+            "dependencies": [
+              "259.1"
+            ],
+            "details": "Research best practices for integrating documentation retrieval into code generation workflows. Compare synchronous (API call) and asynchronous (pub/sub, streaming) patterns, and document configuration examples for major agent engines.",
+            "status": "pending",
+            "testStrategy": "Demonstrate integration by implementing a reference agent engine that fetches documentation from Context7 MCP using at least two different patterns (e.g., HTTP API and command-line)."
+          },
+          {
+            "id": 3,
+            "title": "Evaluate Documentation Indexing, Search, and Retrieval Strategies",
+            "description": "Research and document efficient techniques for indexing, searching, and retrieving library documentation in the Context7 MCP ecosystem, with a focus on semantic search and context-aware retrieval.",
+            "dependencies": [
+              "259.2"
+            ],
+            "details": "Analyze the use of inverted indexes, vector embeddings, and similarity metrics for fast and relevant documentation lookup. Document strategies for context-aware retrieval based on code generation context and caching approaches for repeated access.",
+            "status": "pending",
+            "testStrategy": "Benchmark search latency and relevance for different indexing and retrieval strategies using a representative documentation dataset."
+          },
+          {
+            "id": 4,
+            "title": "Assess Authentication, Authorization, and Security Frameworks",
+            "description": "Research secure authentication and authorization mechanisms for agent engines accessing the Context7 MCP server, including OAuth 2.0, JWT, API keys, and role-based access control.",
+            "dependencies": [
+              "259.1"
+            ],
+            "details": "Document recommended practices for session management, API key rotation, and access control for documentation resources. Analyze security implications of different integration patterns.",
+            "status": "pending",
+            "testStrategy": "Simulate authentication flows between a backend agent and the MCP server, verifying secure access and correct enforcement of authorization policies."
+          },
+          {
+            "id": 5,
+            "title": "Develop Implementation Guidelines and Integration Recommendations",
+            "description": "Synthesize research findings into actionable implementation guidelines, including TypeScript interface definitions, error handling, logging, and deployment patterns for low-latency documentation access.",
+            "dependencies": [
+              "259.2",
+              "259.3",
+              "259.4"
+            ],
+            "details": "Provide concrete TypeScript interface examples for integration points, document robust error handling and retry strategies, and recommend logging/telemetry approaches. Summarize deployment patterns for scalable, real-time documentation retrieval.",
+            "status": "pending",
+            "testStrategy": "Review guidelines with engineering stakeholders and validate by implementing a proof-of-concept integration following the documented recommendations."
+          }
+        ]
+      },
+      {
+        "id": 260,
+        "title": "Update DatabaseSchemaEngine to Use Context7 for ORM Library Documentation (Mongoose, Sequelize, Prisma)",
+        "description": "Refactor the DatabaseSchemaEngine to leverage Context7 for retrieving and integrating ORM library documentation for Mongoose, Sequelize, and Prisma, ensuring up-to-date and context-aware schema generation.",
+        "details": "1. Analyze the current DatabaseSchemaEngine workflow for ORM documentation retrieval and integration, identifying all points where ORM library documentation (Mongoose, Sequelize, Prisma) is accessed or referenced.\n2. Integrate Context7 as the unified documentation source by implementing API clients or adapters that fetch and cache documentation from Context7 for each supported ORM. Ensure compatibility with Context7's context propagation and documentation retrieval patterns as established in prior research (see Tasks 233, 234, 259).\n3. Refactor schema generation logic to utilize documentation retrieved via Context7, enabling context-aware suggestions, validation, and error reporting based on the latest ORM specifications.\n4. Implement robust error handling and fallback mechanisms for documentation retrieval failures, including logging and graceful degradation to cached or static documentation if Context7 is unavailable.\n5. Ensure extensibility for future ORM support by abstracting documentation retrieval and integration logic.\n6. Update internal documentation and developer guides to reflect the new Context7-based workflow, including usage patterns and troubleshooting steps.\n\nBest practices:\n- Use dependency injection for Context7 clients to facilitate testing and future upgrades.\n- Cache documentation responses with appropriate invalidation strategies to minimize latency and load on Context7.\n- Ensure all context propagation aligns with OpenTelemetry and Context7 standards for traceability and observability.",
+        "testStrategy": "1. Write unit tests for all new Context7 integration components, including documentation retrieval, caching, and error handling logic.\n2. Develop integration tests that simulate schema generation for each ORM (Mongoose, Sequelize, Prisma) using documentation fetched from Context7, verifying correctness and completeness.\n3. Test fallback mechanisms by simulating Context7 outages and ensuring the engine gracefully uses cached or static documentation.\n4. Validate that context propagation and traceability are preserved in all documentation retrieval flows, using OpenTelemetry traces where applicable.\n5. Conduct regression tests to ensure no loss of functionality or accuracy in schema generation compared to previous implementations.\n6. Review and update developer documentation, verifying clarity and accuracy through peer review.",
+        "status": "pending",
+        "dependencies": [
+          233,
+          234,
+          257,
+          259
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 261,
+        "title": "Research NATS Messaging Patterns for Meta-Agent Coordination in Docker Environments",
+        "description": "Investigate and document NATS messaging patterns suitable for coordinating meta-agents in a Dockerized microservices environment, focusing on publish/subscribe, request/reply, queue groups, and subject-based routing.",
+        "details": "1. Survey the official NATS documentation and recent best practices to identify messaging patterns relevant to meta-agent coordination, including publish/subscribe, request/reply, queue groups, and subject-based routing. \n2. Analyze how these patterns can be leveraged for agent discovery, task delegation, state synchronization, and fault tolerance in distributed Node.js/TypeScript systems running in Docker containers. \n3. Document implementation strategies for each pattern, including code examples (Node.js/TypeScript), recommended NATS client libraries, and Docker Compose integration for local development and testing. \n4. Address Docker-specific considerations such as service discovery, network configuration, and secure credential management for NATS clusters. \n5. Compare NATS with alternative messaging systems (e.g., Redis Pub/Sub, RabbitMQ) in the context of agent coordination, highlighting trade-offs in performance, reliability, and operational complexity. \n6. Summarize recommendations for selecting and combining NATS messaging patterns to achieve robust, scalable meta-agent coordination in containerized environments.",
+        "testStrategy": "1. Validate research by implementing reference Node.js/TypeScript meta-agents using each NATS messaging pattern in a Docker Compose environment. \n2. Demonstrate agent coordination scenarios such as leader election, distributed task assignment, and state propagation. \n3. Use Docker Compose to simulate agent scaling, network partitions, and NATS cluster failover. \n4. Verify message delivery, agent responsiveness, and system recovery under fault conditions. \n5. Peer review documentation and code samples for clarity, correctness, and alignment with current best practices.",
+        "status": "pending",
+        "dependencies": [
+          190,
+          252
+        ],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-08-01T13:50:08.582Z",
+      "updated": "2025-08-02T03:36:38.290Z",
       "description": "Tasks for master context"
     }
   }

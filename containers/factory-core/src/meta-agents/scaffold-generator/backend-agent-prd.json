@@ -1,0 +1,185 @@
+{
+  "tasks": [
+    {
+      "title": "Backend Agent Core Development",
+      "description": "Create the main BackendAgent class with UEP integration",
+      "priority": "high",
+      "type": "implementation"
+    },
+    {
+      "title": "API Design Engine",
+      "description": "Implement API design and generation capabilities",
+      "priority": "high",
+      "type": "feature"
+    },
+    {
+      "title": "Database Schema Engine",
+      "description": "Implement database schema design and migration generation",
+      "priority": "high", 
+      "type": "feature"
+    },
+    {
+      "title": "Security Analysis Engine",
+      "description": "Implement security analysis and vulnerability scanning",
+      "priority": "high",
+      "type": "feature"
+    },
+    {
+      "title": "Context7 Integration",
+      "description": "Implement Context7 codebase scanning adapter",
+      "priority": "high",
+      "type": "integration"
+    },
+    {
+      "title": "Testing Framework",
+      "description": "Implement comprehensive testing capabilities",
+      "priority": "medium",
+      "type": "testing"
+    }
+  ],
+  "metadata": {
+    "projectName": "Backend Agent",
+    "agentType": "domain-specific",
+    "description": "Intelligent backend development agent with Context7 integration for API design, database modeling, security implementation, and testing assistance",
+    "category": "development",
+    "priority": "high"
+  },
+  "agent": {
+    "name": "backend-agent",
+    "type": "domain-specific",
+    "description": "Intelligent backend development agent with Context7 integration for API design, database modeling, security implementation, and testing assistance",
+    "category": "development",
+    "priority": "high"
+  },
+  "requirements": {
+    "framework": "TypeScript/Node.js",
+    "architecture": "UEP (Universal Execution Protocol)",
+    "runtime": "Node.js 18+",
+    "dependencies": [
+      "typescript",
+      "@types/node",
+      "express",
+      "@types/express",
+      "joi",
+      "jest",
+      "@types/jest",
+      "winston",
+      "uuid",
+      "@types/uuid"
+    ]
+  },
+  "capabilities": [
+    {
+      "name": "API Design & Generation",
+      "description": "Design and generate RESTful APIs with Express.js patterns",
+      "priority": "high",
+      "implementation": "APIDesignEngine"
+    },
+    {
+      "name": "Database Schema Design",
+      "description": "Design database schemas and generate migration files",
+      "priority": "high", 
+      "implementation": "DatabaseSchemaEngine"
+    },
+    {
+      "name": "Security Analysis",
+      "description": "Analyze code for security vulnerabilities and generate secure patterns",
+      "priority": "high",
+      "implementation": "SecurityAnalysisEngine"
+    },
+    {
+      "name": "Testing Framework Integration",
+      "description": "Generate comprehensive backend tests and mock data",
+      "priority": "medium",
+      "implementation": "TestingFrameworkEngine"
+    },
+    {
+      "name": "Context7 Integration",
+      "description": "Scan codebase for backend patterns and context awareness",
+      "priority": "high",
+      "implementation": "Context7ScannerAdapter"
+    },
+    {
+      "name": "Documentation Generation",
+      "description": "Generate API documentation and deployment guides",
+      "priority": "medium",
+      "implementation": "DocumentationEngine"
+    }
+  ],
+  "integration": {
+    "uep": {
+      "enabled": true,
+      "messageFormat": "standardized",
+      "validationRequired": true
+    },
+    "context7": {
+      "enabled": true,
+      "scanPatterns": ["**/*.{ts,js}", "**/api/**/*", "**/routes/**/*", "**/models/**/*"],
+      "priority": "high"
+    },
+    "rag": {
+      "enabled": true,
+      "contextRetrieval": true,
+      "documentationSearch": true
+    },
+    "metaAgentCoordination": {
+      "enabled": true,
+      "coordinatesWith": ["frontend-agent", "devops-agent", "qa-agent"],
+      "realTimeUpdates": true
+    }
+  },
+  "fileStructure": {
+    "src": {
+      "core": ["BackendAgent.ts", "UEPWrapper.ts"],
+      "engines": [
+        "APIDesignEngine.ts",
+        "DatabaseSchemaEngine.ts", 
+        "SecurityAnalysisEngine.ts",
+        "TestingFrameworkEngine.ts",
+        "DocumentationEngine.ts"
+      ],
+      "adapters": ["Context7ScannerAdapter.ts"],
+      "types": ["index.ts", "capabilities.ts", "integration.ts"],
+      "utils": ["logger.ts", "validators.ts"]
+    },
+    "templates": {
+      "api": ["express-router.hbs", "middleware.hbs", "error-handler.hbs"],
+      "database": ["schema.hbs", "migration.hbs", "model.hbs"],
+      "security": ["auth-middleware.hbs", "rate-limiter.hbs"],
+      "testing": ["api-test.hbs", "integration-test.hbs", "mock-data.hbs"]
+    },
+    "tests": {
+      "unit": ["BackendAgent.test.ts", "APIDesignEngine.test.ts"],
+      "integration": ["backend-agent-integration.test.ts"],
+      "fixtures": ["sample-api.json", "sample-schema.json"]
+    }
+  },
+  "configuration": {
+    "defaultSettings": {
+      "apiFramework": "express",
+      "databaseType": "postgresql",
+      "authStrategy": "jwt",
+      "testFramework": "jest",
+      "documentationFormat": "openapi"
+    },
+    "environmentVariables": [
+      "DATABASE_URL",
+      "JWT_SECRET",
+      "API_PORT",
+      "NODE_ENV"
+    ]
+  },
+  "compliance": {
+    "securityStandards": ["OWASP Top 10", "GDPR", "SOC2"],
+    "codeQuality": {
+      "typescriptStrict": true,
+      "testCoverage": ">80%",
+      "documentationCoverage": "100%"
+    },
+    "performance": {
+      "responseTime": "<1s",
+      "context7ScanTime": "<2s",
+      "ragRelevanceScore": ">0.8"
+    }
+  }
+}

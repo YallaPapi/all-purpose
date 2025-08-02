@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Just the absolute essentials
+  redis:
+    image: redis:7-alpine
+    container_name: meta-agent-redis-minimal
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    
+  nats-broker:
+    image: all-purpose-nats-broker:latest
+    container_name: meta-agent-nats-minimal
+    ports:
+      - "4223:4222"
+      - "8223:8222"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    
+  # Simple test container to verify connectivity
+  test-app:
+    image: node:20-alpine
+    container_name: meta-agent-test
+    command: |
+      sh -c "
+        echo 'Testing Redis connection...'
+        apk add --no-cache redis curl
+        redis-cli -h redis ping
+        echo 'Testing NATS connection...'
+        curl -f http://nats-broker:8222/varz
+        echo 'All systems connected!'
+        sleep infinity
+      "
+    depends_on:
+      redis:
+        condition: service_healthy
+      nats-broker:
+        condition: service_healthy
+
+networks:
+  default:
+    name: meta-agent-minimal

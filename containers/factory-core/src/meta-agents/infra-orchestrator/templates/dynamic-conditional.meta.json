@@ -1,0 +1,30 @@
+{
+  "id": "dynamic-conditional",
+  "name": "Dynamic Conditional Logic",
+  "description": "Replaces hardcoded conditional logic with configuration-driven rule engine",
+  "category": "conditional-logic",
+  "version": "1.0.0",
+  "author": "All-Purpose Meta-Agent Factory",
+  "created": "2025-07-23T03:00:00.000Z",
+  "updated": "2025-07-23T03:00:00.000Z",
+  "tags": ["conditional", "rules", "configuration", "business-logic", "all-purpose-pattern"],
+  "examples": [
+    {
+      "name": "Plan-based Feature Access",
+      "description": "Replace hardcoded plan checks with config-driven rules",
+      "context": {
+        "config": {
+          "configPath": "config.businessRules",
+          "configKey": "featureAccess",
+          "contextVariable": "user.plan",
+          "thenBlock": "// Grant feature access",
+          "elseBlock": "// Deny access",
+          "useRuleEngine": false
+        },
+        "project": {
+          "language": "typescript"
+        }
+      }
+    }
+  ]
+}
