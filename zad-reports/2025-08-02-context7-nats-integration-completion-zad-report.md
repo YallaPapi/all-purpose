@@ -283,11 +283,25 @@ BackendAgent
 
 ## 🎯 **NEXT STEPS & RECOMMENDATIONS**
 
+### **Critical Testing Required**
+A comprehensive testing requirements document has been created at `docs/2025-08-02-SYSTEM-TESTING-REQUIREMENTS.md` that details:
+- Known blockers (EPIPE error, Context7 mocks)
+- Testing priorities and sequences
+- Validation metrics and benchmarks
+- Debugging commands and procedures
+
 ### **Immediate Actions**
-1. **Complete MCP Integration**: Replace Context7 mock with real MCP calls
-2. **Security Hardening**: Configure NATS TLS and authentication
-3. **Monitoring Dashboard**: Create Grafana dashboards for NATS metrics
-4. **Agent Migration**: Port remaining meta-agents to use NATS
+1. **Fix EPIPE Error**: Debug start-all-agents.js broken pipe issue
+2. **Test NATS Infrastructure**: Verify messaging layer functionality
+3. **Complete MCP Integration**: Replace Context7 mock with real MCP calls
+4. **Validate Docker Integration**: Ensure containers communicate properly
+
+### **System Validation**
+The system will be considered operational when:
+- Basic PRD → Code generation flow works end-to-end
+- 10 consecutive successful workflows complete
+- Agent failure recovery demonstrated
+- Performance benchmarks met (see testing doc)
 
 ### **Future Enhancements**
 1. **Load Balancing**: Implement agent pools for task distribution
