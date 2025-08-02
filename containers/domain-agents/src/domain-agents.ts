@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -45,7 +45,7 @@ app.get('/api/agents/domains', async (req, res) => {
     res.json({ success: true, data: agents });
   } catch (error) {
     logger.error('Failed to get domain agents:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 
@@ -57,7 +57,7 @@ app.post('/api/agents/domains/:domain/execute', async (req, res) => {
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('Domain agent execution failed:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 
@@ -69,7 +69,7 @@ app.post('/api/agents/domains/:domain/analyze', async (req, res) => {
     res.json({ success: true, data: analysis });
   } catch (error) {
     logger.error('Domain analysis failed:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 
@@ -80,11 +80,11 @@ app.get('/api/agents/domains/:domain/status', async (req, res) => {
     res.json({ success: true, data: status });
   } catch (error) {
     logger.error('Failed to get domain status:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 
-app.use((err, req, res, next) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error('Unhandled error:', err);
   res.status(500).json({ success: false, error: 'Internal server error' });
 });

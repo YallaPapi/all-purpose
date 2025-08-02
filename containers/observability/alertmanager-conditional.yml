@@ -1,0 +1,121 @@
+# Alternative Alertmanager Configuration with Conditional SMTP
+# This configuration makes SMTP completely optional by using conditional logic
+# Use this if you want to disable email notifications entirely when SMTP is not configured
+
+global:
+  # Only configure SMTP if environment variables are provided
+  # Leave smtp_smarthost empty to disable email notifications entirely
+  smtp_smarthost: '${SMTP_HOST:-""}'
+  smtp_from: '${ALERT_EMAIL_FROM:-""}'
+  smtp_auth_username: '${SMTP_USERNAME:-""}'
+  smtp_auth_password: '${SMTP_PASSWORD:-""}'
+  smtp_require_tls: ${SMTP_REQUIRE_TLS:-true}
+  
+  # Slack API URL template - leave empty if not configured
+  slack_api_url: '${SLACK_WEBHOOK_URL:-""}'
+  
+  # PagerDuty integration
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  
+  # Global resolve timeout
+  resolve_timeout: 5m
+
+# Routing tree for alert distribution
+route:
+  group_by: ['alertname', 'service', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  # Use webhook receiver as default if SMTP is not configured
+  receiver: '{{ if eq (index . "SMTP_HOST") "" }}webhook-default{{ else }}email-default{{ end }}'
+  
+  routes:
+    - match:
+        severity: critical
+      receiver: '{{ if eq (index . "SMTP_HOST") "" }}webhook-critical{{ else }}email-critical{{ end }}'
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 30m
+
+# Receivers with conditional email configuration
+receivers:
+  # Default webhook receiver (no SMTP required)
+  - name: 'webhook-default'
+    webhook_configs:
+      - url: '${WEBHOOK_URL:-http://localhost:3000/api/alerts}'
+        send_resolved: true
+        max_alerts: 0
+        title: 'Meta-Agent Factory Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Severity: {{ .Labels.severity }}
+          Started: {{ .StartsAt }}
+          {{ end }}
+
+  # Critical webhook receiver
+  - name: 'webhook-critical'
+    webhook_configs:
+      - url: '${WEBHOOK_URL:-http://localhost:3000/api/alerts/critical}'
+        send_resolved: true
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          🚨 CRITICAL ALERT 🚨
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Started: {{ .StartsAt }}
+          {{ end }}
+
+  # Email-based receivers (only used when SMTP is configured)
+  - name: 'email-default'
+    email_configs:
+      - to: '${DEFAULT_EMAIL:-devops@meta-agent-factory.com}'
+        subject: 'Meta-Agent Factory Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Severity: {{ .Labels.severity }}
+          Started: {{ .StartsAt }}
+          {{ end }}
+
+  - name: 'email-critical'
+    email_configs:
+      - to: '${CRITICAL_EMAIL:-oncall@meta-agent-factory.com}'
+        subject: '🚨 CRITICAL: Meta-Agent Factory Alert'
+        body: |
+          🚨 CRITICAL ALERT - IMMEDIATE ACTION REQUIRED 🚨
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Started: {{ .StartsAt }}
+          {{ end }}
+          
+          This requires immediate attention!
+
+# Slack-only receivers (works without SMTP)
+  - name: 'slack-only'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts'
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+        title: '{{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          
+          *Service:* {{ .Labels.service }}
+          *Severity:* {{ .Labels.severity }}
+          *Started:* {{ .StartsAt }}
+          {{ end }}
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'

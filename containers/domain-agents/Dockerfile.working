@@ -1,0 +1,48 @@
+FROM node:20-alpine
+
+LABEL maintainer="meta-agent-factory"
+LABEL description="Domain Agents - 5 Specialist Agents Container (Development Mode)"
+
+# Install necessary packages
+RUN apk add --no-cache git python3 make g++
+
+WORKDIR /app
+
+# Copy package files first
+COPY package*.json ./
+
+# Install all dependencies 
+RUN npm install
+
+# Copy all source files
+COPY . .
+
+# Build TypeScript to JavaScript
+RUN npm run build
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
+ENV NATS_URL=nats://nats-broker:4222
+ENV FACTORY_CORE_URL=http://factory-core:3000
+ENV UEP_REGISTRY_URL=http://uep-registry:3001
+ENV DOCKER_CONTAINER=true
+
+# Set proper permissions
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S agents -u 1001 && \
+    chown -R agents:nodejs /app
+
+USER agents
+
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget -q -O - http://localhost:3001/health || exit 1
+
+# Run compiled JavaScript
+CMD ["node", "dist/domain-agents.js"]

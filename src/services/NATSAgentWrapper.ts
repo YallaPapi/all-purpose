@@ -1,322 +1,368 @@
 /**
- * NATS Agent Wrapper
+ * NATS-Enabled Agent Wrapper
  * 
- * Wraps meta-agents with NATS communication capabilities
- * Handles task assignment, execution, and result publishing
+ * Wraps existing meta-agents to enable NATS communication
+ * for distributed coordination and task execution
  */
 
+import { connect, NatsConnection, Subscription } from 'nats';
 import { EventEmitter } from 'events';
-import { NATSEventBus, createNATSEventBus } from '../../containers/factory-core/src/services/NATSEventBus.js';
-import { v4 as uuidv4 } from 'uuid';
+import { Logger } from '../utils/logger.js';
 
 export interface AgentConfig {
   id: string;
   type: string;
-  capability: string;
-  nats: {
-    servers: string[];
-    user?: string;
-    pass?: string;
-  };
-  heartbeatInterval?: number;
+  name: string;
+  capabilities: string[];
+  natsUrl?: string;
+  natsUser?: string;
+  natsPass?: string;
 }
 
-export interface TaskExecution {
+export interface AgentTask {
+  id: string;
+  type: string;
+  workflowId?: string;
+  payload: any;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  timeout?: number;
+  retries?: number;
+}
+
+export interface TaskResult {
   taskId: string;
-  workflowId: string;
-  task: any;
-  startTime: Date;
-  endTime?: Date;
+  agentId: string;
+  success: boolean;
   result?: any;
   error?: string;
+  executionTime: number;
+  timestamp: Date;
 }
 
-export abstract class NATSAgentWrapper extends EventEmitter {
+export class NATSAgentWrapper extends EventEmitter {
+  protected nc: NatsConnection | null = null;
+  protected logger: Logger;
   protected config: AgentConfig;
-  protected eventBus: NATSEventBus;
-  protected currentTask?: TaskExecution;
-  protected heartbeatInterval?: NodeJS.Timeout;
-  protected status: 'idle' | 'busy' | 'error' = 'idle';
-  private taskSubscription?: any;
+  protected status: 'idle' | 'busy' | 'offline' = 'offline';
+  protected subscriptions: Subscription[] = [];
+  protected heartbeatInterval: NodeJS.Timeout | null = null;
+  protected currentTask: AgentTask | null = null;
+  protected wrappedAgent: any;
 
-  constructor(config: AgentConfig) {
+  constructor(config: AgentConfig, wrappedAgent: any) {
     super();
-    this.config = {
-      heartbeatInterval: 30000, // 30 seconds
-      ...config
+    this.config = config;
+    this.wrappedAgent = wrappedAgent;
+    this.logger = new Logger(`NATSAgent-${config.id}`);
+  }
+
+  async connect(): Promise<void> {
+    try {
+      this.logger.info(`Connecting to NATS at ${this.config.natsUrl || 'localhost:4222'}...`);
+      
+      this.nc = await connect({
+        servers: this.config.natsUrl || 'nats://localhost:4222',
+        user: this.config.natsUser || 'factory',
+        pass: this.config.natsPass || 'factory-secret',
+        name: this.config.id,
+        reconnect: true,
+        maxReconnectAttempts: -1,
+        reconnectTimeWait: 1000
+      });
+
+      this.logger.info('Connected to NATS successfully');
+      this.status = 'idle';
+
+      // Set up connection event handlers
+      this.setupConnectionHandlers();
+
+      // Register agent
+      await this.register();
+
+      // Subscribe to agent-specific and broadcast topics
+      await this.setupSubscriptions();
+
+      // Start heartbeat
+      this.startHeartbeat();
+
+      this.emit('connected');
+    } catch (error) {
+      this.logger.error('Failed to connect to NATS:', error);
+      throw error;
+    }
+  }
+
+  protected setupConnectionHandlers(): void {
+    if (!this.nc) return;
+
+    // Handle connection events
+    (async () => {
+      for await (const status of this.nc!.status()) {
+        switch (status.type) {
+          case 'disconnect':
+            this.logger.warn('Disconnected from NATS');
+            this.status = 'offline';
+            this.emit('disconnected');
+            break;
+          case 'reconnect':
+            this.logger.info('Reconnected to NATS');
+            this.status = 'idle';
+            await this.register();
+            this.emit('reconnected');
+            break;
+          case 'error':
+            this.logger.error('NATS error:', status.data);
+            this.emit('error', status.data);
+            break;
+        }
+      }
+    })();
+  }
+
+  protected async register(): Promise<void> {
+    if (!this.nc) return;
+
+    const registration = {
+      id: this.config.id,
+      type: this.config.type,
+      name: this.config.name,
+      capabilities: this.config.capabilities,
+      status: this.status,
+      timestamp: new Date()
     };
 
-    this.eventBus = createNATSEventBus({
-      servers: config.nats.servers,
-      user: config.nats.user,
-      pass: config.nats.pass,
-      namespace: 'agent'
-    });
+    await this.nc.publish('agent.register', JSON.stringify(registration));
+    this.logger.info(`Registered as ${this.config.type} agent`);
   }
 
-  /**
-   * Initialize the agent
-   */
-  async initialize(): Promise<void> {
-    // Connect to NATS
-    await this.eventBus.connect();
+  protected async setupSubscriptions(): Promise<void> {
+    if (!this.nc) return;
 
-    // Register agent
-    await this.registerAgent();
+    // Subscribe to agent-specific tasks
+    const taskSub = this.nc.subscribe(`agent.${this.config.id}.task`);
+    this.subscriptions.push(taskSub);
+    this.handleTaskSubscription(taskSub);
 
-    // Setup task subscription
-    await this.setupTaskSubscription();
+    // Subscribe to broadcast tasks for this agent type
+    const typeSub = this.nc.subscribe(`agent.type.${this.config.type}.task`);
+    this.subscriptions.push(typeSub);
+    this.handleTaskSubscription(typeSub);
 
-    // Start heartbeat
-    this.startHeartbeat();
+    // Subscribe to control messages
+    const controlSub = this.nc.subscribe(`agent.${this.config.id}.control`);
+    this.subscriptions.push(controlSub);
+    this.handleControlSubscription(controlSub);
 
-    // Initialize agent-specific resources
-    await this.onInitialize();
+    // Subscribe to capability-based tasks
+    for (const capability of this.config.capabilities) {
+      const capSub = this.nc.subscribe(`agent.capability.${capability}.task`);
+      this.subscriptions.push(capSub);
+      this.handleTaskSubscription(capSub);
+    }
 
-    this.emit('initialized');
+    this.logger.info(`Subscribed to ${this.subscriptions.length} topics`);
   }
 
-  /**
-   * Shutdown the agent
-   */
+  protected async handleTaskSubscription(sub: Subscription): Promise<void> {
+    for await (const msg of sub) {
+      try {
+        const task: AgentTask = JSON.parse(msg.string());
+        this.logger.info(`Received task: ${task.id} (${task.type})`);
+        
+        // Send acknowledgment if reply subject exists
+        if (msg.reply) {
+          await msg.respond(JSON.stringify({
+            status: 'received',
+            agentId: this.config.id,
+            timestamp: new Date()
+          }));
+        }
+
+        // Execute task
+        await this.executeTask(task);
+      } catch (error) {
+        this.logger.error('Error handling task:', error);
+      }
+    }
+  }
+
+  protected async handleControlSubscription(sub: Subscription): Promise<void> {
+    for await (const msg of sub) {
+      try {
+        const control = JSON.parse(msg.string());
+        this.logger.info(`Received control message: ${control.command}`);
+
+        switch (control.command) {
+          case 'status':
+            await msg.respond(JSON.stringify({
+              id: this.config.id,
+              status: this.status,
+              currentTask: this.currentTask?.id,
+              timestamp: new Date()
+            }));
+            break;
+          case 'stop':
+            if (this.currentTask) {
+              this.logger.warn('Stopping current task');
+              // Implement task cancellation if supported
+            }
+            break;
+          case 'shutdown':
+            await this.shutdown();
+            break;
+        }
+      } catch (error) {
+        this.logger.error('Error handling control message:', error);
+      }
+    }
+  }
+
+  protected async executeTask(task: AgentTask): Promise<void> {
+    if (this.status === 'busy') {
+      this.logger.warn(`Agent busy, rejecting task ${task.id}`);
+      await this.publishTaskResult({
+        taskId: task.id,
+        agentId: this.config.id,
+        success: false,
+        error: 'Agent is busy',
+        executionTime: 0,
+        timestamp: new Date()
+      });
+      return;
+    }
+
+    this.status = 'busy';
+    this.currentTask = task;
+    const startTime = Date.now();
+
+    try {
+      // Update status
+      await this.publishStatus('task.started', {
+        taskId: task.id,
+        agentId: this.config.id,
+        timestamp: new Date()
+      });
+
+      // Execute wrapped agent logic
+      const result = await this.executeWrappedAgent(task);
+
+      // Publish successful result
+      await this.publishTaskResult({
+        taskId: task.id,
+        agentId: this.config.id,
+        success: true,
+        result,
+        executionTime: Date.now() - startTime,
+        timestamp: new Date()
+      });
+
+      this.logger.info(`Task ${task.id} completed successfully`);
+    } catch (error: any) {
+      this.logger.error(`Task ${task.id} failed:`, error);
+      
+      // Publish failure
+      await this.publishTaskResult({
+        taskId: task.id,
+        agentId: this.config.id,
+        success: false,
+        error: error.message || 'Unknown error',
+        executionTime: Date.now() - startTime,
+        timestamp: new Date()
+      });
+    } finally {
+      this.status = 'idle';
+      this.currentTask = null;
+    }
+  }
+
+  protected async executeWrappedAgent(task: AgentTask): Promise<any> {
+    // This should be overridden by specific agent implementations
+    // Default implementation tries common methods
+    if (this.wrappedAgent.execute) {
+      return await this.wrappedAgent.execute(task.payload);
+    } else if (this.wrappedAgent.process) {
+      return await this.wrappedAgent.process(task.payload);
+    } else if (this.wrappedAgent.run) {
+      return await this.wrappedAgent.run(task.payload);
+    } else if (this.wrappedAgent.handle) {
+      return await this.wrappedAgent.handle(task.payload);
+    } else {
+      throw new Error('Wrapped agent has no known execution method');
+    }
+  }
+
+  protected async publishTaskResult(result: TaskResult): Promise<void> {
+    if (!this.nc) return;
+
+    const subject = result.success ? 'task.completed' : 'task.failed';
+    await this.nc.publish(subject, JSON.stringify(result));
+    
+    // Also publish to workflow-specific topic if available
+    if (this.currentTask?.workflowId) {
+      await this.nc.publish(`workflow.${this.currentTask.workflowId}.result`, JSON.stringify(result));
+    }
+  }
+
+  protected async publishStatus(event: string, data: any): Promise<void> {
+    if (!this.nc) return;
+    await this.nc.publish(event, JSON.stringify(data));
+  }
+
+  protected startHeartbeat(): void {
+    this.heartbeatInterval = setInterval(async () => {
+      if (!this.nc || this.status === 'offline') return;
+
+      await this.nc.publish('agent.heartbeat', JSON.stringify({
+        id: this.config.id,
+        type: this.config.type,
+        status: this.status,
+        currentTask: this.currentTask?.id,
+        timestamp: new Date()
+      }));
+    }, 10000); // Every 10 seconds
+  }
+
   async shutdown(): Promise<void> {
+    this.logger.info('Shutting down NATS agent...');
+    
     // Stop heartbeat
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
     }
 
-    // Unsubscribe from tasks
-    if (this.taskSubscription) {
-      await this.taskSubscription.unsubscribe();
+    // Unsubscribe from all topics
+    for (const sub of this.subscriptions) {
+      sub.unsubscribe();
     }
+    this.subscriptions = [];
 
-    // Shutdown agent-specific resources
-    await this.onShutdown();
-
-    // Disconnect from NATS
-    await this.eventBus.disconnect();
-
-    this.emit('shutdown');
-  }
-
-  /**
-   * Abstract method for agent implementation
-   */
-  protected abstract async executeTask(task: any): Promise<any>;
-
-  /**
-   * Optional lifecycle hooks
-   */
-  protected async onInitialize(): Promise<void> {
-    // Override in subclass if needed
-  }
-
-  protected async onShutdown(): Promise<void> {
-    // Override in subclass if needed
-  }
-
-  /**
-   * Private methods
-   */
-  private async registerAgent(): Promise<void> {
-    await this.eventBus.publish('coordinator.agent.register', {
-      agent: {
+    // Publish offline status
+    if (this.nc) {
+      await this.nc.publish('agent.offline', JSON.stringify({
         id: this.config.id,
-        type: this.config.type,
-        capability: this.config.capability,
-        status: this.status,
-        instance: process.env.HOSTNAME || 'localhost',
-        metadata: {
-          pid: process.pid,
-          platform: process.platform,
-          nodeVersion: process.version
-        }
-      },
-      timestamp: new Date()
-    });
-  }
-
-  private async setupTaskSubscription(): Promise<void> {
-    const subject = `agent.${this.config.id}.task.assign`;
-    
-    this.taskSubscription = await this.eventBus.subscribe(subject, async (data: any) => {
-      if (this.status === 'busy') {
-        // Reject task if busy
-        await this.eventBus.publish('task.rejected', {
-          taskId: data.taskId,
-          agentId: this.config.id,
-          reason: 'Agent busy',
-          timestamp: new Date()
-        });
-        return;
-      }
-
-      // Accept task
-      this.currentTask = {
-        taskId: data.taskId,
-        workflowId: data.workflowId,
-        task: data.task,
-        startTime: new Date()
-      };
-
-      this.status = 'busy';
-
-      // Notify task acceptance
-      await this.eventBus.publish('task.accepted', {
-        taskId: data.taskId,
-        agentId: this.config.id,
         timestamp: new Date()
-      });
+      }));
 
-      // Execute task
-      try {
-        const result = await this.executeTask(data.task);
-        
-        this.currentTask.result = result;
-        this.currentTask.endTime = new Date();
-
-        // Publish completion
-        await this.eventBus.publish('task.completed', {
-          taskId: data.taskId,
-          agentId: this.config.id,
-          result,
-          duration: this.currentTask.endTime.getTime() - this.currentTask.startTime.getTime(),
-          timestamp: new Date()
-        });
-
-        this.emit('task:completed', this.currentTask);
-
-      } catch (error) {
-        this.currentTask.error = error.message;
-        this.currentTask.endTime = new Date();
-
-        // Publish failure
-        await this.eventBus.publish('task.failed', {
-          taskId: data.taskId,
-          agentId: this.config.id,
-          error: error.message,
-          duration: this.currentTask.endTime.getTime() - this.currentTask.startTime.getTime(),
-          timestamp: new Date()
-        });
-
-        this.emit('task:failed', this.currentTask);
-        this.status = 'error';
-      }
-
-      // Reset status
-      this.status = 'idle';
-      this.currentTask = undefined;
-    });
-  }
-
-  private startHeartbeat(): void {
-    // Send initial heartbeat
-    this.sendHeartbeat();
-
-    // Setup interval
-    this.heartbeatInterval = setInterval(() => {
-      this.sendHeartbeat();
-    }, this.config.heartbeatInterval);
-  }
-
-  private async sendHeartbeat(): Promise<void> {
-    try {
-      await this.eventBus.publish('agent.heartbeat', {
-        agentId: this.config.id,
-        status: this.status,
-        currentTask: this.currentTask?.taskId,
-        metrics: {
-          memory: process.memoryUsage(),
-          uptime: process.uptime(),
-          cpuUsage: process.cpuUsage()
-        },
-        timestamp: new Date()
-      });
-    } catch (error) {
-      console.error(`Failed to send heartbeat:`, error);
-    }
-  }
-
-  /**
-   * Helper methods for agents
-   */
-  protected async publishProgress(progress: number, message?: string): Promise<void> {
-    if (!this.currentTask) return;
-
-    await this.eventBus.publish('task.progress', {
-      taskId: this.currentTask.taskId,
-      agentId: this.config.id,
-      progress,
-      message,
-      timestamp: new Date()
-    });
-  }
-
-  protected async publishLog(level: 'info' | 'warn' | 'error', message: string, data?: any): Promise<void> {
-    await this.eventBus.publish('agent.log', {
-      agentId: this.config.id,
-      taskId: this.currentTask?.taskId,
-      level,
-      message,
-      data,
-      timestamp: new Date()
-    });
-  }
-
-  protected async requestResource(resourceType: string, requirements: any): Promise<any> {
-    const requestId = uuidv4();
-    
-    // Use request-reply pattern
-    const response = await this.eventBus.request('resource.request', {
-      requestId,
-      agentId: this.config.id,
-      resourceType,
-      requirements,
-      timestamp: new Date()
-    }, 30000); // 30 second timeout
-
-    return response;
-  }
-}
-
-/**
- * Example implementation for a concrete agent
- */
-export class ExampleAgent extends NATSAgentWrapper {
-  constructor(config: Omit<AgentConfig, 'type' | 'capability'>) {
-    super({
-      ...config,
-      type: 'example',
-      capability: 'example-processing'
-    });
-  }
-
-  protected async executeTask(task: any): Promise<any> {
-    // Log task start
-    await this.publishLog('info', 'Starting example task', { task });
-
-    // Simulate work with progress updates
-    for (let i = 0; i <= 100; i += 20) {
-      await this.publishProgress(i, `Processing step ${i / 20 + 1}`);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate work
+      // Drain connection
+      await this.nc.drain();
+      this.nc = null;
     }
 
-    // Return result
-    return {
-      success: true,
-      processedAt: new Date(),
-      data: {
-        input: task,
-        output: 'Example processing complete'
-      }
-    };
+    this.status = 'offline';
+    this.emit('shutdown');
+    this.logger.info('NATS agent shutdown complete');
   }
 
-  protected async onInitialize(): Promise<void> {
-    console.log('Example agent initialized');
+  getStatus(): string {
+    return this.status;
   }
 
-  protected async onShutdown(): Promise<void> {
-    console.log('Example agent shutting down');
+  getCurrentTask(): AgentTask | null {
+    return this.currentTask;
+  }
+
+  isConnected(): boolean {
+    return this.nc !== null && !this.nc.isClosed();
   }
 }

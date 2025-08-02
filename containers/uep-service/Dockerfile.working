@@ -1,0 +1,49 @@
+FROM node:20-alpine
+
+LABEL maintainer="meta-agent-factory"
+LABEL description="UEP Service - Universal Execution Protocol (Development Mode)"
+
+# Install necessary packages
+RUN apk add --no-cache git python3 make g++
+
+WORKDIR /app
+
+# Copy package files first
+COPY package*.json ./
+
+# Install all dependencies including TypeScript runtime
+RUN npm install && npm install -g tsx
+
+# Copy all source files
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3003
+ENV NATS_URL=nats://nats-broker:4222
+ENV FACTORY_CORE_URL=http://factory-core:3000
+ENV DOMAIN_AGENTS_URL=http://domain-agents:3001
+ENV UEP_REGISTRY_URL=http://uep-registry:3001
+ENV UEP_MODE=strict
+ENV UEP_VALIDATION_ENABLED=true
+ENV UEP_ENFORCEMENT_ENABLED=true
+ENV DOCKER_CONTAINER=true
+
+# Set proper permissions
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S uep -u 1001 && \
+    chown -R uep:nodejs /app
+
+USER uep
+
+EXPOSE 3003
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget -q -O - http://localhost:3003/health || exit 1
+
+# Run with tsx to handle TypeScript directly
+CMD ["tsx", "src/uep-service.ts"]

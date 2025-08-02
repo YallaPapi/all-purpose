@@ -11,7 +11,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm install --production
 
 # Install TypeScript and build dependencies
 RUN npm install -g typescript@5.2.2

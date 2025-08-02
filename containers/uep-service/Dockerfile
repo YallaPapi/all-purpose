@@ -6,12 +6,11 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY tsconfig.json ./
-RUN npm ci --only=production
+RUN npm install --production
 
-COPY src/uep/ ./src/uep/
-COPY shared/ ./shared/
+COPY src/ ./src/
 
-RUN npm run build:uep
+RUN npm run build
 
 FROM node:20-alpine AS runtime
 

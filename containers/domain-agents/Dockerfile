@@ -6,13 +6,13 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY tsconfig.json ./
-RUN npm ci --only=production
+RUN npm install --production
 
-COPY src/agents/ ./src/agents/
-COPY apps/lead-generation/ ./apps/lead-generation/
+COPY src/ ./src/
+COPY apps/ ./apps/
 COPY lib/ ./lib/
 
-RUN npm run build:agents
+RUN npm run build
 
 FROM node:20-alpine AS runtime
 

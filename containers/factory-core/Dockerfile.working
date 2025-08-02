@@ -1,0 +1,41 @@
+FROM node:20-alpine
+
+LABEL maintainer="meta-agent-factory"
+LABEL description="Factory Core - 11 Meta-Agents Container (Development Mode)"
+
+# Install necessary packages
+RUN apk add --no-cache git python3 make g++
+
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY package*.json ./
+
+# Install all dependencies including TypeScript runtime
+RUN npm install && npm install -g tsx
+
+# Copy all source files
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV REDIS_URL=redis://redis:6379
+ENV NATS_URL=nats://nats-broker:4222
+ENV DOCKER_CONTAINER=true
+
+# Set proper permissions
+RUN chown -R node:node /app
+USER node
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget -q -O - http://localhost:3000/health || exit 1
+
+# Run with tsx to handle TypeScript directly
+CMD ["tsx", "src/factory-core.ts"]

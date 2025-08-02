@@ -1,0 +1,59 @@
+# Prometheus Configuration for NATS Monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'all-purpose-nats'
+
+# Alert manager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Load rules
+rule_files:
+  - "alert-rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # NATS Exporter metrics
+  - job_name: 'nats'
+    static_configs:
+      - targets: ['nats-exporter:7777']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop
+
+  # NATS Surveyor metrics (advanced)
+  - job_name: 'nats-surveyor'
+    static_configs:
+      - targets: ['nats-surveyor:7778']
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Grafana metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+
+  # Meta-Agent metrics (if instrumented)
+  - job_name: 'meta-agents'
+    static_configs:
+      - targets: 
+        - 'backend-agent:9091'
+        - 'frontend-agent:9092'
+        - 'devops-agent:9093'
+        - 'qa-agent:9094'
+        - 'documentation-agent:9095'
+        - 'factory-core:9096'
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.*):.*'
+        target_label: agent_name
+        replacement: '$1'

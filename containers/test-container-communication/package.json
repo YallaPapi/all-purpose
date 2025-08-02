@@ -1,0 +1,10 @@
+{
+  "name": "test-container-communication",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "nats": "^2.15.1",
+    "@upstash/redis": "^1.22.0",
+    "etcd3": "^1.1.2"
+  }
+}

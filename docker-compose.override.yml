@@ -25,13 +25,17 @@ services:
 
   # Enable observability stack in development
   observability:
-    profiles: ["monitoring"]
+    environment:
+      - LOG_LEVEL=debug
     
   tempo:
-    profiles: ["monitoring"]
+    environment:
+      - LOG_LEVEL=debug
     
   loki:
-    profiles: ["monitoring"]
+    environment:
+      - LOG_LEVEL=debug
     
   alertmanager:
-    profiles: ["monitoring"]
+    environment:
+      - LOG_LEVEL=debug

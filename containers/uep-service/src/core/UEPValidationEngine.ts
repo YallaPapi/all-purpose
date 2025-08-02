@@ -1,4 +1,4 @@
-import { validateEvent } from '../../../../shared/messaging/EventSchemas.js';
+import { validateEventAgainstSchema } from '../schemas/event-schemas.js';
 import { Logger } from '../utils/Logger.js';
 
 export interface UEPRequest {

@@ -14,16 +14,16 @@ receivers:
             - "http://localhost:3000"
             - "http://localhost:8080"
             - "https://*.vercel.app"
-  jaeger:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:14250
-      thrift_http:
-        endpoint: 0.0.0.0:14268
-      thrift_binary:
-        endpoint: 0.0.0.0:6832
-      thrift_compact:
-        endpoint: 0.0.0.0:6831
+  # jaeger:
+  #   protocols:
+  #     grpc:
+  #       endpoint: 0.0.0.0:14250
+  #     thrift_http:
+  #       endpoint: 0.0.0.0:14268
+  #     thrift_binary:
+  #       endpoint: 0.0.0.0:6832
+  #     thrift_compact:
+  #       endpoint: 0.0.0.0:6831
   zipkin:
     endpoint: 0.0.0.0:9411
   
@@ -133,17 +133,16 @@ processors:
     metadata_cardinality_limit: 1000
 
   # Context7 Span Enrichment
-  span:
-    name:
-      to_attributes:
-        rules:
-          - ^(?P<service_name>[^/]+)/(?P<operation>[^/?]+).*$
-          - ^/api/v(?P<version>[^/]+)/(?P<resource>[^/?]+)/(?P<action>[^/?]+).*$
-      from_attributes: ["http.method", "http.route"]
-    # Add exemplars for Context7 correlation
-    exemplars:
-      enabled: true
-      max_exemplars_per_datapoint: 5
+  # span processor is not available in otel-collector-contrib
+  # Use attributes processor instead
+  attributes:
+    actions:
+      - key: span.name
+        action: update
+        from_attribute: http.route
+      - key: span.service
+        action: insert
+        from_attribute: service.name
 
 exporters:
   # Export to Tempo for trace storage with Context7 enhancement
@@ -156,10 +155,10 @@ exporters:
       "X-UEP-Protocol-Version": "2.0.0"
 
   # Export to Jaeger for UI with Context7 tags
-  jaeger:
-    endpoint: jaeger:14250
-    tls:
-      insecure: true
+  # jaeger:
+  #   endpoint: jaeger:14250
+  #   tls:
+  #     insecure: true
 
   # Export traces to Prometheus as metrics with Context7 labels  
   prometheus:
@@ -209,7 +208,7 @@ service:
   pipelines:
     # Context7 Enhanced Trace Pipeline
     traces:
-      receivers: [otlp, jaeger, zipkin]
+      receivers: [otlp, zipkin]
       processors: [
         memory_limiter,      # Safety first
         resource,            # Context7 resource attribution
@@ -217,9 +216,9 @@ service:
         filter,              # Noise reduction
         tail_sampling,       # Context7 intelligent sampling
         batch,               # Performance optimization
-        span                 # Final span processing
+        attributes           # Span attribute processing
       ]
-      exporters: [otlp/tempo, jaeger, logging, file]
+      exporters: [otlp/tempo, logging, file]
     
     # Context7 Enhanced Metrics Pipeline
     metrics:

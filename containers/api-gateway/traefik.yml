@@ -45,10 +45,10 @@ metrics:
     addServicesLabels: true
     addRoutersLabels: true
 
-tracing:
-  jaeger:
-    samplingServerURL: "http://observability:14268/api/sampling"
-    localAgentHostPort: "observability:6832"
+# tracing:
+#   jaeger:
+#     samplingServerURL: "http://observability:14268/api/sampling"
+#     localAgentHostPort: "observability:6832"
 
 # Enhanced middleware for production
 ping:

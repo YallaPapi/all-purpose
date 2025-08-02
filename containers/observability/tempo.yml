@@ -63,12 +63,9 @@ storage:
       queue_depth: 10000               # Queue depth for processing
 
 overrides:
-  defaults:
-    metrics_generator:
-      processors: [service-graphs, span-metrics]
-      generate_native_histograms: true
-    max_traces_per_user: 50000
-    max_bytes_per_trace: 50000
-    ingestion_rate_strategy: global
-    ingestion_rate_limit_bytes: 20000000
-    ingestion_burst_size_bytes: 30000000
+  metrics_generator_processors: [service-graphs, span-metrics]
+  max_traces_per_user: 50000
+  max_bytes_per_trace: 50000
+  ingestion_rate_strategy: global
+  ingestion_rate_limit_bytes: 20000000
+  ingestion_burst_size_bytes: 30000000

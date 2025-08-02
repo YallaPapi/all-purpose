@@ -1,6 +1,7 @@
 {
   "name": "domain-agents",
   "version": "1.0.0",
+  "type": "module",
   "description": "Domain Agents - 5 Specialist Agents for MVS Architecture",
   "main": "dist/domain-agents.js",
   "scripts": {
@@ -13,6 +14,7 @@
   },
   "dependencies": {
     "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
     "cors": "^2.8.5",
     "helmet": "^7.0.0",
     "axios": "^1.6.0",

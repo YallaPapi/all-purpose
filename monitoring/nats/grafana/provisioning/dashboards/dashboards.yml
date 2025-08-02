@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: 'NATS Monitoring'
+    orgId: 1
+    folder: 'NATS'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

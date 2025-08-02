@@ -37,7 +37,7 @@ export class RealMetaAgentFactory extends EventEmitter {
   private agentInstances: Map<string, any> = new Map();
   private agentLoader: AgentLoader;
   
-  // Paths to actual agent implementations
+  // Paths to actual agent implementations (will be resolved by AgentLoader)
   private agentPaths: Record<string, string> = {
     'prd-parser': '/app/src/meta-agents/prd-parser/parser.js',
     'scaffold-generator': '/app/src/meta-agents/scaffold-generator/main.js',
@@ -49,7 +49,8 @@ export class RealMetaAgentFactory extends EventEmitter {
     'vercel-native-architecture': '/app/src/meta-agents/vercel-native-architecture/src/main.ts',
     'infra-orchestrator': '/app/src/meta-agents/infra-orchestrator/src/main.ts',
     'backend-agent': '/app/src/meta-agents/backend-agent/src/main.ts',
-    'frontend-agent': '/app/src/meta-agents/frontend-agent/src/main.ts'
+    'frontend-agent': '/app/src/meta-agents/frontend-agent/src/main.ts',
+    'memory-integration': '/app/src/memory/agentMemoryIntegration.js'
   };
 
   constructor(eventBus: EventBus) {
@@ -57,7 +58,7 @@ export class RealMetaAgentFactory extends EventEmitter {
     this.eventBus = eventBus;
     this.logger = new Logger('RealMetaAgentFactory');
     this.agentLoader = new AgentLoader();
-    this.logger.info('RealMetaAgentFactory initialized with actual agent implementations');
+    this.logger.info('RealMetaAgentFactory initialized with environment-aware agent loading');
   }
 
   getAvailableAgentTypes(): string[] {
@@ -104,7 +105,7 @@ export class RealMetaAgentFactory extends EventEmitter {
     
     // Publish agent creation event
     if (this.eventBus.isConnected()) {
-      await this.eventBus.publish('meta.agent.created', {
+      await this.eventBus.publish('event.agent.created', {
         agentId,
         type,
         status: 'created',

@@ -1,25 +1,39 @@
 # Task Management API
 
 ## Overview
-Build a RESTful API for task management with authentication
+A RESTful API for managing tasks with authentication and CRUD operations.
 
 ## Requirements
-- Must have user authentication with JWT (REQ-001)
-- Must support CRUD operations for tasks (REQ-002)
-- Should have task categories (REQ-003)
-- Should support task assignment to users (REQ-004)
-- Could have task comments (REQ-005)
 
-## Technical Requirements
-- Framework: Express
-- Database: MongoDB
-- Authentication: JWT
-- API Style: REST
+### Functional Requirements
+- REQ-001: Must provide secure user authentication
+- REQ-002: Users should be able to create, read, update, and delete tasks
+- REQ-003: Tasks must have title, description, status, and due date
+- REQ-004: API must support filtering tasks by status
+- REQ-005: Should provide user-specific task lists
 
-## Expected Deliverables
-- Working API with all endpoints implemented
-- Database schemas and models
-- Authentication middleware
-- API documentation
-- Unit and integration tests
-- Deployment configuration
+### Technical Specifications
+- Framework: Node.js with Express
+- Database: MongoDB with Mongoose ODM
+- Authentication: JWT-based authentication
+- API Format: RESTful with JSON responses
+
+### Non-Functional Requirements
+- Must handle 1000 concurrent users
+- API response time should be under 200ms
+- Must include comprehensive error handling
+- Should provide API documentation
+- Must include unit and integration tests
+
+### Deployment Requirements
+- Should be containerized with Docker
+- Must include CI/CD pipeline
+- Should have infrastructure as code
+- Must include monitoring and logging
+
+## Success Criteria
+- All CRUD operations functional
+- Authentication working correctly
+- 80%+ test coverage
+- API documentation complete
+- Deployment automated

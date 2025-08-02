@@ -81,6 +81,7 @@
     "handlebars": "^4.7.8",
     "ioredis": "^5.5.1",
     "mustache": "^4.2.0",
+    "nats": "^2.29.3",
     "next": "14.2.5",
     "node-fetch": "^2.7.0",
     "openai": "^4.85.0",

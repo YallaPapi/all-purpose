@@ -4,17 +4,21 @@
 
 global:
   # SMTP configuration for email notifications
-  smtp_smarthost: '${SMTP_HOST:-localhost:587}'
-  smtp_from: '${ALERT_EMAIL_FROM:-alerts@meta-agent-factory.com}'
-  smtp_auth_username: '${SMTP_USERNAME:-}'
-  smtp_auth_password: '${SMTP_PASSWORD:-}'
-  smtp_require_tls: true
+  # Use double quotes around default values containing colons to avoid YAML parsing errors
+  smtp_smarthost: '${SMTP_HOST:-"localhost:587"}'
+  smtp_from: '${ALERT_EMAIL_FROM:-"alerts@meta-agent-factory.com"}'
+  smtp_auth_username: '${SMTP_USERNAME:-""}'
+  smtp_auth_password: '${SMTP_PASSWORD:-""}'
+  smtp_require_tls: ${SMTP_REQUIRE_TLS:-true}
   
-  # Slack API URL template
-  slack_api_url: '${SLACK_WEBHOOK_URL:-}'
+  # Slack API URL template - leave empty if not configured
+  slack_api_url: '${SLACK_WEBHOOK_URL:-""}'
   
   # PagerDuty integration key
   pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  
+  # Global resolve timeout
+  resolve_timeout: 5m
 
 # Routing tree for alert distribution
 route:

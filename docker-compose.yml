@@ -32,8 +32,6 @@ services:
         condition: service_healthy
       uep-registry:
         condition: service_healthy
-      observability:
-        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "traefik", "healthcheck"]
@@ -56,7 +54,9 @@ services:
 
   # Factory Core - 11 Meta-Agents
   factory-core:
-    image: meta-agent-factory-core:fixed
+    build:
+      context: ./containers/factory-core
+      dockerfile: Dockerfile.working
     container_name: meta-agent-factory-core
     ports:
       - "3000:3000"
@@ -110,8 +110,8 @@ services:
   # Domain Agents - 5 Specialists
   domain-agents:
     build:
-      context: .
-      dockerfile: ./containers/domain-agents/Dockerfile
+      context: ./containers/domain-agents
+      dockerfile: Dockerfile.working
     container_name: meta-agent-domain-agents
     ports:
       - "3002:3001"
@@ -165,7 +165,7 @@ services:
   uep-registry:
     build:
       context: ./services/uep-registry
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.working
     container_name: meta-agent-uep-registry
     ports:
       - "3001:3001"  # HTTP API
@@ -206,7 +206,7 @@ services:
   uep-service:
     build:
       context: ./containers/uep-service
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.working
     container_name: meta-agent-uep-service
     ports:
       - "3003:3003"
@@ -378,8 +378,8 @@ services:
     ports:
       - "3200:3200"   # HTTP
       - "9095:9095"   # gRPC
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
+      # - "4317:4317"   # OTLP gRPC (handled by otel-collector)
+      # - "4318:4318"   # OTLP HTTP (handled by otel-collector)
     volumes:
       - tempo_data:/tmp/tempo
       - ./containers/observability/tempo.yml:/etc/tempo/tempo.yml:ro
@@ -469,7 +469,7 @@ services:
       - PAGERDUTY_INTEGRATION_KEY=${PAGERDUTY_INTEGRATION_KEY:-}
     volumes:
       - alertmanager_data:/alertmanager
-      - ./containers/observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./containers/observability/alertmanager-simple.yml:/etc/alertmanager/alertmanager.yml:ro
       - ./containers/observability/templates:/etc/alertmanager/templates:ro
     networks:
       - meta-agent-factory
@@ -648,7 +648,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.4.0/24
+        - subnet: 172.21.4.0/24
     labels:
       - "network.description=Monitoring network for observability services"
   
@@ -657,7 +657,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.20.5.0/24
     labels:
       - "network.description=Legacy network for backward compatibility"
 

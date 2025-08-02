@@ -1,0 +1,146 @@
+# Prometheus Alert Rules for NATS Monitoring
+
+groups:
+  - name: nats_server_alerts
+    interval: 30s
+    rules:
+      # NATS Server Health
+      - alert: NATSServerDown
+        expr: up{job="nats"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: nats
+        annotations:
+          summary: "NATS server is down"
+          description: "NATS server {{ $labels.instance }} has been down for more than 1 minute."
+
+      # High Memory Usage
+      - alert: NATSHighMemoryUsage
+        expr: (nats_varz_mem / 1024 / 1024 / 1024) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          service: nats
+        annotations:
+          summary: "NATS server high memory usage"
+          description: "NATS server is using {{ $value | humanize }}GB of memory."
+
+      # High CPU Usage
+      - alert: NATSHighCPUUsage
+        expr: nats_varz_cpu > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: nats
+        annotations:
+          summary: "NATS server high CPU usage"
+          description: "NATS server CPU usage is {{ $value }}%."
+
+      # Connection Issues
+      - alert: NATSHighConnectionChurn
+        expr: rate(nats_varz_connections[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: nats
+        annotations:
+          summary: "High connection churn rate"
+          description: "NATS is experiencing {{ $value }} new connections per second."
+
+      # Slow Consumers
+      - alert: NATSSlowConsumers
+        expr: nats_varz_slow_consumers > 0
+        for: 2m
+        labels:
+          severity: warning
+          service: nats
+        annotations:
+          summary: "NATS has slow consumers"
+          description: "{{ $value }} slow consumers detected."
+
+  - name: agent_alerts
+    interval: 30s
+    rules:
+      # Agent Disconnection
+      - alert: MetaAgentDisconnected
+        expr: nats_connz_num_connections{agent_name=~".*-agent"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: meta-agent
+        annotations:
+          summary: "Meta-agent disconnected"
+          description: "{{ $labels.agent_name }} has been disconnected for more than 2 minutes."
+
+      # High Message Latency
+      - alert: HighMessageLatency
+        expr: histogram_quantile(0.95, rate(nats_latency_histogram_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: nats
+        annotations:
+          summary: "High message latency"
+          description: "95th percentile message latency is {{ $value }}s."
+
+      # Task Processing Failures
+      - alert: HighTaskFailureRate
+        expr: rate(agent_task_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: meta-agent
+        annotations:
+          summary: "High task failure rate"
+          description: "{{ $labels.agent_name }} is failing {{ $value | humanizePercentage }} of tasks."
+
+  - name: jetstream_alerts
+    interval: 30s
+    rules:
+      # JetStream Storage
+      - alert: JetStreamStorageFull
+        expr: (nats_jetstream_server_storage_used / nats_jetstream_server_storage_reserved) > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          service: jetstream
+        annotations:
+          summary: "JetStream storage almost full"
+          description: "JetStream storage is {{ $value | humanizePercentage }} full."
+
+      # Stream Lag
+      - alert: JetStreamConsumerLag
+        expr: nats_jetstream_consumer_ack_pending > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: jetstream
+        annotations:
+          summary: "JetStream consumer lag"
+          description: "Consumer {{ $labels.consumer_name }} has {{ $value }} pending messages."
+
+  - name: security_alerts
+    interval: 30s
+    rules:
+      # Authentication Failures
+      - alert: HighAuthenticationFailures
+        expr: rate(nats_auth_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: nats
+        annotations:
+          summary: "High authentication failure rate"
+          description: "{{ $value }} authentication failures per second detected."
+
+      # TLS Issues
+      - alert: TLSCertificateExpiringSoon
+        expr: (nats_tls_cert_expiry_timestamp - time()) < 86400 * 7
+        for: 1h
+        labels:
+          severity: warning
+          service: nats
+        annotations:
+          summary: "TLS certificate expiring soon"
+          description: "TLS certificate expires in {{ $value | humanizeDuration }}."

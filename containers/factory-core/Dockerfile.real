@@ -1,0 +1,23 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy all source files
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY src ./src
+COPY containers/factory-core/src ./containers/factory-core/src
+COPY dist ./dist
+
+# Install dependencies
+RUN npm ci
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
+  CMD wget -q -O - http://localhost:3000/health || exit 1
+
+# Start with real factory
+CMD ["node", "dist/factory-core.js"]

@@ -4145,11 +4145,25 @@
         ],
         "priority": "medium",
         "subtasks": []
+      },
+      {
+        "id": 262,
+        "title": "Fix Domain-Agents TypeScript Compilation Errors for NodeNext Module Resolution",
+        "description": "Resolve TypeScript compilation errors in domain-agents by adding explicit .js extensions to relative import paths for NodeNext moduleResolution and fixing type safety issues.",
+        "details": "This task involves fixing TypeScript compilation errors in the domain-agents codebase to ensure compatibility with NodeNext module resolution and proper type safety:\n\n1. **Analyze Current TypeScript Configuration**:\n   - Review the current `tsconfig.json` settings, particularly focusing on `moduleResolution` and `module` settings\n   - Confirm that the project is using `NodeNext` for moduleResolution, which requires explicit file extensions in import paths\n   - Document any other TypeScript configuration issues that may be contributing to compilation errors\n\n2. **Fix Relative Import Paths**:\n   - Systematically update all relative import statements in domain-agents code to include explicit `.js` extensions\n   - Example: Change `import { Agent } from '../models/agent'` to `import { Agent } from '../models/agent.js'`\n   - Note that TypeScript requires `.js` extensions even for TypeScript files when using ESM with NodeNext resolution\n   - Create a script to automate this process if there are numerous files to update\n\n3. **Address Type Safety Issues**:\n   - Identify and fix type safety errors, including:\n     - Missing or incorrect type annotations\n     - Incompatible type assignments\n     - Improper null/undefined handling\n     - Incorrect function parameter or return types\n   - Add appropriate type guards where necessary\n   - Implement proper error handling with typed error objects\n\n4. **Update Build Process**:\n   - Ensure the build process correctly handles the updated import paths\n   - Verify that the TypeScript compilation options are consistent across development and production environments\n   - Update any bundling or packaging configurations that may be affected by the changes\n\n5. **Documentation Updates**:\n   - Update development documentation to reflect the requirement for explicit file extensions in imports\n   - Document any patterns or conventions established for handling imports in the codebase\n   - Create a style guide section for TypeScript imports to prevent future issues\n\n6. **Integration with Containerization**:\n   - Verify that the fixed TypeScript compilation works correctly in the containerized environment\n   - Test the build process within Docker containers to ensure consistency\n\nImplementation Notes:\n- When using ESM modules with TypeScript and NodeNext resolution, all relative imports must use the `.js` extension, even when importing `.ts` files\n- This is because the compiled JavaScript will reference the `.js` files, not the source `.ts` files\n- The TypeScript compiler does not automatically adjust these extensions during compilation",
+        "testStrategy": "1. **Compilation Testing**:\n   - Run `tsc --noEmit` to verify that TypeScript compilation succeeds without errors\n   - Test compilation with strict type checking enabled (`--strict` flag)\n   - Verify that no import-related errors remain in the compilation output\n\n2. **Runtime Testing**:\n   - Execute the domain-agents in a development environment to ensure they start correctly\n   - Verify that all modules are properly loaded at runtime without \"module not found\" errors\n   - Test dynamic imports to ensure they function correctly with the new path format\n\n3. **Container Build Testing**:\n   - Build Docker containers for each domain agent using the updated code\n   - Verify that the TypeScript compilation step succeeds during container builds\n   - Test the containerized agents to ensure they function correctly\n\n4. **Integration Testing**:\n   - Test the domain-agents' interaction with other system components\n   - Verify UEP protocol communication works correctly after the changes\n   - Ensure that the agents register properly with service discovery mechanisms\n\n5. **Automated Test Suite**:\n   - Run the existing test suite to verify that functionality remains intact\n   - Add specific tests for any components that were significantly modified\n   - Verify that all tests pass with the updated import paths\n\n6. **Code Review**:\n   - Conduct a thorough code review to ensure all import paths have been updated correctly\n   - Verify that type safety issues have been properly addressed\n   - Check for any remaining TypeScript compiler warnings that should be resolved\n\n7. **Documentation Verification**:\n   - Review updated documentation for accuracy and completeness\n   - Verify that the style guide for imports is clear and actionable for developers",
+        "status": "pending",
+        "dependencies": [
+          198,
+          257
+        ],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-08-02T03:36:38.290Z",
+      "updated": "2025-08-02T21:24:45.768Z",
       "description": "Tasks for master context"
     }
   }
