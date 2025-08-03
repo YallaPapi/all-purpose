@@ -253,7 +253,7 @@ export interface MiddlewarePattern {
 // Task and Processing Types
 export interface BackendTask {
   id: string;
-  type: 'api-design' | 'database-design' | 'security-analysis' | 'test-generation' | 'documentation';
+  type: 'api-design' | 'database-design' | 'security-analysis' | 'test-generation' | 'documentation' | 'file-operations';
   description: string;
   requirements: any;
   context: Context7ScanResult;
@@ -264,10 +264,12 @@ export interface BackendTask {
 }
 
 export interface ProcessingResult {
-  taskId: string;
+  taskId?: string;
   success: boolean;
   data?: any;
   error?: string;
+  message?: string;
+  processingTime?: number;
   generatedFiles?: GeneratedFile[];
   recommendations?: string[];
   nextSteps?: string[];

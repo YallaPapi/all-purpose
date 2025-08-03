@@ -1,0 +1,80 @@
+
+### **The ZAD Mandate for the Meta-Agent Factory: Phase 3 - Full Swarm Operationalization**
+
+---
+
+#### 🚨 **CRITICAL METHODOLOGY REQUIREMENT** 🚨
+
+**⚠️ MANDATORY: ALL FINAL INTEGRATION AND TESTING MUST FOLLOW THIS FRAMEWORK ⚠️**
+
+This is the final mandate for core system development. It focuses on replacing all placeholder components with their final, production-ready counterparts and ensuring they communicate and operate flawlessly. Its purpose is to mitigate the primary risk of a full system rollout: **protocol mismatches and integration failures between specialized agents.**
+
+This framework consists of two parts:
+1.  **The Swarm-First Mandate (The Blueprint):** A strict, sequential process for activating the full agent swarm and their communication protocol.
+2.  **The ZAD Reporting Framework (The Inspection Report):** The same documentation style to prove each step was completed correctly.
+
+---
+
+#### 🔥 **THE CORE PROBLEM THIS SOLVES**
+
+You have a proven factory that can create a plan and send out orders. You also have a set of highly specialized, powerful workers (the 11 meta-agents). The problem is ensuring that when an order is sent, every worker understands it perfectly, knows how to execute it, and how to report back in a standardized way. Without this, you have chaos – workers misunderstanding instructions, using the wrong tools, and creating a mess.
+
+The **ZAD Mandate: Phase 3** fixes this by forcing a simple rule: **Prove everyone speaks the same language before you open the factory for business.**
+
+---
+
+### **PART 1: THE SWARM-FIRST MANDATE (THE BLUEPRINT)**
+
+This is the strategic plan that must be followed to complete the core development of the project.
+
+#### **Step 1: Isolate and Prove the Universal Execution Protocol (UEP)**
+
+Before integrating the full swarm of agents, you must prove that the UEP can reliably serialize, transport, and deserialize a complex task between two simple, standalone test agents.
+
+* **Requirement**: Create a new, self-contained script named `uep_test.js`. This script must:
+    1.  Define a complex, multi-step task in a JSON object.
+    2.  Create a "Sender Agent" that serializes this task into a UEP message.
+    3.  The Sender Agent will publish this message to a specific NATS subject.
+    4.  Create a "Receiver Agent" subscribed to that NATS subject.
+    5.  The Receiver Agent will receive the message, deserialize it using the UEP, and verify that the reconstructed task object is identical to the original.
+    6.  The script must print a clear "SUCCESS" or "FAILURE" message to the terminal.
+* **No Dependencies**: This script should not involve the `factory-core` or any of the existing agents. It is a pure test of the UEP's integrity over NATS.
+* **Clear Output**: The script must log the original task, the serialized UEP message, and the deserialized task, followed by a final success or failure confirmation.
+* **NO FAKE SHIT**: Under no circumstances are you to use fake demo data or placeholder implementations. The UEP protocol tested here must be the **REAL**, production-ready version. If a bug or missing feature in the UEP library prevents this test from passing, **YOU ARE TO GO FIX THE UEP LIBRARY IMMEDIATELY.** Do not skip the problem.
+
+**DO NOT PROCEED TO STEP 2 UNTIL THIS SCRIPT RUNS SUCCESSFULLY AND THE UEP'S RELIABILITY IS PROVEN.**
+
+#### **Step 2: Refactor the Factory and a Single Agent to Use UEP**
+
+Once the UEP is proven, refactor the `factory-core` and a single, real meta-agent (e.g., the `file-manager-agent`) to communicate exclusively using the UEP.
+
+* **Requirement**:
+    * The `factory-core`'s task dispatching logic must be updated to create and send tasks as UEP messages.
+    * The `file-manager-agent` must be updated to listen for and deserialize UEP messages. It should be able to execute a simple task (e.g., "list files in the current directory") and send its response back to the factory, also as a UEP message.
+* **Focus**: This step is only about replacing the old, simple communication method with the new, robust UEP for a single agent.
+* **NO FAKE SHIT**: The agent integrated here must be the **REAL** `file-manager-agent`, not a simplified placeholder. If the agent's code has bugs, compilation errors, or is incomplete, **YOU ARE TO FIX THE AGENT'S CODE IMMEDIATELY.** Do not create a dumbed-down version to make the test pass. Solve the actual problems.
+
+**DO NOT PROCEED TO STEP 3 UNTIL THE FACTORY AND THE REAL AGENT ARE COMMUNICATING FLAWLESSLY.**
+
+#### **Step 3: Implement a True End-to-End UEP Workflow Test**
+
+Before integrating the rest of the agents, write a single, automated E2E test to validate the full UEP-based workflow.
+
+* **Requirement**: This test, `uep_e2e_test.js`, must automate the following:
+    1.  Submit a PRD to the factory that is known to generate a task for the `file-manager-agent`.
+    2.  The test will then monitor the NATS bus to ensure a correctly formatted UEP message is sent from the factory to the agent.
+    3.  It will also monitor for the agent's UEP-formatted response back to the factory.
+    4.  Finally, it will query the factory's API to confirm the task's status was updated based on the agent's response.
+* **Purpose**: This test becomes the ultimate gatekeeper for the communication protocol. If it passes, you have proven that the factory can reliably command and control a real agent using the UEP.
+* **NO FAKE SHIT**: The PRD used in this test must be a **REAL-WORLD** example, not a simplified "hello world" test case. The test must validate the complete, unadulterated workflow. If the test reveals an integration issue between the factory, NATS, and the agent, **YOU ARE TO DEBUG AND FIX THE ROOT CAUSE.** Do not hardcode expected values or bypass the actual communication channel.
+
+**DO NOT PROCEED TO STEP 4 UNTIL THIS E2E TEST PASSES RELIABLY.**
+
+#### **Step 4: Integrate the Full Agent Swarm and Finalize the UI**
+
+Only after the UEP-based workflow is proven with a single agent can you begin integrating the full swarm of 11 meta-agents and finalize the user interface.
+
+* **Integrate the Swarm**: One by one, refactor the remaining 10 meta-agents to communicate using the UEP. Ensure each one can correctly receive, execute, and respond to tasks from the factory.
+* **Finalize the UI**: With the entire backend now fully operational, build out the final, polished version of the web UI. This should include features like project progress visualization, task lists, and the ability to view agent logs and generated artifacts.
+* **Comprehensive System Test**: Run a final, large-scale test with a highly complex PRD that requires coordination between multiple agents to complete. This will be the final validation of the entire "all-purpose" system.
+* **NO FAKE SHIT**: Every single one of the 11 meta-agents integrated must be the **REAL**, fully-featured version from the repository. If any of them have bugs or are incomplete, **THEY MUST BE FIXED.** The final test must orchestrate the actual, complete swarm. Do not finish until the entire, real system is working end-to-end as designed.
