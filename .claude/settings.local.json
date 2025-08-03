@@ -13,5 +13,4 @@
     "task-master-ai"
   ],
   "enableAllProjectMcpServers": true,
-  "apiKeyHelper": "~/.claude/anthropic_key.sh"
 }

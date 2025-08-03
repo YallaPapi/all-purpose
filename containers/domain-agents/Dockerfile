@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY tsconfig.json ./
-RUN npm install --production
+RUN npm install
 
 COPY src/ ./src/
 COPY apps/ ./apps/

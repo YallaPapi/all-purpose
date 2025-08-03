@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta-Agent Factory - Browser Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+        }
+        .task-card {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .agent-card {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .agent-card.online {
+            border-left: 4px solid #28a745;
+        }
+        .agent-card.offline {
+            border-left: 4px solid #dc3545;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏭 Meta-Agent Factory - Browser Test</h1>
+        
+        <div id="status" class="status info">
+            🔄 Initializing connection to factory-core...
+        </div>
+
+        <!-- Factory Status Section -->
+        <div class="form-group">
+            <button onclick="checkFactoryStatus()">🔍 Check Factory Status</button>
+            <button onclick="listAgents()">🤖 List Registered Agents</button>
+        </div>
+
+        <!-- Agents Display -->
+        <div id="agents-section" style="display: none;">
+            <h3>📋 Registered Agents</h3>
+            <div id="agents-grid" class="agents-grid"></div>
+        </div>
+
+        <!-- Task Creation Form -->
+        <div class="form-group">
+            <h3>🚀 Create New Task</h3>
+            <label for="agentType">Agent Type:</label>
+            <select id="agentType">
+                <option value="backend">Backend Agent</option>
+                <option value="frontend">Frontend Agent</option>
+                <option value="devops">DevOps Agent</option>
+                <option value="qa">QA Agent</option>
+                <option value="documentation">Documentation Agent</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="taskDescription">Task Description:</label>
+            <textarea id="taskDescription" rows="3" placeholder="Describe what you want the agent to build...">Create a user authentication API with Express.js, JWT tokens, and password hashing</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="requirements">Requirements (comma-separated):</label>
+            <input type="text" id="requirements" placeholder="Express.js, JWT, bcrypt, MongoDB" value="Express.js, JWT, bcrypt">
+        </div>
+
+        <div class="form-group">
+            <button onclick="createTask()" id="createTaskBtn">🎯 Create Task</button>
+            <button onclick="clearResults()">🧹 Clear Results</button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results" style="display: none;">
+            <h3>📊 Results</h3>
+            <div id="resultsContent"></div>
+        </div>
+
+        <!-- Tasks List -->
+        <div id="tasks-section" style="display: none;">
+            <h3>📋 Recent Tasks</h3>
+            <div id="tasks-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const FACTORY_URL = 'http://localhost:3005';
+        let currentTasks = [];
+
+        // Initialize on page load
+        window.onload = function() {
+            checkFactoryStatus();
+        };
+
+        async function checkFactoryStatus() {
+            try {
+                updateStatus('🔄 Checking factory status...', 'info');
+                
+                const response = await fetch(`${FACTORY_URL}/api/factory/status`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStatus(`✅ Factory is online! Agents: ${data.data.agents}, Tasks: ${data.data.tasks}, Uptime: ${Math.round(data.data.uptime)}s`, 'success');
+                    
+                    // Auto-load agents if factory is working
+                    await listAgents();
+                } else {
+                    updateStatus('❌ Factory status check failed', 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Cannot connect to factory: ${error.message}`, 'error');
+                console.error('Factory status error:', error);
+            }
+        }
+
+        async function listAgents() {
+            try {
+                const response = await fetch(`${FACTORY_URL}/api/agents`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAgents(data.data);
+                } else {
+                    updateStatus('❌ Failed to load agents', 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Error loading agents: ${error.message}`, 'error');
+                console.error('Agents error:', error);
+            }
+        }
+
+        async function createTask() {
+            try {
+                const agentType = document.getElementById('agentType').value;
+                const description = document.getElementById('taskDescription').value;
+                const requirementsText = document.getElementById('requirements').value;
+                const requirements = requirementsText.split(',').map(r => r.trim()).filter(r => r);
+
+                if (!description.trim()) {
+                    updateStatus('❌ Please enter a task description', 'error');
+                    return;
+                }
+
+                updateStatus('🚀 Creating task...', 'info');
+                document.getElementById('createTaskBtn').disabled = true;
+
+                const taskData = {
+                    description: description,
+                    requirements: requirements,
+                    timestamp: new Date().toISOString()
+                };
+
+                const response = await fetch(`${FACTORY_URL}/api/tasks`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        agentType: agentType,
+                        taskData: taskData
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    updateStatus(`✅ Task created successfully: ${result.data.id}`, 'success');
+                    addTaskToList(result.data);
+                    
+                    // Start polling for task completion
+                    setTimeout(() => pollTaskStatus(result.data.id), 2000);
+                } else {
+                    updateStatus(`❌ Task creation failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Error creating task: ${error.message}`, 'error');
+                console.error('Task creation error:', error);
+            } finally {
+                document.getElementById('createTaskBtn').disabled = false;
+            }
+        }
+
+        async function pollTaskStatus(taskId) {
+            try {
+                const response = await fetch(`${FACTORY_URL}/api/tasks/${taskId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateTaskInList(data.data);
+                    
+                    if (data.data.status === 'pending') {
+                        // Continue polling
+                        setTimeout(() => pollTaskStatus(taskId), 3000);
+                    } else {
+                        updateStatus(`🎉 Task ${taskId} ${data.data.status}!`, 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('Task polling error:', error);
+            }
+        }
+
+        function displayAgents(agents) {
+            const agentsSection = document.getElementById('agents-section');
+            const agentsGrid = document.getElementById('agents-grid');
+            
+            if (agents.length === 0) {
+                agentsGrid.innerHTML = '<div class="agent-card offline">No agents registered</div>';
+            } else {
+                agentsGrid.innerHTML = agents.map(agent => `
+                    <div class="agent-card online">
+                        <h4>🤖 ${agent.id}</h4>
+                        <p><strong>Type:</strong> ${agent.type}</p>
+                        <p><strong>Registered:</strong> ${new Date(agent.registeredAt).toLocaleTimeString()}</p>
+                        <p><strong>Last Seen:</strong> ${new Date(agent.lastSeen).toLocaleTimeString()}</p>
+                    </div>
+                `).join('');
+            }
+            
+            agentsSection.style.display = 'block';
+        }
+
+        function addTaskToList(task) {
+            currentTasks.unshift(task);
+            updateTasksDisplay();
+        }
+
+        function updateTaskInList(updatedTask) {
+            const index = currentTasks.findIndex(t => t.id === updatedTask.id);
+            if (index !== -1) {
+                currentTasks[index] = updatedTask;
+                updateTasksDisplay();
+            }
+        }
+
+        function updateTasksDisplay() {
+            const tasksSection = document.getElementById('tasks-section');
+            const tasksList = document.getElementById('tasks-list');
+            
+            if (currentTasks.length > 0) {
+                tasksList.innerHTML = currentTasks.map(task => {
+                    const statusColor = task.status === 'completed' ? '#28a745' : 
+                                      task.status === 'pending' ? '#ffc107' : '#6c757d';
+                    
+                    return `
+                        <div class="task-card">
+                            <h4>📋 ${task.id}</h4>
+                            <p><strong>Type:</strong> ${task.type}</p>
+                            <p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${task.status}</span></p>
+                            <p><strong>Description:</strong> ${task.data.description}</p>
+                            <p><strong>Created:</strong> ${new Date(task.createdAt).toLocaleString()}</p>
+                            ${task.result ? `
+                                <details>
+                                    <summary><strong>Result:</strong></summary>
+                                    <pre>${JSON.stringify(task.result, null, 2)}</pre>
+                                </details>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                tasksSection.style.display = 'block';
+            }
+        }
+
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function clearResults() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('tasks-section').style.display = 'none';
+            currentTasks = [];
+            updateStatus('🧹 Results cleared', 'info');
+        }
+
+        // Auto-refresh factory status every 30 seconds
+        setInterval(checkFactoryStatus, 30000);
+    </script>
+</body>
+</html>
