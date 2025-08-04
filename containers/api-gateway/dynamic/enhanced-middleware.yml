@@ -74,7 +74,7 @@ http:
           - PUT
           - DELETE
           - OPTIONS
-        accessControlAllowOrigins:
+        accessControlAllowOriginList:
           - "https://*.yourdomain.com"
           - "http://localhost:*"
         accessControlAllowHeaders:
@@ -106,12 +106,7 @@ http:
         fallbackDuration: "30s"
         recoveryDuration: "10s"
 
-    # Request logging
-    access-log:
-      accessLog:
-        filePath: "/var/log/traefik/access.log"
-        format: json
-        bufferingSize: 100
+    # Request logging middleware removed - accessLog must be in static config
 
     # Compression
     compression:
@@ -135,7 +130,7 @@ http:
 
     # IP Whitelisting for admin endpoints
     admin-whitelist:
-      ipWhiteList:
+      ipAllowList:
         sourceRange:
           - "127.0.0.1/32"
           - "10.0.0.0/8"
@@ -240,7 +235,7 @@ http:
         certResolver: letsencrypt
 
     websockets:
-      rule: "Host(`ws.localhost`) || (PathPrefix(`/ws`) && Headers(`Connection`, `Upgrade`))"
+      rule: "Host(`ws.localhost`) || (PathPrefix(`/ws`) && Header(`Connection`, `Upgrade`))"
       service: factory-core-enhanced
       middlewares:
         - auth-factory
@@ -262,7 +257,7 @@ http:
 
     # Meta-agent event validation
     uep-events:
-      rule: "Host(`events.localhost`) || (PathPrefix(`/api/events`) && Headers(`X-Event-Type`, `.*`))"
+      rule: "Host(`events.localhost`) || (PathPrefix(`/api/events`) && Header(`X-Event-Type`, `.*`))"
       service: uep-service-enhanced
       middlewares:
         - auth-factory

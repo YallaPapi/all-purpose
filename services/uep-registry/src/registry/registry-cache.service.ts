@@ -6,7 +6,7 @@
  * and reduces load on etcd storage.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { RegisteredAgent } from './dto/registry.dto';
@@ -15,50 +15,99 @@ import { metricsHelpers } from '../monitoring/prometheus.setup';
 @Injectable()
 export class RegistryCacheService {
   private readonly logger = new Logger(RegistryCacheService.name);
-  private readonly redis: Redis;
+  private redis: Redis;
   private readonly keyPrefix = 'uep:registry:';
-  private readonly defaultTtl: number;
+  private defaultTtl: number;
+  private initialized = false;
 
   constructor(
-    private readonly configService: ConfigService,
+    @Optional() private readonly configService?: ConfigService,
   ) {
-    // Initialize Redis connection
-    this.redis = new Redis({
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-      password: this.configService.get<string>('REDIS_PASSWORD'),
-      db: this.configService.get<number>('REDIS_DB', 0),
-      retryDelayOnFailover: 100,
-      enableReadyCheck: true,
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-      keepAlive: 30000,
-      family: 4,
-      keyPrefix: this.keyPrefix,
+    // DEBUG: Enhanced ConfigService validation
+    console.log('🔍 RegistryCacheService constructor - ConfigService:', {
+      exists: !!this.configService,
+      type: typeof this.configService,
+      hasGet: typeof this.configService?.get === 'function',
+      constructor: this.configService?.constructor?.name,
     });
+    
+    if (!this.configService) {
+      console.warn('⚠️  ConfigService not available - using environment variables and defaults');
+      // Don't throw error - use fallback initialization
+    } else if (typeof this.configService.get !== 'function') {
+      console.error('❌ ConfigService.get method is missing!');
+      throw new Error('ConfigService.get method not available - invalid ConfigService instance');
+    } else {
+      console.log('✅ ConfigService validation passed in RegistryCacheService');
+    }
+    
+    // Defer initialization to avoid potential race conditions
+    this.initializeAsync();
+  }
 
-    this.defaultTtl = this.configService.get<number>('DISCOVERY_CACHE_TTL_SECONDS', 60);
+  private async initializeAsync(): Promise<void> {
+    try {
+      // Initialize Redis connection with ConfigService or environment variables
+      const redisHost = this.configService?.get<string>('REDIS_HOST') || process.env.REDIS_HOST || 'localhost';
+      const redisPort = this.configService?.get<number>('REDIS_PORT') || parseInt(process.env.REDIS_PORT || '6379');
+      const redisPassword = this.configService?.get<string>('REDIS_PASSWORD') || process.env.REDIS_PASSWORD;
+      const redisDb = this.configService?.get<number>('REDIS_DB') || parseInt(process.env.REDIS_DB || '0');
 
-    // Redis event handlers
-    this.redis.on('connect', () => {
-      this.logger.log('Connected to Redis cache');
-    });
+      this.redis = new Redis({
+        host: redisHost,
+        port: redisPort,
+        password: redisPassword,
+        db: redisDb,
+        lazyConnect: true,
+        keepAlive: 30000,
+        family: 4,
+        keyPrefix: this.keyPrefix,
+        retryStrategy: (times: number) => {
+          const delay = Math.min(100 + times * 2, 2000);
+          return delay;
+        },
+      });
 
-    this.redis.on('error', (error) => {
-      this.logger.error('Redis cache error:', error);
-    });
+      this.defaultTtl = this.configService?.get<number>('DISCOVERY_CACHE_TTL_SECONDS') || parseInt(process.env.DISCOVERY_CACHE_TTL_SECONDS || '60');
 
-    this.redis.on('ready', () => {
-      this.logger.log('Redis cache ready');
-    });
+      // Redis event handlers
+      this.redis.on('connect', () => {
+        this.logger.log('Connected to Redis cache');
+      });
 
-    this.redis.on('close', () => {
-      this.logger.warn('Redis cache connection closed');
-    });
+      this.redis.on('error', (error) => {
+        this.logger.error('Redis cache error:', error);
+      });
 
-    this.redis.on('reconnecting', () => {
-      this.logger.log('Redis cache reconnecting...');
-    });
+      this.redis.on('ready', () => {
+        this.logger.log('Redis cache ready');
+        this.initialized = true;
+      });
+
+      this.redis.on('close', () => {
+        this.logger.warn('Redis cache connection closed');
+        this.initialized = false;
+      });
+
+      this.redis.on('reconnecting', () => {
+        this.logger.log('Redis cache reconnecting...');
+      });
+
+      this.logger.log('RegistryCacheService initialized successfully');
+    } catch (error) {
+      this.logger.error('Failed to initialize RegistryCacheService:', error);
+      throw error;
+    }
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      // Wait a bit for async initialization
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (!this.initialized) {
+        throw new Error('RegistryCacheService not properly initialized');
+      }
+    }
   }
 
   /**
@@ -66,6 +115,8 @@ export class RegistryCacheService {
    */
   async setAgent(agentId: string, agent: RegisteredAgent, ttl?: number): Promise<void> {
     try {
+      await this.ensureInitialized();
+      
       const key = `agent:${agentId}`;
       const value = JSON.stringify(agent);
       const cacheTtl = ttl || this.defaultTtl;
@@ -280,7 +331,7 @@ export class RegistryCacheService {
       ] = await Promise.all([
         this.getAgentCacheSize(),
         this.getDiscoveryCacheSize(),
-        this.redis.memory('usage', `${this.keyPrefix}*`),
+        this.redis.memory('USAGE', `${this.keyPrefix}*`),
         this.redis.scard(`type:meta`),
         this.redis.scard(`type:domain`),
         this.redis.scard(`type:system`),

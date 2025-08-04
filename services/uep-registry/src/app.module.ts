@@ -16,13 +16,14 @@ import { WinstonModule } from 'nest-winston';
 // Core modules
 import { EtcdModule } from './etcd/etcd.module';
 import { RegistryModule } from './registry/registry.module';
-import { DiscoveryModule } from './discovery/discovery.module';
-import { HealthModule } from './health/health.module';
-import { MonitoringModule } from './monitoring/monitoring.module';
+// import { DiscoveryModule } from './discovery/discovery.module';
+// import { HealthModule } from './health/health.module';
+// import { MonitoringModule } from './monitoring/monitoring.module';
 
 // Configuration
 import { createWinstonConfig } from './config/winston.config';
 import { validateConfig } from './config/config.validation';
+// import { StartupService } from './startup/startup.service';
 
 @Module({
   imports: [
@@ -64,13 +65,14 @@ import { validateConfig } from './config/config.validation';
           port: configService.get<number>('REDIS_PORT', 6379),
           password: configService.get<string>('REDIS_PASSWORD'),
           db: configService.get<number>('REDIS_DB', 0),
-          retryDelayOnFailover: 100,
-          enableReadyCheck: true,
-          maxRetriesPerRequest: 3,
           lazyConnect: true,
           keepAlive: 30000,
           family: 4,
           keyPrefix: 'uep-registry:',
+          retryStrategy: (times: number) => {
+            const delay = Math.min(100 + times * 2, 2000);
+            return delay;
+          },
         },
       }),
       inject: [ConfigService],
@@ -82,25 +84,11 @@ import { validateConfig } from './config/config.validation';
     // Core business modules
     EtcdModule,
     RegistryModule,
-    DiscoveryModule,
-    HealthModule,
-    MonitoringModule,
+    // DiscoveryModule,
+    // HealthModule,
+    // MonitoringModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {
-  constructor(private configService: ConfigService) {
-    // Log configuration on startup
-    const etcdEndpoints = this.configService.get<string>('ETCD_ENDPOINTS', 'localhost:2379');
-    const redisHost = this.configService.get<string>('REDIS_HOST', 'localhost');
-    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
-
-    console.log('🔧 UEP Registry Configuration:');
-    console.log(`   Environment: ${nodeEnv}`);
-    console.log(`   etcd Endpoints: ${etcdEndpoints}`);
-    console.log(`   Redis Host: ${redisHost}`);
-    console.log(`   Metrics Enabled: ${this.configService.get<boolean>('METRICS_ENABLED', true)}`);
-    console.log(`   Health Checks Enabled: ${this.configService.get<boolean>('HEALTH_CHECKS_ENABLED', true)}`);
-  }
-}
+export class AppModule {}

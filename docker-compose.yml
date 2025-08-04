@@ -114,7 +114,7 @@ services:
       dockerfile: Dockerfile.working
     container_name: meta-agent-domain-agents
     ports:
-      - "3002:3001"
+      - "3005:3001"
     environment:
       - NODE_ENV=production
       - PORT=3001

@@ -45,5 +45,5 @@ EXPOSE 3003
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD wget -q -O - http://localhost:3003/health || exit 1
 
-# Run with tsx to handle TypeScript directly
-CMD ["tsx", "src/uep-service.ts"]
+# Run with node using simple JavaScript
+CMD ["node", "src/simple-uep.js"]
