@@ -198,6 +198,24 @@ export class AgentLoader {
         // These export functions directly
         return AgentModule;
         
+      case 'infra-orchestrator':
+        // InfraOrchestrator exports as { InfraOrchestrator }
+        this.logger.info(`Debug - InfraOrchestrator module exports:`, Object.keys(AgentModule));
+        this.logger.info(`Debug - AgentModule.InfraOrchestrator exists:`, !!AgentModule.InfraOrchestrator);
+        this.logger.info(`Debug - AgentModule.default exists:`, !!AgentModule.default);
+        
+        if (AgentModule.InfraOrchestrator) {
+          const instance = new AgentModule.InfraOrchestrator(config);
+          this.logger.info(`Debug - InfraOrchestrator instance methods:`, Object.getOwnPropertyNames(instance).concat(Object.getOwnPropertyNames(Object.getPrototypeOf(instance))));
+          return instance;
+        } else if (AgentModule.default?.InfraOrchestrator) {
+          const instance = new AgentModule.default.InfraOrchestrator(config);
+          this.logger.info(`Debug - InfraOrchestrator instance methods:`, Object.getOwnPropertyNames(instance).concat(Object.getOwnPropertyNames(Object.getPrototypeOf(instance))));
+          return instance;
+        }
+        // Fallback to generic handling
+        break;
+        
       default:
         // Try to find a class with the agent name
         const className = this.getClassName(agentType);

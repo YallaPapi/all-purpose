@@ -213,6 +213,10 @@ export class RealMetaAgentFactory extends EventEmitter {
         }
         return await instance.execute(task);
         
+      case 'infra-orchestrator':
+        // Infrastructure orchestrator with execute method
+        return await instance.execute(task);
+        
       default:
         // Generic execution for other agents
         if (instance.execute) {

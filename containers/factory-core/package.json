@@ -21,7 +21,18 @@
     "winston": "^3.10.0",
     "dotenv": "^16.3.1",
     "redis": "^4.6.8",
-    "nats": "^2.18.0"
+    "nats": "^2.18.0",
+    "@babel/parser": "^7.23.6",
+    "@babel/traverse": "^7.23.6",
+    "@babel/types": "^7.23.6",
+    "chokidar": "^3.5.3",
+    "fs-extra": "^11.3.0",
+    "glob": "^10.3.10",
+    "handlebars": "^4.7.8",
+    "joi": "^17.11.0",
+    "mermaid": "^10.6.1",
+    "yaml": "^2.3.4",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.8.0",

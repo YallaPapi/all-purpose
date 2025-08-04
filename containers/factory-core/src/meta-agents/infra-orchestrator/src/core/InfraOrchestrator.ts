@@ -31,6 +31,27 @@ export class InfraOrchestrator {
   }
 
   /**
+   * Execute method for Factory integration
+   * Wraps orchestration methods to match Factory interface
+   */
+  async execute(task: any): Promise<any> {
+    const { type = 'orchestrate', ...taskData } = task;
+    
+    switch (type) {
+      case 'orchestrate':
+        return await this.runFullOrchestration();
+      case 'audit':
+        return await this.runComplianceAudit();
+      case 'compliance':
+        return await this.runComplianceCheck();
+      case 'status':
+        return await this.generateStatusReport();
+      default:
+        return await this.runFullOrchestration();
+    }
+  }
+
+  /**
    * Run full orchestration cycle - main operational mode
    */
   async runFullOrchestration(): Promise<OrchestrationResult> {
