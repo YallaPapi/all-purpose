@@ -29,7 +29,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s
-    metrics_relabel_configs:
+    metric_relabel_configs:
       - source_labels: [__name__]
         regex: 'agent_.*'
         target_label: 'component'
@@ -46,7 +46,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s
-    metrics_relabel_configs:
+    metric_relabel_configs:
       - source_labels: [__name__]
         regex: 'domain_.*'
         target_label: 'component'
@@ -59,7 +59,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s
-    metrics_relabel_configs:
+    metric_relabel_configs:
       - source_labels: [__name__]
         regex: 'uep_.*'
         target_label: 'component'
@@ -142,9 +142,4 @@ alerting:
 #       max_shards: 200
 #       capacity: 2500
 
-# Storage configuration
-storage:
-  tsdb:
-    retention.time: 15d
-    retention.size: 10GB
-    wal-compression: true
+# Storage configuration - removed invalid fields, Prometheus will use defaults

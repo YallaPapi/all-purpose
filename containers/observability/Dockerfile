@@ -10,7 +10,9 @@ RUN apk add --no-cache supervisor curl
 # Copy Prometheus
 COPY --from=prometheus /bin/prometheus /bin/prometheus
 COPY --from=prometheus /bin/promtool /bin/promtool
-COPY prometheus.yml /etc/prometheus/prometheus.yml
+COPY prometheus-enhanced.yml /etc/prometheus/prometheus.yml
+COPY recording_rules.yml /etc/prometheus/recording_rules.yml
+COPY alert_rules.yml /etc/prometheus/alert_rules.yml
 
 # Copy Grafana
 COPY --from=grafana /usr/share/grafana /usr/share/grafana
