@@ -7,7 +7,7 @@
 
 import { INestApplication } from '@nestjs/common';
 import { register, collectDefaultMetrics, Counter, Histogram, Gauge } from 'prom-client';
-import * as promApiMetrics from 'prometheus-api-metrics';
+import promApiMetrics from 'prometheus-api-metrics';
 
 // Custom metrics for UEP Registry
 export const registryMetrics = {
@@ -134,9 +134,7 @@ export function setupPrometheusMetrics(app: INestApplication): void {
   app.use(promApiMetrics({
     metricsPath: '/metrics',
     defaultMetricsInterval: 5000,
-    requestDurationBuckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0],
-    requestSizeBuckets: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000],
-    responseSizeBuckets: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000],
+    durationBuckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0],
     excludeRoutes: ['/health', '/metrics'],
   }));
 
@@ -221,5 +219,18 @@ export const metricsHelpers = {
 
   recordIncompatibleRequest: (clientVersion: string, requiredVersion: string) => {
     registryMetrics.incompatibleRequests.inc({ client_version: clientVersion, required_version: requiredVersion });
+  },
+
+  recordWatchSubscription: (action: string, eventTypes: string) => {
+    registryMetrics.watchEvents.inc({ event_type: action, watch_type: eventTypes });
+  },
+
+  recordAgentLifecycleEvent: (eventType: string, agentType: string) => {
+    registryMetrics.agentRegistrations.inc({ agent_type: agentType, status: eventType });
+  },
+
+  recordCleanupOperation: (operationType: string, status: string, duration: number) => {
+    registryMetrics.etcdOperations.inc({ operation: operationType, status });
+    registryMetrics.etcdOperationDuration.observe({ operation: operationType }, duration / 1000);
   },
 };

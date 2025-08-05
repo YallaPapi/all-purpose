@@ -6,6 +6,7 @@
  */
 
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { RegistryService } from './registry.service';
 import { RegistryController } from './registry.controller';
@@ -14,10 +15,12 @@ import { AgentLifecycleService } from './agent-lifecycle.service';
 import { RegistryValidationService } from './registry-validation.service';
 import { RegistryCacheService } from './registry-cache.service';
 import { RegistryCleanupProcessor } from './registry-cleanup.processor';
-import { AgentHealthMonitorService } from './agent-health-monitor.service';
+// import { AgentHealthMonitorService } from './agent-health-monitor.service';
 
 @Module({
   imports: [
+    // ConfigModule is global - no need to import here
+    
     // Bull queue for async operations
     BullModule.registerQueue({
       name: 'registry-operations',
@@ -32,7 +35,7 @@ import { AgentHealthMonitorService } from './agent-health-monitor.service';
       },
     }),
     
-    // Bull queue for health monitoring
+    // Bull queue for health monitoring - RE-ENABLED
     BullModule.registerQueue({
       name: 'health-monitoring',
       defaultJobOptions: {
@@ -58,19 +61,20 @@ import { AgentHealthMonitorService } from './agent-health-monitor.service';
   ],
   controllers: [RegistryController],
   providers: [
+    // Order matters: ConfigService dependencies first
+    RegistryValidationService,
+    RegistryCacheService, // RE-ENABLED - ConfigService injection should work now
     RegistryService,
     RegistryGateway,
     AgentLifecycleService,
-    RegistryValidationService,
-    RegistryCacheService,
     RegistryCleanupProcessor,
-    AgentHealthMonitorService,
+    // AgentHealthMonitorService,
   ],
   exports: [
     RegistryService,
     AgentLifecycleService,
     RegistryValidationService,
-    RegistryCacheService,
+    RegistryCacheService, // RE-ENABLED
   ],
 })
 export class RegistryModule {}

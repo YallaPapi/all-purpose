@@ -5,7 +5,7 @@ import { createServer } from 'http';
 import { UEPValidationEngine } from './core/UEPValidationEngine.js';
 import { UEPProtocolProcessor } from './core/UEPProtocolProcessor.js';
 import { UEPEnforcementEngine } from './core/UEPEnforcementEngine.js';
-import { EventBus } from '../../../shared/messaging/EventBus.js';
+import { EventBus } from '../shared/messaging/EventBus.js';
 import { Logger } from './utils/Logger.js';
 import { config } from './config/environment.js';
 

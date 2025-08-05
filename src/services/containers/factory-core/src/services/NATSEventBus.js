@@ -146,25 +146,42 @@ export class NATSEventBus extends EventEmitter {
             const subscriptionId = this.generateId();
             this.logger.info(`Subscribing to ${fullSubject}`);
             // Create consumer configuration
+            const consumerName = `consumer-${subscriptionId}`;
             const consumerOpts = {
-                durable_name: `consumer-${subscriptionId}`,
+                durable_name: consumerName,
                 deliver_policy: 'new',
                 ack_policy: 'explicit',
                 ack_wait: 30000000000, // 30 seconds in nanoseconds
                 max_deliver: 3,
                 filter_subject: fullSubject
             };
+            
             // Get the appropriate stream
             const streamName = this.getStreamForSubject(fullSubject);
-            // Create consumer
-            const consumer = await this.jetstream.consumers.get(streamName, consumerOpts);
-            // Start consuming messages
+            
+            // Create the consumer first using JetStreamManager
+            try {
+                await this.jsm.consumers.add(streamName, consumerOpts);
+                console.log(`✅ Created consumer ${consumerName} for stream ${streamName}`);
+            } catch (consumerError) {
+                if (consumerError.message?.includes('10014') || consumerError.message?.includes('consumer already exists')) {
+                    console.log(`ℹ️ Using existing consumer ${consumerName} for stream ${streamName}`);
+                } else {
+                    throw consumerError;
+                }
+            }
+            
+            // Now get the consumer for message processing  
+            // CRITICAL FIX: Use consumer name, not configuration object
+            const consumer = await this.jetstream.consumers.get(streamName, consumerName);
+            // Start consuming messages with async iterator pattern (NATS 2.29.3 fix)
             const messages = await consumer.consume({
                 max_messages: 100,
-                expires: 30000,
+                expires: 30000
+                // Remove callback parameter - use async iterator instead
             });
-            // Process messages
-            this.processMessages(messages, handler, subscriptionId);
+            // Process messages using async iterator pattern
+            this.processMessagesAsync(messages, handler, subscriptionId);
             // Store subscription
             const subscription = {
                 id: subscriptionId,
@@ -365,7 +382,7 @@ export class NATSEventBus extends EventEmitter {
         // Default to events stream
         return 'META_AGENT_EVENTS';
     }
-    async processMessages(messages, handler, subscriptionId) {
+    async processMessagesAsync(messages, handler, subscriptionId) {
         (async () => {
             try {
                 for await (const jsMsg of messages) {
@@ -399,6 +416,11 @@ export class NATSEventBus extends EventEmitter {
                 this.emit('subscription:error', { subscriptionId, error });
             }
         })();
+    }
+    
+    // Legacy method kept for compatibility
+    async processMessages(messages, handler, subscriptionId) {
+        return this.processMessagesAsync(messages, handler, subscriptionId);
     }
     generateId() {
         return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

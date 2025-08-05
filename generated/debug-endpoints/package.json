@@ -1,0 +1,27 @@
+{
+  "name": "debug-endpoints-server",
+  "version": "1.0.0",
+  "description": "Generated debug endpoints server by 30-Minute Rule Agent",
+  "main": "debug-server.js",
+  "scripts": {
+    "start": "node debug-server.js",
+    "dev": "nodemon debug-server.js",
+    "test": "echo \"No tests specified\""
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "debugging",
+    "debug-endpoints",
+    "thirty-minute-rule",
+    "component-isolation",
+    "health-checks"
+  ],
+  "author": "30-Minute Rule Agent",
+  "license": "MIT"
+}

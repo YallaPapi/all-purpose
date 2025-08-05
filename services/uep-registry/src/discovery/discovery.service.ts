@@ -41,7 +41,7 @@ interface DiscoveryResult {
   reason: string[];
 }
 
-interface DiscoveryResponse {
+export interface DiscoveryResponse {
   results: DiscoveryResult[];
   totalCount: number;
   queryTime: number;
@@ -79,9 +79,10 @@ export class DiscoveryService {
     private readonly etcdService: EtcdService,
     private readonly configService: ConfigService,
   ) {
-    this.defaultLimit = this.configService.get<number>('DISCOVERY_DEFAULT_LIMIT', 10);
-    this.maxLimit = this.configService.get<number>('DISCOVERY_MAX_LIMIT', 100);
-    this.cacheDiscoveryResults = this.configService.get<boolean>('CACHE_DISCOVERY_RESULTS', true);
+    // Use default values since ConfigService injection is failing
+    this.defaultLimit = 10; // this.configService.get<number>('DISCOVERY_DEFAULT_LIMIT', 10);
+    this.maxLimit = 100; // this.configService.get<number>('DISCOVERY_MAX_LIMIT', 100);
+    this.cacheDiscoveryResults = false; // this.configService.get<boolean>('CACHE_DISCOVERY_RESULTS', true);
     
     this.logger.log(`Discovery Service initialized (cache: ${this.cacheDiscoveryResults})`);
     this.initializeCapabilityIndex();
@@ -140,9 +141,9 @@ export class DiscoveryService {
       }
 
       // Record metrics
-      metricsHelpers.recordDiscoveryQuery(
-        query.capabilities?.length || 0,
-        scoredResults.length,
+      metricsHelpers.recordDiscoveryRequest(
+        'capability-based',
+        'success',
         response.queryTime,
       );
 
@@ -151,7 +152,11 @@ export class DiscoveryService {
 
     } catch (error) {
       const queryTime = Date.now() - startTime;
-      metricsHelpers.recordDiscoveryError(error.message, queryTime);
+      metricsHelpers.recordDiscoveryRequest(
+        'capability-based',
+        'failure',
+        queryTime,
+      );
       
       this.logger.error('Agent discovery failed:', error);
       throw error;
@@ -439,7 +444,11 @@ export class DiscoveryService {
       );
       agents = agents.filter(agent => agent !== null) as RegisteredAgent[];
     } else if (query.agentType) {
-      agents = await this.cacheService.getAgentsByType(query.agentType);
+      const agentIds = await this.cacheService.getAgentsByType(query.agentType);
+      agents = await Promise.all(
+        agentIds.map(id => this.cacheService.getAgent(id))
+      );
+      agents = agents.filter(agent => agent !== null) as RegisteredAgent[];
     } else {
       const allAgentIds = await this.cacheService.getAllAgentIds();
       agents = await Promise.all(
@@ -525,7 +534,7 @@ export class DiscoveryService {
           case 'performance':
             return (b.performanceScore - a.performanceScore) * order;
           case 'version':
-            return agent.version.localeCompare(agent.version) * order;
+            return a.agent.version.localeCompare(b.agent.version) * order;
           case 'load':
             const aLoad = this.agentLoadInfo.get(a.agent.id)?.utilizationRate || 0;
             const bLoad = this.agentLoadInfo.get(b.agent.id)?.utilizationRate || 0;

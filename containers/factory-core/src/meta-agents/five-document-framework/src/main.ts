@@ -284,7 +284,7 @@ function showHelp() {
 function showVersion() {
   const packagePath = path.join(__dirname, '..', 'package.json');
   try {
-    const packageJson = require(packagePath);
+    const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
     console.log(`Five Document Framework Agent v${packageJson.version}`);
   } catch (error) {
     console.log('Five Document Framework Agent v1.0.0');

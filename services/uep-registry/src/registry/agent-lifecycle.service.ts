@@ -6,7 +6,7 @@
  * agent registration, health monitoring, and cleanup operations.
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Optional } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -46,13 +46,13 @@ export class AgentLifecycleService implements OnModuleInit, OnModuleDestroy {
     private readonly eventEmitter: EventEmitter2,
     private readonly cacheService: RegistryCacheService,
     private readonly etcdService: EtcdService,
-    private readonly configService: ConfigService,
+    @Optional() private readonly configService: ConfigService,
     @InjectQueue('registry-cleanup') private cleanupQueue: Queue,
     @InjectQueue('health-monitoring') private healthQueue: Queue,
   ) {
-    this.maxEventQueueSize = this.configService.get<number>('LIFECYCLE_EVENT_QUEUE_SIZE', 1000);
-    this.healthCheckTimeout = this.configService.get<number>('HEALTH_CHECK_TIMEOUT_MS', 5000);
-    this.leaseRenewalThreshold = this.configService.get<number>('LEASE_RENEWAL_THRESHOLD_SECONDS', 60);
+    this.maxEventQueueSize = this.configService?.get<number>('LIFECYCLE_EVENT_QUEUE_SIZE', 1000) || parseInt(process.env.LIFECYCLE_EVENT_QUEUE_SIZE || '1000');
+    this.healthCheckTimeout = this.configService?.get<number>('HEALTH_CHECK_TIMEOUT_MS', 5000) || parseInt(process.env.HEALTH_CHECK_TIMEOUT_MS || '5000');
+    this.leaseRenewalThreshold = this.configService?.get<number>('LEASE_RENEWAL_THRESHOLD_SECONDS', 60) || parseInt(process.env.LEASE_RENEWAL_THRESHOLD_SECONDS || '60');
     
     this.logger.log(`Agent Lifecycle Service initialized with queue size: ${this.maxEventQueueSize}`);
   }
@@ -95,7 +95,7 @@ export class AgentLifecycleService implements OnModuleInit, OnModuleDestroy {
       this.logger.debug(`Handling agent registration: ${payload.agent.id}`);
       
       // Track lease information
-      const ttl = this.configService.get<number>('UEP_REGISTRY_TTL_SECONDS', 300);
+      const ttl = this.configService?.get<number>('UEP_REGISTRY_TTL_SECONDS', 300) || parseInt(process.env.UEP_REGISTRY_TTL_SECONDS || '300');
       const expiresAt = new Date();
       expiresAt.setSeconds(expiresAt.getSeconds() + ttl);
       

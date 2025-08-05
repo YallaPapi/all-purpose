@@ -26,7 +26,7 @@ interface WatchSubscription {
   eventCount: number;
 }
 
-interface WatchFilters {
+export interface WatchFilters {
   agentIds?: string[];
   agentTypes?: AgentType[];
   capabilities?: string[];
@@ -51,7 +51,7 @@ interface WatchEvent {
   source: 'registry' | 'health' | 'lifecycle' | 'discovery';
 }
 
-type WatchEventType = 
+export type WatchEventType = 
   | 'agent_registered'
   | 'agent_deregistered' 
   | 'agent_updated'
@@ -100,7 +100,7 @@ export class WatchService implements OnModuleInit, OnModuleDestroy {
   private readonly maxSubscriptionsPerClient: number;
   private readonly maxEventHistory: number;
   private readonly eventHistory: WatchEvent[] = [];
-  private readonly cleanupInterval: NodeJS.Timer;
+  private cleanupInterval: NodeJS.Timeout | null = null;
   private readonly shutdownSubject = new Subject<void>();
 
   constructor(
@@ -141,6 +141,7 @@ export class WatchService implements OnModuleInit, OnModuleDestroy {
     
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
     }
 
     // Close all active subscriptions

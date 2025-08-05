@@ -106,7 +106,7 @@ http:
           - PUT
           - DELETE
           - OPTIONS
-        accessControlAllowOrigins:
+        accessControlAllowOriginList:
           - "*"
         accessControlAllowHeaders:
           - "*"

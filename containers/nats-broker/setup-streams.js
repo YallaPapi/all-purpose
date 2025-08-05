@@ -1,11 +1,31 @@
 #!/usr/bin/env node
 
-import { connect, JSONCodec, StringCodec } from 'nats';
+import { connect, JSONCodec, StringCodec, StorageType, RetentionPolicy, DiscardPolicy, DeliverPolicy, AckPolicy, ReplayPolicy } from 'nats';
 import fs from 'fs';
 import path from 'path';
 
 const jc = JSONCodec();
 const sc = StringCodec();
+
+// Convert string literals to NATS enums
+function convertToNATSEnums(config) {
+  const storageMap = { 'file': StorageType.File, 'memory': StorageType.Memory };
+  const retentionMap = { 'limits': RetentionPolicy.Limits, 'interest': RetentionPolicy.Interest, 'workqueue': RetentionPolicy.Workqueue };
+  const discardMap = { 'old': DiscardPolicy.Old, 'new': DiscardPolicy.New };
+  const deliverMap = { 'all': DeliverPolicy.All, 'new': DeliverPolicy.New, 'last': DeliverPolicy.Last, 'last_per_subject': DeliverPolicy.LastPerSubject };
+  const ackMap = { 'explicit': AckPolicy.Explicit, 'none': AckPolicy.None, 'all': AckPolicy.All };
+  const replayMap = { 'instant': ReplayPolicy.Instant, 'original': ReplayPolicy.Original };
+
+  return {
+    ...config,
+    storage: storageMap[config.storage] || config.storage,
+    retention: retentionMap[config.retention] || config.retention,
+    discard: discardMap[config.discard] || config.discard,
+    deliver_policy: deliverMap[config.deliver_policy] || config.deliver_policy,
+    ack_policy: ackMap[config.ack_policy] || config.ack_policy,
+    replay_policy: replayMap[config.replay_policy] || config.replay_policy
+  };
+}
 
 async function setupJetStreamStreams() {
   console.log('🚀 Setting up NATS JetStream streams...');
@@ -33,18 +53,19 @@ async function setupJetStreamStreams() {
       try {
         console.log(`📋 Creating stream: ${streamConfig.name}`);
         
+        const convertedStreamConfig = convertToNATSEnums(streamConfig);
         await jsm.streams.add({
-          name: streamConfig.name,
-          description: streamConfig.description,
-          subjects: streamConfig.subjects,
-          retention: streamConfig.retention,
-          max_consumers: streamConfig.max_consumers,
-          max_msgs: streamConfig.max_msgs,
-          max_bytes: streamConfig.max_bytes,
-          max_age: streamConfig.max_age,
-          storage: streamConfig.storage,
-          replicas: streamConfig.replicas,
-          discard: streamConfig.discard
+          name: convertedStreamConfig.name,
+          description: convertedStreamConfig.description,
+          subjects: convertedStreamConfig.subjects,
+          retention: convertedStreamConfig.retention,
+          max_consumers: convertedStreamConfig.max_consumers,
+          max_msgs: convertedStreamConfig.max_msgs,
+          max_bytes: convertedStreamConfig.max_bytes,
+          max_age: convertedStreamConfig.max_age,
+          storage: convertedStreamConfig.storage,
+          replicas: convertedStreamConfig.replicas,
+          discard: convertedStreamConfig.discard
         });
 
         console.log(`✅ Stream created: ${streamConfig.name}`);
@@ -62,16 +83,17 @@ async function setupJetStreamStreams() {
       try {
         console.log(`👥 Creating consumer: ${consumerConfig.name} on ${consumerConfig.stream_name}`);
         
+        const convertedConsumerConfig = convertToNATSEnums(consumerConfig);
         await jsm.consumers.add(consumerConfig.stream_name, {
-          name: consumerConfig.name,
-          description: consumerConfig.description,
-          durable_name: consumerConfig.durable_name,
-          deliver_policy: consumerConfig.deliver_policy,
-          ack_policy: consumerConfig.ack_policy,
-          ack_wait: consumerConfig.ack_wait,
-          max_deliver: consumerConfig.max_deliver,
-          filter_subject: consumerConfig.filter_subject,
-          replay_policy: consumerConfig.replay_policy
+          name: convertedConsumerConfig.name,
+          description: convertedConsumerConfig.description,
+          durable_name: convertedConsumerConfig.durable_name,
+          deliver_policy: convertedConsumerConfig.deliver_policy,
+          ack_policy: convertedConsumerConfig.ack_policy,
+          ack_wait: convertedConsumerConfig.ack_wait,
+          max_deliver: convertedConsumerConfig.max_deliver,
+          filter_subject: convertedConsumerConfig.filter_subject,
+          replay_policy: convertedConsumerConfig.replay_policy
         });
 
         console.log(`✅ Consumer created: ${consumerConfig.name}`);

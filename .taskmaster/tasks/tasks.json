@@ -4159,11 +4159,25 @@
         ],
         "priority": "medium",
         "subtasks": []
+      },
+      {
+        "id": 263,
+        "title": "Research and Design Integration Layer for Coordinated Meta-Agent Workflow in Full-Stack Software Development",
+        "description": "Research, define, and design an integration layer that enables a single PRD to coordinate all 16 meta-agents—including scaffold-generator, backend, frontend, QA, DevOps, and documentation agents—for end-to-end software delivery, identifying workflow patterns and missing orchestration mechanisms.",
+        "details": "1. Survey state-of-the-art multi-agent orchestration frameworks (e.g., MetaGPT, MetaAgent) and agentic workflow patterns in software engineering, focusing on how a high-level orchestrator or integration layer manages communication, task decomposition, and synchronization among heterogeneous agents (scaffold-generator, backend, frontend, QA, DevOps, documentation, infra orchestrator, and domain agents).\n2. Analyze the assembly line and FSM-based coordination paradigms, emphasizing the use of Standardized Operating Procedures (SOPs), executive feedback loops, and shared state management to ensure robust, error-minimized collaboration across agents[2][4].\n3. Map the required data flows and control signals between the scaffold-generator and each specialized agent, identifying where parallelization, dependency management, and feedback integration are necessary for simultaneous multi-agent execution[3][4].\n4. Identify and document the missing integration layer(s) needed to bridge the PRD and agent swarm, specifying interface contracts, message schemas, and coordination protocols (e.g., event-driven, pub/sub, or workflow engine-based approaches).\n5. Provide architectural diagrams and reference implementation patterns for the integration layer, including error handling, state reconciliation, and extensibility for new agent types.\n6. Summarize best practices for monitoring, debugging, and evolving the integration layer as agent roles and workflows change over time.",
+        "testStrategy": "1. Validate the proposed integration layer design by simulating a full-stack software delivery workflow: trigger a PRD, observe agent coordination, and verify correct handoff and feedback between scaffold-generator, backend, frontend, QA, DevOps, and documentation agents.\n2. Use mock agents and message tracing to ensure that all required data and control flows are correctly routed and synchronized.\n3. Review architectural diagrams and interface definitions with domain experts for completeness and extensibility.\n4. Document and test error scenarios (e.g., agent failure, communication breakdown) to confirm robust recovery and state reconciliation mechanisms.",
+        "status": "done",
+        "dependencies": [
+          252,
+          241
+        ],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-26T01:05:11.687Z",
-      "updated": "2025-08-02T21:24:45.768Z",
+      "updated": "2025-08-04T23:25:20.449Z",
       "description": "Tasks for master context"
     }
   }

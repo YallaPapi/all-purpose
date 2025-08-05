@@ -28,7 +28,7 @@ export interface RedisRegistryConfig {
     password?: string;
     db?: number;
     keyPrefix?: string;
-    retryDelayOnFailover: number;
+    retryDelayOnFailover?: number;
     enableReadyCheck: boolean;
     maxRetriesPerRequest: number;
   };
@@ -81,9 +81,12 @@ export class RedisServiceRegistry extends EventEmitter {
       port: config.redis.port,
       password: config.redis.password,
       db: config.redis.db || 0,
-      retryDelayOnFailover: config.redis.retryDelayOnFailover,
       enableReadyCheck: config.redis.enableReadyCheck,
-      maxRetriesPerRequest: config.redis.maxRetriesPerRequest
+      maxRetriesPerRequest: config.redis.maxRetriesPerRequest,
+      retryStrategy: (times: number) => {
+        const delay = Math.min((config.redis.retryDelayOnFailover || 100) + times * 2, 2000);
+        return delay;
+      }
     });
 
     this.setupRedisEventHandlers();

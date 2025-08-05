@@ -6,12 +6,13 @@
  */
 
 import { Module, Global } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EtcdService } from './etcd.service';
 import { EtcdHealthIndicator } from './etcd-health.indicator';
 
 @Global()
 @Module({
+  imports: [ConfigModule],
   providers: [
     {
       provide: 'ETCD_CLIENT',

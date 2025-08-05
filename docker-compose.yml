@@ -1,5 +1,3 @@
-version: '3.8'
-
 # All-Purpose Meta-Agent Factory - Production Docker Compose Configuration
 # Complete orchestration with proper service dependencies, health checks, and monitoring
 # Usage: docker-compose up -d
@@ -55,8 +53,8 @@ services:
   # Factory Core - 11 Meta-Agents
   factory-core:
     build:
-      context: ./containers/factory-core
-      dockerfile: Dockerfile.working
+      context: .
+      dockerfile: containers/factory-core/Dockerfile.working
     container_name: meta-agent-factory-core
     ports:
       - "3000:3000"
@@ -89,7 +87,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -142,12 +140,7 @@ services:
       uep-registry:
         condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    # Use NATS-based health check from Dockerfile (node src/nats-health-check.js)
     deploy:
       resources:
         limits:
@@ -192,7 +185,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/v1/registry/agents/health/check"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -205,8 +198,8 @@ services:
   # UEP Service - Universal Execution Protocol
   uep-service:
     build:
-      context: ./containers/uep-service
-      dockerfile: Dockerfile.working
+      context: .
+      dockerfile: containers/uep-service/Dockerfile.working
     container_name: meta-agent-uep-service
     ports:
       - "3003:3003"
@@ -226,14 +219,9 @@ services:
     networks:
       - meta-agent-factory
     depends_on:
-      uep-registry:
-        condition: service_healthy
-      nats-broker:
-        condition: service_healthy
-      factory-core:
-        condition: service_healthy
-      domain-agents:
-        condition: service_healthy
+      - uep-registry
+      - nats-broker
+      - factory-core
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3003/health"]

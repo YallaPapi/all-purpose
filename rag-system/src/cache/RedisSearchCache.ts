@@ -16,13 +16,12 @@ export interface RedisCacheConfig {
   password?: string;
   db?: number;
   maxRetriesPerRequest?: number;
-  retryDelayOnFailover?: number;
   enableReadyCheck?: boolean;
-  maxRetriesPerRequest?: number;
   lazyConnect?: boolean;
   keyPrefix?: string;
   maxMemoryPolicy?: string;
   maxMemoryMB?: number;
+  retryStrategy?: (times: number) => number;
 }
 
 export interface CacheEntry {
@@ -68,12 +67,15 @@ export class RedisSearchCache {
   constructor(config: RedisCacheConfig) {
     this.config = {
       maxRetriesPerRequest: 3,
-      retryDelayOnFailover: 100,
       enableReadyCheck: true,
       lazyConnect: true,
       keyPrefix: 'rag:',
       maxMemoryPolicy: 'volatile-lru',
       maxMemoryMB: 100,
+      retryStrategy: (times: number) => {
+        const delay = Math.min(100 + times * 2, 2000);
+        return delay;
+      },
       ...config
     };
 
@@ -83,16 +85,12 @@ export class RedisSearchCache {
       port: this.config.port,
       password: this.config.password,
       db: this.config.db || 0,
-      maxRetriesPerRequest: this.config.maxRetriesPerRequest,
-      retryDelayOnFailover: this.config.retryDelayOnFailover,
-      enableReadyCheck: this.config.enableReadyCheck,
-      lazyConnect: this.config.lazyConnect,
-      keyPrefix: this.config.keyPrefix,
-      // Connection pool settings for high concurrency
+      maxRetriesPerRequest: this.config.maxRetriesPerRequest || 3,
+      enableReadyCheck: this.config.enableReadyCheck !== false,
+      lazyConnect: this.config.lazyConnect || false,
+      keyPrefix: this.config.keyPrefix || 'rag:',
       family: 4,
-      keepAlive: true,
-      // Memory optimization
-      maxmemoryPolicy: this.config.maxMemoryPolicy as any,
+      keepAlive: 30000,
     });
 
     // Initialize stats

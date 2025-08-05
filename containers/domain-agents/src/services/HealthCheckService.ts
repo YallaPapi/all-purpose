@@ -1,15 +1,22 @@
+import { connect } from 'nats';
+
 export class HealthCheckService {
   private startTime: number;
+  private natsConnection: any = null;
 
   constructor() {
     this.startTime = Date.now();
   }
 
-  getHealthStatus() {
+  async getHealthStatus() {
     const uptime = Date.now() - this.startTime;
+    const natsCheck = await this.checkNATSConnectivity();
+    
+    // Determine overall status based on critical checks
+    const overallStatus = natsCheck.status === 'healthy' ? 'healthy' : 'unhealthy';
     
     return {
-      status: 'healthy',
+      status: overallStatus,
       service: 'domain-agents',
       timestamp: new Date().toISOString(),
       uptime: Math.floor(uptime / 1000),
@@ -18,9 +25,44 @@ export class HealthCheckService {
       checks: {
         memory: this.checkMemory(),
         cpu: this.checkCpu(),
-        disk: this.checkDisk()
+        disk: this.checkDisk(),
+        nats: natsCheck
       }
     };
+  }
+
+  private async checkNATSConnectivity() {
+    try {
+      const natsUrl = process.env.NATS_URL || 'nats://nats-broker:4222';
+      
+      // Try to connect with a short timeout
+      const nc = await connect({
+        servers: natsUrl,
+        timeout: 3000,
+        reconnect: false
+      });
+      
+      // Test basic publish capability
+      await nc.publish('health.test', Buffer.from('ping'));
+      
+      // Clean up
+      await nc.drain();
+      
+      return {
+        status: 'healthy',
+        server: natsUrl,
+        connected: true,
+        latency: Date.now() - this.startTime
+      };
+      
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        server: process.env.NATS_URL || 'nats://nats-broker:4222',
+        connected: false,
+        error: error instanceof Error ? error.message : 'Unknown NATS error'
+      };
+    }
   }
 
   private checkMemory() {

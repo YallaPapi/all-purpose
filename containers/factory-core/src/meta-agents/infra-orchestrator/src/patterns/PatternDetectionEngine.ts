@@ -6,6 +6,7 @@
  */
 
 import * as fs from 'fs-extra';
+import * as nativeFs from 'fs';
 import * as path from 'path';
 import { glob } from 'glob';
 import { PatternRegistry } from './PatternRegistry.js';
@@ -58,7 +59,7 @@ export class PatternDetectionEngine {
       throw new Error(`File not found: ${filePath}`);
     }
 
-    const sourceCode = await fs.readFile(filePath, 'utf-8');
+    const sourceCode = await nativeFs.promises.readFile(filePath, 'utf-8');
     const results = await this.registry.detectInFile(filePath, sourceCode);
     
     const analysisTime = Date.now() - startTime;
@@ -117,7 +118,8 @@ export class PatternDetectionEngine {
   async analyzeCodebase(rootPath: string): Promise<CodebaseAnalysisReport> {
     const startTime = Date.now();
     
-    if (!await fs.pathExists(rootPath)) {
+    // Use native fs.existsSync instead of fs-extra pathExists to avoid Docker volume overlay issues
+    if (!nativeFs.existsSync(rootPath)) {
       throw new Error(`Root path not found: ${rootPath}`);
     }
 

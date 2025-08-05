@@ -1,0 +1,28 @@
+FROM nats:2.10-alpine
+
+LABEL maintainer="Meta-Agent Factory Team" \
+      version="1.0.0" \
+      description="NATS JetStream for Meta-Agent Factory" \
+      component="messaging"
+
+# Create directories
+RUN mkdir -p /data/jetstream /logs
+
+# Copy configuration
+COPY nats-server.conf /etc/nats/nats-server.conf
+
+# Set permissions
+RUN addgroup -g 1000 -S nats && \
+    adduser -S -u 1000 -G nats nats && \
+    chown -R nats:nats /data /logs
+USER nats
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD nats server check jetstream
+
+# Expose ports
+EXPOSE 4222 8222 6222
+
+# Start NATS with JetStream
+CMD ["nats-server", "-c", "/etc/nats/nats-server.conf"]

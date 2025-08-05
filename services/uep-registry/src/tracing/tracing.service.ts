@@ -66,7 +66,7 @@ export class UEPRegistryTracingService {
       metricReader: new PeriodicExportingMetricReader({
         exporter: metricExporter,
         exportIntervalMillis: 5000,
-      }),
+      }) as any,
       instrumentations: [
         getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-fs': { enabled: false },

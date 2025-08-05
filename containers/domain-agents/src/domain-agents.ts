@@ -29,9 +29,19 @@ const domainManager = new DomainAgentManager();
 const healthService = new HealthCheckService();
 const metricsService = new MetricsService();
 
-app.get('/health', (req, res) => {
-  const health = healthService.getHealthStatus();
-  res.status(health.status === 'healthy' ? 200 : 503).json(health);
+app.get('/health', async (req, res) => {
+  try {
+    const health = await healthService.getHealthStatus();
+    res.status(health.status === 'healthy' ? 200 : 503).json(health);
+  } catch (error) {
+    logger.error('Health check failed:', error);
+    res.status(503).json({
+      status: 'unhealthy',
+      service: 'domain-agents',
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : 'Health check failed'
+    });
+  }
 });
 
 app.get('/metrics', (req, res) => {

@@ -16,7 +16,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { createServer } from 'http';
-import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts, createInbox, Msg } from 'nats';
+import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts, createInbox, Msg, DeliverPolicy, ReplayPolicy, AckPolicy } from 'nats';
 import { UEPValidationEngine } from './core/UEPValidationEngine.js';
 import { UEPProtocolProcessor } from './core/UEPProtocolProcessor.js';
 import { UEPEnforcementEngine } from './core/UEPEnforcementEngine.js';
@@ -277,14 +277,22 @@ export class UEPEventBusValidationService {
     }
 
     // Consumer for primary UEP protocol messages validation
-    const uepConsumerOpts = consumerOpts()
-      .durable('uep-validation-service')
-      .deliverTo(createInbox())
-      .manualAck()
-      .ackExplicit()
-      .maxDeliver(1)
-      .ackWait(5000);
+    // FIXED: Create consumer first, then get it
+    try {
+      await this.jetStreamManager!.consumers.add('UEP_PROTOCOL_MESSAGES', {
+        durable_name: 'uep-validation-consumer',
+        ack_policy: AckPolicy.Explicit,
+        deliver_policy: DeliverPolicy.All,
+        replay_policy: ReplayPolicy.Instant
+      });
+    } catch (error: any) {
+      // Consumer might already exist, that's OK
+      if (!error.message?.includes('consumer already exists')) {
+        throw error;
+      }
+    }
 
+    // Now get the consumer - this is the correct API: (streamName, consumerName)
     const uepConsumer = await this.jetStreamClient.consumers.get('UEP_PROTOCOL_MESSAGES', 'uep-validation-consumer');
     
     console.log('✅ UEP protocol validation consumer created');

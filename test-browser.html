@@ -109,7 +109,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏭 Meta-Agent Factory - Browser Test</h1>
+        <h1>🏭 Meta-Agent Factory - PRD Gateway</h1>
         
         <div id="status" class="status info">
             🔄 Initializing connection to factory-core...
@@ -118,40 +118,73 @@
         <!-- Factory Status Section -->
         <div class="form-group">
             <button onclick="checkFactoryStatus()">🔍 Check Factory Status</button>
-            <button onclick="listAgents()">🤖 List Registered Agents</button>
+            <button onclick="listProjects()">📋 List Projects</button>
         </div>
 
-        <!-- Agents Display -->
-        <div id="agents-section" style="display: none;">
-            <h3>📋 Registered Agents</h3>
-            <div id="agents-grid" class="agents-grid"></div>
+        <!-- Projects Display -->
+        <div id="projects-section" style="display: none;">
+            <h3>📂 Active Projects</h3>
+            <div id="projects-list"></div>
         </div>
 
-        <!-- Task Creation Form -->
+        <!-- PRD Submission Form -->
         <div class="form-group">
-            <h3>🚀 Create New Task</h3>
-            <label for="agentType">Agent Type:</label>
-            <select id="agentType">
-                <option value="backend">Backend Agent</option>
-                <option value="frontend">Frontend Agent</option>
-                <option value="devops">DevOps Agent</option>
-                <option value="qa">QA Agent</option>
-                <option value="documentation">Documentation Agent</option>
-            </select>
+            <h3>🚀 Submit Product Requirements Document (PRD)</h3>
+            <label for="projectName">Project Name:</label>
+            <input type="text" id="projectName" placeholder="My Awesome Project" value="Task Management System">
         </div>
 
         <div class="form-group">
-            <label for="taskDescription">Task Description:</label>
-            <textarea id="taskDescription" rows="3" placeholder="Describe what you want the agent to build...">Create a user authentication API with Express.js, JWT tokens, and password hashing</textarea>
+            <label for="prdContent">PRD Content (Markdown):</label>
+            <textarea id="prdContent" rows="15" placeholder="Paste your Product Requirements Document here..."># Task Management System
+
+## Project Overview
+Build a comprehensive task management system with real-time collaboration and analytics.
+
+## Core Requirements
+
+### User Management
+- User registration and authentication
+- Role-based access control (Admin, Manager, User)
+- Team management and invitations
+
+### Task Management
+- Create, read, update, delete tasks
+- Task assignment to users
+- Due dates and priority levels
+- Task categories and labels
+
+### Real-time Features
+- Live task updates across all users
+- Real-time notifications
+- Activity feed showing all changes
+
+### Analytics & Reporting
+- Task completion metrics
+- Team productivity dashboards
+- Custom report generation
+
+## Technical Requirements
+
+### Backend
+- Node.js with Express.js framework
+- PostgreSQL for data persistence
+- JWT authentication
+- RESTful API design
+
+### Frontend
+- React with TypeScript
+- Redux for state management
+- Material-UI for components
+
+### DevOps
+- Docker containerization
+- CI/CD with GitHub Actions
+- AWS deployment</textarea>
         </div>
 
         <div class="form-group">
-            <label for="requirements">Requirements (comma-separated):</label>
-            <input type="text" id="requirements" placeholder="Express.js, JWT, bcrypt, MongoDB" value="Express.js, JWT, bcrypt">
-        </div>
-
-        <div class="form-group">
-            <button onclick="createTask()" id="createTaskBtn">🎯 Create Task</button>
+            <button onclick="submitPRD()" id="submitPRDBtn">🎯 Submit PRD & Generate Project</button>
             <button onclick="clearResults()">🧹 Clear Results</button>
         </div>
 
@@ -161,16 +194,18 @@
             <div id="resultsContent"></div>
         </div>
 
-        <!-- Tasks List -->
-        <div id="tasks-section" style="display: none;">
-            <h3>📋 Recent Tasks</h3>
-            <div id="tasks-list"></div>
+        <!-- Project Details -->
+        <div id="project-details" style="display: none;">
+            <h3>📊 Project Execution Status</h3>
+            <div id="project-info"></div>
+            <div id="tasks-grid" class="agents-grid"></div>
         </div>
     </div>
 
     <script>
-        const FACTORY_URL = 'http://localhost:3005';
-        let currentTasks = [];
+        const FACTORY_URL = 'http://localhost:3006';
+        let currentProjects = [];
+        let selectedProject = null;
 
         // Initialize on page load
         window.onload = function() {
@@ -185,10 +220,10 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    updateStatus(`✅ Factory is online! Agents: ${data.data.agents}, Tasks: ${data.data.tasks}, Uptime: ${Math.round(data.data.uptime)}s`, 'success');
+                    updateStatus(`✅ Factory is online! Active projects: ${data.data.tasks}, NATS: ${data.data.natsConnected ? 'Connected' : 'Disconnected'}`, 'success');
                     
-                    // Auto-load agents if factory is working
-                    await listAgents();
+                    // Auto-load projects if factory is working
+                    await listProjects();
                 } else {
                     updateStatus('❌ Factory status check failed', 'error');
                 }
@@ -198,153 +233,198 @@
             }
         }
 
-        async function listAgents() {
+        async function listProjects() {
             try {
-                const response = await fetch(`${FACTORY_URL}/api/agents`);
+                const response = await fetch(`${FACTORY_URL}/api/factory/projects`);
                 const data = await response.json();
                 
                 if (data.success) {
-                    displayAgents(data.data);
+                    currentProjects = data.data;
+                    displayProjects(data.data);
                 } else {
-                    updateStatus('❌ Failed to load agents', 'error');
+                    updateStatus('❌ Failed to load projects', 'error');
                 }
             } catch (error) {
-                updateStatus(`❌ Error loading agents: ${error.message}`, 'error');
-                console.error('Agents error:', error);
+                updateStatus(`❌ Error loading projects: ${error.message}`, 'error');
+                console.error('Projects error:', error);
             }
         }
 
-        async function createTask() {
+        async function submitPRD() {
             try {
-                const agentType = document.getElementById('agentType').value;
-                const description = document.getElementById('taskDescription').value;
-                const requirementsText = document.getElementById('requirements').value;
-                const requirements = requirementsText.split(',').map(r => r.trim()).filter(r => r);
+                const projectName = document.getElementById('projectName').value.trim();
+                const prdContent = document.getElementById('prdContent').value.trim();
 
-                if (!description.trim()) {
-                    updateStatus('❌ Please enter a task description', 'error');
+                if (!projectName) {
+                    updateStatus('❌ Please enter a project name', 'error');
                     return;
                 }
 
-                updateStatus('🚀 Creating task...', 'info');
-                document.getElementById('createTaskBtn').disabled = true;
+                if (!prdContent) {
+                    updateStatus('❌ Please enter PRD content', 'error');
+                    return;
+                }
 
-                const taskData = {
-                    description: description,
-                    requirements: requirements,
-                    timestamp: new Date().toISOString()
-                };
+                updateStatus('🚀 Processing PRD and generating project...', 'info');
+                document.getElementById('submitPRDBtn').disabled = true;
 
-                const response = await fetch(`${FACTORY_URL}/api/tasks`, {
+                const response = await fetch(`${FACTORY_URL}/api/factory/projects`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        agentType: agentType,
-                        taskData: taskData
+                        projectName: projectName,
+                        prd: prdContent
                     })
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
-                    updateStatus(`✅ Task created successfully: ${result.data.id}`, 'success');
-                    addTaskToList(result.data);
+                    const project = result.data.project;
+                    const executionPlan = result.data.executionPlan;
+                    const dispatch = result.data.dispatch;
                     
-                    // Start polling for task completion
-                    setTimeout(() => pollTaskStatus(result.data.id), 2000);
+                    updateStatus(`✅ Project created successfully! Generated ${executionPlan.totalTasks} tasks in ${executionPlan.complexity} complexity project`, 'success');
+                    
+                    // Display project details
+                    displayProjectDetails(result.data);
+                    
+                    // Refresh projects list
+                    await listProjects();
+                    
+                    // Start monitoring project progress
+                    setTimeout(() => monitorProject(project.id), 3000);
                 } else {
-                    updateStatus(`❌ Task creation failed: ${result.error}`, 'error');
+                    updateStatus(`❌ PRD processing failed: ${result.error}`, 'error');
                 }
             } catch (error) {
-                updateStatus(`❌ Error creating task: ${error.message}`, 'error');
-                console.error('Task creation error:', error);
+                updateStatus(`❌ Error processing PRD: ${error.message}`, 'error');
+                console.error('PRD processing error:', error);
             } finally {
-                document.getElementById('createTaskBtn').disabled = false;
+                document.getElementById('submitPRDBtn').disabled = false;
             }
         }
 
-        async function pollTaskStatus(taskId) {
+        async function monitorProject(projectId) {
             try {
-                const response = await fetch(`${FACTORY_URL}/api/tasks/${taskId}`);
+                const response = await fetch(`${FACTORY_URL}/api/factory/projects/${projectId}`);
                 const data = await response.json();
                 
                 if (data.success) {
-                    updateTaskInList(data.data);
+                    updateProjectProgress(data.data);
                     
-                    if (data.data.status === 'pending') {
-                        // Continue polling
-                        setTimeout(() => pollTaskStatus(taskId), 3000);
+                    if (data.data.taskStatus.progress < 100) {
+                        // Continue monitoring
+                        setTimeout(() => monitorProject(projectId), 5000);
                     } else {
-                        updateStatus(`🎉 Task ${taskId} ${data.data.status}!`, 'success');
+                        updateStatus(`🎉 Project ${projectId} completed!`, 'success');
                     }
                 }
             } catch (error) {
-                console.error('Task polling error:', error);
+                console.error('Project monitoring error:', error);
             }
         }
 
-        function displayAgents(agents) {
-            const agentsSection = document.getElementById('agents-section');
-            const agentsGrid = document.getElementById('agents-grid');
+        function displayProjects(projects) {
+            const projectsSection = document.getElementById('projects-section');
+            const projectsList = document.getElementById('projects-list');
             
-            if (agents.length === 0) {
-                agentsGrid.innerHTML = '<div class="agent-card offline">No agents registered</div>';
+            if (projects.length === 0) {
+                projectsList.innerHTML = '<div class="agent-card offline">No projects created yet</div>';
             } else {
-                agentsGrid.innerHTML = agents.map(agent => `
-                    <div class="agent-card online">
-                        <h4>🤖 ${agent.id}</h4>
-                        <p><strong>Type:</strong> ${agent.type}</p>
-                        <p><strong>Registered:</strong> ${new Date(agent.registeredAt).toLocaleTimeString()}</p>
-                        <p><strong>Last Seen:</strong> ${new Date(agent.lastSeen).toLocaleTimeString()}</p>
-                    </div>
-                `).join('');
+                projectsList.innerHTML = projects.map(project => {
+                    const statusColor = project.status === 'executing' ? '#28a745' : 
+                                      project.status === 'planning' ? '#ffc107' : '#6c757d';
+                    
+                    return `
+                        <div class="agent-card" onclick="selectProject('${project.id}')" style="cursor: pointer;">
+                            <h4>📂 ${project.name}</h4>
+                            <p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${project.status}</span></p>
+                            <p><strong>Tasks:</strong> ${project.taskCount}</p>
+                            <p><strong>Phase:</strong> ${project.currentPhase}</p>
+                            <p><strong>Created:</strong> ${new Date(project.createdAt).toLocaleTimeString()}</p>
+                        </div>
+                    `;
+                }).join('');
             }
             
-            agentsSection.style.display = 'block';
+            projectsSection.style.display = 'block';
         }
 
-        function addTaskToList(task) {
-            currentTasks.unshift(task);
-            updateTasksDisplay();
-        }
-
-        function updateTaskInList(updatedTask) {
-            const index = currentTasks.findIndex(t => t.id === updatedTask.id);
-            if (index !== -1) {
-                currentTasks[index] = updatedTask;
-                updateTasksDisplay();
+        async function selectProject(projectId) {
+            try {
+                const response = await fetch(`${FACTORY_URL}/api/factory/projects/${projectId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    selectedProject = data.data;
+                    displayProjectDetails(selectedProject);
+                }
+            } catch (error) {
+                console.error('Project selection error:', error);
             }
         }
 
-        function updateTasksDisplay() {
-            const tasksSection = document.getElementById('tasks-section');
-            const tasksList = document.getElementById('tasks-list');
+        function displayProjectDetails(projectData) {
+            const project = projectData.project || projectData;
+            const executionPlan = projectData.executionPlan || project.executionPlan;
+            const taskStatus = projectData.taskStatus || project.taskStatus;
             
-            if (currentTasks.length > 0) {
-                tasksList.innerHTML = currentTasks.map(task => {
+            const projectInfo = document.getElementById('project-info');
+            const tasksGrid = document.getElementById('tasks-grid');
+            
+            // Display project summary
+            projectInfo.innerHTML = `
+                <div class="task-card">
+                    <h4>📊 ${project.name}</h4>
+                    <p><strong>Status:</strong> ${project.status}</p>
+                    <p><strong>Created:</strong> ${new Date(project.createdAt).toLocaleString()}</p>
+                    ${taskStatus ? `
+                        <p><strong>Progress:</strong> ${taskStatus.progress}% (${taskStatus.completed}/${taskStatus.total} tasks)</p>
+                        <div style="background: #e9ecef; border-radius: 10px; height: 20px; margin: 10px 0;">
+                            <div style="background: #28a745; height: 20px; border-radius: 10px; width: ${taskStatus.progress}%; transition: width 0.3s;"></div>
+                        </div>
+                    ` : ''}
+                    ${executionPlan ? `
+                        <p><strong>Total Tasks:</strong> ${executionPlan.totalTasks || executionPlan.tasks?.length || 'N/A'}</p>
+                        <p><strong>Estimated Hours:</strong> ${executionPlan.totalHours || 'N/A'}</p>
+                        <p><strong>Complexity:</strong> ${executionPlan.complexity || 'N/A'}</p>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Display tasks if available
+            if (executionPlan && executionPlan.tasks) {
+                const tasks = executionPlan.tasks.slice(0, 12); // Show first 12 tasks
+                tasksGrid.innerHTML = tasks.map(task => {
                     const statusColor = task.status === 'completed' ? '#28a745' : 
                                       task.status === 'pending' ? '#ffc107' : '#6c757d';
                     
                     return `
-                        <div class="task-card">
-                            <h4>📋 ${task.id}</h4>
-                            <p><strong>Type:</strong> ${task.type}</p>
+                        <div class="agent-card">
+                            <h5>📋 ${task.title.substring(0, 30)}${task.title.length > 30 ? '...' : ''}</h5>
+                            <p><strong>Agent:</strong> ${task.domainAgent}</p>
+                            <p><strong>Priority:</strong> ${task.priority}</p>
+                            <p><strong>Phase:</strong> ${task.phase}</p>
+                            <p><strong>Est. Hours:</strong> ${task.estimatedHours}h</p>
                             <p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${task.status}</span></p>
-                            <p><strong>Description:</strong> ${task.data.description}</p>
-                            <p><strong>Created:</strong> ${new Date(task.createdAt).toLocaleString()}</p>
-                            ${task.result ? `
-                                <details>
-                                    <summary><strong>Result:</strong></summary>
-                                    <pre>${JSON.stringify(task.result, null, 2)}</pre>
-                                </details>
-                            ` : ''}
                         </div>
                     `;
                 }).join('');
                 
-                tasksSection.style.display = 'block';
+                if (executionPlan.tasks.length > 12) {
+                    tasksGrid.innerHTML += `<div class="agent-card offline">... and ${executionPlan.tasks.length - 12} more tasks</div>`;
+                }
+            }
+            
+            document.getElementById('project-details').style.display = 'block';
+        }
+
+        function updateProjectProgress(project) {
+            if (selectedProject && selectedProject.id === project.id) {
+                displayProjectDetails(project);
             }
         }
 
@@ -356,13 +436,18 @@
 
         function clearResults() {
             document.getElementById('results').style.display = 'none';
-            document.getElementById('tasks-section').style.display = 'none';
-            currentTasks = [];
+            document.getElementById('project-details').style.display = 'none';
+            selectedProject = null;
             updateStatus('🧹 Results cleared', 'info');
         }
 
-        // Auto-refresh factory status every 30 seconds
-        setInterval(checkFactoryStatus, 30000);
+        // Auto-refresh factory status and projects every 30 seconds
+        setInterval(() => {
+            checkFactoryStatus();
+            if (currentProjects.length > 0) {
+                listProjects();
+            }
+        }, 30000);
     </script>
 </body>
 </html>

@@ -5,7 +5,7 @@
  * Handles agent metadata storage, health tracking, and protocol compatibility.
  */
 
-import { Injectable, Logger, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, ConflictException, NotFoundException, Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -21,6 +21,7 @@ import {
   AgentHealthStatus,
   RegistrationResponse,
   DeregistrationResponse,
+  HealthStatus,
 } from './dto/registry.dto';
 
 @Injectable()
@@ -37,12 +38,12 @@ export class RegistryService {
     private readonly validationService: RegistryValidationService,
     private readonly cacheService: RegistryCacheService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly configService: ConfigService,
+    @Optional() private readonly configService: ConfigService,
     @InjectQueue('registry-operations') private registryQueue: Queue,
     @InjectQueue('health-monitoring') private healthQueue: Queue,
   ) {
-    this.defaultTtl = this.configService.get<number>('UEP_REGISTRY_TTL_SECONDS', 300);
-    this.maxConcurrentRegistrations = this.configService.get<number>('MAX_CONCURRENT_REGISTRATIONS', 100);
+    this.defaultTtl = this.configService?.get<number>('UEP_REGISTRY_TTL_SECONDS', 300) || parseInt(process.env.UEP_REGISTRY_TTL_SECONDS || '300');
+    this.maxConcurrentRegistrations = this.configService?.get<number>('MAX_CONCURRENT_REGISTRATIONS', 100) || parseInt(process.env.MAX_CONCURRENT_REGISTRATIONS || '100');
     
     this.logger.log(`Registry service initialized with TTL: ${this.defaultTtl}s, Max concurrent: ${this.maxConcurrentRegistrations}`);
   }
@@ -78,7 +79,7 @@ export class RegistryService {
         registeredAt: new Date(),
         lastHeartbeat: new Date(),
         health: {
-          status: 'healthy',
+          status: HealthStatus.HEALTHY,
           lastChecked: new Date(),
           consecutiveFailures: 0,
           responseTime: 0,
@@ -132,11 +133,11 @@ export class RegistryService {
       return {
         success: true,
         agentId: registrationDto.id,
-        leaseId,
+        leaseId: parseInt(leaseId), // Convert string to number for compatibility
         ttl: this.defaultTtl,
         message: 'Agent registered successfully',
         registeredAt: registeredAgent.registeredAt,
-        heartbeatInterval: this.configService.get<number>('UEP_HEALTH_CHECK_INTERVAL_SECONDS', 30),
+        heartbeatInterval: this.configService?.get<number>('UEP_HEALTH_CHECK_INTERVAL_SECONDS', 30) || parseInt(process.env.UEP_HEALTH_CHECK_INTERVAL_SECONDS || '30'),
       };
 
     } catch (error) {
@@ -414,7 +415,7 @@ export class RegistryService {
    * Schedule health monitoring for an agent
    */
   private async scheduleHealthMonitoring(agentId: string): Promise<void> {
-    const healthCheckInterval = this.configService.get<number>('UEP_HEALTH_CHECK_INTERVAL_SECONDS', 30) * 1000;
+    const healthCheckInterval = (this.configService?.get<number>('UEP_HEALTH_CHECK_INTERVAL_SECONDS', 30) || parseInt(process.env.UEP_HEALTH_CHECK_INTERVAL_SECONDS || '30')) * 1000;
 
     await this.healthQueue.add(
       'monitor-agent-health',
@@ -434,7 +435,7 @@ export class RegistryService {
   private async cancelHealthMonitoring(agentId: string): Promise<void> {
     try {
       await this.healthQueue.removeRepeatable('monitor-agent-health', {
-        every: this.configService.get<number>('UEP_HEALTH_CHECK_INTERVAL_SECONDS', 30) * 1000,
+        every: (this.configService?.get<number>('UEP_HEALTH_CHECK_INTERVAL_SECONDS', 30) || parseInt(process.env.UEP_HEALTH_CHECK_INTERVAL_SECONDS || '30')) * 1000,
         jobId: `health-${agentId}`,
       });
 

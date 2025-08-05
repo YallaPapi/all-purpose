@@ -1,8 +1,28 @@
 # 🤖 CLAUDE CODE INSTRUCTIONS - ALL-PURPOSE META-AGENT FACTORY
 
 > **Complete consolidated Claude Code instructions from archived documentation**  
-> **Last Updated**: August 1, 2025  
+> **Last Updated**: August 4, 2025  
 > **Status**: 238 Tasks Complete - 750+ Pages Documentation - System Partially Operational  
+
+## 🚨 **MANDATORY PROBLEM-SOLVING METHODOLOGY**
+
+**NEVER CREATE NEW VERSIONS, MINIMAL VERSIONS, OR TEST VERSIONS OF EXISTING CODE**
+
+**Required Fix Process (20 CYCLES PER ERROR):**
+1. **Use existing files/systems ONLY** - no new simpler versions
+2. **Try to run the existing tool/system**
+3. **If SUCCESS**: Reset cycle counter to 0, move to next task
+4. **If ERROR**: Begin cycles for this specific error:
+   - **CYCLE N**: Research EXACT error with TaskMaster
+   - **CYCLE N**: Find correct code with Context7  
+   - **CYCLE N**: Apply fix and test again
+   - **If FIXED**: Reset counter to 0, move to next task
+   - **If STILL BROKEN**: Continue CYCLE N+1 for SAME error
+   - **If 20 cycles reached for SAME error**: STOP, report stuck
+5. **Each individual error gets its own 20-cycle budget**
+6. **Cycle counter resets to 0 when error is resolved**
+
+**NO OTHER APPROACH IS ACCEPTABLE**
 
 ---
 

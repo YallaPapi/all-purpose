@@ -69,9 +69,9 @@ export interface CachedRAGStats {
  */
 export class CachedRAGPipeline {
   private config: CachedRAGConfig;
-  private cacheManager: CacheManager;
-  private cacheInvalidator: CacheInvalidator;
-  private cacheWarmer: CacheWarmer;
+  private cacheManager!: CacheManager;
+  private cacheInvalidator!: CacheInvalidator;
+  private cacheWarmer!: CacheWarmer;
   private originalSearchAPI: SemanticSearchAPI;
   private originalEmbeddings: OpenAIEmbeddings;
   private isInitialized = false;
@@ -153,7 +153,12 @@ export class CachedRAGPipeline {
       if (this.config.cache.enabled) {
         this.cacheManager = createCacheManager({
           redis: this.config.cache.redis,
-          memory: this.config.cache.memory,
+          memory: {
+            enabled: true,
+            embeddingCacheMB: this.config.cache.memory.embeddingCacheMB,
+            fileContentCacheMB: this.config.cache.memory.fileContentCacheMB,
+            queryPatternCacheMB: this.config.cache.memory.queryPatternCacheMB
+          },
           fallbackStrategy: this.config.cache.fallbackStrategy,
           enableMetrics: this.config.analytics.enabled
         });
@@ -602,7 +607,7 @@ export class CachedRAGPipeline {
    * Get cache warming progress
    */
   getWarmingProgress() {
-    return this.cacheWarmer ? this.cachewarmer.getProgress() : null;
+    return this.cacheWarmer ? this.cacheWarmer.getProgress() : null;
   }
 
   /**

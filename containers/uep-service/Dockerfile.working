@@ -4,18 +4,21 @@ LABEL maintainer="meta-agent-factory"
 LABEL description="UEP Service - Universal Execution Protocol (Development Mode)"
 
 # Install necessary packages
-RUN apk add --no-cache git python3 make g++
+RUN apk add --no-cache git python3 make g++ curl
 
 WORKDIR /app
 
 # Copy package files first
-COPY package*.json ./
+COPY containers/uep-service/package*.json ./
 
 # Install all dependencies including TypeScript runtime
 RUN npm install && npm install -g tsx
 
 # Copy all source files
-COPY . .
+COPY containers/uep-service ./
+
+# Copy shared modules needed for UEP service  
+COPY shared ./shared/
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/data
@@ -43,7 +46,7 @@ EXPOSE 3003
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget -q -O - http://localhost:3003/health || exit 1
+  CMD curl -f http://localhost:3003/health || exit 1
 
-# Run with node using simple JavaScript
-CMD ["node", "src/simple-uep.js"]
+# Run with tsx using the REAL TypeScript UEP service
+CMD ["tsx", "src/uep-service.ts"]

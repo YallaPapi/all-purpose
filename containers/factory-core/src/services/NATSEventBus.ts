@@ -5,7 +5,7 @@
  * Replaces the stub EventBus with actual NATS JetStream functionality
  */
 
-import { connect, NatsConnection, JetStreamClient, JetStreamManager, JsMsg, PubAck } from 'nats';
+import { connect, NatsConnection, JetStreamClient, JetStreamManager, JsMsg, PubAck, RetentionPolicy, StorageType, DiscardPolicy } from 'nats';
 import { EventEmitter } from 'events';
 import { Logger } from '../utils/Logger.js';
 
@@ -192,8 +192,9 @@ export class NATSEventBus extends EventEmitter {
       this.logger.info(`Subscribing to ${fullSubject}`);
 
       // Create consumer configuration
+      const consumerName = `consumer-${subscriptionId}`;
       const consumerOpts = {
-        durable_name: `consumer-${subscriptionId}`,
+        durable_name: consumerName,
         deliver_policy: 'new',
         ack_policy: 'explicit',
         ack_wait: 30000000000, // 30 seconds in nanoseconds
@@ -204,8 +205,22 @@ export class NATSEventBus extends EventEmitter {
       // Get the appropriate stream
       const streamName = this.getStreamForSubject(fullSubject);
       
-      // Create consumer
-      const consumer = await this.jetstream.consumers.get(streamName, consumerOpts);
+      // Create the consumer first using JetStreamManager with proper nesting
+      try {
+        await this.jsm.consumers.add(streamName, {
+          config: consumerOpts  // Nest config under 'config' property (NATS 2.29.3 requirement)
+        });
+        this.logger.debug(`✅ Created consumer ${consumerName} for stream ${streamName}`);
+      } catch (consumerError: any) {
+        if (consumerError.message?.includes('10014') || consumerError.message?.includes('consumer already exists')) {
+          this.logger.debug(`ℹ️ Using existing consumer ${consumerName} for stream ${streamName}`);
+        } else {
+          throw consumerError;
+        }
+      }
+      
+      // Now get the consumer using correct NATS 2.29.3 API (consumer name only)
+      const consumer = await this.jetstream.consumers.get(streamName, consumerName);
       
       // Start consuming messages
       const messages = await consumer.consume({

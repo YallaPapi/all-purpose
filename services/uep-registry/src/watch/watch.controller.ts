@@ -36,7 +36,7 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
-import { WatchService } from './watch.service';
+import { WatchService, WatchEventType } from './watch.service';
 import { AgentType, HealthStatus } from '../registry/dto/registry.dto';
 
 // DTOs for watch operations
@@ -46,7 +46,7 @@ class CreateWatchSubscriptionDto {
   capabilities?: string[];
   tags?: string[];
   healthStatuses?: HealthStatus[];
-  eventTypes?: string[];
+  eventTypes?: WatchEventType[];
   includeMetadata?: boolean;
   includeHistory?: boolean;
   batchSize?: number;
@@ -59,7 +59,7 @@ class UpdateWatchFiltersDto {
   capabilities?: string[];
   tags?: string[];
   healthStatuses?: HealthStatus[];
-  eventTypes?: string[];
+  eventTypes?: WatchEventType[];
   includeMetadata?: boolean;
   batchSize?: number;
   debounceMs?: number;
@@ -608,7 +608,7 @@ export class WatchController {
     startTime?: string;
     endTime?: string;
     agentIds?: string[];
-    eventTypes?: string[];
+    eventTypes?: WatchEventType[];
     limit?: number;
   }) {
     // This would normally query the event history

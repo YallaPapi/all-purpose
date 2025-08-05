@@ -41,7 +41,7 @@ export interface UEPCacheConfig {
     keyPrefix: string;
     ttl: number;
     maxRetries: number;
-    retryDelayOnFailover: number;
+    retryStrategy?: (times: number) => number;
   };
   cacheStrategy: 'local-only' | 'distributed-only' | 'hybrid' | 'write-through' | 'write-behind';
   invalidationStrategy: 'time-based' | 'version-based' | 'content-based' | 'hybrid';
@@ -156,7 +156,10 @@ export class UEPValidationCacheManager extends EventEmitter {
         keyPrefix: 'uep:validation:',
         ttl: 900, // 15 minutes
         maxRetries: 3,
-        retryDelayOnFailover: 100
+        retryStrategy: (times: number) => {
+          const delay = Math.min(100 + times * 2, 2000);
+          return delay;
+        }
       },
       cacheStrategy: 'hybrid',
       invalidationStrategy: 'hybrid',
@@ -397,7 +400,7 @@ export class UEPValidationCacheManager extends EventEmitter {
         db: this.config.distributedCacheOptions.db,
         keyPrefix: this.config.distributedCacheOptions.keyPrefix,
         maxRetriesPerRequest: this.config.distributedCacheOptions.maxRetries,
-        retryDelayOnFailover: this.config.distributedCacheOptions.retryDelayOnFailover,
+        retryStrategy: this.config.distributedCacheOptions.retryStrategy,
         lazyConnect: true,
         enableReadyCheck: true,
         maxLoadingTimeout: 5000

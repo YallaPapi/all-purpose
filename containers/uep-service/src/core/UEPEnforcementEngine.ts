@@ -38,9 +38,20 @@ export class UEPEnforcementEngine extends EventEmitter {
   private violations: Map<string, UEPViolation[]> = new Map();
   private policies: UEPEnforcementPolicy[] = [];
   private activeEnforcements: Map<string, EnforcementAction[]> = new Map();
+  private eventBus: any;
+  private initialized: boolean = false;
+  private startTime: Date = new Date();
+  private metrics = {
+    totalEnforcements: 0,
+    successfulEnforcements: 0,
+    failedEnforcements: 0,
+    totalViolations: 0,
+    activePolicies: 0
+  };
 
-  constructor() {
+  constructor(eventBus?: any) {
     super();
+    this.eventBus = eventBus;
     this.validationEngine = new UEPValidationEngine();
     this.protocolProcessor = new UEPProtocolProcessor();
     this.initializeDefaultPolicies();
@@ -109,17 +120,17 @@ export class UEPEnforcementEngine extends EventEmitter {
     try {
       // 1. Run validation
       const validationResult = await this.validationEngine.validateRequest(request);
-      if (!validationResult.isValid) {
-        for (const error of validationResult.errors) {
+      if (!validationResult.valid) {
+        for (const error of validationResult.violations || []) {
           const violation: UEPViolation = {
             id: this.generateViolationId(),
             timestamp: new Date(),
             violationType: 'VALIDATION',
             severity: this.determineSeverity(error),
             source: context.source || 'unknown',
-            description: error.message,
+            description: typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : String(error),
             context: { request, error },
-            remediation: error.remediation
+            remediation: typeof error === 'object' && error !== null && 'remediation' in error ? (error as any).remediation : 'Review validation requirements'
           };
           violations.push(violation);
         }
@@ -134,7 +145,7 @@ export class UEPEnforcementEngine extends EventEmitter {
           violationType: 'PROTOCOL',
           severity: 'HIGH',
           source: context.source || 'unknown',
-          description: `Protocol processing failed: ${processingResult.error}`,
+          description: `Protocol processing failed: ${(processingResult as any).message || 'Unknown error'}`,
           context: { request, processingResult },
           remediation: 'Review protocol compliance requirements'
         };
@@ -187,7 +198,7 @@ export class UEPEnforcementEngine extends EventEmitter {
         violationType: 'ENFORCEMENT',
         severity: 'CRITICAL',
         source: context.source || 'unknown',
-        description: `Enforcement engine failure: ${error.message}`,
+        description: `Enforcement engine failure: ${error instanceof Error ? error.message : String(error)}`,
         context: { request, error },
         remediation: 'Contact system administrator'
       };
@@ -207,7 +218,7 @@ export class UEPEnforcementEngine extends EventEmitter {
         allowed: false,
         violations,
         actions,
-        metadata: { error: error.message }
+        metadata: { error: error instanceof Error ? error.message : String(error) }
       };
     }
   }
@@ -255,7 +266,7 @@ export class UEPEnforcementEngine extends EventEmitter {
         case 'severity':
         case 'violationType':
         case 'description':
-          value = violation[condition.field];
+          value = (violation as any)[condition.field];
           break;
         case 'frequency':
           value = recentViolations.length;
@@ -434,5 +445,195 @@ export class UEPEnforcementEngine extends EventEmitter {
       return true;
     }
     return false;
+  }
+
+  // Lifecycle methods required by uep-service.ts
+  public async initialize(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+
+    try {
+      // Initialize validation engine and protocol processor
+      await this.validationEngine.initialize?.();
+      await this.protocolProcessor.initialize?.();
+      
+      // Update metrics
+      this.metrics.activePolicies = this.policies.length;
+      
+      this.initialized = true;
+      this.emit('initialized', { timestamp: new Date() });
+    } catch (error) {
+      this.emit('error', { error, context: 'initialization' });
+      throw error;
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    if (!this.initialized) {
+      return;
+    }
+
+    try {
+      // Clear all active enforcements
+      this.activeEnforcements.clear();
+      
+      // Shutdown validation engine and protocol processor
+      await this.validationEngine.shutdown?.();
+      await this.protocolProcessor.shutdown?.();
+      
+      this.initialized = false;
+      this.emit('shutdown', { timestamp: new Date() });
+    } catch (error) {
+      this.emit('error', { error, context: 'shutdown' });
+      throw error;
+    }
+  }
+
+  // Status and metrics methods required by uep-service.ts
+  public getStatus(): any {
+    return {
+      active: this.initialized,
+      uptime: Date.now() - this.startTime.getTime(),
+      version: '1.0.0',
+      activeEnforcements: this.activeEnforcements.size,
+      totalPolicies: this.policies.length,
+      totalViolationSources: this.violations.size,
+      eventBusConnected: !!this.eventBus
+    };
+  }
+
+  public getMetrics(): any {
+    const totalViolations = Array.from(this.violations.values())
+      .reduce((sum, violations) => sum + violations.length, 0);
+    
+    const successRate = this.metrics.totalEnforcements > 0 
+      ? ((this.metrics.successfulEnforcements / this.metrics.totalEnforcements) * 100).toFixed(2)
+      : '0.00';
+
+    return {
+      totalEnforcements: this.metrics.totalEnforcements,
+      successfulEnforcements: this.metrics.successfulEnforcements,
+      failedEnforcements: this.metrics.failedEnforcements,
+      successRate: `${successRate}%`,
+      totalViolations,
+      activeViolations: this.activeEnforcements.size,
+      activePolicies: this.policies.length,
+      uptime: Date.now() - this.startTime.getTime()
+    };
+  }
+
+  public getEnforcementStatus(): any {
+    return {
+      active: this.initialized,
+      policies: this.policies.map(p => ({
+        name: p.name,
+        conditions: p.conditions.length,
+        actions: p.actions.length,
+        maxViolations: p.maxViolations
+      })),
+      activeEnforcements: Array.from(this.activeEnforcements.entries()).map(([target, actions]) => ({
+        target,
+        actions: actions.map(a => ({ type: a.type, duration: a.duration }))
+      })),
+      recentViolations: this.getViolations().slice(0, 10),
+      lastUpdate: new Date()
+    };
+  }
+
+  // Agent management methods required by uep-service.ts
+  public async createAgentWrapper(agentId: string, agentType: string, config: any): Promise<any> {
+    return {
+      agentId,
+      agentType,
+      config,
+      enforcementEnabled: true,
+      policies: this.policies.filter(p => 
+        p.name.toLowerCase().includes(agentType.toLowerCase()) ||
+        p.name.toLowerCase().includes('agent')
+      ),
+      wrapper: {
+        validate: (request: any) => this.validationEngine.validateRequest(request),
+        enforce: (request: any, context: any) => this.enforceCompliance(request, { ...context, agentId, agentType }),
+        isBlocked: () => this.isBlocked(agentId)
+      }
+    };
+  }
+
+  // Protocol enforcement methods required by uep-service.ts
+  public async enforceProtocol(protocolType: string, message: any): Promise<void> {
+    try {
+      const context = {
+        source: `protocol:${protocolType}`,
+        protocolType,
+        timestamp: new Date()
+      };
+
+      const enforcement = await this.enforceCompliance(message, context);
+      
+      if (!enforcement.allowed) {
+        this.emit('protocolViolation', {
+          protocolType,
+          message,
+          violations: enforcement.violations,
+          actions: enforcement.actions
+        });
+      }
+
+      this.metrics.totalEnforcements++;
+      if (enforcement.allowed) {
+        this.metrics.successfulEnforcements++;
+      } else {
+        this.metrics.failedEnforcements++;
+      }
+
+    } catch (error) {
+      this.metrics.failedEnforcements++;
+      this.emit('error', {
+        error,
+        context: 'protocol_enforcement',
+        protocolType,
+        message
+      });
+      throw error;
+    }
+  }
+
+  // Enhanced getViolations method with filtering options
+  public async getViolations(options: {
+    since?: string;
+    severity?: string;
+    limit?: number;
+  } = {}): Promise<any> {
+    let violations = this.getViolations();
+
+    // Apply filters
+    if (options.since) {
+      const sinceDate = new Date(options.since);
+      violations = violations.filter(v => v.timestamp >= sinceDate);
+    }
+
+    if (options.severity) {
+      violations = violations.filter(v => v.severity === options.severity);
+    }
+
+    // Apply limit
+    if (options.limit) {
+      violations = violations.slice(0, options.limit);
+    }
+
+    return {
+      violations: violations.map(v => ({
+        id: v.id,
+        timestamp: v.timestamp,
+        violationType: v.violationType,
+        severity: v.severity,
+        source: v.source,
+        description: v.description,
+        remediation: v.remediation
+      })),
+      total: violations.length,
+      query: options
+    };
   }
 }

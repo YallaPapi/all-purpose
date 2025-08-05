@@ -118,9 +118,12 @@ export class CapabilityRegistryService {
     // Initialize Redis connection with Context7 wrapper
     this.redis = new Redis(config.storage.connectionString || 'redis://localhost:6379', {
       keyPrefix: config.storage.keyPrefix || 'uep:',
-      retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
-      lazyConnect: true
+      lazyConnect: true,
+      retryStrategy: (times: number) => {
+        const delay = Math.min(100 + times * 2, 2000);
+        return delay;
+      }
     });
     
     // Create Context7-enhanced Redis wrapper

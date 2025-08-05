@@ -4,18 +4,21 @@ LABEL maintainer="meta-agent-factory"
 LABEL description="Factory Core - 11 Meta-Agents Container (Development Mode)"
 
 # Install necessary packages
-RUN apk add --no-cache git python3 make g++
+RUN apk add --no-cache git python3 make g++ curl
 
 WORKDIR /app
 
 # Copy package files first for better caching
-COPY package*.json ./
+COPY containers/factory-core/package*.json ./
 
 # Install all dependencies including TypeScript runtime
-RUN npm install && npm install -g tsx
+RUN npm install --legacy-peer-deps && npm install -g tsx
 
 # Copy all source files
-COPY . .
+COPY containers/factory-core ./
+
+# Copy RAG system for integration  
+COPY rag-system ./rag-system/
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/data
@@ -37,5 +40,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD wget -q -O - http://localhost:3000/health || exit 1
 
-# Run with tsx to handle TypeScript directly
-CMD ["tsx", "src/factory-core.ts"]
+# Run with tsx to handle simple factory core with autonomous PRD processing
+CMD ["tsx", "src/simple-factory-core.ts"]

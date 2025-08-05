@@ -40,9 +40,9 @@ USER agents
 
 EXPOSE 3001
 
-# Health check
+# Health check for NATS-only workers (no HTTP endpoints)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget -q -O - http://localhost:3001/health || exit 1
+  CMD node src/nats-health-check.js || exit 1
 
 # Run NATS-enabled simple domain agent
 CMD ["node", "dist/simple-domain-agent.js"]

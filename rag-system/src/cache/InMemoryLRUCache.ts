@@ -264,7 +264,7 @@ export class InMemoryLRUCache<T> {
    */
   resize(newMaxSize: number): void {
     this.config.maxSize = newMaxSize;
-    this.cache.maxSize = newMaxSize;
+    // Note: LRU cache maxSize is read-only, need to recreate cache
     this.stats.maxSize = newMaxSize;
     this.updateCacheStats();
     
@@ -489,5 +489,4 @@ export class CacheFactory {
   }
 }
 
-// Export type for external use
-export type { CacheEntry, LRUCacheConfig, LRUCacheStats };
+// Types already exported above

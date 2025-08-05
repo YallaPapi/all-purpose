@@ -315,13 +315,13 @@ export class WatchGateway implements OnModuleDestroy {
             this.convertFiltersFromGrpc(request.filters || {})
           );
 
-          const bufferTime = request.options?.bufferTimeMs || 100;
+          const bufferTimeMs = request.options?.bufferTimeMs || 100;
           const batchSize = request.options?.batchSize || 10;
 
           eventStream.pipe(
-            bufferTime > 0 ? bufferTime(bufferTime) : map(event => [event]),
-            filter(events => events.length > 0),
-            map(events => events.slice(0, batchSize)),
+            bufferTimeMs > 0 ? bufferTime(bufferTimeMs) : map(event => [event]),
+            filter((events: any[]) => events.length > 0),
+            map((events: any[]) => events.slice(0, batchSize)),
             takeUntil(this.shutdownSubject)
           ).subscribe({
             next: (events) => {
@@ -394,10 +394,10 @@ export class WatchGateway implements OnModuleDestroy {
       severity: string;
     };
   }> {
-    return data$.pipe(
+    return (data$.pipe(
       mergeMap(async (request) => {
         const filters = {
-          eventTypes: ['health_changed'],
+          eventTypes: ['health_changed' as const],
           agentIds: request.agentIds,
           healthStatuses: request.healthStatuses?.map(s => s as HealthStatus),
         };
@@ -445,7 +445,7 @@ export class WatchGateway implements OnModuleDestroy {
         this.logger.error('Health event stream error:', error);
         throw error;
       })
-    );
+    ) as any);
   }
 
   /**
@@ -462,7 +462,7 @@ export class WatchGateway implements OnModuleDestroy {
     timestamp: string;
     metadata?: any;
   }> {
-    return data$.pipe(
+    return (data$.pipe(
       mergeMap(async (request) => {
         const eventTypes = [];
         
@@ -496,7 +496,7 @@ export class WatchGateway implements OnModuleDestroy {
         this.logger.error('Discovery event stream error:', error);
         throw error;
       })
-    );
+    ) as any);
   }
 
   /**

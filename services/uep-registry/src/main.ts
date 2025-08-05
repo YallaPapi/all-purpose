@@ -32,10 +32,10 @@ async function bootstrap() {
       logger: WinstonModule.createLogger(createWinstonConfig()),
     });
 
-    const configService = app.get(ConfigService);
-    const httpPort = configService.get<number>('HTTP_PORT', 3001);
-    const grpcPort = configService.get<number>('GRPC_PORT', 50051);
-    const nodeEnv = configService.get<string>('NODE_ENV', 'development');
+    const configService = app.get(ConfigService, { strict: false });
+    const httpPort = configService?.get<number>('HTTP_PORT', 3001) || parseInt(process.env.HTTP_PORT || process.env.PORT || '3001');
+    const grpcPort = configService?.get<number>('GRPC_PORT', 50051) || parseInt(process.env.GRPC_PORT || '50051');
+    const nodeEnv = configService?.get<string>('NODE_ENV', 'development') || process.env.NODE_ENV || 'development';
 
     // Security middleware
     app.use(helmet({
@@ -49,7 +49,7 @@ async function bootstrap() {
     app.use(uepRegistryTracingService.getExpressMiddleware());
 
     // Global validation pipe
-    app.use(ValidationPipe({
+    app.useGlobalPipes(new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
@@ -60,7 +60,7 @@ async function bootstrap() {
 
     // CORS configuration
     app.enableCors({
-      origin: configService.get<string>('CORS_ORIGIN', '*'),
+      origin: configService?.get<string>('CORS_ORIGIN', '*') || process.env.CORS_ORIGIN || '*',
       credentials: true,
     });
 
@@ -94,40 +94,37 @@ async function bootstrap() {
     // Setup Prometheus metrics
     setupPrometheusMetrics(app);
 
-    // Create gRPC microservice
-    const grpcApp = await NestFactory.createMicroservice<MicroserviceOptions>(
-      AppModule,
-      {
-        transport: Transport.GRPC,
-        options: {
-          package: ['uep.registry.v1', 'uep.discovery.v1'],
-          protoPath: [
-            join(__dirname, '../proto/registry.proto'),
-            join(__dirname, '../proto/discovery.proto'),
-          ],
-          url: `0.0.0.0:${grpcPort}`,
-          maxReceiveMessageLength: 1024 * 1024 * 4, // 4MB
-          maxSendMessageLength: 1024 * 1024 * 4, // 4MB
-          keepalive: {
-            keepaliveTimeMs: 30000,
-            keepaliveTimeoutMs: 5000,
-            keepalivePermitWithoutCalls: true,
-            http2MaxPingsWithoutData: 0,
-            http2MinTimeBetweenPingsMs: 10000,
-            http2MaxPingStrikes: 1,
-          },
-        },
-      },
-    );
+    // TODO: Create gRPC microservice when proto files are available
+    // const grpcApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+    //   AppModule,
+    //   {
+    //     transport: Transport.GRPC,
+    //     options: {
+    //       package: ['uep.registry.v1', 'uep.discovery.v1'],
+    //       protoPath: [
+    //         join(__dirname, '../proto/registry.proto'),
+    //         join(__dirname, '../proto/discovery.proto'),
+    //       ],
+    //       url: `0.0.0.0:${grpcPort}`,
+    //       maxReceiveMessageLength: 1024 * 1024 * 4, // 4MB
+    //       maxSendMessageLength: 1024 * 1024 * 4, // 4MB
+    //       keepalive: {
+    //         keepaliveTimeMs: 30000,
+    //         keepaliveTimeoutMs: 5000,
+    //         keepalivePermitWithoutCalls: 1,
+    //         http2MaxPingsWithoutData: 0,
+    //         http2MinTimeBetweenPingsMs: 10000,
+    //         http2MaxPingStrikes: 1,
+    //       },
+    //     },
+    //   },
+    // );
 
-    // Start both servers
-    await Promise.all([
-      app.listen(httpPort),
-      grpcApp.listen(),
-    ]);
+    // Start HTTP server only for now
+    await app.listen(httpPort);
 
     logger.log(`🌐 HTTP Server listening on port ${httpPort}`);
-    logger.log(`🔌 gRPC Server listening on port ${grpcPort}`);
+    logger.log(`🔌 gRPC Server disabled (proto files not available)`);
     logger.log(`🏥 Health checks available at http://localhost:${httpPort}/health`);
     logger.log(`📊 Metrics available at http://localhost:${httpPort}/metrics`);
     
@@ -138,7 +135,7 @@ async function bootstrap() {
       try {
         await Promise.all([
           app.close(),
-          grpcApp.close(),
+          // grpcApp.close(), // gRPC app not created
           uepRegistryTracingService.shutdown(),
         ]);
         
@@ -169,7 +166,23 @@ async function bootstrap() {
     logger.log('🎉 UEP Registry Service started successfully!');
     
   } catch (error) {
-    logger.error('💥 Failed to start UEP Registry Service:', error);
+    const errorDetails = error instanceof Error ? {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      cause: (error as any).cause,
+    } : {
+      message: String(error),
+      stack: undefined,
+      name: 'Unknown',
+      cause: undefined,
+    };
+    
+    logger.error('💥 Failed to start UEP Registry Service:', {
+      ...errorDetails,
+      fullError: error
+    });
+    console.error('💥 Bootstrap error details:', error);
     process.exit(1);
   }
 }

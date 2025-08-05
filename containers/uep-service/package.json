@@ -2,12 +2,12 @@
   "name": "uep-service",
   "version": "1.0.0",
   "description": "UEP Validation Service - Universal Execution Protocol Enforcement",
-  "main": "src/simple-uep.js",
+  "main": "src/uep-service.ts",
   "scripts": {
-    "build": "echo 'Using simple JavaScript - no build needed'",
+    "build": "tsc --project tsconfig.json",
     "build:uep": "tsc --project tsconfig.json",
-    "start": "node src/simple-uep.js",
-    "dev": "node src/simple-uep.js",
+    "start": "tsx src/uep-service.ts",
+    "dev": "tsx src/uep-service.ts",
     "test": "jest",
     "lint": "eslint src/**/*.ts"
   },

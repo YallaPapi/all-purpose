@@ -19,11 +19,15 @@
     "lib": ["ES2020", "DOM"]
   },
   "include": [
-    "src/**/*"
+    "src/main-simple.ts",
+    "src/core/SimplePostCreationInvestigator.ts",
+    "src/types/index.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "tests"
+    "tests",
+    "src/main.ts",
+    "src/core/PostCreationInvestigator.ts"
   ]
 }

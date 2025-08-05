@@ -96,18 +96,18 @@ export interface CacheStats {
 export class CacheManager {
   private config: CacheManagerConfig;
   private redisCache?: RedisSearchCache;
-  private embeddingCache: InMemoryLRUCache<number[]>;
-  private fileContentCache: InMemoryLRUCache<ProcessedFile>;
-  private queryPatternCache: InMemoryLRUCache<any>;
+  private embeddingCache!: InMemoryLRUCache<number[]>;
+  private fileContentCache!: InMemoryLRUCache<ProcessedFile>;
+  private queryPatternCache!: InMemoryLRUCache<any>;
   private isHealthy = true;
   private lastHealthCheck = 0;
   private readonly healthCheckInterval = 30000; // 30 seconds
 
   constructor(config: CacheManagerConfig) {
     this.config = {
-      fallbackStrategy: 'redis-first',
-      enableMetrics: true,
-      ...config
+      ...config,
+      fallbackStrategy: config.fallbackStrategy || 'redis-first',
+      enableMetrics: config.enableMetrics !== undefined ? config.enableMetrics : true
     };
 
     // Initialize Redis cache if enabled

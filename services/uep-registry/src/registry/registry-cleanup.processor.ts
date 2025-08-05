@@ -6,9 +6,9 @@
  * orphaned record removal, and cache maintenance.
  */
 
-import { Processor, Process, OnQueueActive, OnQueueCompleted, OnQueueFailed } from '@nestjs/bull';
+import { Processor, Process, OnQueueActive, OnQueueCompleted, OnQueueFailed, InjectQueue } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
-import { Job } from 'bull';
+import { Job, Queue } from 'bull';
 import { EtcdService } from '../etcd/etcd.service';
 import { RegistryCacheService } from './registry-cache.service';
 import { metricsHelpers } from '../monitoring/prometheus.setup';
@@ -49,6 +49,7 @@ export class RegistryCleanupProcessor {
   constructor(
     private readonly etcdService: EtcdService,
     private readonly cacheService: RegistryCacheService,
+    @InjectQueue('registry-operations') private readonly registryQueue: Queue,
   ) {
     this.logger.log('Registry Cleanup Processor initialized');
   }
@@ -81,7 +82,12 @@ export class RegistryCleanupProcessor {
 
       // Archive agent data before deletion
       if (agent) {
-        await this.archiveAgentData(agentId, agent, 90); // Archive for 90 days
+        // Queue archiving job for agent data
+        await this.registryQueue.add('archive-agent-data', {
+          agentId,
+          agent,
+          retentionDays: 90,
+        });
       }
 
       // Remove from etcd
@@ -375,24 +381,6 @@ export class RegistryCleanupProcessor {
    * Private helper methods
    */
 
-  private async archiveAgentData(agentId: string, agent: RegisteredAgent, retentionDays: number): Promise<void> {
-    try {
-      const archiveKey = `${this.archivePrefix}${agentId}/${Date.now()}`;
-      const archiveData = {
-        agent,
-        archivedAt: new Date(),
-        retentionDays,
-        reason: 'cleanup',
-      };
-
-      const archiveTtl = retentionDays * 24 * 60 * 60;
-      await this.etcdService.putWithLease(archiveKey, JSON.stringify(archiveData), archiveTtl);
-
-      this.logger.debug(`Archived agent data: ${agentId} (${retentionDays} days retention)`);
-    } catch (error) {
-      this.logger.warn(`Failed to archive agent data for ${agentId}:`, error);
-    }
-  }
 
   private async cleanupAgentMetrics(agentId: string): Promise<void> {
     // Remove agent-specific metrics

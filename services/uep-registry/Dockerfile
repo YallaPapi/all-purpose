@@ -10,18 +10,18 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm install --production
+# Install all dependencies (including dev dependencies for build)
+RUN npm install
 
-# Install TypeScript and build dependencies
+# Install TypeScript globally
 RUN npm install -g typescript@5.2.2
-RUN npm install --save-dev @types/node
 
-# Copy source code
+# Copy source code and config files
 COPY src/ ./src/
+COPY tsconfig.json ./
 
-# Build the application (skip build for now as we don't have build script)
-# RUN npm run build
+# Build the application
+RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS runtime
@@ -35,10 +35,12 @@ RUN apk add --no-cache curl
 
 WORKDIR /app
 
-# Copy application source (no build for now)
-COPY --from=builder --chown=uep-registry:nodejs /app/src ./src
-COPY --from=builder --chown=uep-registry:nodejs /app/node_modules ./node_modules
+# Copy built application and production dependencies
+COPY --from=builder --chown=uep-registry:nodejs /app/dist ./dist
 COPY --from=builder --chown=uep-registry:nodejs /app/package*.json ./
+
+# Install only production dependencies in runtime stage
+RUN npm install --only=production
 
 # Create data directory
 RUN mkdir -p /app/data && chown uep-registry:nodejs /app/data
@@ -53,5 +55,5 @@ EXPOSE 3001 50051
 HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
   CMD curl -f http://localhost:3001/health || exit 1
 
-# Start the application (run directly with ts-node for now)
-CMD ["npx", "ts-node", "src/main.ts"]
+# Start the application using the built JavaScript
+CMD ["node", "dist/main.js"]

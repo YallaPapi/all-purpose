@@ -56,31 +56,9 @@ echo "=== UEP Consumers Status ==="\n\
 curl -s http://localhost:8222/jsz | jq ".streams[].consumer_detail[] | {name: .name, delivered: .delivered.consumer_seq, ack_pending: .num_ack_pending}"\n\
 ' > /scripts/uep-status.sh && chmod +x /scripts/uep-status.sh
 
-# Create startup script that initializes UEP streams
-RUN echo '#!/bin/sh\n\
-echo "Starting UEP Event Bus..."\n\
-\n\
-# Start NATS server in background\n\
-nats-server -c /etc/nats/nats-server.conf &\n\
-NATS_PID=$!\n\
-\n\
-# Wait for NATS to be ready\n\
-echo "Waiting for NATS server to start..."\n\
-sleep 10\n\
-\n\
-# Setup UEP streams and consumers\n\
-echo "Setting up UEP streams and consumers..."\n\
-cd /app/uep && node setup-streams.js\n\
-\n\
-# Log startup completion\n\
-echo "UEP Event Bus startup complete - NATS PID: $NATS_PID"\n\
-echo "JetStream domain: uep-meta-agent-factory"\n\
-echo "UEP Protocol version: 2.1"\n\
-echo "Monitoring: http://localhost:8222"\n\
-\n\
-# Keep NATS running in foreground\n\
-wait $NATS_PID\n\
-' > /scripts/start-uep-event-bus.sh && chmod +x /scripts/start-uep-event-bus.sh
+# Copy startup script that initializes UEP streams
+COPY start-uep-event-bus.sh /scripts/start-uep-event-bus.sh
+RUN chmod +x /scripts/start-uep-event-bus.sh
 
 # Create nats user and set proper permissions for UEP data persistence
 RUN addgroup -g 1000 -S nats && \

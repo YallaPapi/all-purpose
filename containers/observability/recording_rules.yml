@@ -177,11 +177,11 @@ groups:
       - record: system:health_score
         expr: |
           (
-            (count(up == 1) / count(up)) * 30 +                          # Service availability (30%)
+            (sum(up) / count(up)) * 30 +                          # Service availability (30%)
             (agent:success_rate_5m * 0.25) +                             # Agent success rate (25%)
             (uep:validation_success_rate_5m * 0.20) +                    # UEP compliance (20%)
             (factory:coordination_success_rate_5m * 0.15) +              # Factory coordination (15%)
-            (min(100, (1 - avg(container:cpu_usage_avg_5m/100)) * 100) * 0.10)  # Resource efficiency (10%)
+            (clamp_max((1 - avg(container:cpu_usage_avg_5m) / 100) * 100, 100) * 0.10)  # Resource efficiency (10%)
           )
 
       # Critical services count (services that must be up)

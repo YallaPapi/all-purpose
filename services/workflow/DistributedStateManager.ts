@@ -80,7 +80,7 @@ export interface StateManagerConfig {
     db?: number;                       // Redis database number
     keyPrefix?: string;                // Key prefix for namespacing
     maxRetriesPerRequest?: number;     // Max retries per request
-    retryDelayOnFailover?: number;     // Retry delay on failover
+    retryDelayOnFailover?: number;     // Legacy - used in retryStrategy calculation
     enableReadyCheck?: boolean;        // Enable ready check
     lazyConnect?: boolean;             // Lazy connection
     cluster?: {                        // Cluster configuration
@@ -176,9 +176,12 @@ export class DistributedStateManager extends EventEmitter {
       db: this.config.redis.db || 0,
       keyPrefix: this.config.redis.keyPrefix || 'uep:workflow:',
       maxRetriesPerRequest: this.config.redis.maxRetriesPerRequest || 3,
-      retryDelayOnFailover: this.config.redis.retryDelayOnFailover || 100,
       enableReadyCheck: this.config.redis.enableReadyCheck ?? true,
-      lazyConnect: this.config.redis.lazyConnect ?? true
+      lazyConnect: this.config.redis.lazyConnect ?? true,
+      retryStrategy: (times: number) => {
+        const delay = Math.min((this.config.redis.retryDelayOnFailover || 100) + times * 2, 2000);
+        return delay;
+      }
     };
 
     if (this.config.redis.cluster) {

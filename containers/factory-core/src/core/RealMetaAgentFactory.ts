@@ -90,9 +90,21 @@ export class RealMetaAgentFactory extends EventEmitter {
       const agentInstance = this.agentLoader.instantiateAgent(type, AgentModule, config);
       
       agent.instance = agentInstance;
-      agent.status = 'idle';
       this.agentInstances.set(agentId, agentInstance);
       
+      // Initialize agent if it has an initialize method
+      if (agentInstance && typeof agentInstance.initialize === 'function') {
+        try {
+          await agentInstance.initialize();
+          this.logger.info(`Initialized agent ${type}`);
+        } catch (initError) {
+          this.logger.error(`Failed to initialize agent ${type}:`, initError);
+          agent.status = 'error';
+          return agent;
+        }
+      }
+      
+      agent.status = 'idle';
       this.logger.info(`Successfully loaded agent ${type}`);
       
     } catch (error) {
@@ -198,7 +210,7 @@ export class RealMetaAgentFactory extends EventEmitter {
         
       case 'scaffold-generator':
         // Scaffold generator expects project config
-        return await instance.generateScaffold(task);
+        return await instance.process(task);
         
       case 'all-purpose-pattern':
         // Pattern detector expects code to analyze

@@ -38,6 +38,16 @@ log:
 
 accessLog:
   format: json
+  filePath: "/var/log/traefik/access.log"
+  bufferingSize: 100
+  filters:
+    statusCodes:
+      - "200"
+      - "300-302"
+      - "400-499"
+      - "500-599"
+    retryAttempts: true
+    minDuration: "10ms"
 
 metrics:
   prometheus:

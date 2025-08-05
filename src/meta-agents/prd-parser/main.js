@@ -29,7 +29,7 @@ import TaskFormatter from './task-formatter.js';
 import GitIntegration from './git-integration.js';
 
 // Working Memory Integration following ADD methodology
-import { createMemoryEnhancedAgent, runAgentTaskWithMemory } from '../../memory/agentMemoryIntegration.js';
+import { createMemoryEnhancedAgent } from '../../memory/agentMemoryIntegration.js';
 
 class PRDParserAgent extends EventEmitter {
     constructor(options = {}) {
