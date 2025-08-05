@@ -12,13 +12,13 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
 # Build stage
 FROM base AS build
 
 # Install dev dependencies for building
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY src ./src
@@ -35,7 +35,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
 # Copy compiled JavaScript from build stage
 COPY --from=build /app/dist ./dist

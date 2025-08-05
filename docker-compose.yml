@@ -54,7 +54,7 @@ services:
   factory-core:
     build:
       context: .
-      dockerfile: containers/factory-core/Dockerfile.working
+      dockerfile: containers/factory-core/Dockerfile
     container_name: meta-agent-factory-core
     ports:
       - "3000:3000"
@@ -109,7 +109,7 @@ services:
   domain-agents:
     build:
       context: ./containers/domain-agents
-      dockerfile: Dockerfile.working
+      dockerfile: Dockerfile
     container_name: meta-agent-domain-agents
     ports:
       - "3005:3001"
@@ -158,7 +158,7 @@ services:
   uep-registry:
     build:
       context: ./services/uep-registry
-      dockerfile: Dockerfile.working
+      dockerfile: Dockerfile
     container_name: meta-agent-uep-registry
     ports:
       - "3001:3001"  # HTTP API
@@ -199,7 +199,7 @@ services:
   uep-service:
     build:
       context: .
-      dockerfile: containers/uep-service/Dockerfile.working
+      dockerfile: containers/uep-service/Dockerfile
     container_name: meta-agent-uep-service
     ports:
       - "3003:3003"

@@ -78,10 +78,10 @@ docker-compose*
 .editorconfig
 
 # TypeScript
-tsconfig.json
+# tsconfig.json  # Commented out - needed for Docker build
 *.tsbuildinfo
 
 # Package manager lock files for faster builds
-package-lock.json
+# package-lock.json  # Commented out - needed for Docker build
 yarn.lock
 pnpm-lock.yaml

@@ -1,0 +1,38 @@
+FROM node:20-alpine
+
+LABEL maintainer="meta-agent-factory"
+LABEL description="Factory Core - Working Version"
+
+# Install necessary packages
+RUN apk add --no-cache git python3 make g++
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json ./
+COPY package-lock.json ./
+
+# Install dependencies
+RUN npm ci --legacy-peer-deps && npm cache clean --force
+
+# Copy all source files directly (no TypeScript compilation)
+COPY src ./src
+
+# Create directories for logs and data
+RUN mkdir -p /app/logs /app/data /app/generated
+
+# Set proper permissions
+RUN chown -R node:node /app
+USER node
+
+EXPOSE 3000
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV REDIS_URL=redis://redis:6379
+ENV NATS_URL=nats://nats-broker:4222
+ENV DOCKER_CONTAINER=true
+
+# Run the TypeScript file directly with tsx
+CMD ["npx", "tsx", "src/factory-core.ts"]
