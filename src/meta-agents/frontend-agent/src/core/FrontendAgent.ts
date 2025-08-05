@@ -26,7 +26,7 @@ import {
 
 import { createLogger } from '../utils/logger.js';
 import { Context7ScannerAdapter } from '../adapters/Context7ScannerAdapter.js';
-import { UEPWrapper } from './UEPWrapper.js';
+import { RealUEPWrapper } from './RealUEPWrapper.js';
 
 /**
  * Main Frontend Agent class implementing comprehensive frontend development capabilities
@@ -38,7 +38,7 @@ export class FrontendAgent extends EventEmitter {
   private startTime = Date.now();
   private engines = new Map<string, FrontendEngine>();
   private context7Scanner?: Context7ScannerAdapter;
-  private uepWrapper?: UEPWrapper;
+  private uepWrapper?: RealUEPWrapper;
   private metrics: AgentMetrics;
 
   constructor(config: Partial<FrontendAgentConfig> = {}) {
@@ -111,16 +111,26 @@ export class FrontendAgent extends EventEmitter {
         this.logger.info('✅ Context7 Scanner initialized');
       }
 
-      // Initialize UEP Wrapper
+      // Initialize REAL UEP Wrapper
       if (this.config.enableUEP) {
-        this.uepWrapper = new UEPWrapper({
+        this.uepWrapper = new RealUEPWrapper({
           agentId: 'frontend-agent',
           agentType: 'domain-specific',
-          capabilities: this.getCapabilities()
+          capabilities: this.getCapabilities(),
+          natsUrl: process.env.NATS_URL || 'nats://localhost:4222',
+          enableRealTimeUpdates: true,
+          enableTaskDistribution: true
         });
         
         await this.uepWrapper.initialize();
-        this.logger.info('✅ UEP Wrapper initialized');
+        
+        // Setup task assignment handler for UEP messages
+        this.uepWrapper.on('task-assigned', (task: FrontendTask) => {
+          // Process task automatically when received via UEP
+          this.processTask(task.description, task.requirements);
+        });
+        
+        this.logger.info('✅ REAL UEP Wrapper (Frontend Agent) initialized');
       }
 
       // Initialize all engines
@@ -189,7 +199,7 @@ export class FrontendAgent extends EventEmitter {
       description: taskDescription,
       requirements,
       context: {} as Context7ScanResult,
-      priority: requirements.priority || 'medium',
+      priority: (requirements.priority as 'low' | 'medium' | 'high' | 'critical') || 'medium',
       status: 'pending'
     };
 
@@ -348,40 +358,40 @@ export class FrontendAgent extends EventEmitter {
   getCapabilities(): FrontendAgentCapabilities {
     return {
       componentGeneration: {
-        react: true,
-        vue: true,
-        angular: true,
-        svelte: true,
-        typescript: true,
+        reactComponents: true,
+        vueComponents: true,
+        angularComponents: true,
+        svelteComponents: true,
+        customHooks: true,
         storybook: true
       },
       uiDesign: {
-        responsiveLayouts: true,
-        cssFrameworks: true,
-        designSystems: true,
-        animations: true,
-        theming: true
+        responsiveDesign: true,
+        themingSystem: true,
+        designTokens: true,
+        componentLibrary: true,
+        accessibilityCompliance: true
       },
       stateManagement: {
-        redux: true,
-        zustand: true,
-        vuex: true,
-        mobx: true,
-        contextAPI: true
+        globalState: true,
+        localState: true,
+        asyncDataFetching: true,
+        caching: true,
+        optimisticUpdates: true
       },
       performance: {
-        bundleOptimization: true,
         codesplitting: true,
         lazyLoading: true,
-        caching: true,
-        optimization: true
+        bundleOptimization: true,
+        imageOptimization: true,
+        criticalCss: true
       },
-      accessibility: {
-        wcagCompliance: true,
-        screenReaderSupport: true,
-        keyboardNavigation: true,
-        ariaLabels: true,
-        colorContrast: true
+      testing: {
+        unitTests: true,
+        integrationTests: true,
+        e2eTests: true,
+        visualRegression: true,
+        accessibilityTests: true
       }
     };
   }
@@ -439,12 +449,17 @@ export class FrontendAgent extends EventEmitter {
   }
 
   private selectEngine(taskType: FrontendTask['type']): FrontendEngine | undefined {
-    const engineMap = {
+    const engineMap: Record<string, string> = {
       'component-generation': 'ComponentGeneratorEngine',
       'ui-design': 'UIDesignEngine',
       'state-management': 'StateManagementEngine',
       'performance-optimization': 'PerformanceOptimizationEngine',
-      'accessibility': 'AccessibilityEngine'
+      'accessibility': 'AccessibilityEngine',
+      'generate-component': 'ComponentGeneratorEngine',
+      'design-ui': 'UIDesignEngine',
+      'setup-state': 'StateManagementEngine',
+      'optimize-performance': 'PerformanceOptimizationEngine',
+      'write-tests': 'AccessibilityEngine'
     };
 
     const engineName = engineMap[taskType];
@@ -458,6 +473,10 @@ export class FrontendAgent extends EventEmitter {
       tasksFailed: 0,
       averageProcessingTime: 0,
       filesGenerated: 0,
+      apiEndpointsCreated: 0,
+      databaseSchemasDesigned: 0,
+      securityIssuesFound: 0,
+      testsGenerated: 0,
       componentsCreated: 0,
       layoutsDesigned: 0,
       performanceOptimizations: 0,
@@ -515,94 +534,3 @@ export class FrontendAgentError extends Error {
   }
 }
 
-// Types that need to be defined
-interface FrontendAgentConfig {
-  logLevel: string;
-  timeout: number;
-  projectRoot: string;
-  outputDir: string;
-  enableContext7: boolean;
-  enableRAG: boolean;
-  enableUEP: boolean;
-  uiFramework: string;
-  cssFramework: string;
-  stateManagement: string;
-  testFramework: string;
-}
-
-interface FrontendAgentCapabilities {
-  componentGeneration: any;
-  uiDesign: any;
-  stateManagement: any;
-  performance: any;
-  accessibility: any;
-}
-
-interface FrontendAgentStatus {
-  name: string;
-  version: string;
-  initialized: boolean;
-  uptime: number;
-  config: any;
-  capabilities: any;
-  engines: any[];
-  metrics: any;
-  timestamp: string;
-}
-
-interface FrontendTask {
-  id: string;
-  type: 'component-generation' | 'ui-design' | 'state-management' | 'performance-optimization' | 'accessibility';
-  description: string;
-  requirements: any;
-  context: any;
-  priority: string;
-  status: string;
-  result?: any;
-  error?: string;
-}
-
-interface ProcessingResult {
-  taskId: string;
-  success: boolean;
-  data?: any;
-  error?: string;
-  generatedFiles?: any[];
-  recommendations?: string[];
-  nextSteps?: string[];
-}
-
-interface FrontendEngine {
-  name: string;
-  initialize(): Promise<void>;
-  process(task: FrontendTask): Promise<ProcessingResult>;
-  shutdown(): Promise<void>;
-}
-
-interface UEPContext {
-  sessionId: string;
-  memory: any;
-  codebaseContext: any;
-  validationResults: any;
-}
-
-interface Context7ScanResult {
-  relevantFiles: any[];
-  codePatterns: any[];
-}
-
-interface FrontendAgentEvents {
-  [key: string]: (...args: any[]) => void;
-}
-
-interface AgentMetrics {
-  tasksCompleted: number;
-  tasksInProgress: number;
-  tasksFailed: number;
-  averageProcessingTime: number;
-  filesGenerated: number;
-  componentsCreated: number;
-  layoutsDesigned: number;
-  performanceOptimizations: number;
-  accessibilityImprovements: number;
-}

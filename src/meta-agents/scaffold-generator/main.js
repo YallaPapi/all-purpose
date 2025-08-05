@@ -22,6 +22,9 @@ import { fileURLToPath } from 'url';
 // Working Memory Integration following ADD methodology
 import { createMemoryEnhancedAgent } from '../../memory/agentMemoryIntegration.js';
 
+// REAL UEP (Universal Execution Protocol) Integration - NATS-based coordination
+import { RealUEPWrapper } from './RealUEPWrapper.js';
+
 // ES modules don't have __dirname, so we need to create it
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,6 +50,10 @@ class ScaffoldGeneratorAgent {
     // Working Memory Integration - following ADD methodology
     this.memoryAgent = this.config.memoryEnabled ? 
       createMemoryEnhancedAgent(this.config.agentId, this) : null;
+    
+    // REAL UEP Integration - NATS-based coordination
+    this.uepEnabled = this.config.uepEnabled !== false;
+    this.uepWrapper = null;
   }
 
   /**
@@ -66,6 +73,11 @@ class ScaffoldGeneratorAgent {
       // Verify templates directory
       if (!await fs.pathExists(this.config.templatesDir)) {
         throw new Error(`Templates directory not found: ${this.config.templatesDir}`);
+      }
+
+      // Initialize REAL UEP wrapper if enabled
+      if (this.uepEnabled) {
+        await this.initializeUEP();
       }
       
       this.isInitialized = true;
@@ -174,6 +186,23 @@ class ScaffoldGeneratorAgent {
         memoryContext: memory ? true : false
       };
       
+      // Send results via UEP if enabled
+      if (this.uepWrapper) {
+        try {
+          await this.uepWrapper.broadcastScaffoldAnalysis({
+            agentName: result.agentName,
+            outputPath: result.outputPath,
+            filesGenerated: result.files.length,
+            directoriesCreated: result.directories.length,
+            summary: result.summary,
+            timestamp: new Date().toISOString()
+          });
+          console.log(chalk.blue('📤 Scaffold results broadcasted via UEP'));
+        } catch (uepError) {
+          console.warn(chalk.yellow('⚠️ Failed to broadcast via UEP:'), uepError.message);
+        }
+      }
+      
       return `Generated agent scaffold for ${result.agentName}. Created ${result.files.length} files in ${result.directories.length} directories at ${result.outputPath}`;
       
     } catch (error) {
@@ -190,6 +219,12 @@ class ScaffoldGeneratorAgent {
     try {
       console.log(chalk.blue('🧹 Cleaning up Scaffold Generator agent...'));
       
+      // Shutdown UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = null;
+      }
+      
       // Clear any cached templates
       if (this.fileGenerator && this.fileGenerator.templateEngine) {
         this.fileGenerator.templateEngine.clearCache();
@@ -201,6 +236,99 @@ class ScaffoldGeneratorAgent {
       console.error(chalk.red(`❌ Cleanup failed: ${error.message}`));
       throw error;
     }
+  }
+
+  /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  async initializeUEP() {
+    try {
+      console.log(chalk.blue('🔗 Initializing REAL UEP integration for Scaffold-Generator Agent...'));
+      
+      this.uepWrapper = new RealUEPWrapper({
+        agentId: this.config.agentId,
+        agentType: 'infrastructure',
+        capabilities: {
+          scaffoldGeneration: {
+            projectScaffolding: true,
+            templateGeneration: true,
+            fileStructureCreation: true,
+            codeGeneration: true,
+            testGeneration: true
+          },
+          frameworks: {
+            nodejs: true,
+            express: true,
+            react: true,
+            nextjs: true,
+            typescript: true
+          },
+          templates: {
+            apiServices: true,
+            webApplications: true,
+            microservices: true,
+            libraries: true
+          },
+          integration: { taskMaster: true, context7: true, git: true, memory: true, prdParser: true }
+        },
+        natsUrl: process.env.NATS_URL || 'nats://localhost:4222',
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      });
+
+      // Set up UEP event handlers
+      this.setupUEPEventHandlers();
+
+      // Initialize the wrapper
+      await this.uepWrapper.initialize();
+      
+      console.log(chalk.green('✅ REAL UEP integration initialized for Scaffold-Generator Agent'));
+      
+    } catch (error) {
+      console.error(chalk.red('❌ Failed to initialize UEP integration:'), error);
+      // Continue without UEP if initialization fails
+      this.uepEnabled = false;
+      this.uepWrapper = null;
+    }
+  }
+
+  /**
+   * Set up UEP event handlers for coordination
+   */
+  setupUEPEventHandlers() {
+    if (!this.uepWrapper) return;
+
+    // Handle incoming task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      console.log(chalk.blue('📋 UEP Task assigned to Scaffold-Generator:'), task);
+      try {
+        const result = await this.process(task);
+        await this.uepWrapper.sendTaskResult(task, result);
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process UEP task:'), error);
+      }
+    });
+
+    // Handle scaffold generation requests from other agents
+    this.uepWrapper.on('scaffold-request', async (uepMessage) => {
+      console.log(chalk.blue('🏗️ Scaffold generation request received:'), uepMessage);
+      try {
+        const result = await this.process(uepMessage.payload);
+        await this.uepWrapper.sendScaffoldResult(uepMessage.from, result);
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process scaffold request:'), error);
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (broadcast) => {
+      console.log(chalk.blue('📢 System broadcast received:'), broadcast);
+    });
+
+    // Handle agent heartbeats
+    this.uepWrapper.on('agent-heartbeat', (heartbeat) => {
+      console.log(chalk.blue('💓 Agent heartbeat received:'), heartbeat.agentId);
+    });
   }
 
   /**

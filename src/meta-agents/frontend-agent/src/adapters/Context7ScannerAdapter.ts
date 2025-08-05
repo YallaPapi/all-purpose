@@ -205,6 +205,55 @@ export class Context7ScannerAdapter extends EventEmitter {
   }
 
   /**
+   * Scan codebase for frontend-specific patterns (components, hooks, styles)
+   */
+  async scanForFrontendPatterns(taskDescription: string): Promise<Context7ScanResult> {
+    if (!this.isInitialized) {
+      throw new Error('Context7 Scanner not initialized');
+    }
+
+    this.logger.info('🔍 Scanning codebase for frontend patterns', { task: taskDescription });
+
+    try {
+      // Step 1: Discover relevant files (reuse backend logic)
+      const relevantFiles = await this.discoverRelevantFiles(taskDescription);
+
+      // Step 2: Extract code patterns (reuse backend logic)
+      const codePatterns = await this.extractCodePatterns(relevantFiles);
+
+      // Step 3: For frontend, we focus on different patterns
+      const apiEndpoints: APIEndpoint[] = []; // Frontend typically consumes APIs, doesn't define them
+      const databaseSchemas: DatabaseSchema[] = []; // Frontend doesn't define DB schemas
+      const middlewarePatterns: MiddlewarePattern[] = []; // Frontend has different middleware concepts
+      const securityPatterns = await this.extractSecurityPatterns(relevantFiles);
+      const testingPatterns = await this.extractTestingPatterns(relevantFiles);
+
+      const result: Context7ScanResult = {
+        relevantFiles,
+        codePatterns,
+        apiEndpoints,
+        databaseSchemas,
+        middlewarePatterns,
+        securityPatterns,
+        testingPatterns
+      };
+
+      this.logger.info('✅ Frontend pattern scan completed', {
+        relevantFiles: relevantFiles.length,
+        codePatterns: codePatterns.length,
+        securityPatterns: securityPatterns.length,
+        testingPatterns: testingPatterns.length
+      });
+
+      return result;
+
+    } catch (error) {
+      this.logger.error('❌ Frontend pattern scan failed', { error });
+      throw error;
+    }
+  }
+
+  /**
    * Discover files relevant to the task
    */
   private async discoverRelevantFiles(taskDescription: string): Promise<FileContext[]> {

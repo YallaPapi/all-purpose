@@ -31,6 +31,9 @@ import GitIntegration from './git-integration.js';
 // Working Memory Integration following ADD methodology
 import { createMemoryEnhancedAgent } from '../../memory/agentMemoryIntegration.js';
 
+// REAL UEP (Universal Execution Protocol) Integration - NATS-based coordination
+import { RealUEPWrapper } from './RealUEPWrapper.js';
+
 class PRDParserAgent extends EventEmitter {
     constructor(options = {}) {
         super();
@@ -58,6 +61,10 @@ class PRDParserAgent extends EventEmitter {
         this.memoryAgent = this.config.memoryEnabled ? 
             createMemoryEnhancedAgent(this.config.agentId, this) : null;
         
+        // REAL UEP Integration - NATS-based coordination
+        this.uepEnabled = this.config.uepEnabled !== false;
+        this.uepWrapper = null;
+        
         // File watcher for real-time PRD processing
         this.watcher = null;
         this.isProcessing = new Map(); // Prevent concurrent processing of same file
@@ -77,6 +84,11 @@ class PRDParserAgent extends EventEmitter {
 
             // Ensure directories exist (All-Purpose Pattern - works for any directory structure)
             await this.ensureDirectories();
+
+            // Initialize REAL UEP wrapper if enabled
+            if (this.uepEnabled) {
+                await this.initializeUEP();
+            }
 
             // Initialize file watcher
             this.watcher = chokidar.watch(
@@ -122,12 +134,105 @@ class PRDParserAgent extends EventEmitter {
             this.watcher = null;
         }
         
+        // Shutdown UEP wrapper
+        if (this.uepWrapper) {
+            await this.uepWrapper.shutdown();
+            this.uepWrapper = null;
+        }
+        
         this.emit('agent:stopped', { 
             agent: 'PRD-Parser',
             timestamp: new Date().toISOString()
         });
         
         console.log('🛑 PRD-Parser Agent stopped');
+    }
+
+    /**
+     * Initialize REAL UEP wrapper for agent coordination
+     */
+    async initializeUEP() {
+        try {
+            console.log('🔗 Initializing REAL UEP integration for PRD-Parser Agent...');
+            
+            this.uepWrapper = new RealUEPWrapper({
+                agentId: this.config.agentId,
+                agentType: 'infrastructure',
+                capabilities: {
+                    prdParsing: {
+                        requirementExtraction: true,
+                        taskGeneration: true,
+                        researchIntegration: true,
+                        contextIntegration: true,
+                        gitIntegration: true
+                    },
+                    formats: { markdown: true, json: true, yaml: true },
+                    analysis: {
+                        complexityAnalysis: true,
+                        dependencyMapping: true,
+                        riskAssessment: true,
+                        effortEstimation: true
+                    },
+                    integration: { taskMaster: true, context7: true, git: true, memory: true }
+                },
+                natsUrl: process.env.NATS_URL || 'nats://localhost:4222',
+                enableRealTimeUpdates: true,
+                enableTaskDistribution: true
+            });
+
+            // Set up UEP event handlers
+            this.setupUEPEventHandlers();
+
+            // Initialize the wrapper
+            await this.uepWrapper.initialize();
+            
+            console.log('✅ REAL UEP integration initialized for PRD-Parser Agent');
+            
+        } catch (error) {
+            console.error('❌ Failed to initialize UEP integration:', error);
+            // Continue without UEP if initialization fails
+            this.uepEnabled = false;
+            this.uepWrapper = null;
+        }
+    }
+
+    /**
+     * Set up UEP event handlers for coordination
+     */
+    setupUEPEventHandlers() {
+        if (!this.uepWrapper) return;
+
+        // Handle incoming task assignments
+        this.uepWrapper.on('task-assigned', async (task) => {
+            console.log('📋 UEP Task assigned to PRD-Parser:', task);
+            try {
+                const result = await this.process(task);
+                await this.uepWrapper.sendTaskResult(task, result);
+            } catch (error) {
+                console.error('❌ Failed to process UEP task:', error);
+            }
+        });
+
+        // Handle PRD processing requests from other agents
+        this.uepWrapper.on('prd-request', async (uepMessage) => {
+            console.log('📄 PRD processing request received:', uepMessage);
+            try {
+                const result = await this.process(uepMessage.payload);
+                await this.uepWrapper.sendPRDResult(uepMessage.from, result);
+            } catch (error) {
+                console.error('❌ Failed to process PRD request:', error);
+            }
+        });
+
+        // Handle system broadcasts
+        this.uepWrapper.on('system-broadcast', (broadcast) => {
+            console.log('📢 System broadcast received:', broadcast);
+        });
+
+        // Handle agent heartbeats
+        this.uepWrapper.on('agent-heartbeat', (heartbeat) => {
+            console.log('💓 Agent heartbeat received:', heartbeat.agentId);
+        });
     }
 
     /**
@@ -275,6 +380,24 @@ class PRDParserAgent extends EventEmitter {
             
             console.log(`✅ Completed ${agentName} PRD processing (${processingTime}ms)`);
             console.log(`📋 Tasks: ${tasksData.tasks?.length || 0}, Research: ${successfulResearchCount}`);
+            
+            // Send results via UEP if enabled
+            if (this.uepWrapper) {
+                try {
+                    await this.uepWrapper.broadcastPRDAnalysis({
+                        agentName,
+                        filepath,
+                        tasksGenerated: tasksData.tasks?.length || 0,
+                        researchCompleted: successfulResearchCount,
+                        outputPath,
+                        processingTime,
+                        timestamp: new Date().toISOString()
+                    });
+                    console.log('📤 PRD results broadcasted via UEP');
+                } catch (uepError) {
+                    console.warn('⚠️ Failed to broadcast via UEP:', uepError.message);
+                }
+            }
             
             return result;
         } catch (error) {

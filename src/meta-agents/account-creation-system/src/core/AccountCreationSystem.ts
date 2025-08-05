@@ -34,6 +34,7 @@ import { ServiceRegistry } from '../services/ServiceRegistry.js';
 import { CredentialsManager } from '../services/CredentialsManager.js';
 import { SecurityManager } from '../services/SecurityManager.js';
 import { MetaAgentIntegration } from '../integration/MetaAgentIntegration.js';
+import { RealUEPWrapper, RealUEPWrapperConfig } from '../RealUEPWrapper.js';
 import { logger } from '../utils/logger.js';
 
 export class AccountCreationSystem {
@@ -45,6 +46,7 @@ export class AccountCreationSystem {
   private credentialsManager: CredentialsManager;
   private securityManager: SecurityManager;
   private metaAgentIntegration?: MetaAgentIntegration;
+  private uepWrapper?: RealUEPWrapper;
   private activeSessions: Map<string, BrowserSession> = new Map();
   private activeVerifications: Map<string, EmailVerification> = new Map();
   private isRunning = false;
@@ -76,6 +78,9 @@ export class AccountCreationSystem {
       });
     }
 
+    // Initialize UEP wrapper for real-time coordination
+    this.initializeUEP(systemConfig);
+
     logger.info('🤖 Account Creation System initialized', {
       agentId: systemConfig.agentId,
       enabledServices: creationConfig.services.filter(s => s.enabled).length,
@@ -85,6 +90,107 @@ export class AccountCreationSystem {
 
     // Set up periodic maintenance
     this.setupPeriodicMaintenance();
+  }
+
+  /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  private initializeUEP(config: AccountCreationSystemConfig): void {
+    try {
+      const uepConfig: RealUEPWrapperConfig = {
+        agentId: 'account-creation-system-agent',
+        agentType: 'coordination',
+        capabilities: {
+          automation: ['account-creation', 'email-verification', 'browser-automation'],
+          credentials: ['secure-storage', 'api-key-generation', 'multi-service-support'],
+          verification: ['email-verification', 'captcha-handling', 'form-automation'],
+          coordination: ['meta-agent-integration', 'status-reporting', 'task-distribution'],
+          services: ['auto-detect', 'social-media', 'cloud-services', 'development-tools', 'productivity-apps']
+        },
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      };
+
+      this.uepWrapper = new RealUEPWrapper(uepConfig);
+      this.setupUEPEventHandlers();
+      
+      logger.info('✅ REAL UEP wrapper initialized for Account-Creation-System Agent');
+    } catch (error) {
+      logger.error('❌ Failed to initialize UEP wrapper for Account-Creation-System Agent', { error });
+    }
+  }
+
+  /**
+   * Setup UEP event handlers for task coordination
+   */
+  private setupUEPEventHandlers(): void {
+    if (!this.uepWrapper) return;
+
+    // Handle task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      logger.info('📋 Received task via UEP', { taskId: task.id, type: task.type });
+      
+      try {
+        let result;
+        switch (task.type) {
+          case 'create-accounts':
+          case 'account-creation':
+            result = await this.createAccounts({
+              requestId: task.requestId || task.id,
+              services: task.services || [],
+              personalInfo: task.personalInfo || {
+                email: task.email || 'user@example.com',
+                firstName: task.firstName || 'John',
+                lastName: task.lastName || 'Doe'
+              },
+              priority: task.priority || 'medium',
+              preferences: task.preferences || {},
+              requirements: task.requirements || {},
+              configuration: task.configuration || {},
+              context: task.context || {}
+            });
+            break;
+          case 'get-status':
+          case 'status':
+            result = this.getStatus();
+            break;
+          default:
+            result = { success: false, error: `Unknown task type: ${task.type}` };
+        }
+
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, result);
+        }
+      } catch (error) {
+        logger.error('❌ Task execution failed', { taskId: task.id, error });
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, { 
+            success: false, 
+            overallStatus: 'FAILED',
+            error: error instanceof Error ? error.message : String(error) 
+          });
+        }
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (message) => {
+      logger.info('📢 Received system broadcast', { 
+        type: message.payload.type, 
+        from: message.from 
+      });
+    });
+
+    logger.info('✅ UEP event handlers configured for Account-Creation-System Agent');
+  }
+
+  /**
+   * Initialize UEP connection (called after construction)
+   */
+  async initializeUEPConnection(): Promise<void> {
+    if (this.uepWrapper) {
+      await this.uepWrapper.initialize();
+    }
   }
 
   /**
@@ -147,6 +253,12 @@ export class AccountCreationSystem {
 
       // Stop email verification manager
       await this.emailManager.stop();
+
+      // Cleanup UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
 
       // Unregister from meta-agent coordinator
       if (this.metaAgentIntegration) {
@@ -288,6 +400,15 @@ export class AccountCreationSystem {
       // Store credentials securely
       if (credentials.length > 0) {
         await this.credentialsManager.storeCredentials(request.requestId, credentials);
+      }
+
+      // Broadcast account creation result via UEP
+      if (this.uepWrapper && result.overallStatus !== 'FAILED') {
+        try {
+          await this.uepWrapper.broadcastAccountCreationResult(result);
+        } catch (error) {
+          logger.warn('Failed to broadcast account creation result via UEP', { error });
+        }
       }
 
       // Share knowledge with meta-agent coordinator

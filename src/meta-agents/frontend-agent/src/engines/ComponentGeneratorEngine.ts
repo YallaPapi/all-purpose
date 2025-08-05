@@ -168,7 +168,7 @@ export default class ComponentGeneratorEngine extends EventEmitter {
       // Generate main component file
       const componentTemplate = this.templates.get(`${options.framework}-component`) || this.getInlineTemplate(options.framework, 'component');
       
-      if (componentTemplate) {
+      if (componentTemplate && typeof componentTemplate === 'function') {
         const componentContent = componentTemplate({
           component,
           framework: options.framework,

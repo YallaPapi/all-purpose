@@ -59,6 +59,7 @@ import { ProductionDeploymentManager } from '../deployers/ProductionDeploymentMa
 import { PerformanceOptimizer } from '../optimizers/PerformanceOptimizer.js';
 import { ProductionMonitor } from '../monitors/ProductionMonitor.js';
 import { MetaAgentIntegrator } from '../integrators/MetaAgentIntegrator.js';
+import { RealUEPWrapper, RealUEPWrapperConfig } from '../RealUEPWrapper.js';
 
 /**
  * Vercel-Native Architecture Agent - Builds complete production deployment systems
@@ -72,6 +73,7 @@ export class VercelNativeArchitectureAgent extends EventEmitter {
   private performanceOptimizer: PerformanceOptimizer;
   private productionMonitor: ProductionMonitor;
   private metaAgentIntegrator: MetaAgentIntegrator;
+  private uepWrapper?: RealUEPWrapper;
   private isInitialized: boolean = false;
 
   // Architecture tracking
@@ -161,6 +163,9 @@ export class VercelNativeArchitectureAgent extends EventEmitter {
 
     // Set up event forwarding for observability
     this.setupEventForwarding();
+
+    // Initialize UEP wrapper for real-time coordination
+    this.initializeUEP();
   }
 
   /**
@@ -187,6 +192,11 @@ export class VercelNativeArchitectureAgent extends EventEmitter {
 
       // Initialize meta-agent integrations
       await this.initializeMetaAgentIntegrations();
+
+      // Initialize UEP connection for real-time coordination
+      if (this.uepWrapper) {
+        await this.uepWrapper.initialize();
+      }
 
       // Ensure output directories exist
       await fs.ensureDir(this.config.outputDirectory!);
@@ -414,6 +424,15 @@ export class VercelNativeArchitectureAgent extends EventEmitter {
         result,
         timestamp: new Date().toISOString()
       });
+
+      // Broadcast architecture result via UEP
+      if (this.uepWrapper && result.success) {
+        try {
+          await this.uepWrapper.broadcastArchitectureResult(result);
+        } catch (error) {
+          console.warn('⚠️ Failed to broadcast architecture result via UEP', { error });
+        }
+      }
 
       console.log(chalk.green(`✅ Vercel architecture built successfully: ${request.architectureName}`));
       console.log(chalk.blue(`📊 Functions created: ${result.generation.functionsCreated}`));
@@ -908,6 +927,27 @@ export class VercelNativeArchitectureAgent extends EventEmitter {
     this.monitoringConfigurations.set(deploymentId, monitoringConfig);
     
     console.log(chalk.green('✅ Monitoring configured'));
+  }
+
+  /**
+   * Graceful shutdown with UEP cleanup
+   */
+  async shutdown(): Promise<void> {
+    console.log('🛑 Shutting down Vercel-Native-Architecture Agent...');
+
+    try {
+      // Cleanup UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
+
+      this.isInitialized = false;
+      console.log('✅ Vercel-Native-Architecture Agent shut down successfully');
+    } catch (error) {
+      console.error('❌ Error during Vercel-Native-Architecture Agent shutdown', { error });
+      throw error;
+    }
   }
 
   // Vercel configuration generation helpers

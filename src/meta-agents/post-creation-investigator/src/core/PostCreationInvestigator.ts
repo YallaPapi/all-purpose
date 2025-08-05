@@ -39,6 +39,7 @@ import { PerformanceAnalyzer } from '../analyzers/PerformanceAnalyzer.js';
 import { DeploymentAnalyzer } from '../analyzers/DeploymentAnalyzer.js';
 import { ReportGenerator } from '../reporting/ReportGenerator.js';
 import { MetaAgentIntegration } from '../integration/MetaAgentIntegration.js';
+import { RealUEPWrapper, RealUEPWrapperConfig } from '../RealUEPWrapper.js';
 import { logger } from '../utils/logger.js';
 
 const execAsync = promisify(exec);
@@ -55,6 +56,7 @@ export class PostCreationInvestigator {
   private deploymentAnalyzer: DeploymentAnalyzer;
   private reportGenerator: ReportGenerator;
   private metaAgentIntegration?: MetaAgentIntegration;
+  private uepWrapper?: RealUEPWrapper;
 
   constructor(config: InvestigatorMetaAgentConfig) {
     this.config = config;
@@ -75,12 +77,115 @@ export class PostCreationInvestigator {
       this.metaAgentIntegration = new MetaAgentIntegration(config);
     }
 
+    // Initialize UEP wrapper for real-time coordination
+    this.initializeUEP(config);
+
     logger.info('🔍 Post-Creation Investigator Agent initialized', {
       agentId: config.agentId,
       metaAgentCoordination: config.enableMetaAgentCoordination,
       ragIntegration: config.enableRAGIntegration,
       parallelism: config.parallelism
     });
+  }
+
+  /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  private initializeUEP(config: InvestigatorMetaAgentConfig): void {
+    try {
+      const uepConfig: RealUEPWrapperConfig = {
+        agentId: 'post-creation-investigator-agent',
+        agentType: 'coordination',
+        capabilities: {
+          investigation: ['comprehensive-analysis', 'project-validation', 'setup-requirements'],
+          analysis: ['structure', 'dependencies', 'environment', 'api', 'database', 'security', 'performance', 'deployment'],
+          validation: ['quick-validation', 'critical-issues', 'project-scoring'],
+          reporting: ['investigation-reports', 'setup-guides', 'recommendations'],
+          coordination: ['meta-agent-integration', 'knowledge-sharing', 'status-reporting'],
+          projectTypes: ['auto-detect', 'web-app', 'api', 'microservice', 'desktop', 'mobile', 'cli']
+        },
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      };
+
+      this.uepWrapper = new RealUEPWrapper(uepConfig);
+      this.setupUEPEventHandlers();
+      
+      logger.info('✅ REAL UEP wrapper initialized for Post-Creation-Investigator Agent');
+    } catch (error) {
+      logger.error('❌ Failed to initialize UEP wrapper for Post-Creation-Investigator Agent', { error });
+    }
+  }
+
+  /**
+   * Setup UEP event handlers for task coordination
+   */
+  private setupUEPEventHandlers(): void {
+    if (!this.uepWrapper) return;
+
+    // Handle task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      logger.info('📋 Received task via UEP', { taskId: task.id, type: task.type });
+      
+      try {
+        let result;
+        switch (task.type) {
+          case 'investigate-project':
+          case 'investigate':
+            result = await this.investigate({
+              projectPath: task.projectPath,
+              projectType: task.projectType,
+              skipTests: task.skipTests,
+              timeout: task.timeout
+            });
+            break;
+          case 'quick-validation':
+            result = await this.quickValidation(task.projectPath, task.projectType);
+            break;
+          case 'generate-setup-guide':
+            result = await this.generateSetupGuide(task.projectPath, task.projectType);
+            break;
+          case 'get-status':
+          case 'status':
+            result = this.getStatus();
+            break;
+          default:
+            result = { success: false, error: `Unknown task type: ${task.type}` };
+        }
+
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, result);
+        }
+      } catch (error) {
+        logger.error('❌ Task execution failed', { taskId: task.id, error });
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, { 
+            success: false, 
+            overallStatus: 'FAIL',
+            error: error instanceof Error ? error.message : String(error) 
+          });
+        }
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (message) => {
+      logger.info('📢 Received system broadcast', { 
+        type: message.payload.type, 
+        from: message.from 
+      });
+    });
+
+    logger.info('✅ UEP event handlers configured for Post-Creation-Investigator Agent');
+  }
+
+  /**
+   * Initialize UEP connection (called after construction)
+   */
+  async initializeUEPConnection(): Promise<void> {
+    if (this.uepWrapper) {
+      await this.uepWrapper.initialize();
+    }
   }
 
   /**
@@ -193,6 +298,15 @@ export class PostCreationInvestigator {
 
       // Generate and save report
       await this.reportGenerator.generateReport(result, investigationConfig);
+
+      // Broadcast investigation result via UEP
+      if (this.uepWrapper && result.overallStatus !== 'FAIL') {
+        try {
+          await this.uepWrapper.broadcastInvestigationResult(result);
+        } catch (error) {
+          logger.warn('Failed to broadcast investigation result via UEP', { error });
+        }
+      }
 
       // Share knowledge with meta-agent coordinator
       if (this.metaAgentIntegration) {
@@ -655,5 +769,25 @@ export class PostCreationInvestigator {
       status: 'ready',
       investigations: 0 // Could track this in state
     };
+  }
+
+  /**
+   * Graceful shutdown with UEP cleanup
+   */
+  async shutdown(): Promise<void> {
+    logger.info('🛑 Shutting down Post-Creation-Investigator Agent...');
+
+    try {
+      // Cleanup UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
+
+      logger.info('✅ Post-Creation-Investigator Agent shut down successfully');
+    } catch (error) {
+      logger.error('❌ Error during Post-Creation-Investigator Agent shutdown', { error });
+      throw error;
+    }
   }
 }

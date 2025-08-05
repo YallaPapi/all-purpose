@@ -48,6 +48,9 @@ import { DataTransformationEngine } from '../transformers/DataTransformationEngi
 import { IntegrationTestBuilder } from '../validators/IntegrationTestBuilder.js';
 import { MetaAgentCoordinator } from '../integrations/MetaAgentCoordinator.js';
 
+// REAL UEP (Universal Execution Protocol) Integration - NATS-based coordination
+import { RealUEPWrapper } from '../RealUEPWrapper.js';
+
 /**
  * Parameter Flow Agent - Builds complete integration architecture for unlimited system complexity
  * NO limitations on integration depth, parameter complexity, or data flow patterns
@@ -67,6 +70,9 @@ export class ParameterFlowAgent extends EventEmitter {
   private transformationPipelines: Map<string, TransformationPipeline> = new Map();
   private testSuites: Map<string, IntegrationTestSuite> = new Map();
   private activeIntegrations: Map<string, any> = new Map();
+
+  // REAL UEP Integration
+  private uepWrapper?: RealUEPWrapper;
 
   constructor(config: ParameterFlowConfig = {}) {
     super();
@@ -126,6 +132,7 @@ export class ParameterFlowAgent extends EventEmitter {
         communicationProtocols: [], // UNLIMITED protocols
         dataExchangeFormats: [], // UNLIMITED formats
         errorHandlingStrategies: [], // UNLIMITED strategies
+        uepEnabled: config.metaAgentCoordination?.uepEnabled !== false, // UEP enabled by default
         ...config.metaAgentCoordination
       },
       
@@ -184,6 +191,11 @@ export class ParameterFlowAgent extends EventEmitter {
       // Initialize RAG system integration if enabled
       if (this.config.customConfiguration?.ragSystemIntegration) {
         await this.initializeRAGSystemIntegration();
+      }
+
+      // Initialize REAL UEP integration if enabled
+      if (this.config.metaAgentCoordination?.uepEnabled) {
+        await this.initializeUEP();
       }
 
       // Ensure output directories exist
@@ -390,6 +402,26 @@ export class ParameterFlowAgent extends EventEmitter {
       // Store built architecture
       this.builtArchitectures.set(architectureId, architecture);
       this.activeIntegrations.delete(architectureId);
+
+      // Send results via UEP if enabled
+      if (this.uepWrapper) {
+        try {
+          await this.uepWrapper.broadcastIntegrationArchitecture({
+            architectureId: result.architectureId,
+            architectureName: architecture.name,
+            componentsIntegrated: result.generation.componentsIntegrated,
+            connectionsCreated: result.generation.connectionsCreated,
+            testSuitesGenerated: result.generation.testSuitesGenerated,
+            duration: result.generation.duration,
+            qualityScore: result.quality.architectureScore,
+            summary: `Built integration architecture: ${architecture.name}`,
+            timestamp: new Date().toISOString()
+          });
+          console.log(chalk.blue('📤 Integration architecture results broadcasted via UEP'));
+        } catch (uepError) {
+          console.warn(chalk.yellow('⚠️ Failed to broadcast via UEP:'), uepError instanceof Error ? uepError.message : String(uepError));
+        }
+      }
 
       this.emit('architecture:building:completed', {
         architectureId,
@@ -609,6 +641,34 @@ export class ParameterFlowAgent extends EventEmitter {
   }
 
   /**
+   * Shutdown the agent and cleanup resources
+   */
+  async shutdown(): Promise<void> {
+    try {
+      console.log(chalk.blue('🛑 Shutting down Parameter Flow Agent...'));
+      
+      // Shutdown UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
+      
+      // Clear integration tracking
+      this.builtArchitectures.clear();
+      this.parameterMappings.clear();
+      this.transformationPipelines.clear();
+      this.testSuites.clear();
+      this.activeIntegrations.clear();
+      
+      this.isInitialized = false;
+      console.log(chalk.green('✅ Parameter Flow Agent shutdown completed'));
+    } catch (error: any) {
+      console.error(chalk.red(`❌ Shutdown failed: ${error.message}`));
+      throw error;
+    }
+  }
+
+  /**
    * Private helper methods
    */
 
@@ -663,6 +723,142 @@ export class ParameterFlowAgent extends EventEmitter {
     } catch (error: any) {
       console.warn(chalk.yellow(`⚠️  RAG System integration failed: ${error.message}`));
     }
+  }
+
+  /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  private async initializeUEP(): Promise<void> {
+    try {
+      console.log(chalk.blue('🔗 Initializing REAL UEP integration for Parameter-Flow Agent...'));
+      
+      this.uepWrapper = new RealUEPWrapper({
+        agentId: 'parameter-flow-001',
+        agentType: 'coordination',
+        capabilities: {
+          integrationArchitecture: {
+            architectureBuilding: true,
+            componentIntegration: true,
+            topologyDesign: true,
+            dependencyAnalysis: true,
+            performanceOptimization: true
+          },
+          parameterMapping: {
+            schemaMapping: true,
+            dataTransformation: true,
+            validationChains: true,
+            serializationHandling: true,
+            typeConversion: true
+          },
+          dataFlowManagement: {
+            flowControllers: true,
+            synchronizationPoints: true,
+            conflictResolution: true,
+            integrityChecking: true,
+            realTimeProcessing: true
+          },
+          integrationTesting: {
+            testSuiteGeneration: true,
+            mockingFrameworks: true,
+            performanceMonitoring: true,
+            validationEngines: true,
+            coverageAnalysis: true
+          },
+          integration: { 
+            metaAgentFactory: true, 
+            allMetaAgents: true, 
+            context7: true, 
+            ragSystem: true 
+          }
+        },
+        natsUrl: process.env.NATS_URL || 'nats://localhost:4222',
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      });
+
+      // Set up UEP event handlers
+      this.setupUEPEventHandlers();
+
+      // Initialize the wrapper
+      await this.uepWrapper.initialize();
+      
+      console.log(chalk.green('✅ REAL UEP integration initialized for Parameter-Flow Agent'));
+      
+    } catch (error: any) {
+      console.error(chalk.red('❌ Failed to initialize UEP integration:'), error);
+      // Continue without UEP if initialization fails
+      this.uepWrapper = undefined;
+    }
+  }
+
+  /**
+   * Set up UEP event handlers for coordination
+   */
+  private setupUEPEventHandlers(): void {
+    if (!this.uepWrapper) return;
+
+    // Handle incoming task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      console.log(chalk.blue('📋 UEP Task assigned to Parameter-Flow:'), task);
+      try {
+        const result = await this.buildIntegrationArchitecture(task);
+        await this.uepWrapper!.sendTaskResult(task, {
+          success: true,
+          result,
+          processingTime: result.generation.duration
+        });
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process UEP task:'), error);
+        await this.uepWrapper!.sendTaskResult(task, {
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+          processingTime: 0
+        });
+      }
+    });
+
+    // Handle integration architecture requests from other agents
+    this.uepWrapper.on('integration-architecture-request', async (uepMessage) => {
+      console.log(chalk.blue('🏗️ Integration architecture request received:'), uepMessage);
+      try {
+        const result = await this.buildIntegrationArchitecture(uepMessage.payload);
+        await this.uepWrapper!.sendParameterMappingResult(uepMessage.from, result);
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process integration architecture request:'), error);
+      }
+    });
+
+    // Handle parameter mapping requests
+    this.uepWrapper.on('parameter-mapping-request', async (uepMessage) => {
+      console.log(chalk.blue('🗺️ Parameter mapping request received:'), uepMessage);
+      try {
+        const result = await this.generateParameterMapping(uepMessage.payload);
+        await this.uepWrapper!.sendParameterMappingResult(uepMessage.from, result);
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process parameter mapping request:'), error);
+      }
+    });
+
+    // Handle integration test requests
+    this.uepWrapper.on('integration-test-request', async (uepMessage) => {
+      console.log(chalk.blue('🧪 Integration test request received:'), uepMessage);
+      try {
+        const result = await this.runIntegrationTests(uepMessage.payload);
+        await this.uepWrapper!.sendIntegrationTestResult(uepMessage.from, result);
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process integration test request:'), error);
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (broadcast) => {
+      console.log(chalk.blue('📢 System broadcast received:'), broadcast);
+    });
+
+    // Handle agent heartbeats
+    this.uepWrapper.on('agent-heartbeat', (heartbeat) => {
+      console.log(chalk.blue('💓 Agent heartbeat received:'), heartbeat.agentId);
+    });
   }
 
   // Placeholder methods for architecture building steps

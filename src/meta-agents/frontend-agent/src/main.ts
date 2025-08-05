@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 
 /**
- * Backend Agent - CLI Entry Point
+ * Frontend Agent - CLI Entry Point
  * 
- * Command-line interface for the Backend Agent
+ * Command-line interface for the Frontend Agent
  */
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { BackendAgent } from './core/BackendAgent.js';
+import { FrontendAgent } from './core/FrontendAgent.js';
 import { createLogger } from './utils/logger.js';
 
 const program = new Command();
-const logger = createLogger('backend-agent-cli');
+const logger = createLogger('frontend-agent-cli');
 
 program
-  .name('backend-agent')
-  .description('Intelligent backend development agent with Context7 integration')
+  .name('frontend-agent')
+  .description('Intelligent frontend development agent with Context7 integration')
   .version('1.0.0');
 
 program
@@ -32,11 +32,12 @@ program
     try {
       console.log(chalk.blue('🚀 Initializing Backend Agent...'));
       
-      const agent = new BackendAgent({
+      const agent = new FrontendAgent({
         projectRoot: process.cwd(),
-        apiFramework: options.framework,
-        databaseType: options.database,
-        authStrategy: options.auth,
+        uiFramework: options.framework || 'react',
+        cssFramework: options.css || 'tailwind',
+        stateManagement: options.state || 'redux',
+        testFramework: options.tests || 'jest',
         enableContext7: options.context7,
         enableRAG: options.rag,
         enableUEP: options.uep,
@@ -69,7 +70,7 @@ program
     try {
       console.log(chalk.blue('🔄 Generating ' + type + '...'));
       
-      const agent = new BackendAgent({
+      const agent = new FrontendAgent({
         projectRoot: process.cwd(),
         outputDir: options.output,
         logLevel: 'info'
@@ -80,24 +81,25 @@ program
       let result;
       switch (type.toLowerCase()) {
         case 'api':
-          result = await agent.generateAPI({
-            endpoints: []
+          result = await agent.generateComponents({
+            framework: 'react',
+            components: []
           });
           break;
         case 'database':
-          result = await agent.designDatabase({
-            entities: [],
-            relationships: []
+          result = await agent.designUI({
+            layouts: [],
+            responsive: true
           });
           break;
         case 'tests':
-          result = await agent.generateTests({
+          result = await agent.processTask('Generate comprehensive frontend tests', {
             testTypes: ['unit', 'integration'],
             coverage: 80
           });
           break;
         case 'docs':
-          result = await agent.generateDocumentation({
+          result = await agent.processTask('Generate comprehensive frontend documentation', {
             format: 'openapi',
             includeExamples: true
           });
@@ -112,12 +114,12 @@ program
         
         if (result.recommendations) {
           console.log(chalk.yellow('\nRecommendations:'));
-          result.recommendations.forEach(rec => console.log('• ' + rec));
+          result.recommendations.forEach((rec: any) => console.log('• ' + rec));
         }
         
         if (result.nextSteps) {
           console.log(chalk.yellow('\nNext steps:'));
-          result.nextSteps.forEach(step => console.log('• ' + step));
+          result.nextSteps.forEach((step: any) => console.log('• ' + step));
         }
       } else {
         console.error(chalk.red('❌ ' + type + ' generation failed:'), result.error);
@@ -142,7 +144,7 @@ program
     try {
       console.log(chalk.blue('🔍 Analyzing ' + type + '...'));
       
-      const agent = new BackendAgent({
+      const agent = new FrontendAgent({
         projectRoot: process.cwd(),
         logLevel: 'info'
       });
@@ -152,9 +154,9 @@ program
       let result;
       switch (type.toLowerCase()) {
         case 'security':
-          result = await agent.analyzeSecurity({
-            scanPaths: options.path,
-            severity: options.severity
+          result = await agent.implementAccessibility({
+            wcagLevel: 'AA',
+            screenReader: true
           });
           break;
         default:
@@ -196,7 +198,7 @@ program
   .description('Show Backend Agent status')
   .action(async () => {
     try {
-      const agent = new BackendAgent({
+      const agent = new FrontendAgent({
         projectRoot: process.cwd(),
         logLevel: 'warn'
       });
@@ -222,10 +224,10 @@ program
       
       console.log(chalk.blue('\n🔧 Capabilities:'));
       const caps = status.capabilities;
-      console.log('API Design: ' + (caps.apiDesign.restfulEndpoints ? '✅' : '❌') + ' REST, ' + (caps.apiDesign.graphqlSchema ? '✅' : '❌') + ' GraphQL');
-      console.log('Database: ' + (caps.database.schemaDesign ? '✅' : '❌') + ' Schema Design, ' + (caps.database.migrationGeneration ? '✅' : '❌') + ' Migrations');
-      console.log('Security: ' + (caps.security.securityAudit ? '✅' : '❌') + ' Security Audit, ' + (caps.security.authenticationFlow ? '✅' : '❌') + ' Authentication');
-      console.log('Testing: ' + (caps.testing.unitTestGeneration ? '✅' : '❌') + ' Unit Tests, ' + (caps.testing.integrationTests ? '✅' : '❌') + ' Integration Tests');
+      console.log('Component Generation: ' + (caps.componentGeneration.reactComponents ? '✅' : '❌') + ' React, ' + (caps.componentGeneration.vueComponents ? '✅' : '❌') + ' Vue');
+      console.log('UI Design: ' + (caps.uiDesign.responsiveDesign ? '✅' : '❌') + ' Responsive Design, ' + (caps.uiDesign.themingSystem ? '✅' : '❌') + ' Theming');
+      console.log('State Management: ' + (caps.stateManagement.globalState ? '✅' : '❌') + ' Global State, ' + (caps.stateManagement.localState ? '✅' : '❌') + ' Local State');
+      console.log('Testing: ' + (caps.testing.unitTests ? '✅' : '❌') + ' Unit Tests, ' + (caps.testing.integrationTests ? '✅' : '❌') + ' Integration Tests');
       
       await agent.shutdown();
       

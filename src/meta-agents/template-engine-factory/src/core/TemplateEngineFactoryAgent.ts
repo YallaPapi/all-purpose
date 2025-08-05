@@ -40,6 +40,9 @@ import { TemplateAnalyzer } from '../generators/TemplateAnalyzer.js';
 import { CodeGenerationEngine } from '../generators/CodeGenerationEngine.js';
 import { IntegrationCoordinator } from '../utils/IntegrationCoordinator.js';
 
+// REAL UEP (Universal Execution Protocol) Integration - NATS-based coordination
+import { RealUEPWrapper } from '../RealUEPWrapper.js';
+
 /**
  * Template Engine Factory Agent - Builds complete dynamic content generation systems
  * NO limitations on template types, content systems, or complexity levels
@@ -56,6 +59,9 @@ export class TemplateEngineFactoryAgent extends EventEmitter {
   private generatedSystems: Map<string, DynamicTemplateSystem> = new Map();
   private activeGenerations: Map<string, SystemGenerationRequest> = new Map();
   private metaAgentIntegrations: Map<string, MetaAgentIntegration> = new Map();
+
+  // REAL UEP Integration
+  private uepWrapper?: RealUEPWrapper;
 
   constructor(config: TemplateEngineFactoryConfig = {}) {
     super();
@@ -96,6 +102,7 @@ export class TemplateEngineFactoryAgent extends EventEmitter {
         fiveDocumentFramework: true,
         context7Integration: true,
         ragSystemIntegration: true,
+        uepEnabled: config.integration?.uepEnabled !== false, // UEP enabled by default
         ...config.integration
       },
       
@@ -154,6 +161,11 @@ export class TemplateEngineFactoryAgent extends EventEmitter {
 
       if (this.config.integration?.ragSystemIntegration) {
         await this.initializeRAGSystemIntegration();
+      }
+
+      // Initialize REAL UEP integration if enabled
+      if (this.config.integration?.uepEnabled) {
+        await this.initializeUEP();
       }
 
       // Ensure output directories exist
@@ -331,6 +343,25 @@ export class TemplateEngineFactoryAgent extends EventEmitter {
       this.generatedSystems.set(request.requestId, generatedSystem);
       this.activeGenerations.delete(request.requestId);
 
+      // Send results via UEP if enabled
+      if (this.uepWrapper) {
+        try {
+          await this.uepWrapper.broadcastDynamicSystemGeneration({
+            systemId: result.systemId,
+            systemName: generatedSystem.name,
+            filesGenerated: result.generation.filesGenerated,
+            linesOfCode: result.generation.linesOfCode,
+            duration: result.generation.duration,
+            qualityScore: result.quality.codeQualityScore,
+            summary: `Generated dynamic template system: ${generatedSystem.name}`,
+            timestamp: new Date().toISOString()
+          });
+          console.log(chalk.blue('📤 Dynamic system generation results broadcasted via UEP'));
+        } catch (uepError) {
+          console.warn(chalk.yellow('⚠️ Failed to broadcast via UEP:'), uepError instanceof Error ? uepError.message : String(uepError));
+        }
+      }
+
       this.emit('system:generation:completed', {
         requestId: request.requestId,
         result,
@@ -466,6 +497,36 @@ export class TemplateEngineFactoryAgent extends EventEmitter {
   }
 
   /**
+   * Shutdown the agent and cleanup resources
+   */
+  async shutdown(): Promise<void> {
+    try {
+      console.log(chalk.blue('🛑 Shutting down Template Engine Factory Agent...'));
+      
+      // Shutdown UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
+      
+      // Clear active generations
+      this.activeGenerations.clear();
+      
+      // Clear generated systems
+      this.generatedSystems.clear();
+      
+      // Clear integrations
+      this.metaAgentIntegrations.clear();
+      
+      this.isInitialized = false;
+      console.log(chalk.green('✅ Template Engine Factory Agent shutdown completed'));
+    } catch (error: any) {
+      console.error(chalk.red(`❌ Shutdown failed: ${error.message}`));
+      throw error;
+    }
+  }
+
+  /**
    * Private helper methods
    */
 
@@ -585,6 +646,124 @@ export class TemplateEngineFactoryAgent extends EventEmitter {
     } catch (error: any) {
       console.warn(chalk.yellow(`⚠️  RAG System integration failed: ${error.message}`));
     }
+  }
+
+  /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  private async initializeUEP(): Promise<void> {
+    try {
+      console.log(chalk.blue('🔗 Initializing REAL UEP integration for Template-Engine-Factory Agent...'));
+      
+      this.uepWrapper = new RealUEPWrapper({
+        agentId: 'template-engine-factory-001',
+        agentType: 'infrastructure',
+        capabilities: {
+          templateGeneration: {
+            dynamicSystems: true,
+            templateEngines: ['mustache', 'handlebars', 'custom'],
+            codeGeneration: true,
+            architectureDesign: true,
+            systemIntegration: true
+          },
+          templateAnalysis: {
+            complexityAnalysis: true,
+            patternDetection: true,
+            allPurposeCompliance: true,
+            conversionOpportunities: true
+          },
+          systemGeneration: {
+            contextProcessors: true,
+            variationGenerators: true,
+            fallbackHandlers: true,
+            validationEngines: true,
+            integrationUnits: true
+          },
+          integration: { 
+            metaAgentFactory: true, 
+            allPurposePattern: true, 
+            context7: true, 
+            ragSystem: true 
+          }
+        },
+        natsUrl: process.env.NATS_URL || 'nats://localhost:4222',
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      });
+
+      // Set up UEP event handlers
+      this.setupUEPEventHandlers();
+
+      // Initialize the wrapper
+      await this.uepWrapper.initialize();
+      
+      console.log(chalk.green('✅ REAL UEP integration initialized for Template-Engine-Factory Agent'));
+      
+    } catch (error: any) {
+      console.error(chalk.red('❌ Failed to initialize UEP integration:'), error);
+      // Continue without UEP if initialization fails
+      this.uepWrapper = undefined;
+    }
+  }
+
+  /**
+   * Set up UEP event handlers for coordination
+   */
+  private setupUEPEventHandlers(): void {
+    if (!this.uepWrapper) return;
+
+    // Handle incoming task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      console.log(chalk.blue('📋 UEP Task assigned to Template-Engine-Factory:'), task);
+      try {
+        const result = await this.generateDynamicSystem(task);
+        await this.uepWrapper!.sendTaskResult(task, {
+          success: true,
+          result,
+          processingTime: result.generation.duration
+        });
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process UEP task:'), error);
+        await this.uepWrapper!.sendTaskResult(task, {
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+          processingTime: 0
+        });
+      }
+    });
+
+    // Handle template generation requests from other agents
+    this.uepWrapper.on('template-generation-request', async (uepMessage) => {
+      console.log(chalk.blue('🏗️ Template generation request received:'), uepMessage);
+      try {
+        const result = await this.generateDynamicSystem(uepMessage.payload);
+        await this.uepWrapper!.sendTemplateAnalysisResult(uepMessage.from, result);
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process template generation request:'), error);
+      }
+    });
+
+    // Handle template analysis requests
+    this.uepWrapper.on('template-analysis-request', async (uepMessage) => {
+      console.log(chalk.blue('🔍 Template analysis request received:'), uepMessage);
+      try {
+        const templatePath = uepMessage.payload.templatePath;
+        const result = await this.analyzeTemplate(templatePath);
+        await this.uepWrapper!.sendTemplateAnalysisResult(uepMessage.from, result);
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process template analysis request:'), error);
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (broadcast) => {
+      console.log(chalk.blue('📢 System broadcast received:'), broadcast);
+    });
+
+    // Handle agent heartbeats
+    this.uepWrapper.on('agent-heartbeat', (heartbeat) => {
+      console.log(chalk.blue('💓 Agent heartbeat received:'), heartbeat.agentId);
+    });
   }
 
   // Placeholder methods for system generation steps

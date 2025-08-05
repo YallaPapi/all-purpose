@@ -39,6 +39,7 @@ import {
 import { TemplateEngine } from './TemplateEngine.js';
 import { ConsistencyValidator } from './ConsistencyValidator.js';
 import { ProjectAnalyzer } from './ProjectAnalyzer.js';
+import { RealUEPWrapper, RealUEPWrapperConfig } from '../RealUEPWrapper.js';
 
 /**
  * Five Document Framework Agent - Generates systematic documentation
@@ -49,6 +50,7 @@ export class FiveDocumentFrameworkAgent extends EventEmitter {
   private templateEngine: TemplateEngine;
   private consistencyValidator: ConsistencyValidator;
   private projectAnalyzer: ProjectAnalyzer;
+  private uepWrapper?: RealUEPWrapper;
   private isInitialized: boolean = false;
 
   // Core documents that are always generated
@@ -80,6 +82,127 @@ export class FiveDocumentFrameworkAgent extends EventEmitter {
     
     this.consistencyValidator = new ConsistencyValidator();
     this.projectAnalyzer = new ProjectAnalyzer();
+
+    // Initialize UEP wrapper for real-time coordination
+    this.initializeUEP();
+  }
+
+  /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  private initializeUEP(): void {
+    try {
+      const uepConfig: RealUEPWrapperConfig = {
+        agentId: 'five-document-framework-agent',
+        agentType: 'coordination',
+        capabilities: {
+          documentation: ['generate-framework', 'consistency-validation', 'template-processing'],
+          documents: ['changelog', 'environment-setup', 'debugging-guide', 'parameter-mapping', 'readme-taskmaster'],
+          templates: ['handlebars', 'mustache', 'custom'],
+          analysis: ['project-structure', 'cross-document-consistency', 'template-variables'],
+          formats: ['markdown', 'yaml', 'json'],
+          integration: ['taskmaster', 'context7', 'prd-parser', 'scaffold-generator']
+        },
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      };
+
+      this.uepWrapper = new RealUEPWrapper(uepConfig);
+      this.setupUEPEventHandlers();
+      
+      console.log('✅ REAL UEP wrapper initialized for Five-Document-Framework Agent');
+    } catch (error) {
+      console.error('❌ Failed to initialize UEP wrapper for Five-Document-Framework Agent', { error });
+    }
+  }
+
+  /**
+   * Setup UEP event handlers for task coordination
+   */
+  private setupUEPEventHandlers(): void {
+    if (!this.uepWrapper) return;
+
+    // Handle task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      console.log('📋 Received task via UEP', { taskId: task.id, type: task.type });
+      
+      try {
+        let result;
+        switch (task.type) {
+          case 'generate':
+          case 'generate-documentation-framework':
+            result = await this.generate({
+              projectOverride: task.projectOverride,
+              generationOverride: task.generationOverride,
+              documentsToGenerate: task.documentsToGenerate,
+              validateOnly: task.validateOnly
+            });
+            break;
+          case 'validate-consistency':
+            // Run validation only
+            result = await this.generate({
+              validateOnly: true
+            });
+            break;
+          case 'template-processing':
+            // Custom template processing
+            result = await this.processCustomTemplate(task);
+            break;
+          default:
+            result = { success: false, error: `Unknown task type: ${task.type}` };
+        }
+
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, result);
+        }
+      } catch (error) {
+        console.error('❌ Task execution failed', { taskId: task.id, error });
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, { 
+            success: false, 
+            error: error instanceof Error ? error.message : String(error) 
+          });
+        }
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (message) => {
+      console.log('📢 Received system broadcast', { 
+        type: message.payload.type, 
+        from: message.from 
+      });
+    });
+
+    console.log('✅ UEP event handlers configured for Five-Document-Framework Agent');
+  }
+
+  /**
+   * Process custom template (for UEP integration)
+   */
+  private async processCustomTemplate(task: any): Promise<any> {
+    try {
+      // Custom template processing logic
+      const templateContext = this.createTemplateContext(
+        task.projectOverride || this.config.projectConfig,
+        task.generationOverride || this.config.generationConfig
+      );
+
+      const result = {
+        success: true,
+        templateContext,
+        customProcessing: true,
+        agentId: 'five-document-framework-agent',
+        timestamp: new Date().toISOString()
+      };
+
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
   }
 
   /**
@@ -101,6 +224,11 @@ export class FiveDocumentFrameworkAgent extends EventEmitter {
 
       // Register Handlebars helpers for document generation
       this.registerHandlebarsHelpers();
+
+      // Initialize UEP connection for real-time coordination
+      if (this.uepWrapper) {
+        await this.uepWrapper.initialize();
+      }
 
       this.isInitialized = true;
 
@@ -211,6 +339,15 @@ export class FiveDocumentFrameworkAgent extends EventEmitter {
         result,
         timestamp: new Date().toISOString()
       });
+
+      // Broadcast documentation framework result via UEP
+      if (this.uepWrapper && result.success) {
+        try {
+          await this.uepWrapper.broadcastDocumentationFramework(result);
+        } catch (error) {
+          console.warn('⚠️ Failed to broadcast documentation framework result via UEP', { error });
+        }
+      }
 
       console.log(chalk.green(`🎉 Framework generation complete in ${totalTime}ms`));
       console.log(chalk.blue(`📊 Documents generated: ${documentResults.length}`));
@@ -439,6 +576,27 @@ export class FiveDocumentFrameworkAgent extends EventEmitter {
         concurrentGeneration: true
       }
     };
+  }
+
+  /**
+   * Graceful shutdown with UEP cleanup
+   */
+  async shutdown(): Promise<void> {
+    console.log('🛑 Shutting down Five Document Framework Agent...');
+
+    try {
+      // Cleanup UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
+
+      this.isInitialized = false;
+      console.log('✅ Five Document Framework Agent shut down successfully');
+    } catch (error) {
+      console.error('❌ Error during Five Document Framework Agent shutdown', { error });
+      throw error;
+    }
   }
 }
 

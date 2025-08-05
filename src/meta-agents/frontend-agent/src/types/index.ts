@@ -1,12 +1,12 @@
 /**
- * Backend Agent Types
- * Comprehensive type definitions for backend development agent
+ * Frontend Agent Types
+ * Comprehensive type definitions for frontend development agent
  */
 
 import { EventEmitter } from 'events';
 
-// Core Backend Agent Types
-export interface BackendAgentConfig {
+// Core Frontend Agent Types
+export interface FrontendAgentConfig {
   logLevel: 'debug' | 'info' | 'warn' | 'error';
   timeout: number;
   projectRoot: string;
@@ -14,47 +14,48 @@ export interface BackendAgentConfig {
   enableContext7: boolean;
   enableRAG: boolean;
   enableUEP: boolean;
-  apiFramework: 'express' | 'fastify' | 'koa' | 'nestjs';
-  databaseType: 'postgresql' | 'mysql' | 'mongodb' | 'sqlite';
-  authStrategy: 'jwt' | 'oauth' | 'session' | 'custom';
-  testFramework: 'jest' | 'mocha' | 'vitest';
+  uiFramework: 'react' | 'vue' | 'angular' | 'svelte' | 'solid';
+  cssFramework: 'tailwind' | 'bootstrap' | 'bulma' | 'chakra' | 'emotion' | 'styled-components';
+  stateManagement: 'redux' | 'zustand' | 'mobx' | 'context' | 'jotai' | 'valtio';
+  testFramework: 'jest' | 'vitest' | 'cypress' | 'playwright';
 }
 
-export interface BackendAgentCapabilities {
-  apiDesign: {
-    restfulEndpoints: boolean;
-    graphqlSchema: boolean;
-    middlewareGeneration: boolean;
-    errorHandling: boolean;
-    inputValidation: boolean;
+export interface FrontendAgentCapabilities {
+  componentGeneration: {
+    reactComponents: boolean;
+    vueComponents: boolean;
+    angularComponents: boolean;
+    svelteComponents: boolean;
+    customHooks: boolean;
+    storybook: boolean;
   };
-  database: {
-    schemaDesign: boolean;
-    migrationGeneration: boolean;
-    queryOptimization: boolean;
-    relationshipModeling: boolean;
-    ormIntegration: string[];
+  uiDesign: {
+    responsiveDesign: boolean;
+    themingSystem: boolean;
+    designTokens: boolean;
+    componentLibrary: boolean;
+    accessibilityCompliance: boolean;
   };
-  security: {
-    authenticationFlow: boolean;
-    authorizationMiddleware: boolean;
-    securityAudit: boolean;
-    rateLimiting: boolean;
-    jwtImplementation: boolean;
-    oauthIntegration: boolean;
+  stateManagement: {
+    globalState: boolean;
+    localState: boolean;
+    asyncDataFetching: boolean;
+    caching: boolean;
+    optimisticUpdates: boolean;
+  };
+  performance: {
+    codesplitting: boolean;
+    lazyLoading: boolean;
+    bundleOptimization: boolean;
+    imageOptimization: boolean;
+    criticalCss: boolean;
   };
   testing: {
-    unitTestGeneration: boolean;
+    unitTests: boolean;
     integrationTests: boolean;
-    mockDataCreation: boolean;
-    apiTesting: boolean;
-    loadTesting: boolean;
-  };
-  documentation: {
-    apiDocumentation: boolean;
-    schemaDocumentation: boolean;
-    deploymentGuides: boolean;
-    swaggerGeneration: boolean;
+    e2eTests: boolean;
+    visualRegression: boolean;
+    accessibilityTests: boolean;
   };
 }
 
@@ -271,6 +272,7 @@ export interface ProcessingResult {
   generatedFiles?: GeneratedFile[];
   recommendations?: string[];
   nextSteps?: string[];
+  processingTime?: number;
 }
 
 export interface GeneratedFile {
@@ -323,6 +325,10 @@ export interface AgentMetrics {
   databaseSchemasDesigned: number;
   securityIssuesFound: number;
   testsGenerated: number;
+  componentsCreated: number;
+  layoutsDesigned: number;
+  performanceOptimizations: number;
+  accessibilityImprovements: number;
 }
 
 // Template and Generation Types
@@ -379,4 +385,131 @@ export interface BackendAgentEvents {
   'engine-error': (engineName: string, error: Error) => void;
   'context-updated': (context: Context7ScanResult) => void;
   'files-generated': (files: GeneratedFile[]) => void;
+}
+
+// Backend Types (for compatibility with mixed engines)
+export interface BackendAgentConfig {
+  logLevel: 'debug' | 'info' | 'warn' | 'error';
+  timeout: number;
+  projectRoot: string;
+  outputDir: string;
+  enableContext7: boolean;
+  enableRAG: boolean;
+  enableUEP: boolean;
+  apiFramework: string;
+  databaseType: string;
+  authStrategy: string;
+  testFramework: string;
+}
+
+export interface BackendAgentCapabilities {
+  apiDesign: any;
+  database: any;
+  security: any;
+  testing: any;
+  documentation: any;
+}
+
+// Frontend Agent Types
+export interface FrontendAgentConfig {
+  logLevel: 'debug' | 'info' | 'warn' | 'error';
+  timeout: number;
+  projectRoot: string;
+  outputDir: string;
+  enableContext7: boolean;
+  enableRAG: boolean;
+  enableUEP: boolean;
+  uiFramework: 'react' | 'vue' | 'angular' | 'svelte' | 'solid';
+  cssFramework: 'tailwind' | 'bootstrap' | 'bulma' | 'chakra' | 'emotion' | 'styled-components';
+  stateManagement: 'redux' | 'zustand' | 'mobx' | 'context' | 'jotai' | 'valtio';
+  testFramework: 'jest' | 'vitest' | 'cypress' | 'playwright';
+}
+
+export interface FrontendAgentCapabilities {
+  componentGeneration: {
+    reactComponents: boolean;
+    vueComponents: boolean;
+    angularComponents: boolean;
+    svelteComponents: boolean;
+    customHooks: boolean;
+    storybook: boolean;
+  };
+  uiDesign: {
+    responsiveDesign: boolean;
+    themingSystem: boolean;
+    designTokens: boolean;
+    componentLibrary: boolean;
+    accessibilityCompliance: boolean;
+  };
+  stateManagement: {
+    globalState: boolean;
+    localState: boolean;
+    asyncDataFetching: boolean;
+    caching: boolean;
+    optimisticUpdates: boolean;
+  };
+  performance: {
+    codesplitting: boolean;
+    lazyLoading: boolean;
+    bundleOptimization: boolean;
+    imageOptimization: boolean;
+    criticalCss: boolean;
+  };
+  testing: {
+    unitTests: boolean;
+    integrationTests: boolean;
+    e2eTests: boolean;
+    visualRegression: boolean;
+    accessibilityTests: boolean;
+  };
+}
+
+export interface FrontendTask {
+  id: string;
+  type: 'component-generation' | 'ui-design' | 'state-management' | 'performance-optimization' | 'accessibility' | 'generate-component' | 'design-ui' | 'setup-state' | 'optimize-performance' | 'write-tests';
+  description: string;
+  requirements: any;
+  context: Context7ScanResult;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'pending' | 'in-progress' | 'completed' | 'failed';
+  result?: any;
+  error?: string;
+}
+
+export interface FrontendEngine extends EventEmitter {
+  name: string;
+  initialize(config: any): Promise<void>;
+  process(task: FrontendTask): Promise<ProcessingResult>;
+  getCapabilities(): any;
+  getStatus(): any;
+  shutdown(): Promise<void>;
+}
+
+export interface FrontendAgentStatus {
+  name: string;
+  version: string;
+  initialized: boolean;
+  uptime: number;
+  config: Partial<FrontendAgentConfig>;
+  capabilities: FrontendAgentCapabilities;
+  engines: EngineStatus[];
+  metrics: AgentMetrics;
+  timestamp: string;
+}
+
+export interface FrontendAgentEvents {
+  'task-started': (task: FrontendTask) => void;
+  'task-completed': (task: FrontendTask, result: ProcessingResult) => void;
+  'task-failed': (task: FrontendTask, error: FrontendAgentError) => void;  
+  'engine-initialized': (engineName: string) => void;
+  'engine-error': (engineName: string, error: Error) => void;
+  'context-updated': (context: Context7ScanResult) => void;
+  'files-generated': (files: GeneratedFile[]) => void;
+}
+
+export interface FrontendAgentError extends Error {
+  code: string;
+  type: 'configuration' | 'processing' | 'validation' | 'integration' | 'template';
+  details?: any;
+  suggestions?: string[];
 }

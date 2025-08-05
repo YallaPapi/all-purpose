@@ -12,9 +12,9 @@ import { Logger } from 'winston';
 import {
   UEPMessage,
   UEPContext,
-  BackendTask,
+  FrontendTask,
   ProcessingResult,
-  BackendAgentCapabilities
+  FrontendAgentCapabilities
 } from '../types/index.js';
 
 import { createLogger } from '../utils/logger.js';
@@ -22,7 +22,7 @@ import { createLogger } from '../utils/logger.js';
 export interface UEPWrapperConfig {
   agentId: string;
   agentType: 'domain-specific' | 'infrastructure' | 'coordination';
-  capabilities: BackendAgentCapabilities;
+  capabilities: FrontendAgentCapabilities;
   coordinationEndpoint?: string;
   enableRealTimeUpdates?: boolean;
   enableTaskDistribution?: boolean;
@@ -92,7 +92,7 @@ export class UEPWrapper extends EventEmitter {
   /**
    * Send task result to coordination system
    */
-  async sendTaskResult(task: BackendTask, result: ProcessingResult): Promise<void> {
+  async sendTaskResult(task: FrontendTask, result: ProcessingResult): Promise<void> {
     const message: UEPMessage = {
       id: uuidv4(),
       type: 'response',
@@ -115,7 +115,7 @@ export class UEPWrapper extends EventEmitter {
   /**
    * Send task status update
    */
-  async sendTaskUpdate(task: BackendTask): Promise<void> {
+  async sendTaskUpdate(task: FrontendTask): Promise<void> {
     const message: UEPMessage = {
       id: uuidv4(),
       type: 'event',
@@ -137,7 +137,7 @@ export class UEPWrapper extends EventEmitter {
   /**
    * Request task from coordination system
    */
-  async requestTask(taskType?: string, priority?: string): Promise<BackendTask | null> {
+  async requestTask(taskType?: string, priority?: string): Promise<FrontendTask | null> {
     const message: UEPMessage = {
       id: uuidv4(),
       type: 'request',
@@ -182,7 +182,7 @@ export class UEPWrapper extends EventEmitter {
   /**
    * Register capabilities with coordination system
    */
-  async updateCapabilities(capabilities: Partial<BackendAgentCapabilities>): Promise<void> {
+  async updateCapabilities(capabilities: Partial<FrontendAgentCapabilities>): Promise<void> {
     this.config.capabilities = { ...this.config.capabilities, ...capabilities };
 
     const message: UEPMessage = {
@@ -301,7 +301,7 @@ export class UEPWrapper extends EventEmitter {
 
     // Handle task distribution
     if (this.config.enableTaskDistribution) {
-      this.on('task-assigned', (task: BackendTask) => {
+      this.on('task-assigned', (task: FrontendTask) => {
         this.emit('new-task', task);
       });
     }
@@ -469,7 +469,7 @@ export class UEPWrapper extends EventEmitter {
     });
   }
 
-  private calculateTaskProgress(task: BackendTask): number {
+  private calculateTaskProgress(task: FrontendTask): number {
     // Simple progress calculation based on task status
     switch (task.status) {
       case 'pending': return 0;
