@@ -11,10 +11,12 @@ export async function GET(request: NextRequest) {
     const protocol = request.headers.get('x-forwarded-proto') || 'https';
     const host = request.headers.get('x-vercel-deployment-url') || 
                  request.headers.get('host') || 
-                 'solarbookers.com';
+                 'localhost:3000';
     const currentDomain = `${protocol}://${host}`;
     
     console.log('Creating quick demo with domain:', currentDomain);
+    console.log('Headers check - x-vercel-deployment-url:', request.headers.get('x-vercel-deployment-url'));
+    console.log('Headers check - host:', request.headers.get('host'));
 
     // Create assistant directly without calling other endpoints
     const assistant = await openai.beta.assistants.create({
