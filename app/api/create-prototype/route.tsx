@@ -164,14 +164,30 @@ export async function POST(request: NextRequest) {
     const instructions = templateManager.generateInstructions(templateVariables, validatedIndustry);
     
     console.log('Generated instructions using template system for industry:', validatedIndustry);
+    console.log('Template variables being passed:', JSON.stringify(templateVariables, null, 2));
 
-    // Create the assistant
-    const assistant = await openai.beta.assistants.create({
-      name: `${organization_name} ${industryText} Assistant`,
-      instructions,
-      model: "gpt-4-1106-preview",
-      tools: [{ type: "code_interpreter" }]
-    });
+    // Create the assistant with error handling
+    let assistant;
+    try {
+      assistant = await openai.beta.assistants.create({
+        name: `${organization_name} ${industryText} Assistant`,
+        instructions,
+        model: "gpt-4-1106-preview",
+        tools: [{ type: "code_interpreter" }]
+      });
+      
+      if (!assistant || !assistant.id) {
+        throw new Error('Assistant creation returned invalid response');
+      }
+      
+      console.log('Assistant created successfully:', assistant.id);
+    } catch (error) {
+      console.error('Failed to create OpenAI assistant:', error);
+      return NextResponse.json(
+        { error: 'Failed to create AI assistant', details: error.message },
+        { status: 500 }
+      );
+    }
 
   // Use the new domain detection utility for Vercel-aware domain detection
   const { generateFullUrl, logDomainDetection } = await import('../../../lib/domain-utils');
@@ -204,7 +220,21 @@ export async function POST(request: NextRequest) {
         createdAt: new Date().toISOString()
       };
       
+      // Store under multiple keys to handle slug mismatches
       await redis.set(`company:${companySlug}`, JSON.stringify(companyData));
+      
+      // Also store under raw company name slug (no processing)
+      const rawSlug = organization_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      if (rawSlug !== companySlug) {
+        await redis.set(`company:${rawSlug}`, JSON.stringify(companyData));
+      }
+      
+      console.log('REDIS STORAGE DEBUG:', {
+        redisKey: `company:${companySlug}`,
+        companySlug: companySlug,
+        assistantId: assistant.id,
+        storedData: companyData
+      });
       console.log(`Successfully stored assistant ${assistant.id} and industry ${validatedIndustry} for company ${companySlug} in Redis`);
     } catch (error) {
       console.log('Warning: Could not store assistant mapping:', error);

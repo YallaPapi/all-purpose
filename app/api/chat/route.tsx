@@ -27,8 +27,41 @@ export async function POST(request: NextRequest) {
     let finalAssistantId = assistantId;
     if (!finalAssistantId && company) {
       try {
-        const companyData = await redis.get(`company:${company}`);
-        console.log(`Retrieved company data for ${company}:`, companyData);
+        // Try multiple Redis key formats to handle slug mismatches
+        let companyData = await redis.get(`company:${company}`);
+        
+        if (!companyData) {
+          // Try raw slug format
+          const rawSlug = company.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+          if (rawSlug !== company) {
+            companyData = await redis.get(`company:${rawSlug}`);
+          }
+        }
+        
+        if (!companyData) {
+          // Try original company name patterns
+          const variations = [
+            company.replace(/-/g, ''),
+            company.replace(/-/g, ' '),
+            company.split('-').join('')
+          ];
+          
+          for (const variation of variations) {
+            const testSlug = variation.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            const testData = await redis.get(`company:${testSlug}`);
+            if (testData) {
+              companyData = testData;
+              break;
+            }
+          }
+        }
+        
+        console.log('REDIS RETRIEVAL DEBUG:', {
+          lookingForKey: `company:${company}`,
+          company: company,
+          foundData: companyData,
+          dataType: typeof companyData
+        });
         
         // Handle both old format (just assistant ID) and new format (JSON object)
         if (typeof companyData === 'string' && companyData.startsWith('asst_')) {
@@ -41,13 +74,17 @@ export async function POST(request: NextRequest) {
         } else if (companyData && typeof companyData === 'object') {
           // Already parsed object
           finalAssistantId = companyData.assistantId;
-        } else {
+        } else if (companyData) {
           finalAssistantId = companyData;
         }
         
         console.log(`Final assistant ID for company ${company}:`, finalAssistantId);
       } catch (error) {
         console.error('Error retrieving assistant from Redis:', error);
+        return NextResponse.json(
+          { error: 'Failed to retrieve assistant data', details: error.message },
+          { status: 500 }
+        );
       }
     }
 
