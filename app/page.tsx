@@ -232,24 +232,13 @@ export default function Home() {
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Industry
                           </label>
-                          <select
+                          <input
+                            type="text"
                             value={customDemoData.industry}
                             onChange={(e) => setCustomDemoData(prev => ({ ...prev, industry: e.target.value }))}
+                            placeholder="e.g., solar, HVAC, legal, dental, fitness, etc."
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="">Select Industry</option>
-                            <option value="marketing">Marketing & Advertising</option>
-                            <option value="automotive">Automotive</option>
-                            <option value="dental">Dental</option>
-                            <option value="legal">Legal</option>
-                            <option value="fitness">Fitness</option>
-                            <option value="real-estate">Real Estate</option>
-                            <option value="consulting">Business Consulting</option>
-                            <option value="technology">Technology</option>
-                            <option value="healthcare">Healthcare</option>
-                            <option value="financial">Financial Services</option>
-                            <option value="other">Other</option>
-                          </select>
+                          />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
