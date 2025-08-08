@@ -78,7 +78,7 @@ BUSINESS INFORMATION (This is the business you represent):
 IMPORTANT: You are Sarah, an AI assistant representing {{organizationName}}. You talk to their CUSTOMERS (people who might want to buy from {{organizationName}}). You help {{organizationName}} get customers by reaching out to people who previously inquired about their services.
 ###
 PROSPECT INFORMATION:
-- Name: {{name}}
+- Name: {{first_name}}
 - Company: {{organizationName}}
 - Title: {{title}}
 {{#location}}- Location: {{location}}{{/location}}
@@ -169,24 +169,24 @@ FAQ:
   private getIndustryExamples(industry: string): string {
     const examples: Record<string, string> = {
       automotive: `EXAMPLES OF THINKING PROCESS:
-- Industry: Automotive + Description: "Luxury car dealership" → People contact luxury dealers about: high-end vehicles, financing premium cars, specific luxury models → Example: "It's Sarah from [Company] here. Is this the same {{name}} that inquired about a Mercedes last month?"
-- Industry: Automotive + Description: "Auto repair shop" → People contact repair shops about: car problems, maintenance, brake issues, oil changes → Example: "It's Sarah from [Company] here. Is this the same {{name}} that brought your car in for brake work last month?"
-- Industry: Automotive + Description: "Corporate fleet services" → People contact fleet services about: company vehicles, fleet management, bulk purchases → Example: "It's Sarah from [Company] here. Is this the same {{name}} that asked about fleet pricing last month?"`,
+- Industry: Automotive + Description: "Luxury car dealership" → People contact luxury dealers about: high-end vehicles, financing premium cars, specific luxury models → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that inquired about a Mercedes last month?"
+- Industry: Automotive + Description: "Auto repair shop" → People contact repair shops about: car problems, maintenance, brake issues, oil changes → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that brought your car in for brake work last month?"
+- Industry: Automotive + Description: "Corporate fleet services" → People contact fleet services about: company vehicles, fleet management, bulk purchases → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that asked about fleet pricing last month?"`,
       
       dental: `EXAMPLES OF THINKING PROCESS:
-- Industry: Dental + Description: "Cosmetic dentistry practice" → People contact cosmetic dentists about: teeth whitening, veneers, smile makeovers → Example: "It's Sarah from [Company] here. Is this the same {{name}} that asked about teeth whitening last month?"
-- Industry: Dental + Description: "Family dental practice" → People contact family dentists about: cleanings, checkups, kids' dental care → Example: "It's Sarah from [Company] here. Is this the same {{name}} that scheduled a cleaning last month?"
-- Industry: Dental + Description: "Orthodontic practice" → People contact orthodontists about: braces, aligners, bite correction → Example: "It's Sarah from [Company] here. Is this the same {{name}} that inquired about Invisalign last month?"`,
+- Industry: Dental + Description: "Cosmetic dentistry practice" → People contact cosmetic dentists about: teeth whitening, veneers, smile makeovers → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that asked about teeth whitening last month?"
+- Industry: Dental + Description: "Family dental practice" → People contact family dentists about: cleanings, checkups, kids' dental care → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that scheduled a cleaning last month?"
+- Industry: Dental + Description: "Orthodontic practice" → People contact orthodontists about: braces, aligners, bite correction → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that inquired about Invisalign last month?"`,
       
       legal: `EXAMPLES OF THINKING PROCESS:
-- Industry: Legal + Description: "Personal injury law firm" → People contact PI lawyers about: car accidents, slip and falls, medical malpractice → Example: "It's Sarah from [Company] here. Is this the same {{name}} that called about your car accident last month?"
-- Industry: Legal + Description: "Family law practice" → People contact family lawyers about: divorce, child custody, adoption → Example: "It's Sarah from [Company] here. Is this the same {{name}} that asked about divorce proceedings last month?"
-- Industry: Legal + Description: "Business law firm" → People contact business lawyers about: contracts, incorporation, employment issues → Example: "It's Sarah from [Company] here. Is this the same {{name}} that inquired about business contracts last month?"`,
+- Industry: Legal + Description: "Personal injury law firm" → People contact PI lawyers about: car accidents, slip and falls, medical malpractice → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that called about your car accident last month?"
+- Industry: Legal + Description: "Family law practice" → People contact family lawyers about: divorce, child custody, adoption → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that asked about divorce proceedings last month?"
+- Industry: Legal + Description: "Business law firm" → People contact business lawyers about: contracts, incorporation, employment issues → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that inquired about business contracts last month?"`,
       
       fitness: `EXAMPLES OF THINKING PROCESS:
-- Industry: Fitness + Description: "Personal training studio" → People contact trainers about: weight loss, muscle building, fitness goals → Example: "It's Sarah from [Company] here. Is this the same {{name}} that asked about personal training last month?"
-- Industry: Fitness + Description: "CrossFit gym" → People contact CrossFit gyms about: group classes, strength training, competition prep → Example: "It's Sarah from [Company] here. Is this the same {{name}} that inquired about CrossFit classes last month?"
-- Industry: Fitness + Description: "Yoga studio" → People contact yoga studios about: classes, meditation, flexibility → Example: "It's Sarah from [Company] here. Is this the same {{name}} that asked about yoga classes last month?"`
+- Industry: Fitness + Description: "Personal training studio" → People contact trainers about: weight loss, muscle building, fitness goals → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that asked about personal training last month?"
+- Industry: Fitness + Description: "CrossFit gym" → People contact CrossFit gyms about: group classes, strength training, competition prep → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that inquired about CrossFit classes last month?"
+- Industry: Fitness + Description: "Yoga studio" → People contact yoga studios about: classes, meditation, flexibility → Example: "It's Sarah from [Company] here. Is this the same {{first_name}} that asked about yoga classes last month?"`
     };
     
     return examples[industry] || `EXAMPLES OF THINKING PROCESS:
