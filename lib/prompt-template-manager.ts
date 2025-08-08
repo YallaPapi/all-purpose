@@ -4,6 +4,7 @@ import Mustache from 'mustache';
 export interface PromptTemplateVariables {
   // Prospect Information (the lead/customer)
   name: string;
+  first_name: string;
   title: string;
   
   // Business Information (the LEAD's company)
