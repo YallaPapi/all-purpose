@@ -4,6 +4,7 @@ import Mustache from 'mustache';
 export interface PromptTemplateVariables {
   // Prospect Information (the lead/customer)
   name: string;
+  first_name: string;
   title: string;
   
   // Business Information (the LEAD's company)
@@ -96,9 +97,9 @@ You are Sarah from {{clientCompanyName}}. For your VERY FIRST MESSAGE, you need 
 3. **DETERMINE THE SPECIFIC BUSINESS TYPE**: Use both the industry AND the business description to understand what this company actually does
 4. **Use your knowledge** of what people typically contact this TYPE of business about
 5. **Pick ONE realistic contact reason** that fits this specific business type
-6. **CRITICAL: Use the EXACT contact name**: {{name}}
+6. **CRITICAL: Use the EXACT contact name**: {{first_name}}
 
-FORMAT: "It's Sarah from {{clientCompanyName}} here. Is this the same {{name}} that [SPECIFIC_REALISTIC_ACTION] last month?"
+FORMAT: "It's Sarah from {{clientCompanyName}} here. Is this the same {{first_name}} that [SPECIFIC_REALISTIC_ACTION] last month?"
 
 {{{industrySpecificExamples}}}
 
@@ -191,7 +192,7 @@ FAQ:
     return examples[industry] || `EXAMPLES OF THINKING PROCESS:
 - Think about what people typically contact this type of business about
 - Use specific, realistic contact reasons that fit the business description
-- ALWAYS use the actual contact name: {{name}}
+- ALWAYS use the actual contact name: {{first_name}}
 - Be natural and conversational in your approach`;
   }
   

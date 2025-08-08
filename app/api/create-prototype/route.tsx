@@ -147,6 +147,7 @@ export async function POST(request: NextRequest) {
     // Prepare template variables
     const templateVariables: PromptTemplateVariables = {
       name: name || 'Prospect',
+      first_name: name || 'Prospect',
       title: title || 'Not specified',
       organizationName: organization_name,
       industryText,
