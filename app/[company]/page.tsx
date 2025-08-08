@@ -46,7 +46,10 @@ export default function CompanyPage() {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll to bottom if there are at least 2 messages (after user starts chatting)
+    if (messages.length > 1) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -284,29 +287,6 @@ export default function CompanyPage() {
               </div>
 
               <div className="space-y-4">
-                {/* How It Works Section */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                  <h3 className="font-semibold text-green-900 mb-3">🤖 How It Works</h3>
-                  <div className="space-y-2 text-green-800 text-sm">
-                    <div className="flex items-start space-x-2">
-                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">1</span>
-                      <span>AI sends personalized first message using prospect's name and context</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">2</span>
-                      <span>Asks qualifying questions about their specific needs and goals</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">3</span>
-                      <span>Builds rapport and provides compelling reasons to book a call</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">4</span>
-                      <span>Automatically provides calendar link for instant booking</span>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Book Appointment Button */}
                 <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
                   <h3 className="font-semibold text-orange-900 mb-3">🚀 Ready to Get Started?</h3>
@@ -351,6 +331,29 @@ export default function CompanyPage() {
                   </div>
                   <p className="text-blue-800 text-xs mt-2">SMS is 5x more effective than email with 98% open rates vs 20% for email*</p>
                   <p className="text-blue-700 text-xs mt-1">*Source: SimpleTexting, TextDrip, Constant Contact 2024 studies</p>
+                </div>
+
+                {/* How It Works Section */}
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                  <h3 className="font-semibold text-green-900 mb-3">🤖 How It Works</h3>
+                  <div className="space-y-2 text-green-800 text-sm">
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">1</span>
+                      <span>AI sends personalized first message using prospect's name and context</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">2</span>
+                      <span>Asks qualifying questions about their specific needs and goals</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">3</span>
+                      <span>Builds rapport and provides compelling reasons to book a call</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">4</span>
+                      <span>Automatically provides calendar link for instant booking</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Quick Responses Section */}
