@@ -167,7 +167,24 @@ export async function POST(request: NextRequest) {
     console.log('Generated instructions using template system for industry:', validatedIndustry);
     console.log('Template variables being passed:', JSON.stringify(templateVariables, null, 2));
     console.log('FIRST_NAME DEBUG:', templateVariables.first_name);
+    console.log('NAME DEBUG:', templateVariables.name);
     console.log('Generated instructions preview:', instructions.substring(0, 500) + '...');
+    
+    // Check if first_name is actually in the rendered instructions
+    const firstNameCheck = instructions.includes(templateVariables.first_name);
+    console.log('CRITICAL: first_name rendered correctly in instructions:', firstNameCheck);
+    
+    // FORCE: Clear any existing assistant for this company to ensure fresh instructions
+    try {
+      const redis = new (await import('@upstash/redis')).Redis({
+        url: process.env.KV_REST_API_URL!,
+        token: process.env.KV_REST_API_TOKEN!,
+      });
+      await redis.del(`company:${companySlug}`);
+      console.log('FORCE REFRESH: Cleared existing assistant for', companySlug);
+    } catch (error) {
+      console.log('Could not clear existing assistant:', error);
+    }
 
     // Create the assistant with error handling
     let assistant;
