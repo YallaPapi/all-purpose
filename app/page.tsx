@@ -221,7 +221,7 @@ export default function Home() {
                             type="text"
                             value={customDemoData.contactName}
                             onChange={(e) => setCustomDemoData(prev => ({ ...prev, contactName: e.target.value }))}
-                            placeholder="e.g., John Smith"
+                            placeholder="e.g., Alex Johnson"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
