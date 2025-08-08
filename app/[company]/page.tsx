@@ -284,6 +284,50 @@ export default function CompanyPage() {
               </div>
 
               <div className="space-y-4">
+                {/* How It Works Section */}
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                  <h3 className="font-semibold text-green-900 mb-3">🤖 How It Works</h3>
+                  <div className="space-y-2 text-green-800 text-sm">
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">1</span>
+                      <span>AI sends personalized first message using prospect's name and context</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">2</span>
+                      <span>Asks qualifying questions about their specific needs and goals</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">3</span>
+                      <span>Builds rapport and provides compelling reasons to book a call</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">4</span>
+                      <span>Automatically provides calendar link for instant booking</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Book Appointment Button */}
+                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                  <h3 className="font-semibold text-orange-900 mb-3">🚀 Ready to Get Started?</h3>
+                  <p className="text-orange-800 text-sm mb-3">
+                    Book a discovery call to see how this AI agent can work for your business.
+                  </p>
+                  <div>
+                    <a 
+                      href="https://calendly.com/tool-delta/discovery"
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block w-full bg-orange-600 text-white text-center py-3 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors"
+                    >
+                      📅 Book Discovery Call
+                    </a>
+                  </div>
+                  <p className="text-orange-700 text-xs mt-2 text-center">
+                    Get your AI agent set up in 24 hours ⚡
+                  </p>
+                </div>
+
                 {/* Why SMS? Section */}
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <h3 className="font-semibold text-blue-900 mb-3">📱 Why SMS?</h3>
@@ -307,29 +351,6 @@ export default function CompanyPage() {
                   </div>
                   <p className="text-blue-800 text-xs mt-2">SMS is 5x more effective than email with 98% open rates vs 20% for email*</p>
                   <p className="text-blue-700 text-xs mt-1">*Source: SimpleTexting, TextDrip, Constant Contact 2024 studies</p>
-                </div>
-
-                {/* How It Works Section */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                  <h3 className="font-semibold text-green-900 mb-3">🤖 How It Works</h3>
-                  <div className="space-y-2 text-green-800 text-sm">
-                    <div className="flex items-start space-x-2">
-                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">1</span>
-                      <span>AI sends personalized first message using prospect's name and context</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">2</span>
-                      <span>Asks qualifying questions about their specific needs and goals</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">3</span>
-                      <span>Builds rapport and provides compelling reasons to book a call</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">4</span>
-                      <span>Automatically provides calendar link for instant booking</span>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Quick Responses Section */}
@@ -366,27 +387,6 @@ export default function CompanyPage() {
                   </div>
                   <p className="text-purple-800 text-xs mt-2">
                     <strong>Act like the prospect!</strong> Try different responses to see how the AI adapts to various scenarios.
-                  </p>
-                </div>
-
-                {/* How to Get Started Section */}
-                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                  <h3 className="font-semibold text-orange-900 mb-3">🚀 How to Get Started</h3>
-                  <p className="text-orange-800 text-sm mb-3">
-                    Ready to get your own AI SMS agent that converts prospects into booked calls?
-                  </p>
-                  <div>
-                    <a 
-                      href={`https://calendly.com/${company}`}
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block w-full bg-orange-600 text-white text-center py-3 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors"
-                    >
-                      📅 Book Your Demo Call
-                    </a>
-                  </div>
-                  <p className="text-orange-700 text-xs mt-2 text-center">
-                    Get your AI agent set up in 24 hours ⚡
                   </p>
                 </div>
               </div>
