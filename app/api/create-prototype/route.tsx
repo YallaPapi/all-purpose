@@ -166,6 +166,8 @@ export async function POST(request: NextRequest) {
     
     console.log('Generated instructions using template system for industry:', validatedIndustry);
     console.log('Template variables being passed:', JSON.stringify(templateVariables, null, 2));
+    console.log('FIRST_NAME DEBUG:', templateVariables.first_name);
+    console.log('Generated instructions preview:', instructions.substring(0, 500) + '...');
 
     // Create the assistant with error handling
     let assistant;
