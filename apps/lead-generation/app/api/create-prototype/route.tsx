@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
     const assistant = await openai.beta.assistants.create({
       name: `${organization_name} ${industryText} Assistant`,
       instructions,
-      model: "gpt-4-1106-preview",
+      model: "gpt-4o",
       tools: [{ type: "code_interpreter" }]
     });
 

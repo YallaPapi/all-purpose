@@ -62,7 +62,7 @@ FAQ:
 - We help businesses optimize their operations and grow their revenue through professional consulting services.
 - Our service typically helps businesses increase efficiency by 20-30%.
 - If they ask where we got their details/data from you MUST tell them "You made an enquiry via our website, if you no longer wish to speak with us, reply with the word 'delete'"`,
-      model: "gpt-4-1106-preview",
+      model: "gpt-4o",
       tools: [{ type: "code_interpreter" }]
     });
 
