@@ -20,6 +20,9 @@ import chalk from 'chalk';
 import { ASTParser, ParseResult, ParseError } from './core/astParser';
 import { ASTTraversal, TraversalResult, TraversalFinding } from './core/astTraverse';
 
+// REAL UEP (Universal Execution Protocol) Integration - NATS-based coordination
+import { RealUEPWrapper } from './RealUEPWrapper';
+
 export interface AllPurposePatternConfig {
   // Input configuration - NO hardcoded limitations
   sourceDir?: string;
@@ -39,6 +42,10 @@ export interface AllPurposePatternConfig {
   // Integration options - Context7 enhanced
   contextEnabled?: boolean;
   taskMasterIntegration?: boolean;
+  
+  // UEP Integration options - NATS-based coordination
+  uepEnabled?: boolean;
+  agentId?: string;
   
   // Performance options - UNLIMITED scalability
   maxFiles?: number;
@@ -112,6 +119,9 @@ export class AllPurposePatternAgent extends EventEmitter {
   private astParser: ASTParser;
   private astTraversal: ASTTraversal;
   private isInitialized: boolean = false;
+  
+  // REAL UEP Integration - NATS-based coordination
+  private uepWrapper?: RealUEPWrapper;
 
   constructor(config: AllPurposePatternConfig = {}) {
     super();
@@ -129,6 +139,8 @@ export class AllPurposePatternAgent extends EventEmitter {
       templateGeneration: config.templateGeneration !== false,
       contextEnabled: config.contextEnabled !== false, // Context7 integration
       taskMasterIntegration: config.taskMasterIntegration !== false,
+      uepEnabled: config.uepEnabled !== false, // UEP integration
+      agentId: config.agentId || 'all-purpose-pattern-agent',
       maxFiles: config.maxFiles, // UNLIMITED by default
       maxDepth: config.maxDepth, // UNLIMITED by default
       ...config // UNLIMITED additional configuration
@@ -155,6 +167,11 @@ export class AllPurposePatternAgent extends EventEmitter {
       // Initialize Context7 patterns if enabled
       if (this.config.contextEnabled) {
         await this.initializeContext7();
+      }
+
+      // Initialize REAL UEP wrapper if enabled
+      if (this.config.uepEnabled) {
+        await this.initializeUEP();
       }
 
       this.isInitialized = true;
@@ -259,6 +276,33 @@ export class AllPurposePatternAgent extends EventEmitter {
         result,
         timestamp: new Date().toISOString()
       });
+
+      // Send results via UEP if enabled
+      if (this.uepWrapper) {
+        try {
+          await this.uepWrapper.broadcastPatternTransformation({
+            analysis: {
+              antiPatternsFound: analysis.antiPatterns.length,
+              filesProcessed: result.performance.filesProcessed,
+              processingTime: result.performance.totalTime
+            },
+            transformation: transformation ? {
+              transformedFiles: transformation.transformedFiles.length,
+              templatesGenerated: transformation.templatesGenerated.length,
+              configurationSchema: !!transformation.configurationSchema
+            } : null,
+            validation: validation ? {
+              isUniversal: validation.isUniversal,
+              hasLimitations: validation.hasLimitations,
+              issuesFound: validation.issues.length
+            } : null,
+            timestamp: new Date().toISOString()
+          });
+          console.log(chalk.blue('📤 Pattern analysis results broadcasted via UEP'));
+        } catch (uepError) {
+          console.warn(chalk.yellow('⚠️ Failed to broadcast via UEP:'), uepError.message);
+        }
+      }
 
       console.log(chalk.green(`🎉 Processing complete in ${totalTime}ms`));
       console.log(chalk.blue(`📊 Anti-patterns found: ${analysis.antiPatterns.length}`));
@@ -787,6 +831,87 @@ export class AllPurposePatternAgent extends EventEmitter {
   }
 
   /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  private async initializeUEP(): Promise<void> {
+    try {
+      console.log(chalk.blue('🔗 Initializing REAL UEP integration for All-Purpose-Pattern Agent...'));
+      
+      this.uepWrapper = new RealUEPWrapper({
+        agentId: this.config.agentId!,
+        agentType: 'infrastructure',
+        capabilities: {
+          patternDetection: {
+            hardcodedArrays: true,
+            limitationConstants: true,
+            conditionalLogic: true,
+            hardcodedEndpoints: true,
+            hardcodedText: true
+          },
+          transformation: {
+            configurationDriven: true,
+            universalPatterns: true,
+            templateGeneration: true,
+            schemaGeneration: true
+          },
+          validation: {
+            universalityCheck: true,
+            configurationCoverage: true,
+            scalabilityPatterns: true,
+            context7Integration: this.config.contextEnabled
+          },
+          languages: ['JavaScript', 'TypeScript'],
+          integrations: ['TaskMaster', 'Context7', 'PRD-Parser', 'Scaffold-Generator']
+        },
+        natsUrl: process.env.NATS_URL || 'nats://localhost:4222',
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      });
+
+      // Set up UEP event handlers
+      this.setupUEPEventHandlers();
+
+      // Initialize the wrapper
+      await this.uepWrapper.initialize();
+      
+      console.log(chalk.green('✅ REAL UEP integration initialized for All-Purpose-Pattern Agent'));
+      
+    } catch (error) {
+      console.error(chalk.red('❌ Failed to initialize UEP integration:'), error);
+      // Continue without UEP if initialization fails
+      this.uepWrapper = undefined;
+    }
+  }
+
+  /**
+   * Set up UEP event handlers for coordination
+   */
+  private setupUEPEventHandlers(): void {
+    if (!this.uepWrapper) return;
+
+    // Handle incoming task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      console.log(chalk.blue('📋 UEP Task assigned to All-Purpose-Pattern:'), task);
+      try {
+        const result = await this.process(task);
+        await this.uepWrapper!.sendTaskResult(task, result);
+      } catch (error) {
+        console.error(chalk.red('❌ Failed to process UEP task:'), error);
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (broadcast) => {
+      console.log(chalk.blue('📢 System broadcast received:'), broadcast);
+    });
+
+    // Handle agent heartbeats
+    this.uepWrapper.on('agent-heartbeat', (heartbeat) => {
+      console.log(chalk.blue('💓 Agent heartbeat received:'), heartbeat.agentId);
+    });
+  }
+
+  /**
    * Generate recommendations based on findings
    */
   private generateRecommendations(antiPatterns: AntiPatternFinding[]): string[] {
@@ -1123,6 +1248,28 @@ code all-purpose-config.schema.json
     }
     
     return 'hardcoded_expression';
+  }
+
+  /**
+   * Shutdown the agent gracefully
+   */
+  async shutdown(): Promise<void> {
+    try {
+      console.log(chalk.blue('🛑 Shutting down All-Purpose-Pattern Agent...'));
+      
+      // Shutdown UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
+      
+      this.isInitialized = false;
+      console.log(chalk.green('✅ All-Purpose-Pattern Agent shut down successfully'));
+      
+    } catch (error) {
+      console.error(chalk.red('❌ Error during shutdown:'), error);
+      throw error;
+    }
   }
 
   /**

@@ -1,0 +1,124 @@
+{
+  "name": "uep-agent-template",
+  "version": "1.0.0",
+  "description": "UEP Meta-Agent Factory - Agent Container Template with Protocol Compliance",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "clean": "rimraf dist",
+    "docker:build": "docker build -f Dockerfile --target uep-production -t ${npm_package_name}:${npm_package_version} .",
+    "docker:dev": "docker build -f Dockerfile --target uep-development -t ${npm_package_name}:dev .",
+    "docker:run": "docker run -d --name ${npm_package_name} -p 3000:3000 ${npm_package_name}:${npm_package_version}",
+    "docker:stop": "docker stop ${npm_package_name} && docker rm ${npm_package_name}",
+    "health-check": "curl -f http://localhost:3000/health || exit 1",
+    "uep:register": "curl -X POST http://uep-registry:3000/api/registry/register -H 'Content-Type: application/json' -d @uep-registration.json",
+    "uep:deregister": "curl -X DELETE http://uep-registry:3000/api/registry/deregister/${UEP_AGENT_ID:-unknown}"
+  },
+  "keywords": [
+    "uep",
+    "meta-agent",
+    "microservice",
+    "docker",
+    "typescript",
+    "opentelemetry",
+    "health-check",
+    "service-registration"
+  ],
+  "author": "UEP Meta-Agent Factory",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "axios": "^1.6.7",
+    "winston": "^3.11.0",
+    "express-rate-limit": "^7.1.5",
+    "compression": "^1.7.4",
+    "dotenv": "^16.4.1",
+    "@opentelemetry/sdk-node": "^0.48.0",
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/exporter-otlp-http": "^0.48.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.41.0",
+    "@opentelemetry/resources": "^1.21.0",
+    "@opentelemetry/semantic-conventions": "^1.21.0",
+    "@opentelemetry/sdk-metrics": "^1.21.0",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5",
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "@typescript-eslint/parser": "^6.20.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3",
+    "rimraf": "^5.0.5",
+    "supertest": "^6.3.4",
+    "nodemon": "^3.0.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src", "<rootDir>/tests"],
+    "testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/index.ts"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"]
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint"],
+    "extends": [
+      "eslint:recommended",
+      "@typescript-eslint/recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2022,
+      "sourceType": "module"
+    },
+    "env": {
+      "node": true,
+      "es2022": true
+    },
+    "rules": {
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "no-console": "off"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uep-factory/meta-agents.git"
+  },
+  "bugs": {
+    "url": "https://github.com/uep-factory/meta-agents/issues"
+  },
+  "homepage": "https://github.com/uep-factory/meta-agents#readme",
+  "config": {
+    "uep": {
+      "protocolVersion": "2.0.0",
+      "templateVersion": "1.0.0"
+    }
+  }
+}

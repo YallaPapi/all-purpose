@@ -1,0 +1,157 @@
+{{ define "pagerduty.default.description" }}
+{{ .GroupLabels.alertname }}: {{ .CommonAnnotations.summary }}
+{{ end }}
+
+{{ define "pagerduty.default.incident_key" }}
+{{ .GroupLabels.alertname }}-{{ .GroupLabels.service | default .GroupLabels.job }}-{{ .GroupLabels.instance | default "unknown" }}
+{{ end }}
+
+{{ define "pagerduty.default.client" }}
+Meta-Agent Factory Alertmanager
+{{ end }}
+
+{{ define "pagerduty.default.client_url" }}
+http://localhost:9093
+{{ end }}
+
+{{ define "pagerduty.default.details" }}
+{
+  "alert_summary": "{{ .CommonAnnotations.summary }}",
+  "alert_description": "{{ .CommonAnnotations.description }}",
+  "service": "{{ .GroupLabels.service | default .GroupLabels.job }}",
+  "severity": "{{ .GroupLabels.severity }}",
+  "environment": "{{ .GroupLabels.environment | default "production" }}",
+  "team": "{{ .GroupLabels.team | default "platform" }}",
+  {{ if .GroupLabels.agent_type }}"agent_type": "{{ .GroupLabels.agent_type }}",{{ end }}
+  {{ if .GroupLabels.instance }}"instance": "{{ .GroupLabels.instance }}",{{ end }}
+  "alert_count": {{ len .Alerts }},
+  "started_at": "{{ (index .Alerts 0).StartsAt.Format "2006-01-02T15:04:05Z" }}",
+  "alertmanager_url": "http://localhost:9093",
+  "dashboard_url": "http://localhost:3004/d/meta-agent-overview",
+  "logs_url": "http://localhost:3004/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bservice%3D%5C%22{{ .GroupLabels.service }}%5C%22%7D%22%7D%5D%7D",
+  {{ if .CommonAnnotations.runbook_url }}"runbook_url": "{{ .CommonAnnotations.runbook_url }}",{{ end }}
+  "generator_url": "{{ (index .Alerts 0).GeneratorURL }}",
+  "firing_alerts": [
+    {{ range $i, $alert := .Alerts }}{{ if $i }},{{ end }}
+    {
+      "alertname": "{{ $alert.Labels.alertname }}",
+      "summary": "{{ $alert.Annotations.summary }}",
+      "description": "{{ $alert.Annotations.description }}",
+      "service": "{{ $alert.Labels.service | default $alert.Labels.job }}",
+      "severity": "{{ $alert.Labels.severity }}",
+      "started_at": "{{ $alert.StartsAt.Format "2006-01-02T15:04:05Z" }}",
+      "labels": {
+        {{ range $key, $value := $alert.Labels }}{{ if ne $key "alertname" }}"{{ $key }}": "{{ $value }}",{{ end }}{{ end }}
+        "dummy": "dummy"
+      }
+    }{{ end }}
+  ]
+}
+{{ end }}
+
+{{ define "pagerduty.critical.description" }}
+🚨 CRITICAL: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }} requires immediate attention
+{{ end }}
+
+{{ define "pagerduty.critical.details" }}
+{
+  "alert_type": "CRITICAL",
+  "urgency": "high",
+  "alert_summary": "{{ .CommonAnnotations.summary }}",
+  "alert_description": "{{ .CommonAnnotations.description }}",
+  "service": "{{ .GroupLabels.service | default .GroupLabels.job }}",
+  "severity": "{{ .GroupLabels.severity }}",
+  "environment": "{{ .GroupLabels.environment | default "production" }}",
+  "team": "{{ .GroupLabels.team | default "platform" }}",
+  {{ if .GroupLabels.agent_type }}"agent_type": "{{ .GroupLabels.agent_type }}",{{ end }}
+  {{ if .GroupLabels.instance }}"instance": "{{ .GroupLabels.instance }}",{{ end }}
+  "alert_count": {{ len .Alerts }},
+  "started_at": "{{ (index .Alerts 0).StartsAt.Format "2006-01-02T15:04:05Z" }}",
+  "business_impact": "{{ if eq .GroupLabels.service "factory-core" }}Core factory operations affected - agent coordination may be impacted{{ else if eq .GroupLabels.service "domain-agents" }}Specialized domain processing affected - project generation may be delayed{{ else if eq .GroupLabels.service "uep-service" }}Protocol validation affected - agent communication may be compromised{{ else }}Service disruption may affect overall system functionality{{ end }}",
+  "immediate_actions": [
+    "Check service health dashboard",
+    "Review recent deployments or configuration changes", 
+    "Examine service logs for error patterns",
+    {{ if eq .GroupLabels.service "factory-core" }}"Verify agent registration and coordination status",{{ end }}
+    {{ if eq .GroupLabels.service "domain-agents" }}"Check individual domain agent status",{{ end }}
+    {{ if eq .GroupLabels.service "uep-service" }}"Validate UEP protocol compliance and validation",{{ end }}
+    "Consider service restart if issue persists"
+  ],
+  "escalation_policy": "Critical alerts auto-escalate after 15 minutes if not acknowledged",
+  "alertmanager_url": "http://localhost:9093",
+  "dashboard_url": "http://localhost:3004/d/meta-agent-overview",
+  "service_dashboard_url": "http://localhost:3004/d/service-{{ .GroupLabels.service }}",
+  "logs_url": "http://localhost:3004/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bservice%3D%5C%22{{ .GroupLabels.service }}%5C%22%7D%22%7D%5D%7D",
+  {{ if .CommonAnnotations.runbook_url }}"runbook_url": "{{ .CommonAnnotations.runbook_url }}",{{ end }}
+  "on_call_contact": "Platform Team via PagerDuty",
+  "generator_url": "{{ (index .Alerts 0).GeneratorURL }}",
+  "system_context": {
+    "factory_status": "{{ if eq .GroupLabels.service "factory-core" }}DEGRADED{{ else }}OPERATIONAL{{ end }}",
+    "agent_coordination": "{{ if eq .GroupLabels.service "factory-core" }}AT_RISK{{ else }}OPERATIONAL{{ end }}",
+    "project_generation": "{{ if or (eq .GroupLabels.service "factory-core") (eq .GroupLabels.service "domain-agents") }}AT_RISK{{ else }}OPERATIONAL{{ end }}"
+  },
+  "firing_alerts": [
+    {{ range $i, $alert := .Alerts }}{{ if $i }},{{ end }}
+    {
+      "alertname": "{{ $alert.Labels.alertname }}",
+      "summary": "{{ $alert.Annotations.summary }}",
+      "description": "{{ $alert.Annotations.description }}",
+      "service": "{{ $alert.Labels.service | default $alert.Labels.job }}",
+      "severity": "{{ $alert.Labels.severity }}",
+      "started_at": "{{ $alert.StartsAt.Format "2006-01-02T15:04:05Z" }}",
+      "business_impact_score": "{{ if eq $alert.Labels.severity "critical" }}HIGH{{ else if eq $alert.Labels.severity "warning" }}MEDIUM{{ else }}LOW{{ end }}",
+      "labels": {
+        {{ range $key, $value := $alert.Labels }}{{ if ne $key "alertname" }}"{{ $key }}": "{{ $value }}",{{ end }}{{ end }}
+        "dummy": "dummy"
+      }
+    }{{ end }}
+  ]
+}
+{{ end }}
+
+{{ define "pagerduty.service_down.description" }}
+🚨 SERVICE DOWN: {{ .GroupLabels.service }} is not responding - immediate intervention required
+{{ end }}
+
+{{ define "pagerduty.service_down.details" }}
+{
+  "alert_type": "SERVICE_DOWN",
+  "urgency": "high",
+  "service_status": "DOWN",
+  "alert_summary": "{{ .CommonAnnotations.summary }}",
+  "alert_description": "{{ .CommonAnnotations.description }}",
+  "service": "{{ .GroupLabels.service | default .GroupLabels.job }}",
+  "severity": "{{ .GroupLabels.severity }}",
+  "environment": "{{ .GroupLabels.environment | default "production" }}",
+  {{ if .GroupLabels.instance }}"instance": "{{ .GroupLabels.instance }}",{{ end }}
+  "started_at": "{{ (index .Alerts 0).StartsAt.Format "2006-01-02T15:04:05Z" }}",
+  "business_impact": "{{ if eq .GroupLabels.service "factory-core" }}🚨 CRITICAL: Core factory operations are down. All agent coordination and project generation is affected.{{ else if eq .GroupLabels.service "domain-agents" }}⚠️ HIGH: Domain-specific processing is down. Backend, frontend, DevOps, QA, and documentation agents are not available.{{ else if eq .GroupLabels.service "uep-service" }}⚠️ HIGH: UEP protocol validation is down. Agent communication may be unreliable.{{ else if eq .GroupLabels.service "api-gateway" }}🚨 CRITICAL: External access is down. No external requests can reach the system.{{ else if eq .GroupLabels.service "redis" }}⚠️ MEDIUM: Cache and session storage is down. Performance and user sessions affected.{{ else if eq .GroupLabels.service "nats-broker" }}⚠️ MEDIUM: Message queue is down. Asynchronous processing and event streaming affected.{{ else }}Service disruption affecting system functionality.{{ end }}",
+  "immediate_actions": [
+    "🔍 Check container/service status immediately",
+    "📊 Verify system resources (CPU, memory, disk)",
+    "🔗 Test network connectivity and DNS resolution",
+    "📝 Check recent deployment or configuration changes",
+    "🔄 Attempt service restart if no obvious cause found",
+    {{ if eq .GroupLabels.service "factory-core" }}"🤖 Validate agent registration status after restart",{{ end }}
+    "📞 Escalate to senior engineer if restart fails"
+  ],
+  "dependencies_affected": [
+    {{ if eq .GroupLabels.service "factory-core" }}"domain-agents", "uep-service", "api-gateway"{{ else if eq .GroupLabels.service "redis" }}"factory-core", "domain-agents", "session-management"{{ else if eq .GroupLabels.service "nats-broker" }}"factory-core", "domain-agents", "uep-service", "event-processing"{{ else if eq .GroupLabels.service "api-gateway" }}"external-access", "load-balancing"{{ end }}
+  ],
+  "recovery_time_objective": "{{ if eq .GroupLabels.service "factory-core" }}5 minutes{{ else if eq .GroupLabels.service "api-gateway" }}3 minutes{{ else }}10 minutes{{ end }}",
+  "escalation_threshold": "15 minutes without resolution",
+  "health_check_url": "http://{{ .GroupLabels.service }}:{{ if eq .GroupLabels.service "factory-core" }}3000{{ else if eq .GroupLabels.service "domain-agents" }}3001{{ else if eq .GroupLabels.service "uep-service" }}3003{{ else if eq .GroupLabels.service "api-gateway" }}8080{{ else }}80{{ end }}/health",
+  "container_logs_command": "docker logs meta-agent-{{ .GroupLabels.service }} --tail=100",
+  "restart_command": "docker-compose restart {{ .GroupLabels.service }}",
+  "alertmanager_url": "http://localhost:9093",
+  "dashboard_url": "http://localhost:3004/d/meta-agent-overview",
+  "service_dashboard_url": "http://localhost:3004/d/service-{{ .GroupLabels.service }}",
+  "logs_url": "http://localhost:3004/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bservice%3D%5C%22{{ .GroupLabels.service }}%5C%22%7D%22%7D%5D%7D",
+  {{ if .CommonAnnotations.runbook_url }}"runbook_url": "{{ .CommonAnnotations.runbook_url }}",{{ end }}
+  "generator_url": "{{ (index .Alerts 0).GeneratorURL }}"
+}
+{{ end }}
+
+{{ define "pagerduty.resolution.description" }}
+✅ RESOLVED: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }} has returned to normal operation
+{{ end }}

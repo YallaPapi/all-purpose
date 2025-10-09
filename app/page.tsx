@@ -6,18 +6,43 @@ import Image from "next/image";
 export default function Home() {
   const [isCreatingDemo, setIsCreatingDemo] = useState(false);
   const [demoUrl, setDemoUrl] = useState('');
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [customDemoData, setCustomDemoData] = useState({
+    companyName: '',
+    contactName: '',
+    industry: '',
+    city: '',
+    state: '',
+    organization_short_description: ''
+  });
 
   const createQuickDemo = async () => {
     setIsCreatingDemo(true);
     try {
-      const response = await fetch('/api/quick-demo');
+      const response = await fetch('/api/quick-demo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          companyName: 'Custom Demo Company',
+          industry: 'business-services',
+          generateUnique: true
+        })
+      });
+      
       if (response.ok) {
-        // The quick-demo endpoint returns HTML, let's get the demo URL from it
-        const demoUrl = `${window.location.origin}/quick-demo-business`;
-        setDemoUrl(demoUrl);
-        window.open(demoUrl, '_blank');
+        const data = await response.json();
+        if (data.demoUrl) {
+          setDemoUrl(data.demoUrl);
+          window.open(data.demoUrl, '_blank');
+        } else {
+          alert('Demo created but no URL returned. Please try again.');
+        }
       } else {
-        alert('Failed to create demo. Please try again.');
+        const errorData = await response.json();
+        console.error('Demo creation failed:', errorData);
+        alert(`Failed to create demo: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error creating demo:', error);
@@ -29,6 +54,63 @@ export default function Home() {
 
   const openTestDemo = () => {
     window.open(`${window.location.origin}/quick-demo-business`, '_blank');
+  };
+
+  const createCustomDemo = async () => {
+    // Validate required fields
+    if (!customDemoData.companyName || !customDemoData.contactName) {
+      alert('Please fill in Company Name and Contact Name');
+      return;
+    }
+
+    setIsCreatingDemo(true);
+    try {
+      const response = await fetch('/api/create-prototype', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          companyName: customDemoData.companyName,
+          contactName: customDemoData.contactName,
+          industry: customDemoData.industry || 'business-services',
+          city: customDemoData.city,
+          state: customDemoData.state,
+          organization_short_description: customDemoData.organization_short_description
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.url || data.demoUrl) {
+          const demoLink = data.url || data.demoUrl;
+          setDemoUrl(demoLink);
+          setShowCustomForm(false);
+          window.open(demoLink, '_blank');
+          
+          // Reset form
+          setCustomDemoData({
+            companyName: '',
+            contactName: '',
+            industry: '',
+            city: '',
+            state: '',
+            organization_short_description: ''
+          });
+        } else {
+          alert('Demo created but no URL returned. Please try again.');
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Demo creation failed:', errorData);
+        alert(`Failed to create demo: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error creating demo:', error);
+      alert('Error creating demo. Please try again.');
+    } finally {
+      setIsCreatingDemo(false);
+    }
   };
 
   return (
@@ -109,20 +191,121 @@ export default function Home() {
                     </p>
                   </div>
 
-                  <button
-                    onClick={createQuickDemo}
-                    disabled={isCreatingDemo}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-4 px-6 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    {isCreatingDemo ? (
-                      <>
-                        <span className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></span>
-                        Creating Demo...
-                      </>
-                    ) : (
-                      '🛠️ Create Custom Demo'
-                    )}
-                  </button>
+                  {!showCustomForm ? (
+                    <button
+                      onClick={() => setShowCustomForm(true)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      🛠️ Create Custom Demo
+                    </button>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Company Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={customDemoData.companyName}
+                            onChange={(e) => setCustomDemoData(prev => ({ ...prev, companyName: e.target.value }))}
+                            placeholder="e.g., Smith Marketing Agency"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Contact Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={customDemoData.contactName}
+                            onChange={(e) => setCustomDemoData(prev => ({ ...prev, contactName: e.target.value }))}
+                            placeholder="e.g., Alex Johnson"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Industry
+                          </label>
+                          <input
+                            type="text"
+                            value={customDemoData.industry}
+                            onChange={(e) => setCustomDemoData(prev => ({ ...prev, industry: e.target.value }))}
+                            placeholder="e.g., solar, HVAC, legal, dental, fitness, etc."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              City
+                            </label>
+                            <input
+                              type="text"
+                              value={customDemoData.city}
+                              onChange={(e) => setCustomDemoData(prev => ({ ...prev, city: e.target.value }))}
+                              placeholder="Austin"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              State
+                            </label>
+                            <input
+                              type="text"
+                              value={customDemoData.state}
+                              onChange={(e) => setCustomDemoData(prev => ({ ...prev, state: e.target.value }))}
+                              placeholder="TX"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Business Description
+                        </label>
+                        <textarea
+                          value={customDemoData.organization_short_description}
+                          onChange={(e) => setCustomDemoData(prev => ({ ...prev, organization_short_description: e.target.value }))}
+                          placeholder="e.g., Digital marketing and SEO services for small businesses"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows={3}
+                        />
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={createCustomDemo}
+                          disabled={isCreatingDemo}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-3 px-6 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+                        >
+                          {isCreatingDemo ? (
+                            <span className="flex items-center justify-center">
+                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Creating Demo...
+                            </span>
+                          ) : '🚀 Create Demo'}
+                        </button>
+                        <button
+                          onClick={() => setShowCustomForm(false)}
+                          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-sm text-blue-800">

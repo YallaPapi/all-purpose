@@ -1,0 +1,358 @@
+---
+# Consul Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: consul
+  labels:
+    name: consul
+    app: consul
+    environment: production
+
+---
+# Consul Gossip Encryption Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: consul-encrypt-key
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+type: Opaque
+data:
+  # Base64 encoded 32-byte key generated with: consul keygen
+  # This should be replaced with actual generated key in production
+  key: "WElYTU4yWmpUeWFzQ2dLWkV5Z1J3V0ZmMkRXVzFKWDFZOFE="
+
+---
+# Consul ACL Tokens Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: consul-acl-token
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+type: Opaque
+data:
+  # Base64 encoded UUIDs - replace with actual generated tokens
+  management-token: "ZTNjOGU4ZGUtZjQ2Zi00NzI4LWEzOWEtOWVkNGJjOTk0Mjc2"
+  agent-token: "YjRhNzhlOWQtOTFiOC00MjY5LWE4ZTMtN2Y4MDUyYjY5MzQy"
+
+---
+# Consul Server TLS Certificate Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: consul-server-tls
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+type: kubernetes.io/tls
+data:
+  # Base64 encoded certificates - replace with actual certificates
+  ca.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLkNBIENFUlRJRklDQVRFIC4uLgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t
+  consul.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLkNPTlNVTCBTRVJWRVIgQ0VSVElGSUNBVEUgLi4uCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=
+  consul-key.pem: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQouLi5DT05TVUwgU0VSVkVSIFBSSVZBVEUgS0VZIC4uLgotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==
+
+---
+# Consul Agent ACL Policy
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consul-acl-policies
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+data:
+  agent-policy.hcl: |
+    # Agent policy for Consul servers and clients
+    node_prefix "" {
+      policy = "write"
+    }
+    
+    service_prefix "" {
+      policy = "read"
+    }
+    
+    key_prefix "" {
+      policy = "read"
+    }
+    
+    session_prefix "" {
+      policy = "write"
+    }
+    
+    agent_prefix "" {
+      policy = "write"
+    }
+    
+    query_prefix "" {
+      policy = "read"
+    }
+    
+    event_prefix "" {
+      policy = "read"
+    }
+  
+  uep-agent-policy.hcl: |
+    # Policy for UEP Meta-Agents
+    service_prefix "uep-" {
+      policy = "write"
+    }
+    
+    service_prefix "meta-agent-" {
+      policy = "write"
+    }
+    
+    node_prefix "" {
+      policy = "read"
+    }
+    
+    key_prefix "uep/" {
+      policy = "write"
+    }
+    
+    key_prefix "config/uep/" {
+      policy = "write"
+    }
+    
+    session_prefix "" {
+      policy = "write"
+    }
+    
+    query_prefix "" {
+      policy = "read"
+    }
+    
+    event_prefix "uep-" {
+      policy = "write"
+    }
+    
+    # Connect intentions for service mesh
+    intentions = "write"
+  
+  monitoring-policy.hcl: |
+    # Policy for monitoring and observability
+    node_prefix "" {
+      policy = "read"
+    }
+    
+    service_prefix "" {
+      policy = "read"
+    }
+    
+    key_prefix "" {
+      policy = "read"
+    }
+    
+    agent_prefix "" {
+      policy = "read"
+    }
+    
+    query_prefix "" {
+      policy = "read"
+    }
+    
+    event_prefix "" {
+      policy = "read"
+    }
+
+---
+# Consul Bootstrap Job for ACL Setup
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: consul-acl-bootstrap
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul-bootstrap
+spec:
+  template:
+    metadata:
+      labels:
+        app: consul-server
+        component: consul-bootstrap
+    spec:
+      serviceAccountName: consul-server
+      restartPolicy: OnFailure
+      containers:
+      - name: consul-acl-bootstrap
+        image: hashicorp/consul:1.18.0
+        env:
+        - name: CONSUL_HTTP_ADDR
+          value: "https://consul-server.consul.svc.cluster.local:8501"
+        - name: CONSUL_HTTP_SSL
+          value: "true"
+        - name: CONSUL_CACERT
+          value: "/consul/tls/ca.pem"
+        - name: CONSUL_CLIENT_CERT
+          value: "/consul/tls/consul.pem"
+        - name: CONSUL_CLIENT_KEY
+          value: "/consul/tls/consul-key.pem"
+        command:
+        - "/bin/sh"
+        - "-c"
+        - |
+          set -e
+          
+          # Wait for Consul to be ready
+          echo "Waiting for Consul to be ready..."
+          until consul members; do
+            echo "Consul is not ready, waiting..."
+            sleep 5
+          done
+          
+          echo "Consul is ready, bootstrapping ACL system..."
+          
+          # Bootstrap ACL system (this will fail if already bootstrapped)
+          consul acl bootstrap -format=json > /tmp/bootstrap.json || true
+          
+          # Get the management token
+          MANAGEMENT_TOKEN=$(cat /tmp/bootstrap.json | jq -r '.SecretID' 2>/dev/null || echo $CONSUL_ACL_INITIAL_MANAGEMENT_TOKEN)
+          export CONSUL_HTTP_TOKEN=$MANAGEMENT_TOKEN
+          
+          # Create agent policy
+          consul acl policy create \
+            -name "agent-policy" \
+            -description "Policy for Consul agents" \
+            -rules @/consul/policies/agent-policy.hcl || true
+          
+          # Create UEP agent policy
+          consul acl policy create \
+            -name "uep-agent-policy" \
+            -description "Policy for UEP Meta-Agents" \
+            -rules @/consul/policies/uep-agent-policy.hcl || true
+          
+          # Create monitoring policy
+          consul acl policy create \
+            -name "monitoring-policy" \
+            -description "Policy for monitoring systems" \
+            -rules @/consul/policies/monitoring-policy.hcl || true
+          
+          # Create agent token
+          consul acl token create \
+            -description "Agent token" \
+            -policy-name "agent-policy" \
+            -format=json > /tmp/agent-token.json || true
+          
+          # Create UEP agent token
+          consul acl token create \
+            -description "UEP Agent token" \
+            -policy-name "uep-agent-policy" \
+            -format=json > /tmp/uep-agent-token.json || true
+          
+          # Create monitoring token
+          consul acl token create \
+            -description "Monitoring token" \
+            -policy-name "monitoring-policy" \
+            -format=json > /tmp/monitoring-token.json || true
+          
+          echo "ACL bootstrap completed successfully"
+        volumeMounts:
+        - name: tls
+          mountPath: /consul/tls
+          readOnly: true
+        - name: policies
+          mountPath: /consul/policies
+          readOnly: true
+      volumes:
+      - name: tls
+        secret:
+          secretName: consul-server-tls
+      - name: policies
+        configMap:
+          name: consul-acl-policies
+
+---
+# Consul Connect CA Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consul-connect-ca
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+data:
+  ca-config.json: |
+    {
+      "Provider": "consul",
+      "Config": {
+        "PrivateKeyType": "ec",
+        "PrivateKeyBits": 256,
+        "LeafCertTTL": "1h",
+        "RootCertTTL": "8760h",
+        "IntermediateCertTTL": "2160h"
+      }
+    }
+
+---
+# Pod Security Policy for Consul
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: consul-server
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+  readOnlyRootFilesystem: true
+
+---
+# Role for Pod Security Policy
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: consul-server-psp
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+rules:
+- apiGroups: ['policy']
+  resources: ['podsecuritypolicies']
+  resourceNames: ['consul-server']
+  verbs: ['use']
+
+---
+# RoleBinding for Pod Security Policy
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: consul-server-psp
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: consul-server-psp
+subjects:
+- kind: ServiceAccount
+  name: consul-server
+  namespace: consul

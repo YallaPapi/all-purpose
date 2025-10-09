@@ -1,0 +1,239 @@
+# Prometheus Configuration for UEP Message Broker Monitoring
+#
+# This configuration collects metrics from the NATS JetStream cluster,
+# HAProxy load balancer, and UEP-specific application metrics.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'uep-message-broker'
+    environment: 'development'
+    region: 'local'
+
+# Rule files for alerting
+rule_files:
+  - "alert_rules/*.yml"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Scrape configuration
+scrape_configs:
+  # NATS Server Metrics
+  - job_name: 'nats-cluster'
+    static_configs:
+      - targets: ['nats-1:8222', 'nats-2:8222', 'nats-3:8222']
+    scrape_interval: 10s
+    metrics_path: '/varz'
+    params:
+      format: ['prometheus']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: prometheus-nats-exporter:7777
+
+  # NATS JetStream Metrics
+  - job_name: 'nats-jetstream'
+    static_configs:
+      - targets: ['nats-1:8222', 'nats-2:8222', 'nats-3:8222']
+    scrape_interval: 10s
+    metrics_path: '/jsz'
+    params:
+      format: ['prometheus']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: prometheus-nats-exporter:7777
+
+  # NATS Connection Metrics
+  - job_name: 'nats-connections'
+    static_configs:
+      - targets: ['nats-1:8222', 'nats-2:8222', 'nats-3:8222']
+    scrape_interval: 30s
+    metrics_path: '/connz'
+    params:
+      format: ['prometheus']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: prometheus-nats-exporter:7777
+
+  # NATS Subscription Metrics
+  - job_name: 'nats-subscriptions'
+    static_configs:
+      - targets: ['nats-1:8222', 'nats-2:8222', 'nats-3:8222']
+    scrape_interval: 30s
+    metrics_path: '/subsz'
+    params:
+      format: ['prometheus']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: prometheus-nats-exporter:7777
+
+  # HAProxy Load Balancer Metrics
+  - job_name: 'haproxy'
+    static_configs:
+      - targets: ['nats-lb:8404']
+    scrape_interval: 15s
+    metrics_path: '/stats'
+    params:
+      format: ['prometheus']
+    basic_auth:
+      username: 'admin'
+      password: 'admin'  # Change in production
+
+  # NATS Surveyor Metrics (Advanced Monitoring)
+  - job_name: 'nats-surveyor'
+    static_configs:
+      - targets: ['nats-surveyor:7777']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+
+  # UEP Message Broker Application Metrics
+  - job_name: 'uep-message-broker'
+    static_configs:
+      - targets: ['uep-message-broker:3001']
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'uep-message-broker'
+
+  # Container Runtime Metrics (Docker/cAdvisor)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+
+  # Node Exporter for System Metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+
+  # Application-specific UEP Metrics
+  - job_name: 'uep-agents'
+    static_configs:
+      - targets: 
+        - 'meta-agent-prd-parser:8080'
+        - 'meta-agent-infra-orchestrator:8080'
+        - 'domain-agent-frontend:8080'
+        - 'domain-agent-backend:8080'
+        - 'domain-agent-devops:8080'
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.*):.*'
+        target_label: agent_name
+        replacement: '${1}'
+
+  # Redis Metrics (if used for caching)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:9121']
+    scrape_interval: 30s
+
+  # Custom UEP Event Bus Metrics
+  - job_name: 'uep-event-bus-custom'
+    static_configs:
+      - targets: ['uep-message-broker:9090']
+    scrape_interval: 10s
+    metrics_path: '/uep/metrics'
+    params:
+      format: ['prometheus']
+    metric_relabel_configs:
+      # Add UEP-specific labels
+      - source_labels: [__name__]
+        regex: 'uep_(.*)'
+        target_label: uep_metric_type
+        replacement: '${1}'
+      - target_label: system
+        replacement: 'uep-message-broker'
+
+# Recording rules for aggregated metrics
+recording_rules:
+  - name: uep_message_broker_rules
+    interval: 30s
+    rules:
+      # Message throughput per minute
+      - record: uep:message_throughput_per_minute
+        expr: rate(nats_core_total_msgs[1m]) * 60
+
+      # Error rate percentage
+      - record: uep:message_error_rate_percent
+        expr: (rate(nats_core_total_msgs_err[5m]) / rate(nats_core_total_msgs[5m])) * 100
+
+      # Average message processing time
+      - record: uep:message_processing_time_avg
+        expr: rate(nats_core_total_msg_processing_time[5m]) / rate(nats_core_total_msgs[5m])
+
+      # Cluster health score (0-1)
+      - record: uep:cluster_health_score
+        expr: avg(up{job="nats-cluster"})
+
+      # Memory usage percentage across cluster
+      - record: uep:cluster_memory_usage_percent
+        expr: (sum(nats_core_mem) / sum(nats_core_mem_max)) * 100
+
+      # Connection pool utilization
+      - record: uep:connection_pool_utilization
+        expr: (sum(nats_core_total_connections) / sum(nats_core_max_connections)) * 100
+
+# Metric retention and storage configuration
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 10GB
+    min-block-duration: 2h
+    max-block-duration: 25h
+
+# Remote write configuration (for long-term storage)
+# remote_write:
+#   - url: "https://your-remote-storage/api/v1/write"
+#     queue_config:
+#       max_samples_per_send: 1000
+#       max_shards: 200
+#       capacity: 2500
+
+# Remote read configuration
+# remote_read:
+#   - url: "https://your-remote-storage/api/v1/read"
+
+# Feature flags
+feature_flags:
+  - enable-remote-write-receiver
+  - memory-snapshot-on-shutdown
+  - expand-external-labels
+  - new-service-discovery-manager
+
+# Tracing configuration (if enabled)
+tracing:
+  endpoint: "jaeger:14268/api/traces"
+  sampling_fraction: 0.1

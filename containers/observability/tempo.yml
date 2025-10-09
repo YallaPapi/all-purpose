@@ -1,0 +1,71 @@
+# Tempo Configuration for Distributed Tracing
+# Production-ready trace storage and querying backend
+
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9095
+
+distributor:
+  receivers:
+    jaeger:
+      protocols:
+        thrift_http:
+          endpoint: 0.0.0.0:14268
+        grpc:
+          endpoint: 0.0.0.0:14250
+        thrift_binary:
+          endpoint: 0.0.0.0:6832
+        thrift_compact:
+          endpoint: 0.0.0.0:6831
+    zipkin:
+      endpoint: 0.0.0.0:9411
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+    opencensus:
+      endpoint: 0.0.0.0:55678
+
+ingester:
+  trace_idle_period: 10s
+  max_block_bytes: 1_000_000
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    compaction_window: 1h
+    max_block_bytes: 100_000_000
+    block_retention: 1h
+    compacted_block_retention: 10m
+
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+      cluster: meta-agent-factory
+  storage:
+    path: /tmp/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+
+storage:
+  trace:
+    backend: local                     # Use local storage for development
+    wal:
+      path: /tmp/tempo/wal             # Write-ahead log path
+    local:
+      path: /tmp/tempo/blocks          # Block storage path
+    pool:
+      max_workers: 100                 # Max parallel workers
+      queue_depth: 10000               # Queue depth for processing
+
+overrides:
+  metrics_generator_processors: [service-graphs, span-metrics]
+  max_traces_per_user: 50000
+  max_bytes_per_trace: 50000
+  ingestion_rate_strategy: global
+  ingestion_rate_limit_bytes: 20000000
+  ingestion_burst_size_bytes: 30000000

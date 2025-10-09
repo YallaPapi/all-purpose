@@ -1,0 +1,553 @@
+# Grafana Alerting Rules Configuration
+# Task 231.4 - Integrate Alerting and Meta-Monitoring
+# Dashboard-level alerts with proper Grafana alert rule definitions
+
+apiVersion: 1
+
+# Delete existing alert rules before applying new ones
+deleteRules:
+  - orgId: 1
+    uid: meta-agent-factory-alerts
+
+# Alert rule groups for Grafana unified alerting
+groups:
+  - name: meta-agent-factory-dashboard-alerts
+    orgId: 1
+    folder: meta-agent-factory-alerts
+    interval: 1m
+    rules:
+      # System Health Dashboard Alerts
+      - uid: system-health-score-low
+        title: System Health Score Low (Dashboard Alert)
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: "prometheus"
+            model:
+              expr: |
+                (
+                  (
+                    avg(up{job=~"meta-agent-.*"}) * 0.3 +
+                    (1 - avg(rate(http_request_errors_total[5m]) / rate(http_requests_total[5m]))) * 0.25 +
+                    (1 - avg(cpu_usage_percent) / 100) * 0.2 +
+                    (1 - avg(memory_usage_percent) / 100) * 0.15 +
+                    avg(agent_coordination_success_rate) * 0.1
+                  ) * 100
+                )
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              conditions:
+                - evaluator:
+                    params: [70]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: A
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              conditions:
+                - evaluator:
+                    params: [0, 0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: B
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          description: "System health score has dropped to {{ $values.A.Value | humanize }}% (below 70% threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/system-health"
+          summary: "Meta-Agent Factory system health score below threshold"
+          dashboard_url: "https://grafana.company.com/d/meta-agent-factory-overview"
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: system-overview
+          alert_type: health
+          dashboard: meta-agent-factory-overview
+
+      # Service Registry Dashboard Alerts
+      - uid: service-registry-down
+        title: Service Registry Down (Dashboard Alert)
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: "prometheus"
+            model:
+              expr: up{job="service-registry"}
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: A
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: B < 1
+              refId: C
+              type: threshold
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          description: "Service Registry instance {{ $labels.instance }} is down"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/service-registry-down"
+          summary: "Service Registry is not responding"
+          dashboard_url: "https://grafana.company.com/d/service-registry-health"
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: service-registry
+          alert_type: availability
+          dashboard: service-registry-health
+
+      # Agent Coordination Dashboard Alerts
+      - uid: uep-protocol-compliance-violation
+        title: UEP Protocol Compliance Violation (Dashboard Alert)
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: "prometheus"
+            model:
+              expr: (1 - avg(uep_protocol_compliance_rate)) * 100
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: A
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: B > 5
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          description: "UEP protocol compliance violation rate is {{ $values.A.Value | humanize }}% (above 5% threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/uep-violations"
+          summary: "UEP protocol compliance violations detected"
+          dashboard_url: "https://grafana.company.com/d/agent-coordination-overview"
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: meta-agent
+          service: uep-protocol
+          alert_type: protocol
+          dashboard: agent-coordination-overview
+
+      # Meta-Monitoring Dashboard Alerts
+      - uid: observability-stack-component-down
+        title: Observability Stack Component Down (Dashboard Alert)
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: "prometheus"
+            model:
+              expr: up{job=~"prometheus|loki|grafana|alertmanager"}
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: A
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: B < 1
+              refId: C
+              type: threshold
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          description: "Observability stack component {{ $labels.job }} ({{ $labels.instance }}) is down"
+          runbook_url: "https://runbooks.company.com/observability/{{ $labels.job }}-down"
+          summary: "Observability stack component is not responding"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: "{{ $labels.job }}"
+          alert_type: availability
+          dashboard: observability-stack-health
+
+      # Dashboard Performance Alerts
+      - uid: dashboard-load-time-high
+        title: Dashboard Load Time High (Dashboard Alert)
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: "prometheus"
+            model:
+              expr: histogram_quantile(0.95, rate(grafana_http_request_duration_seconds_bucket{handler=~"/api/dashboards/.*"}[5m])) * 1000
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: A
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: B > 5000
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: "Dashboard load time P95 is {{ $values.A.Value | humanize }}ms (above 5000ms threshold)"
+          runbook_url: "https://runbooks.company.com/grafana/dashboard-performance"
+          summary: "Grafana dashboard load times are high"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: grafana
+          alert_type: performance
+          dashboard: observability-stack-health
+
+  - name: dashboard-data-source-alerts
+    orgId: 1
+    folder: meta-agent-factory-alerts
+    interval: 1m
+    rules:
+      # Data Source Connectivity Alerts
+      - uid: prometheus-data-source-down
+        title: Prometheus Data Source Down (Dashboard Alert)
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: "prometheus"
+            model:
+              expr: up{job="prometheus"}
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: A
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: B < 1
+              refId: C
+              type: threshold
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 30s
+        annotations:
+          description: "Prometheus data source is not responding - dashboards may show no data"
+          runbook_url: "https://runbooks.company.com/grafana/prometheus-datasource-down"
+          summary: "Dashboard data source connectivity issue"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: prometheus
+          alert_type: datasource
+          dashboard: all-dashboards
+
+      # Query Performance Alerts
+      - uid: dashboard-query-slow
+        title: Dashboard Query Performance Slow (Dashboard Alert)
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: "prometheus"
+            model:
+              expr: histogram_quantile(0.95, rate(prometheus_engine_query_duration_seconds_bucket[5m])) * 1000
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: A
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              expression: B > 10000
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 3m
+        annotations:
+          description: "Dashboard query performance P95 is {{ $values.A.Value | humanize }}ms (above 10s threshold)"
+          runbook_url: "https://runbooks.company.com/grafana/query-performance"
+          summary: "Dashboard queries are running slowly"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: prometheus
+          alert_type: performance
+          dashboard: all-dashboards
+
+# Contact points for Grafana alerting
+contactPoints:
+  - orgId: 1
+    name: meta-agent-factory-slack
+    receivers:
+      - uid: slack-meta-agent-factory
+        type: slack
+        settings:
+          url: "${SLACK_WEBHOOK_URL}"
+          channel: "#meta-agent-factory-alerts"
+          title: "Meta-Agent Factory Alert"
+          text: |
+            {{ range .Alerts }}
+            **{{ .Annotations.summary }}**
+            {{ .Annotations.description }}
+            
+            **Labels:** {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+            {{ if .Annotations.dashboard_url }}**Dashboard:** {{ .Annotations.dashboard_url }}{{ end }}
+            {{ if .Annotations.runbook_url }}**Runbook:** {{ .Annotations.runbook_url }}{{ end }}
+            {{ end }}
+
+  - orgId: 1
+    name: platform-team-email
+    receivers:
+      - uid: email-platform
+        type: email
+        settings:
+          addresses: "platform-team@company.com"
+          subject: "Meta-Agent Factory Dashboard Alert: {{ .GroupLabels.alertname }}"
+          body: |
+            Dashboard Alert Notification
+            
+            {{ range .Alerts }}
+            Alert: {{ .Annotations.summary }}
+            Description: {{ .Annotations.description }}
+            Dashboard: {{ .Labels.dashboard }}
+            Started: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+            
+            Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+            
+            {{ if .Annotations.dashboard_url }}Dashboard: {{ .Annotations.dashboard_url }}{{ end }}
+            {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+            Silence: {{ .SilenceURL }}
+            {{ end }}
+
+  - orgId: 1
+    name: critical-pager-duty
+    receivers:
+      - uid: pagerduty-critical
+        type: pagerduty
+        settings:
+          integrationKey: "${PAGERDUTY_INTEGRATION_KEY}"
+          description: "{{ .GroupLabels.alertname }}: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+          severity: "critical"
+          details:
+            alertname: "{{ .GroupLabels.alertname }}"
+            dashboard: "{{ .GroupLabels.dashboard }}"
+            app: "{{ .GroupLabels.app }}"
+            team: "{{ .GroupLabels.team }}"
+          links:
+            - href: "{{ range .Alerts }}{{ .Annotations.dashboard_url }}{{ end }}"
+              text: "Grafana Dashboard"
+            - href: "{{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}"
+              text: "Runbook"
+
+# Notification policies for Grafana alerting
+policies:
+  - orgId: 1
+    receiver: meta-agent-factory-slack
+    group_by:
+      - alertname
+      - dashboard
+    group_wait: 10s
+    group_interval: 10s
+    repeat_interval: 1h
+    routes:
+      # Critical alerts get immediate PagerDuty notification
+      - matchers:
+          - severity = "critical"
+        receiver: critical-pager-duty
+        group_wait: 0s
+        group_interval: 5s
+        repeat_interval: 15m
+        routes:
+          # Platform team also gets email for critical alerts
+          - matchers:
+              - team = "platform"
+            receiver: platform-team-email
+      
+      # Warning alerts go to email and Slack
+      - matchers:
+          - severity = "warning"
+        receiver: platform-team-email
+        group_wait: 30s
+        repeat_interval: 1h
+        continue: true  # Also send to Slack
+        
+      # Dashboard-specific routing
+      - matchers:
+          - dashboard = "meta-agent-factory-overview"
+        receiver: meta-agent-factory-slack
+        
+      - matchers:
+          - dashboard = "service-registry-health"
+        receiver: platform-team-email
+        
+      - matchers:
+          - dashboard = "observability-stack-health"
+        receiver: platform-team-email
+
+# Mute timings for maintenance windows
+muteTimings:
+  - orgId: 1
+    name: maintenance-window
+    time_intervals:
+      - times:
+          - start_time: "02:00"
+            end_time: "04:00"
+        weekdays: ["sunday"]
+        months: ["1:12"]

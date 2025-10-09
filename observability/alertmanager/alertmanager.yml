@@ -1,0 +1,320 @@
+global:
+  # SMTP configuration for email alerts
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@meta-agent-factory.com'
+  smtp_auth_username: 'alerts@meta-agent-factory.com'
+  smtp_auth_password: 'smtp_password_here'
+  smtp_require_tls: true
+
+  # Slack configuration
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+  # Default alert routing
+  resolve_timeout: 5m
+
+# Inhibition rules allow suppression of duplicate alerts
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+  - source_match:
+      alertname: 'MetaAgentFactoryDown'
+    target_match_re:
+      alertname: '.*'
+    equal: ['instance']
+
+# Default route configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default-receiver'
+  routes:
+  # Critical alerts get immediate notification
+  - match:
+      severity: critical
+    receiver: 'critical-alerts'
+    group_wait: 10s
+    repeat_interval: 30m
+    routes:
+    # Meta-Agent Factory service down - immediate escalation
+    - match:
+        alertname: MetaAgentFactoryDown
+      receiver: 'factory-down-alerts'
+      group_wait: 0s
+      repeat_interval: 5m
+    # Database issues - immediate attention
+    - match_re:
+        alertname: 'Database.*|Redis.*'
+      receiver: 'database-alerts'
+      group_wait: 10s
+      repeat_interval: 15m
+    # UEP violations - security team
+    - match_re:
+        alertname: 'UEP.*Critical.*'
+      receiver: 'security-alerts'
+      group_wait: 5s
+      repeat_interval: 10m
+
+  # Warning alerts get grouped notifications
+  - match:
+      severity: warning
+    receiver: 'warning-alerts'
+    group_wait: 30s
+    repeat_interval: 2h
+
+  # Infrastructure alerts
+  - match_re:
+      component: 'infrastructure'
+    receiver: 'infrastructure-alerts'
+    group_wait: 1m
+    repeat_interval: 4h
+
+  # Business logic alerts
+  - match_re:
+      component: 'business'
+    receiver: 'business-alerts'
+    group_wait: 2m
+    repeat_interval: 6h
+
+  # Istio service mesh alerts
+  - match_re:
+      component: 'istio'
+    receiver: 'mesh-alerts'
+    group_wait: 30s
+    repeat_interval: 1h
+
+# Receiver configurations
+receivers:
+  # Default receiver for uncategorized alerts
+  - name: 'default-receiver'
+    email_configs:
+    - to: 'devops@meta-agent-factory.com'
+      subject: '[Meta-Agent Factory] Default Alert: {{ .GroupLabels.alertname }}'
+      body: |
+        {{ range .Alerts }}
+        Alert: {{ .Annotations.summary }}
+        Description: {{ .Annotations.description }}
+        Labels: {{ range .Labels.SortedPairs }} {{ .Name }} = {{ .Value }} {{ end }}
+        {{ end }}
+      headers:
+        Subject: '[Meta-Agent Factory] Alert Notification'
+
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+    - to: 'alerts@meta-agent-factory.com,devops@meta-agent-factory.com,sre@meta-agent-factory.com'
+      subject: '[CRITICAL] Meta-Agent Factory Alert: {{ .GroupLabels.alertname }}'
+      body: |
+        CRITICAL ALERT - IMMEDIATE ACTION REQUIRED
+        
+        {{ range .Alerts }}
+        Alert: {{ .Annotations.summary }}
+        Description: {{ .Annotations.description }}
+        Severity: {{ .Labels.severity }}
+        Component: {{ .Labels.component }}
+        Instance: {{ .Labels.instance }}
+        Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        
+        Runbook: {{ .Annotations.runbook_url }}
+        
+        Labels: {{ range .Labels.SortedPairs }} {{ .Name }} = {{ .Value }} {{ end }}
+        {{ end }}
+      headers:
+        Priority: 'urgent'
+        X-Priority: '1'
+    
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      channel: '#alerts-critical'
+      title: 'Critical Alert: {{ .GroupLabels.alertname }}'
+      text: |
+        {{ range .Alerts }}
+        🚨 *CRITICAL ALERT* 🚨
+        
+        *Alert:* {{ .Annotations.summary }}
+        *Description:* {{ .Annotations.description }}
+        *Component:* {{ .Labels.component }}
+        *Instance:* {{ .Labels.instance }}
+        *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        {{ if .Annotations.runbook_url }}
+        *Runbook:* {{ .Annotations.runbook_url }}
+        {{ end }}
+        {{ end }}
+      send_resolved: true
+
+  # Factory down alerts - escalated notifications
+  - name: 'factory-down-alerts'
+    email_configs:
+    - to: 'ceo@meta-agent-factory.com,cto@meta-agent-factory.com,alerts@meta-agent-factory.com'
+      subject: '[FACTORY DOWN] Meta-Agent Factory Service Outage'
+      body: |
+        🚨 FACTORY SERVICE OUTAGE 🚨
+        
+        The Meta-Agent Factory core service is experiencing an outage.
+        
+        {{ range .Alerts }}
+        Service: {{ .Labels.instance }}
+        Started: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        Duration: {{ .StartsAt.Sub now }}
+        
+        This is a critical service outage affecting all meta-agent operations.
+        Immediate investigation and resolution required.
+        {{ end }}
+        
+        Incident Response Team has been notified.
+      headers:
+        Priority: 'urgent'
+        X-Priority: '1'
+    
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      channel: '#incident-response'
+      title: '🚨 FACTORY SERVICE DOWN 🚨'
+      text: |
+        {{ range .Alerts }}
+        Meta-Agent Factory core service is DOWN
+        
+        Service: {{ .Labels.instance }}
+        Started: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        
+        @channel - Immediate response required!
+        {{ end }}
+      send_resolved: true
+
+  # Database alerts
+  - name: 'database-alerts'
+    email_configs:
+    - to: 'dba@meta-agent-factory.com,devops@meta-agent-factory.com'
+      subject: '[DATABASE] {{ .GroupLabels.alertname }}'
+      body: |
+        Database Alert Detected
+        
+        {{ range .Alerts }}
+        Alert: {{ .Annotations.summary }}
+        Database: {{ .Labels.instance }}
+        Description: {{ .Annotations.description }}
+        Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        {{ end }}
+    
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      channel: '#database-alerts'
+      title: 'Database Alert: {{ .GroupLabels.alertname }}'
+      send_resolved: true
+
+  # Security alerts for UEP violations
+  - name: 'security-alerts'
+    email_configs:
+    - to: 'security@meta-agent-factory.com,compliance@meta-agent-factory.com'
+      subject: '[SECURITY] UEP Violation Detected'
+      body: |
+        🔒 SECURITY ALERT - UEP VIOLATION 🔒
+        
+        {{ range .Alerts }}
+        Alert: {{ .Annotations.summary }}
+        Description: {{ .Annotations.description }}
+        Component: {{ .Labels.component }}
+        Severity: {{ .Labels.severity }}
+        Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        {{ end }}
+        
+        Immediate security review required.
+    
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      channel: '#security-alerts'
+      title: '🔒 Security Alert: UEP Violation'
+      send_resolved: true
+
+  # Warning alerts
+  - name: 'warning-alerts'
+    email_configs:
+    - to: 'devops@meta-agent-factory.com'
+      subject: '[WARNING] Meta-Agent Factory: {{ .GroupLabels.alertname }}'
+      body: |
+        Warning Alert
+        
+        {{ range .Alerts }}
+        Alert: {{ .Annotations.summary }}
+        Description: {{ .Annotations.description }}
+        Component: {{ .Labels.component }}
+        Instance: {{ .Labels.instance }}
+        Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        {{ end }}
+    
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      channel: '#alerts-warning'
+      title: '⚠️ Warning: {{ .GroupLabels.alertname }}'
+      send_resolved: true
+
+  # Infrastructure alerts
+  - name: 'infrastructure-alerts'
+    email_configs:
+    - to: 'infrastructure@meta-agent-factory.com,devops@meta-agent-factory.com'
+      subject: '[INFRA] {{ .GroupLabels.alertname }}'
+      body: |
+        Infrastructure Alert
+        
+        {{ range .Alerts }}
+        Alert: {{ .Annotations.summary }}
+        Node/Instance: {{ .Labels.instance }}
+        Description: {{ .Annotations.description }}
+        Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        {{ end }}
+    
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      channel: '#infrastructure'
+      title: '🏗️ Infrastructure: {{ .GroupLabels.alertname }}'
+      send_resolved: true
+
+  # Business logic alerts
+  - name: 'business-alerts'
+    email_configs:
+    - to: 'product@meta-agent-factory.com,devops@meta-agent-factory.com'
+      subject: '[BUSINESS] {{ .GroupLabels.alertname }}'
+      body: |
+        Business Logic Alert
+        
+        {{ range .Alerts }}
+        Alert: {{ .Annotations.summary }}
+        Description: {{ .Annotations.description }}
+        Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        {{ end }}
+    
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      channel: '#business-metrics'
+      title: '📊 Business Alert: {{ .GroupLabels.alertname }}'
+      send_resolved: true
+
+  # Service mesh alerts
+  - name: 'mesh-alerts'
+    email_configs:
+    - to: 'sre@meta-agent-factory.com,devops@meta-agent-factory.com'
+      subject: '[MESH] Istio Service Mesh Alert'
+      body: |
+        Service Mesh Alert
+        
+        {{ range .Alerts }}
+        Alert: {{ .Annotations.summary }}
+        Service: {{ .Labels.destination_service_name }}
+        Description: {{ .Annotations.description }}
+        Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+        {{ end }}
+    
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      channel: '#service-mesh'
+      title: '🕸️ Service Mesh: {{ .GroupLabels.alertname }}'
+      send_resolved: true
+
+# Templates for custom notification formats
+templates:
+- '/etc/alertmanager/templates/*.tmpl'

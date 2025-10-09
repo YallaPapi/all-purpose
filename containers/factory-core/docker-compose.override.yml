@@ -1,0 +1,48 @@
+# Docker Compose override for factory-core development
+# This file provides better volume mounting and development settings
+
+version: '3.8'
+
+services:
+  factory-core:
+    build:
+      context: ../..
+      dockerfile: containers/factory-core/Dockerfile
+    environment:
+      - NODE_ENV=development 
+      - DEBUG=factory-core:*
+      - DOCKER_CONTAINER=true
+    volumes:
+      # Mount meta-agents for development
+      - ../../src/meta-agents:/app/src/meta-agents:ro
+      - ../../src/memory:/app/src/memory:ro
+      # Mount logs for debugging
+      - ./logs:/app/logs
+    ports:
+      - "3001:3000"
+    depends_on:
+      - redis
+      - nats-broker
+    healthcheck:
+      test: ["CMD", "node", "dist/health-check.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+
+  nats-broker:
+    image: nats:2.10-alpine
+    ports:
+      - "4223:4222"
+      - "8223:8222"
+    command: ["-js", "-m", "8222"]
+
+volumes:
+  redis_data:

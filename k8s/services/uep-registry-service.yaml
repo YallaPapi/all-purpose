@@ -1,0 +1,457 @@
+# UEP Registry Service Deployment
+# Provides centralized agent registration and service discovery for UEP agents
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: uep-registry
+  labels:
+    istio-injection: enabled
+    uep-validation: enabled
+
+---
+# UEP Registry Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: uep-registry-config
+  namespace: uep-registry
+data:
+  config.yaml: |
+    registry:
+      backend: "consul"
+      endpoint: "http://consul-server:8500"
+      healthCheckInterval: 30000
+      cacheEnabled: true
+      cacheTTL: 30000
+      watchEnabled: true
+    
+    validation:
+      enableProtocolValidation: true
+      requiredProtocolVersions: ["1.0", "1.1", "2.0"]
+      maxRegistrationRetries: 5
+      registrationTimeout: 10000
+    
+    security:
+      enableTLS: true
+      requireMutualTLS: true
+      authenticationRequired: true
+      allowedOrigins: ["*.uep-system.svc.cluster.local"]
+    
+    loadBalancing:
+      defaultStrategy: "round-robin"
+      healthCheckEnabled: true
+      circuitBreakerEnabled: true
+      
+    metrics:
+      enabled: true
+      port: 9090
+      path: "/metrics"
+
+---
+# UEP Registry Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: uep-registry-service
+  namespace: uep-registry
+  labels:
+    app: uep-registry
+
+---
+# RBAC for UEP Registry
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: uep-registry-reader
+rules:
+- apiGroups: [""]
+  resources: ["services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["networking.istio.io"]
+  resources: ["destinationrules", "virtualservices"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: uep-registry-reader-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: uep-registry-reader
+subjects:
+- kind: ServiceAccount
+  name: uep-registry-service
+  namespace: uep-registry
+
+---
+# UEP Registry Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uep-registry-service
+  namespace: uep-registry
+  labels:
+    app: uep-registry
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: uep-registry
+  template:
+    metadata:
+      labels:
+        app: uep-registry
+        version: v1
+        uep-validation: enabled
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: uep-registry-service
+      containers:
+      - name: uep-registry
+        image: all-purpose/uep-registry:latest
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: CONFIG_PATH
+          value: /config/config.yaml
+        - name: CONSUL_ENDPOINT
+          value: "http://consul-server:8500"
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: tls-certs
+          mountPath: /etc/tls
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config
+        configMap:
+          name: uep-registry-config
+      - name: tls-certs
+        secret:
+          secretName: uep-registry-tls
+
+---
+# UEP Registry Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: uep-registry-service
+  namespace: uep-registry
+  labels:
+    app: uep-registry
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+spec:
+  type: ClusterIP
+  selector:
+    app: uep-registry
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+
+---
+# UEP Registry Headless Service for StatefulSet communication
+apiVersion: v1
+kind: Service
+metadata:
+  name: uep-registry-headless
+  namespace: uep-registry
+  labels:
+    app: uep-registry
+spec:
+  clusterIP: None
+  selector:
+    app: uep-registry
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+
+---
+# Istio VirtualService for UEP Registry
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: uep-registry-vs
+  namespace: uep-registry
+spec:
+  hosts:
+  - uep-registry-service.uep-registry.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: "/api/registry"
+    route:
+    - destination:
+        host: uep-registry-service.uep-registry.svc.cluster.local
+        port:
+          number: 3000
+    headers:
+      request:
+        add:
+          x-uep-registry-request: "true"
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: gateway-error,connect-failure,refused-stream
+
+---
+# Istio DestinationRule for UEP Registry
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: uep-registry-dr
+  namespace: uep-registry
+spec:
+  host: uep-registry-service.uep-registry.svc.cluster.local
+  trafficPolicy:
+    circuitBreaker:
+      consecutiveGateway5xxErrors: 5
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 30
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 10
+        maxRetries: 3
+    loadBalancer:
+      simple: LEAST_CONN
+  portLevelSettings:
+  - port:
+      number: 3000
+    circuitBreaker:
+      consecutiveGateway5xxErrors: 3
+      consecutive5xxErrors: 3
+
+---
+# Pod Disruption Budget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: uep-registry-pdb
+  namespace: uep-registry
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: uep-registry
+
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: uep-registry-hpa
+  namespace: uep-registry
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: uep-registry-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: uep_registry_active_registrations
+      target:
+        type: AverageValue
+        averageValue: "100"
+
+---
+# Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: uep-registry-netpol
+  namespace: uep-registry
+spec:
+  podSelector:
+    matchLabels:
+      app: uep-registry
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: uep-system
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+    ports:
+    - protocol: TCP
+      port: 3000
+    - protocol: TCP
+      port: 9090
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: consul
+    ports:
+    - protocol: TCP
+      port: 8500
+  - to: []  # Allow DNS resolution
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+# Service Monitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: uep-registry-monitor
+  namespace: uep-registry
+  labels:
+    app: uep-registry
+spec:
+  selector:
+    matchLabels:
+      app: uep-registry
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+
+---
+# PrometheusRule for UEP Registry Alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: uep-registry-alerts
+  namespace: uep-registry
+spec:
+  groups:
+  - name: uep-registry
+    rules:
+    - alert: UEPRegistryDown
+      expr: up{job="uep-registry-monitor"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "UEP Registry service is down"
+        description: "UEP Registry service has been down for more than 1 minute"
+    
+    - alert: UEPRegistryHighLatency
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="uep-registry-monitor"}[5m])) > 1
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "UEP Registry high latency"
+        description: "95th percentile latency is above 1 second for 2 minutes"
+    
+    - alert: UEPRegistryLowRegistrations
+      expr: uep_registry_active_registrations < 5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Low number of UEP agent registrations"
+        description: "Number of active UEP agent registrations is below 5 for 5 minutes"
+    
+    - alert: UEPRegistryHighMemoryUsage
+      expr: container_memory_usage_bytes{pod=~"uep-registry-.*"} / container_spec_memory_limit_bytes > 0.8
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "UEP Registry high memory usage"
+        description: "Memory usage is above 80% for 2 minutes"
+
+---
+# TLS Secret (would be populated by cert-manager or external process)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: uep-registry-tls
+  namespace: uep-registry
+type: kubernetes.io/tls
+data:
+  tls.crt: # Base64 encoded certificate
+  tls.key: # Base64 encoded private key

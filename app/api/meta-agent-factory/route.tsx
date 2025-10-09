@@ -134,7 +134,10 @@ async function routeWorkRequest(request: WorkRequest, requestId: string) {
     agents: [] as string[],
     tasks: [] as any[],
     estimatedCompletion: '',
-    priority: request.priority || 'medium'
+    priority: request.priority || 'medium',
+    description: request.description,
+    projectName: request.requirements?.projectName || `project-${Date.now()}`,
+    prd: (request as any).prd || request.description // Support PRD content from request
   };
 
   switch (request.type) {
@@ -232,14 +235,66 @@ async function routeWorkRequest(request: WorkRequest, requestId: string) {
 }
 
 async function submitToCoordination(routing: any) {
-  // Submit to the meta-agent coordination system
-  console.log('🚀 Submitting to coordination system:', routing);
+  // Submit to the REAL Factory Core API
+  console.log('🚀 Submitting to REAL Factory Core coordination system:', routing);
   
-  // In a real implementation, this would interface with the coordination system
-  // For now, we'll simulate successful submission
-  return {
-    success: true,
-    tasksCreated: routing.tasks.length,
-    agentsNotified: routing.agents.length
-  };
+  try {
+    // Call the real Factory Core API
+    const factoryCoreUrl = process.env.FACTORY_CORE_URL || 'http://factory-core:3000';
+    const response = await fetch(`${factoryCoreUrl}/api/factory/projects`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prd: routing.description || 'Generated from routing request',
+        projectName: routing.projectName || `project-${Date.now()}`
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Factory Core API error: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ Real Factory Core response:', result);
+    
+    return {
+      success: result.success,
+      tasksCreated: result.project?.requirements?.length || routing.tasks.length,
+      agentsNotified: routing.agents.length,
+      factoryCoreResponse: result
+    };
+  } catch (error) {
+    console.error('❌ Factory Core API call failed:', error);
+    // Fallback to coordination via UEP Registry
+    try {
+      const registryUrl = process.env.UEP_REGISTRY_URL || 'http://uep-registry:3001';
+      console.log('🔄 Falling back to UEP Registry coordination...');
+      
+      // Register task with UEP Registry
+      const registryResponse = await fetch(`${registryUrl}/api/v1/registry/agents`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (registryResponse.ok) {
+        const agents = await registryResponse.json();
+        console.log(`✅ Connected to UEP Registry, found ${agents.length} agents`);
+        
+        return {
+          success: true,
+          tasksCreated: routing.tasks.length,
+          agentsNotified: agents.length,
+          fallbackUsed: 'uep-registry'
+        };
+      }
+    } catch (registryError) {
+      console.error('❌ UEP Registry fallback also failed:', registryError);
+    }
+    
+    throw error;
+  }
 }

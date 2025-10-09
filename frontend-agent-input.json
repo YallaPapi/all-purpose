@@ -1,0 +1,33 @@
+{
+  "name": "frontend-agent",
+  "description": "Domain-specific agent for frontend development tasks including UI scaffolding, code review, accessibility and performance checks, and UI testing",
+  "type": "agent",
+  "framework": "node",
+  "dependencies": {
+    "core": ["react", "next", "tailwindcss", "typescript"],
+    "testing": ["jest", "@testing-library/react", "playwright"],
+    "dev": ["eslint", "@types/node", "@types/react"]
+  },
+  "features": [
+    "Component generation and scaffolding",
+    "Accessibility compliance checking",
+    "Performance optimization recommendations", 
+    "UI testing automation with Playwright",
+    "Code review and best practices validation",
+    "Responsive design implementation",
+    "State management integration"
+  ],
+  "integrations": [
+    "UEP (Universal Execution Protocol)",
+    "Meta-Agent Factory Core",
+    "RAG System for context",
+    "TaskMaster CLI integration"
+  ],
+  "config": {
+    "defaultFramework": "react",
+    "cssFramework": "tailwindcss",
+    "stateManagement": "zustand",
+    "testRunner": "jest",
+    "e2eFramework": "playwright"
+  }
+}

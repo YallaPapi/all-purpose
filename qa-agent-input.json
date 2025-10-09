@@ -1,0 +1,16 @@
+{
+  "agentName": "qa-agent",
+  "description": "Domain-specific agent for QA tasks including test plan writing, edge case discovery, and regression tracking", 
+  "features": [
+    "Test plan generation from requirements",
+    "Automated test case creation",
+    "Edge case identification and testing",
+    "Regression test suite maintenance",
+    "Bug tracking integration",
+    "Testing automation with Jest/Playwright",
+    "UEP integration for agent coordination"
+  ],
+  "framework": "node",
+  "includeTests": true,
+  "includeDocumentation": true
+}

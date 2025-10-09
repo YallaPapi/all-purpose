@@ -1,0 +1,47 @@
+FROM node:20-alpine
+
+LABEL maintainer="meta-agent-factory"
+LABEL description="UEP Registry Service - Service Discovery and Agent Registration (Development Mode)"
+
+# Install necessary packages
+RUN apk add --no-cache git python3 make g++ curl
+
+WORKDIR /app
+
+# Copy package files first
+COPY package*.json ./
+
+# Install all dependencies including TypeScript runtime
+RUN npm install && npm install -g tsx
+
+# Copy all source files
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
+ENV GRPC_PORT=50051
+ENV ETCD_ENDPOINTS=etcd:2379
+ENV REDIS_URL=redis://redis:6379
+ENV NATS_URL=nats://nats-broker:4222
+ENV LOG_LEVEL=info
+ENV DOCKER_CONTAINER=true
+
+# Set proper permissions
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S registry -u 1001 && \
+    chown -R registry:nodejs /app
+
+USER registry
+
+EXPOSE 3001 50051
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
+  CMD curl -f http://localhost:3001/api/v1/registry/agents/health/check || exit 1
+
+# Run with tsx to handle TypeScript directly
+CMD ["tsx", "src/main.ts"]

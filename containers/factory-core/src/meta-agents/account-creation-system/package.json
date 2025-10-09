@@ -1,0 +1,55 @@
+{
+  "name": "@meta-agents/account-creation-system",
+  "version": "1.0.0",
+  "description": "Automated Account Creation & Email Verification System - Creates and verifies accounts across multiple services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/main.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "playwright": "^1.48.2",
+    "imapflow": "^1.0.191",
+    "nodemailer": "^6.9.15",
+    "axios": "^1.7.7",
+    "fs-extra": "^11.2.0",
+    "uuid": "^10.0.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "winston": "^3.15.0",
+    "node-cron": "^3.0.3",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.4",
+    "@types/fs-extra": "^11.0.4",
+    "@types/uuid": "^10.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/nodemailer": "^6.4.16",
+    "@types/node-cron": "^3.0.11",
+    "@types/jest": "^29.5.14",
+    "typescript": "^5.6.3",
+    "eslint": "^9.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.11.0",
+    "@typescript-eslint/parser": "^8.11.0",
+    "jest": "^29.7.0",
+    "rimraf": "^6.0.1"
+  },
+  "keywords": [
+    "meta-agent",
+    "account-creation",
+    "email-verification",
+    "automation",
+    "headless-browser",
+    "imap"
+  ],
+  "author": "Meta-Agent Factory",
+  "license": "MIT"
+}

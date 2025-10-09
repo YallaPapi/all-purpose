@@ -1,0 +1,82 @@
+{
+  "project": {
+    "name": "Monitoring Dashboard for Lead Generation Factory",
+    "type": "web-application",
+    "description": "Comprehensive real-time monitoring dashboard with agent performance tracking, lead generation metrics, system health monitoring, and business intelligence",
+    "priority": "high",
+    "requirements": {
+      "framework": "Next.js",
+      "styling": "Tailwind CSS", 
+      "realtime": "WebSocket/SSE",
+      "database": "Redis",
+      "deployment": "Vercel",
+      "features": [
+        "Real-time agent performance monitoring",
+        "Lead generation pipeline visualization", 
+        "System health indicators",
+        "Business intelligence dashboard",
+        "Alert and notification system",
+        "Interactive charts and graphs",
+        "Export and reporting functionality",
+        "Responsive design with dark/light mode"
+      ]
+    }
+  },
+  "orchestration": {
+    "agents": {
+      "prd-parser": {
+        "priority": 1,
+        "task": "Parse monitoring dashboard PRD and generate structured tasks",
+        "input": "../../../docs/monitoring-dashboard-prd.md"
+      },
+      "all-purpose-pattern": {
+        "priority": 2,
+        "task": "Apply All-Purpose Pattern to eliminate hardcoded limitations"
+      },
+      "scaffold-generator": {
+        "priority": 3,
+        "task": "Generate Next.js project structure with real-time infrastructure"
+      },
+      "template-engine-factory": {
+        "priority": 4,
+        "task": "Create dashboard components and real-time data collection services"
+      },
+      "parameter-flow": {
+        "priority": 5,
+        "task": "Configure data flow between UEP Meta-Agent Factory and dashboard components"
+      },
+      "vercel-native-architecture": {
+        "priority": 6,
+        "task": "Setup Vercel deployment with WebSocket/SSE support"
+      },
+      "five-document-framework": {
+        "priority": 7,
+        "task": "Generate comprehensive documentation and deployment guides"
+      },
+      "thirty-minute-rule": {
+        "priority": 8,
+        "task": "Validate all tasks follow 30-minute complexity rule"
+      }
+    }
+  },
+  "compliance": {
+    "performance": {
+      "loadTime": "<3 seconds",
+      "realtimeLatency": "<1 second",
+      "concurrentUsers": "100+"
+    },
+    "security": ["Authentication required", "HTTPS only", "API rate limiting", "Input validation"],
+    "monitoring": ["Application performance monitoring", "Error tracking", "Real-time metrics"]
+  },
+  "outputs": {
+    "targetDirectory": "../../../generated/monitoring-dashboard",
+    "codeGeneration": true,
+    "documentation": true,
+    "testing": true,
+    "deployment": true,
+    "patterns": {
+      "allPurposePattern": true,
+      "zeroHardcodedLimitations": true
+    }
+  }
+}

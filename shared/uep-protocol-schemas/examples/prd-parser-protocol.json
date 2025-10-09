@@ -1,0 +1,440 @@
+{
+  "id": "meta-agent-prd-parser",
+  "name": "PRD Parser Agent",
+  "version": "1.0.0",
+  "category": "meta-agent",
+  "description": "Protocol definition for Product Requirements Document parsing and analysis agent",
+  "specification": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "PRD Parser Agent API",
+      "version": "1.0.0",
+      "description": "UEP-compliant API for PRD parsing and analysis with structured output generation",
+      "contact": {
+        "name": "UEP Meta-Agent Team",
+        "email": "meta-agents@uep.local"
+      },
+      "license": {
+        "name": "UEP Protocol License",
+        "url": "https://uep.local/licenses/protocol"
+      }
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3001/api/v1",
+        "description": "Development server"
+      },
+      {
+        "url": "https://meta-agents.uep.local/prd-parser/v1",
+        "description": "Production server"
+      }
+    ],
+    "paths": {
+      "/parse-prd": {
+        "post": {
+          "summary": "Parse Product Requirements Document",
+          "description": "Analyzes PRD content and extracts structured requirements, architecture recommendations, and task breakdowns",
+          "operationId": "parsePRD",
+          "x-uep-method": "parse-prd",
+          "x-uep-complexity": "medium",
+          "x-uep-timeout": 30000,
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["content"],
+                  "properties": {
+                    "content": {
+                      "type": "string",
+                      "description": "Raw PRD content to parse",
+                      "minLength": 10,
+                      "maxLength": 100000,
+                      "example": "# Project Requirements\\n\\nThis project aims to build..."
+                    },
+                    "format": {
+                      "type": "string",
+                      "enum": ["markdown", "text", "structured", "html"],
+                      "default": "markdown",
+                      "description": "Format of the input content"
+                    },
+                    "options": {
+                      "type": "object",
+                      "properties": {
+                        "enableValidation": {
+                          "type": "boolean",
+                          "default": true,
+                          "description": "Enable PRD content validation"
+                        },
+                        "extractRequirements": {
+                          "type": "boolean",
+                          "default": true,
+                          "description": "Extract functional and technical requirements"
+                        },
+                        "generateArchitecture": {
+                          "type": "boolean",
+                          "default": true,
+                          "description": "Generate architecture recommendations"
+                        },
+                        "createTasks": {
+                          "type": "boolean",
+                          "default": true,
+                          "description": "Break down into actionable tasks"
+                        },
+                        "analyzeComplexity": {
+                          "type": "boolean",
+                          "default": true,
+                          "description": "Analyze project complexity"
+                        }
+                      }
+                    },
+                    "context": {
+                      "type": "object",
+                      "properties": {
+                        "projectType": {
+                          "type": "string",
+                          "enum": ["web-app", "mobile-app", "api", "desktop", "microservice", "library"],
+                          "description": "Type of project being analyzed"
+                        },
+                        "techStack": {
+                          "type": "array",
+                          "items": { "type": "string" },
+                          "description": "Preferred technology stack"
+                        },
+                        "constraints": {
+                          "type": "object",
+                          "properties": {
+                            "budget": { "type": "string" },
+                            "timeline": { "type": "string" },
+                            "team_size": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "PRD parsed successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["status", "data"],
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "enum": ["success"]
+                      },
+                      "data": {
+                        "type": "object",
+                        "required": ["prdId", "requirements", "metadata"],
+                        "properties": {
+                          "prdId": {
+                            "type": "string",
+                            "description": "Unique identifier for the parsed PRD"
+                          },
+                          "requirements": {
+                            "type": "object",
+                            "properties": {
+                              "functional": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": { "type": "string" },
+                                    "description": { "type": "string" },
+                                    "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+                                    "category": { "type": "string" }
+                                  }
+                                }
+                              },
+                              "technical": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": { "type": "string" },
+                                    "description": { "type": "string" },
+                                    "complexity": { "type": "string", "enum": ["low", "medium", "high"] },
+                                    "dependencies": { "type": "array", "items": { "type": "string" } }
+                                  }
+                                }
+                              },
+                              "performance": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "metric": { "type": "string" },
+                                    "target": { "type": "string" },
+                                    "critical": { "type": "boolean" }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "architecture": {
+                            "type": "object",
+                            "properties": {
+                              "pattern": { "type": "string" },
+                              "components": { "type": "array", "items": { "type": "string" } },
+                              "integrations": { "type": "array", "items": { "type": "string" } },
+                              "recommendations": { "type": "array", "items": { "type": "string" } }
+                            }
+                          },
+                          "tasks": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": { "type": "string" },
+                                "title": { "type": "string" },
+                                "description": { "type": "string" },
+                                "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+                                "estimated_hours": { "type": "number" },
+                                "dependencies": { "type": "array", "items": { "type": "string" } },
+                                "tags": { "type": "array", "items": { "type": "string" } }
+                              }
+                            }
+                          },
+                          "complexity": {
+                            "type": "string",
+                            "enum": ["low", "medium", "high", "very-high"]
+                          },
+                          "metadata": {
+                            "type": "object",
+                            "properties": {
+                              "parseTime": { "type": "number" },
+                              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                              "wordCount": { "type": "integer" },
+                              "sectionsFound": { "type": "array", "items": { "type": "string" } },
+                              "issuesDetected": { "type": "array", "items": { "type": "string" } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid PRD content or request format",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["status", "error"],
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "enum": ["error"]
+                      },
+                      "error": {
+                        "type": "string",
+                        "description": "Human-readable error message"
+                      },
+                      "violations": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field": { "type": "string" },
+                            "message": { "type": "string" },
+                            "code": { "type": "string" },
+                            "value": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "PRD content is valid but cannot be processed",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "enum": ["error"] },
+                      "error": { "type": "string" },
+                      "reason": { "type": "string", "enum": ["too_complex", "insufficient_detail", "ambiguous_requirements"] },
+                      "suggestions": { "type": "array", "items": { "type": "string" } }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UEPError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/validate-prd": {
+        "post": {
+          "summary": "Validate PRD structure and content",
+          "description": "Validates PRD content without full parsing to check for completeness and structure",
+          "operationId": "validatePRD",
+          "x-uep-method": "validate-prd",
+          "x-uep-complexity": "low",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["content"],
+                  "properties": {
+                    "content": { "type": "string" },
+                    "strict": { "type": "boolean", "default": false }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Validation results",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "valid": { "type": "boolean" },
+                      "score": { "type": "number", "minimum": 0, "maximum": 100 },
+                      "issues": { "type": "array", "items": { "type": "string" } },
+                      "suggestions": { "type": "array", "items": { "type": "string" } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "UEPRequest": {
+          "type": "object",
+          "required": ["method", "data", "metadata"],
+          "properties": {
+            "method": { "type": "string" },
+            "data": { "type": "object" },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "traceId": { "type": "string" },
+                "timestamp": { "type": "string", "format": "date-time" },
+                "version": { "type": "string", "default": "1.0.0" },
+                "requestId": { "type": "string" },
+                "agentId": { "type": "string" }
+              }
+            }
+          }
+        },
+        "UEPResponse": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "type": "string", "enum": ["success", "error"] },
+            "data": { "type": "object" },
+            "error": { "type": "string" },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "responseTime": { "type": "number" },
+                "traceId": { "type": "string" },
+                "version": { "type": "string" }
+              }
+            }
+          }
+        },
+        "UEPError": {
+          "type": "object",
+          "required": ["status", "error", "code"],
+          "properties": {
+            "status": { "type": "string", "enum": ["error"] },
+            "error": { "type": "string" },
+            "code": { "type": "string" },
+            "details": { "type": "object" },
+            "timestamp": { "type": "string", "format": "date-time" }
+          }
+        }
+      },
+      "securitySchemes": {
+        "UEPAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT",
+          "description": "UEP Agent Authentication Token"
+        }
+      }
+    },
+    "security": [
+      {
+        "UEPAuth": []
+      }
+    ],
+    "x-uep-capability": "prd-parsing",
+    "x-uep-version": "1.0.0",
+    "x-uep-metadata": {
+      "agentType": "meta",
+      "complexity": "medium",
+      "dependencies": [],
+      "tags": ["parsing", "analysis", "coordination", "requirements"],
+      "capabilities": ["prd-parsing", "requirements-extraction", "task-generation", "architecture-recommendation"],
+      "interactionPatterns": ["request-reply"],
+      "securityRequirements": ["authentication", "authorization", "input-validation"]
+    }
+  },
+  "metadata": {
+    "author": "UEP Meta-Agent Development Team",
+    "createdAt": "2025-01-28T00:00:00.000Z",
+    "updatedAt": "2025-01-28T00:00:00.000Z",
+    "maintainers": ["UEP Meta-Agent Development Team"],
+    "status": "approved",
+    "breaking": false,
+    "experimental": false,
+    "stability": "stable"
+  },
+  "compatibility": {
+    "minVersion": "1.0.0",
+    "breakingChanges": [],
+    "deprecations": [],
+    "migrations": []
+  },
+  "lifecycle": {
+    "phase": "production",
+    "changeLog": [
+      {
+        "version": "1.0.0",
+        "date": "2025-01-28T00:00:00.000Z",
+        "type": "major",
+        "changes": [
+          "Initial protocol definition for PRD Parser Agent",
+          "Added comprehensive parsing and analysis capabilities",
+          "Implemented UEP-compliant request/response patterns",
+          "Added validation and error handling specifications"
+        ],
+        "author": "UEP Meta-Agent Development Team",
+        "breaking": false
+      }
+    ]
+  }
+}

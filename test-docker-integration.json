@@ -1,0 +1,6 @@
+{
+  "agentType": "prd-parser",
+  "config": {
+    "prd": "# Simple REST API\n\n## Overview\nCreate a REST API for managing tasks\n\n## Requirements\n- Express.js server\n- CRUD operations for tasks\n- PostgreSQL database\n- JWT authentication"
+  }
+}

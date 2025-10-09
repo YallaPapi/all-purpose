@@ -1,0 +1,124 @@
+{{!-- 
+Configurable Endpoint Template
+Replaces hardcoded API endpoints with configuration-driven alternatives
+Following All-Purpose Pattern: Eliminates hardcoded infrastructure dependencies
+--}}
+
+{{!-- Generate config-driven endpoint access --}}
+const {{config.endpointVariable}} = {{config.configPath}}?.{{config.configKey}} || '{{config.fallbackUrl}}';
+
+{{!-- Add validation if needed --}}
+{{#if config.enableValidation}}
+// Validate endpoint URL
+if (!{{config.endpointVariable}} || !isValidUrl({{config.endpointVariable}})) {
+  console.error('Configuration error: Invalid or missing endpoint URL for {{config.configKey}}');
+  throw new Error('Invalid endpoint configuration: {{config.configKey}}');
+}
+
+function isValidUrl(url: string): boolean {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+{{/if}}
+
+{{!-- Environment-specific configuration support --}}
+{{#if config.supportEnvironments}}
+// Environment-specific endpoint resolution
+const getEnvironmentEndpoint = (baseConfig: any): string => {
+  const environment = process.env.NODE_ENV || 'development';
+  const envConfig = baseConfig[environment];
+  
+  if (envConfig && envConfig.{{config.configKey}}) {
+    return envConfig.{{config.configKey}};
+  }
+  
+  return baseConfig.{{config.configKey}} || '{{config.fallbackUrl}}';
+};
+
+const {{config.endpointVariable}} = getEnvironmentEndpoint({{config.configPath}});
+{{/if}}
+
+{{!-- Generate the API call with the configurable endpoint --}}
+{{#if config.generateApiCall}}
+// API call using configurable endpoint
+async function {{config.functionName}}({{config.parameters}}) {
+  try {
+    const response = await fetch({{config.endpointVariable}}, {
+      method: '{{config.method}}',
+      headers: {
+        'Content-Type': 'application/json',
+        {{#if config.requiresAuth}}
+        'Authorization': `Bearer ${{{config.configPath}}?.auth?.token || process.env.API_TOKEN}`,
+        {{/if}}
+        ...{{config.configPath}}?.headers
+      },
+      {{#if config.hasBody}}
+      body: JSON.stringify({{config.bodyParameter}})
+      {{/if}}
+    });
+
+    if (!response.ok) {
+      throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('API call failed:', error);
+    throw error;
+  }
+}
+{{/if}}
+
+{{!-- Add type definitions for TypeScript --}}
+{{#ifEquals project.language "typescript"}}
+// Type definitions for endpoint configuration
+interface EndpointConfig {
+  {{config.configKey}}: string;
+  {{#if config.supportEnvironments}}
+  development?: { {{config.configKey}}: string };
+  staging?: { {{config.configKey}}: string };
+  production?: { {{config.configKey}}: string };
+  {{/if}}
+  {{#if config.requiresAuth}}
+  auth?: {
+    token: string;
+  };
+  {{/if}}
+  headers?: Record<string, string>;
+}
+
+{{#if config.generateApiCall}}
+interface {{pascalCase config.functionName}}Response {
+  // Define your API response type here
+  [key: string]: any;
+}
+{{/if}}
+{{/ifEquals}}
+
+/**
+ * Configuration-driven endpoint implementation
+ * 
+ * Add to your config file (config.json, .env, or similar):
+ * {
+ *   {{#if config.supportEnvironments}}
+ *   "development": {
+ *     "{{config.configKey}}": "http://localhost:3000/api"
+ *   },
+ *   "staging": {
+ *     "{{config.configKey}}": "https://staging-api.yourapp.com"
+ *   },
+ *   "production": {
+ *     "{{config.configKey}}": "https://api.yourapp.com"
+ *   }
+ *   {{else}}
+ *   "{{config.configKey}}": "https://api.yourapp.com"
+ *   {{/if}}
+ * }
+ * 
+ * This eliminates hardcoded infrastructure dependencies and follows All-Purpose Pattern
+ * Supports multiple environments and flexible configuration
+ */

@@ -1,0 +1,195 @@
+{{ define "email.default.subject" }}
+[Meta-Agent Factory] {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}
+{{ end }}
+
+{{ define "email.default.html" }}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta-Agent Factory Alert</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; display: flex; align-items: center; }
+        .header .icon { font-size: 30px; margin-right: 15px; }
+        .content { padding: 20px; }
+        .alert-summary { background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin-bottom: 20px; border-radius: 0 4px 4px 0; }
+        .alert-critical { border-left-color: #dc3545; background-color: #fff5f5; }
+        .alert-warning { border-left-color: #ffc107; background-color: #fffbf0; }
+        .alert-info { border-left-color: #17a2b8; background-color: #f0f9ff; }
+        .alert-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .detail-section { background-color: #f8f9fa; padding: 15px; border-radius: 6px; }
+        .detail-section h3 { margin: 0 0 10px 0; color: #495057; font-size: 16px; }
+        .detail-section p { margin: 5px 0; color: #6c757d; }
+        .label-grid { display: grid; grid-template-columns: auto 1fr; gap: 5px 15px; }
+        .label-key { font-weight: bold; color: #495057; }
+        .label-value { color: #6c757d; font-family: monospace; background-color: #e9ecef; padding: 2px 6px; border-radius: 3px; }
+        .actions { text-align: center; margin-top: 30px; }
+        .btn { display: inline-block; padding: 12px 24px; margin: 0 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+        .btn-success { background-color: #28a745; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-danger { background-color: #dc3545; }
+        .footer { background-color: #f8f9fa; padding: 15px 20px; border-radius: 0 0 8px 8px; text-align: center; color: #6c757d; font-size: 12px; }
+        .timestamp { font-family: monospace; background-color: #e9ecef; padding: 2px 6px; border-radius: 3px; }
+        @media (max-width: 600px) {
+            .alert-details { grid-template-columns: 1fr; }
+            .actions { margin-top: 20px; }
+            .btn { display: block; margin: 10px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="icon">🏭</span>
+                Meta-Agent Factory Alert
+            </h1>
+        </div>
+        
+        <div class="content">
+            {{ range .Alerts }}
+            <div class="alert-summary {{ if eq .Labels.severity "critical" }}alert-critical{{ else if eq .Labels.severity "warning" }}alert-warning{{ else }}alert-info{{ end }}">
+                <h2 style="margin: 0 0 10px 0; color: {{ if eq .Labels.severity "critical" }}#dc3545{{ else if eq .Labels.severity "warning" }}#856404{{ else }}#0c5460{{ end }};">
+                    {{ if eq .Labels.severity "critical" }}🚨{{ else if eq .Labels.severity "warning" }}⚠️{{ else }}ℹ️{{ end }}
+                    {{ .Annotations.summary }}
+                </h2>
+                <p style="margin: 0; font-size: 16px; line-height: 1.4;">{{ .Annotations.description }}</p>
+            </div>
+            
+            <div class="alert-details">
+                <div class="detail-section">
+                    <h3>📊 Alert Information</h3>
+                    <div class="label-grid">
+                        <span class="label-key">Alert Name:</span>
+                        <span class="label-value">{{ .Labels.alertname }}</span>
+                        <span class="label-key">Severity:</span>
+                        <span class="label-value">{{ .Labels.severity | toUpper }}</span>
+                        <span class="label-key">Status:</span>
+                        <span class="label-value">{{ .Status | toUpper }}</span>
+                        {{ if .Labels.team }}
+                        <span class="label-key">Team:</span>
+                        <span class="label-value">{{ .Labels.team }}</span>
+                        {{ end }}
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>🏗️ Service Information</h3>
+                    <div class="label-grid">
+                        <span class="label-key">Service:</span>
+                        <span class="label-value">{{ .Labels.service | default .Labels.job }}</span>
+                        {{ if .Labels.instance }}
+                        <span class="label-key">Instance:</span>
+                        <span class="label-value">{{ .Labels.instance }}</span>
+                        {{ end }}
+                        {{ if .Labels.environment }}
+                        <span class="label-key">Environment:</span>
+                        <span class="label-value">{{ .Labels.environment }}</span>
+                        {{ end }}
+                        {{ if .Labels.agent_type }}
+                        <span class="label-key">Agent Type:</span>
+                        <span class="label-value">{{ .Labels.agent_type }}</span>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>⏰ Timeline</h3>
+                <div class="label-grid">
+                    <span class="label-key">Started:</span>
+                    <span class="timestamp">{{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}</span>
+                    {{ if ne .Status "firing" }}
+                    <span class="label-key">Resolved:</span>
+                    <span class="timestamp">{{ .EndsAt.Format "2006-01-02 15:04:05 UTC" }}</span>
+                    {{ end }}
+                    <span class="label-key">Generator:</span>
+                    <span class="label-value">{{ .GeneratorURL }}</span>
+                </div>
+            </div>
+            
+            {{ if .Annotations.runbook_url }}
+            <div class="detail-section">
+                <h3>📖 Additional Resources</h3>
+                <p><strong>Runbook:</strong> <a href="{{ .Annotations.runbook_url }}" style="color: #007bff;">{{ .Annotations.runbook_url }}</a></p>
+            </div>
+            {{ end }}
+            {{ end }}
+            
+            <div class="actions">
+                <a href="http://localhost:3004/d/meta-agent-overview" class="btn btn-success">📊 View Dashboard</a>
+                <a href="http://localhost:9093" class="btn btn-warning">🔕 Manage Alerts</a>
+                <a href="http://localhost:3004/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bservice%3D%5C%22{{ (index .Alerts 0).Labels.service }}%5C%22%7D%22%7D%5D%7D" class="btn">📝 View Logs</a>
+                {{ if eq (index .Alerts 0).Labels.severity "critical" }}
+                <a href="http://localhost:9093/#/silences/new" class="btn btn-danger">🚫 Create Silence</a>
+                {{ end }}
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This alert was generated by the Meta-Agent Factory monitoring system.</p>
+            <p>For support, contact the platform team or visit our documentation.</p>
+            <p>Generated at {{ now.Format "2006-01-02 15:04:05 UTC" }}</p>
+        </div>
+    </div>
+</body>
+</html>
+{{ end }}
+
+{{ define "email.default.text" }}
+🏭 META-AGENT FACTORY ALERT
+
+{{ range .Alerts }}
+{{ if eq .Labels.severity "critical" }}🚨 CRITICAL ALERT{{ else if eq .Labels.severity "warning" }}⚠️  WARNING ALERT{{ else }}ℹ️  INFO ALERT{{ end }}
+
+Summary: {{ .Annotations.summary }}
+Description: {{ .Annotations.description }}
+
+📊 ALERT DETAILS
+Alert Name: {{ .Labels.alertname }}
+Severity: {{ .Labels.severity | toUpper }}
+Status: {{ .Status | toUpper }}
+{{ if .Labels.team }}Team: {{ .Labels.team }}{{ end }}
+
+🏗️ SERVICE DETAILS
+Service: {{ .Labels.service | default .Labels.job }}
+{{ if .Labels.instance }}Instance: {{ .Labels.instance }}{{ end }}
+{{ if .Labels.environment }}Environment: {{ .Labels.environment }}{{ end }}
+{{ if .Labels.agent_type }}Agent Type: {{ .Labels.agent_type }}{{ end }}
+
+⏰ TIMELINE
+Started: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+{{ if ne .Status "firing" }}Resolved: {{ .EndsAt.Format "2006-01-02 15:04:05 UTC" }}{{ end }}
+
+🔗 QUICK ACCESS LINKS
+Dashboard: http://localhost:3004/d/meta-agent-overview
+Alert Manager: http://localhost:9093
+Logs: http://localhost:3004/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bservice%3D%5C%22{{ .Labels.service }}%5C%22%7D%22%7D%5D%7D
+{{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+
+{{ if eq .Labels.severity "critical" }}
+🚨 IMMEDIATE ACTION REQUIRED
+This is a critical alert requiring immediate attention.
+{{ end }}
+
+{{ end }}
+
+Generated by Meta-Agent Factory Monitoring System
+Timestamp: {{ now.Format "2006-01-02 15:04:05 UTC" }}
+{{ end }}
+
+{{ define "email.critical.subject" }}
+🚨 CRITICAL: [Meta-Agent Factory] {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}
+{{ end }}
+
+{{ define "email.team.subject" }}
+[{{ .GroupLabels.team | title }} Team] {{ .GroupLabels.alertname }}{{ if .GroupLabels.agent_type }} - {{ .GroupLabels.agent_type }}{{ end }}
+{{ end }}
+
+{{ define "email.resolved.subject" }}
+✅ RESOLVED: [Meta-Agent Factory] {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}
+{{ end }}

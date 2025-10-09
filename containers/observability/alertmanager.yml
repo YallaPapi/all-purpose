@@ -1,0 +1,212 @@
+# Alertmanager Configuration for Meta-Agent Factory
+# Production-ready configuration with multiple notification channels
+# Based on TaskMaster Research Task 230 - Alertmanager best practices
+
+global:
+  # SMTP configuration for email notifications
+  # Use double quotes around default values containing colons to avoid YAML parsing errors
+  smtp_smarthost: '${SMTP_HOST:-"localhost:587"}'
+  smtp_from: '${ALERT_EMAIL_FROM:-"alerts@meta-agent-factory.com"}'
+  smtp_auth_username: '${SMTP_USERNAME:-""}'
+  smtp_auth_password: '${SMTP_PASSWORD:-""}'
+  smtp_require_tls: ${SMTP_REQUIRE_TLS:-true}
+  
+  # Slack API URL template - leave empty if not configured
+  slack_api_url: '${SLACK_WEBHOOK_URL:-""}'
+  
+  # PagerDuty integration key
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  
+  # Global resolve timeout
+  resolve_timeout: 5m
+
+# Routing tree for alert distribution
+route:
+  # Default route configuration
+  group_by: ['alertname', 'service', 'severity']
+  group_wait: 30s          # Wait 30s before sending first notification
+  group_interval: 5m       # Wait 5m before sending additional notifications for same group
+  repeat_interval: 4h      # Re-send notifications every 4 hours
+  receiver: 'default'      # Default receiver for unmatched alerts
+  
+  # Routing rules for different alert types
+  routes:
+    # Critical production alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 30m
+      routes:
+        # Critical service down alerts
+        - match:
+            alertname: CriticalServiceDown
+          receiver: 'pagerduty-critical'
+        
+        # System health critical
+        - match:
+            alertname: SystemHealthCritical
+          receiver: 'critical-with-slack'
+    
+    # Warning level alerts - team notification
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 1m
+      group_interval: 5m
+      repeat_interval: 2h
+    
+    # Agent-specific alerts
+    - match:
+        team: agents
+      receiver: 'agent-team'
+      group_by: ['agent_type', 'alertname']
+    
+    # Platform infrastructure alerts
+    - match:
+        team: platform
+      receiver: 'platform-team'
+      group_by: ['service', 'alertname']
+    
+    # Meta-Agent Factory specific alerts
+    - match_re:
+        service: '(factory-core|domain-agents|uep-service)'
+      receiver: 'factory-alerts'
+      group_by: ['service', 'severity']
+
+# Inhibition rules to prevent alert spam
+inhibit_rules:
+  # Inhibit warning alerts when critical alerts are firing for same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['service', 'instance']
+  
+  # Inhibit individual service alerts when system health is critical
+  - source_match:
+      alertname: 'SystemHealthCritical'
+    target_match_re:
+      alertname: '.*(Down|Error|Failed).*'
+    equal: ['cluster']
+  
+  # Inhibit agent alerts when factory core is down
+  - source_match:
+      alertname: 'CriticalServiceDown'
+      job: 'factory-core'
+    target_match:
+      team: 'agents'
+    equal: ['cluster']
+
+# Receivers define how to send notifications
+receivers:
+  # Default receiver for miscellaneous alerts
+  - name: 'default'
+    email_configs:
+      - to: '${DEFAULT_EMAIL:-devops@meta-agent-factory.com}'
+        subject: '{{ template "email.default.subject" . }}'
+        body: '{{ template "email.default.text" . }}'
+        html: '{{ template "email.default.html" . }}'
+
+  # Critical alerts with immediate paging
+  - name: 'critical-alerts'
+    email_configs:
+      - to: '${CRITICAL_EMAIL:-oncall@meta-agent-factory.com}'
+        subject: '{{ template "email.critical.subject" . }}'
+        body: '{{ template "email.default.text" . }}'
+        html: '{{ template "email.default.html" . }}'
+    
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-critical'
+        color: '{{ template "slack.color" . }}'
+        pretext: '{{ template "slack.pretext" . }}'
+        title: '{{ template "slack.critical.title" . }}'
+        text: '{{ template "slack.critical.text" . }}'
+        footer: '{{ template "slack.footer" . }}'
+        actions: '{{ template "slack.actions" . }}'
+
+  # PagerDuty integration for critical service down alerts
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - routing_key: '${PAGERDUTY_INTEGRATION_KEY}'
+        description: '{{ template "pagerduty.service_down.description" . }}'
+        incident_key: '{{ template "pagerduty.default.incident_key" . }}'
+        details: '{{ template "pagerduty.service_down.details" . }}'
+        client: '{{ template "pagerduty.default.client" . }}'
+        client_url: '{{ template "pagerduty.default.client_url" . }}'
+
+  # Critical alerts with both email and Slack
+  - name: 'critical-with-slack'
+    email_configs:
+      - to: '${CRITICAL_EMAIL:-oncall@meta-agent-factory.com}'
+        subject: '🚨 CRITICAL: [Meta-Agent Factory] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-critical'
+        color: 'danger'
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+
+  # Warning level alerts
+  - name: 'warning-alerts'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-warnings'
+        color: 'warning'
+        title: '⚠️ WARNING: Meta-Agent Factory Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          
+          *Service:* {{ .Labels.service }}
+          *Started:* {{ .StartsAt }}
+          {{ end }}
+
+  # Agent team notifications
+  - name: 'agent-team'
+    email_configs:
+      - to: '${AGENT_TEAM_EMAIL:-agents@meta-agent-factory.com}'
+        subject: '{{ template "email.team.subject" . }}'
+        body: '{{ template "email.default.text" . }}'
+        html: '{{ template "email.default.html" . }}'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#team-agents'
+        color: '{{ template "slack.color" . }}'
+        title: '{{ template "slack.agent.title" . }}'
+        text: '{{ template "slack.agent.text" . }}'
+        footer: '{{ template "slack.footer" . }}'
+        actions: '{{ template "slack.actions" . }}'
+
+  # Platform team notifications
+  - name: 'platform-team'
+    email_configs:
+      - to: '${PLATFORM_TEAM_EMAIL:-platform@meta-agent-factory.com}'
+        subject: '{{ template "email.team.subject" . }}'
+        body: '{{ template "email.default.text" . }}'
+        html: '{{ template "email.default.html" . }}'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#team-platform'
+        color: '{{ template "slack.color" . }}'
+        title: '{{ template "slack.platform.title" . }}'
+        text: '{{ template "slack.platform.text" . }}'
+        footer: '{{ template "slack.footer" . }}'
+        actions: '{{ template "slack.actions" . }}'
+
+  # Factory-specific alerts
+  - name: 'factory-alerts'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#meta-agent-factory'
+        color: '{{ template "slack.color" . }}'
+        title: '{{ template "slack.factory.title" . }}'
+        text: '{{ template "slack.factory.text" . }}'
+        footer: '{{ template "slack.footer" . }}'
+        actions: '{{ template "slack.actions" . }}'
+
+# Templates for custom notification formatting
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'

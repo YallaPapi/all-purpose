@@ -1,0 +1,33 @@
+{
+  "projectName": "Task Management API",
+  "projectRoot": "./generated-orchestrator-test",
+  "prdPath": "./prd-for-test.md",
+  "enableRAGIntegration": true,
+  "enableMetaAgentCoordination": true,
+  "enableAutoComplianceEnforcement": true,
+  "metaAgents": {
+    "prdParser": {
+      "enabled": true,
+      "path": "./src/meta-agents/prd-parser/parser.js"
+    },
+    "scaffoldGenerator": {
+      "enabled": true,
+      "path": "./src/meta-agents/scaffold-generator/main.js"
+    },
+    "allPurposePattern": {
+      "enabled": true,
+      "path": "./src/meta-agents/all-purpose-pattern-agent/all-purpose-pattern-agent.ts"
+    }
+  },
+  "domainAgents": {
+    "backend": {
+      "enabled": true,
+      "path": "./src/meta-agents/backend-agent/dist/main.js"
+    }
+  },
+  "outputSettings": {
+    "generateDocumentation": true,
+    "generateTests": true,
+    "generateDeploymentConfigs": true
+  }
+}

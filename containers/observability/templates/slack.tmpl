@@ -1,0 +1,189 @@
+{{ define "slack.default.title" }}
+{{ if eq .Status "firing" }}{{ if eq .GroupLabels.severity "critical" }}🚨{{ else if eq .GroupLabels.severity "warning" }}⚠️{{ else }}ℹ️{{ end }}{{ else }}✅{{ end }} {{ if ne .Status "firing" }}RESOLVED: {{ end }}{{ .GroupLabels.alertname }}{{ if .GroupLabels.service }} - {{ .GroupLabels.service }}{{ end }}
+{{ end }}
+
+{{ define "slack.default.text" }}
+{{ if eq .Status "firing" }}
+{{ range .Alerts }}*{{ .Annotations.summary }}*
+{{ .Annotations.description }}
+
+{{ if .Labels.service }}*Service:* {{ .Labels.service }}{{ end }}
+{{ if .Labels.agent_type }}*Agent Type:* {{ .Labels.agent_type }}{{ end }}
+{{ if .Labels.team }}*Team:* {{ .Labels.team }}{{ end }}
+*Severity:* {{ .Labels.severity | title }}
+*Started:* {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+{{ end }}
+{{ else }}
+{{ range .Alerts }}*Alert Resolved:* {{ .Annotations.summary }}
+*Service:* {{ .Labels.service }}
+*Resolved:* {{ .EndsAt.Format "2006-01-02 15:04:05 UTC" }}
+{{ end }}
+{{ end }}
+{{ end }}
+
+{{ define "slack.critical.title" }}
+🚨 CRITICAL: {{ .GroupLabels.alertname }}{{ if .GroupLabels.service }} - {{ .GroupLabels.service }}{{ end }}
+{{ end }}
+
+{{ define "slack.critical.text" }}
+{{ range .Alerts }}🚨 *CRITICAL ALERT REQUIRES IMMEDIATE ATTENTION* 🚨
+
+*{{ .Annotations.summary }}*
+{{ .Annotations.description }}
+
+*🏗️ Service Details:*
+• Service: {{ .Labels.service | default .Labels.job }}
+{{ if .Labels.instance }}• Instance: {{ .Labels.instance }}{{ end }}
+{{ if .Labels.environment }}• Environment: {{ .Labels.environment }}{{ end }}
+{{ if .Labels.agent_type }}• Agent Type: {{ .Labels.agent_type }}{{ end }}
+
+*⏰ Timeline:*
+• Started: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+{{ if ne .Status "firing" }}• Resolved: {{ .EndsAt.Format "2006-01-02 15:04:05 UTC" }}{{ end }}
+
+{{ if .Annotations.runbook_url }}*📖 Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+{{ end }}
+{{ end }}
+
+{{ define "slack.agent.title" }}
+🤖 Agent Alert: {{ .GroupLabels.agent_type | default .GroupLabels.alertname }}
+{{ end }}
+
+{{ define "slack.agent.text" }}
+{{ range .Alerts }}*🤖 Meta-Agent Issue Detected*
+
+*{{ .Annotations.summary }}*
+{{ .Annotations.description }}
+
+*🔧 Agent Details:*
+{{ if .Labels.agent_type }}• Agent Type: {{ .Labels.agent_type }}{{ end }}
+• Service: {{ .Labels.service | default .Labels.job }}
+{{ if .Labels.instance }}• Instance: {{ .Labels.instance }}{{ end }}
+• Severity: {{ .Labels.severity | title }}
+
+*⏰ Timeline:*
+• Started: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+
+*🎯 Impact:*
+{{ if eq .Labels.agent_type "scaffold-generator" }}May affect project scaffold generation{{ end }}
+{{ if eq .Labels.agent_type "parameter-flow" }}May affect parameter mapping between agents{{ end }}
+{{ if eq .Labels.agent_type "template-engine" }}May affect template generation and processing{{ end }}
+{{ if eq .Labels.agent_type "all-purpose-pattern" }}May affect pattern matching and analysis{{ end }}
+{{ if eq .Labels.agent_type "infrastructure-orchestrator" }}May affect overall agent coordination{{ end }}
+{{ end }}
+{{ end }}
+
+{{ define "slack.platform.title" }}
+🏗️ Platform Alert: {{ .GroupLabels.service | default .GroupLabels.alertname }}
+{{ end }}
+
+{{ define "slack.platform.text" }}
+{{ range .Alerts }}*🏗️ Infrastructure Issue Detected*
+
+*{{ .Annotations.summary }}*
+{{ .Annotations.description }}
+
+*🔧 Infrastructure Details:*
+• Service: {{ .Labels.service | default .Labels.job }}
+{{ if .Labels.instance }}• Instance: {{ .Labels.instance }}{{ end }}
+{{ if .Labels.environment }}• Environment: {{ .Labels.environment }}{{ end }}
+• Severity: {{ .Labels.severity | title }}
+
+*⏰ Timeline:*
+• Started: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+
+*💡 Potential Impact:*
+{{ if eq .Labels.service "redis" }}Cache performance and session storage may be affected{{ end }}
+{{ if eq .Labels.service "nats-broker" }}Message queue and event streaming may be impacted{{ end }}
+{{ if eq .Labels.service "etcd" }}Service discovery and configuration may be affected{{ end }}
+{{ if eq .Labels.service "api-gateway" }}External access and routing may be impacted{{ end }}
+{{ end }}
+{{ end }}
+
+{{ define "slack.factory.title" }}
+🏭 Factory Alert{{ if eq .Status "resolved" }} - RESOLVED{{ end }}: {{ .GroupLabels.service }}
+{{ end }}
+
+{{ define "slack.factory.text" }}
+{{ if eq .Status "firing" }}
+{{ range .Alerts }}*🏭 Meta-Agent Factory Issue*
+
+*{{ .Annotations.summary }}*
+{{ .Annotations.description }}
+
+*🔧 Factory Details:*
+• Service: {{ .Labels.service }}
+• Severity: {{ .Labels.severity | title }}
+{{ if .Labels.agent_count }}• Affected Agents: {{ .Labels.agent_count }}{{ end }}
+{{ if .Labels.workflow_status }}• Workflow Status: {{ .Labels.workflow_status }}{{ end }}
+
+*⏰ Timeline:*
+• Started: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+
+*📊 Factory Impact:*
+{{ if eq .Labels.service "factory-core" }}• Core factory operations may be impacted
+• Agent coordination may be affected
+• New project generation may be delayed{{ end }}
+{{ if eq .Labels.service "domain-agents" }}• Specialized domain processing may be affected
+• Backend, frontend, DevOps, QA, or documentation agents may be impacted{{ end }}
+{{ if eq .Labels.service "uep-service" }}• Universal Execution Protocol validation may be affected
+• Agent communication protocol compliance may be impacted{{ end }}
+{{ end }}
+{{ else }}
+{{ range .Alerts }}*✅ Factory Issue Resolved*
+
+*{{ .Annotations.summary }}*
+Service {{ .Labels.service }} has returned to normal operation.
+
+*Resolution Time:* {{ .EndsAt.Format "2006-01-02 15:04:05 UTC" }}
+*Total Duration:* {{ .EndsAt.Sub .StartsAt | printf "%.0fm" }}
+{{ end }}
+{{ end }}
+{{ end }}
+
+{{ define "slack.color" }}
+{{ if eq .Status "firing" }}
+  {{ if eq .GroupLabels.severity "critical" }}danger{{ else if eq .GroupLabels.severity "warning" }}warning{{ else }}#439FE0{{ end }}
+{{ else }}
+  good
+{{ end }}
+{{ end }}
+
+{{ define "slack.actions" }}
+[
+  {
+    "type": "button",
+    "text": "📊 View Dashboard",
+    "url": "http://localhost:3004/d/meta-agent-overview"
+  },
+  {
+    "type": "button", 
+    "text": "🔍 Check Logs",
+    "url": "http://localhost:3004/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bservice%3D%5C%22{{ .GroupLabels.service }}%5C%22%7D%22%7D%5D%7D"
+  },
+  {{ if eq .Status "firing" }}
+  {
+    "type": "button",
+    "text": "🔕 Silence Alert", 
+    "url": "http://localhost:9093/#/silences/new"
+  },
+  {{ end }}
+  {
+    "type": "button",
+    "text": "🎛️ Alert Manager",
+    "url": "http://localhost:9093"
+  }
+]
+{{ end }}
+
+{{ define "slack.footer" }}
+Meta-Agent Factory Monitoring | {{ now.Format "2006-01-02 15:04:05 UTC" }}
+{{ end }}
+
+{{ define "slack.pretext" }}
+{{ if eq .Status "firing" }}
+  {{ if eq .GroupLabels.severity "critical" }}🚨 *CRITICAL ALERT* - Immediate attention required{{ else if eq .GroupLabels.severity "warning" }}⚠️ *WARNING* - Investigation recommended{{ else }}ℹ️ *INFO* - For your awareness{{ end }}
+{{ else }}
+  ✅ *RESOLVED* - Issue has been resolved
+{{ end }}
+{{ end }}

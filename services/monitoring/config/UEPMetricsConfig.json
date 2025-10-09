@@ -1,0 +1,270 @@
+{
+  "metrics": {
+    "collection": {
+      "enabled": true,
+      "interval": 30000,
+      "retention": "7d",
+      "bufferSize": 10000,
+      "autoStart": true
+    },
+    "prometheus": {
+      "port": 9090,
+      "endpoint": "/metrics",
+      "prefix": "uep_",
+      "labels": {
+        "service": "uep-system",
+        "version": "1.0.0",
+        "environment": "production"
+      }
+    },
+    "compliance": {
+      "strictMode": true,
+      "violationThreshold": 0.05,
+      "alertingEnabled": true,
+      "trackingEnabled": true
+    },
+    "performance": {
+      "percentiles": [0.5, 0.9, 0.95, 0.99],
+      "sampleRate": 1.0,
+      "buckets": [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+      "trackLatency": true,
+      "trackThroughput": true,
+      "trackErrorRate": true
+    },
+    "export": {
+      "enabled": true,
+      "format": "prometheus",
+      "destination": "/var/lib/uep/metrics",
+      "schedule": "0 * * * *",
+      "compression": true
+    }
+  },
+  "integration": {
+    "enabled": true,
+    "middleware": {
+      "requestTracking": true,
+      "messageTracking": true,
+      "performanceTracking": true,
+      "errorTracking": true,
+      "complianceTracking": true
+    },
+    "aggregation": {
+      "enabled": true,
+      "interval": 60000,
+      "windowSize": 300000,
+      "retainHistory": true,
+      "computePercentiles": true
+    },
+    "alerting": {
+      "enabled": true,
+      "thresholds": {
+        "errorRate": 0.05,
+        "latencyP99": 1000,
+        "complianceRate": 0.95,
+        "throughput": 100,
+        "agentDowntime": 300000
+      },
+      "cooldownPeriod": 300000,
+      "escalationEnabled": true,
+      "channels": ["console", "webhook"]
+    },
+    "export": {
+      "enabled": true,
+      "formats": ["prometheus", "json"],
+      "schedule": "0 */6 * * *",
+      "destinations": [
+        "/var/lib/uep/exports/metrics",
+        "s3://uep-metrics-bucket/exports"
+      ],
+      "retention": "30d"
+    }
+  },
+  "customMetrics": [
+    {
+      "name": "uep_agent_coordination_success_rate",
+      "type": "gauge",
+      "help": "Success rate of agent coordination events",
+      "labelNames": ["coordinator_type", "pattern", "participant_count"]
+    },
+    {
+      "name": "uep_workflow_execution_duration_seconds",
+      "type": "histogram",
+      "help": "Duration of workflow executions in seconds",
+      "labelNames": ["workflow_type", "agent_count", "complexity"],
+      "buckets": [0.1, 0.5, 1, 2, 5, 10, 30, 60, 300, 600]
+    },
+    {
+      "name": "uep_protocol_version_usage",
+      "type": "counter",
+      "help": "Usage count of different UEP protocol versions",
+      "labelNames": ["version", "agent_type"]
+    },
+    {
+      "name": "uep_message_queue_depth",
+      "type": "gauge",
+      "help": "Current depth of UEP message queues",
+      "labelNames": ["queue_type", "agent_id", "priority"]
+    },
+    {
+      "name": "uep_agent_resource_utilization",
+      "type": "gauge",
+      "help": "Resource utilization of UEP agents",
+      "labelNames": ["agent_id", "resource_type", "unit"]
+    }
+  ],
+  "dashboards": {
+    "enabled": true,
+    "grafana": {
+      "enabled": true,
+      "url": "http://grafana:3000",
+      "apiKey": "${GRAFANA_API_KEY}",
+      "dashboardIds": [
+        "uep-system-overview",
+        "uep-agent-performance",
+        "uep-protocol-compliance",
+        "uep-workflow-monitoring"
+      ]
+    },
+    "custom": {
+      "enabled": true,
+      "panels": [
+        {
+          "title": "UEP System Health",
+          "type": "stat",
+          "metrics": ["uep_agent_status", "uep_compliance_rate"],
+          "thresholds": [0.95, 0.99]
+        },
+        {
+          "title": "Message Processing Latency",
+          "type": "graph",
+          "metrics": ["uep_message_duration_seconds"],
+          "yAxis": "seconds"
+        },
+        {
+          "title": "Agent Coordination Patterns",
+          "type": "pie",
+          "metrics": ["uep_coordinations_total"],
+          "groupBy": ["pattern"]
+        }
+      ]
+    }
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "destinations": ["console", "file"],
+    "file": {
+      "path": "/var/log/uep/metrics.log",
+      "maxSize": "100MB",
+      "maxFiles": 10,
+      "rotate": true
+    },
+    "fields": {
+      "timestamp": true,
+      "level": true,
+      "component": true,
+      "agentId": true,
+      "correlationId": true,
+      "traceId": true
+    }
+  },
+  "storage": {
+    "backend": "prometheus",
+    "prometheus": {
+      "url": "http://prometheus:9090",
+      "retention": "15d",
+      "scrapeInterval": "15s",
+      "evaluationInterval": "15s"
+    },
+    "timeseries": {
+      "enabled": true,
+      "backend": "influxdb",
+      "influxdb": {
+        "url": "http://influxdb:8086",
+        "database": "uep_metrics",
+        "retention": "30d",
+        "precision": "s"
+      }
+    },
+    "longterm": {
+      "enabled": true,
+      "backend": "s3",
+      "s3": {
+        "bucket": "uep-metrics-longterm",
+        "region": "us-east-1",
+        "retention": "1y",
+        "compression": "gzip"
+      }
+    }
+  },
+  "security": {
+    "authentication": {
+      "enabled": true,
+      "method": "jwt",
+      "jwtSecret": "${JWT_SECRET}",
+      "tokenExpiry": "1h"
+    },
+    "authorization": {
+      "enabled": true,
+      "rbac": true,
+      "roles": {
+        "viewer": ["read:metrics", "read:dashboards"],
+        "operator": ["read:metrics", "read:dashboards", "write:config"],
+        "admin": ["*"]
+      }
+    },
+    "encryption": {
+      "inTransit": true,
+      "atRest": false,
+      "algorithm": "AES-256-GCM"
+    },
+    "audit": {
+      "enabled": true,
+      "events": ["access", "configuration", "alerts"],
+      "retention": "90d"
+    }
+  },
+  "development": {
+    "enabled": false,
+    "mockData": {
+      "enabled": false,
+      "agents": 10,
+      "messagesPerSecond": 50,
+      "errorRate": 0.02
+    },
+    "debug": {
+      "enabled": false,
+      "verbose": false,
+      "profiling": false
+    },
+    "testing": {
+      "enabled": true,
+      "endpoints": true,
+      "mockMetrics": true,
+      "loadTesting": false
+    }
+  },
+  "monitoring": {
+    "selfMonitoring": {
+      "enabled": true,
+      "interval": 60000,
+      "metrics": [
+        "collector_memory_usage",
+        "collector_cpu_usage",
+        "collection_latency",
+        "export_success_rate"
+      ]
+    },
+    "healthChecks": {
+      "enabled": true,
+      "endpoint": "/health",
+      "interval": 30000,
+      "timeout": 5000,
+      "checks": [
+        "prometheus_connectivity",
+        "storage_availability",
+        "collection_pipeline"
+      ]
+    }
+  }
+}

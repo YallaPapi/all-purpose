@@ -1,0 +1,285 @@
+# Meta-Agent Factory Monitoring Stack
+# Task 231.5 - Complete monitoring infrastructure deployment
+# Production-ready Docker Compose configuration with auto-provisioning
+
+version: '3.8'
+
+services:
+  # Prometheus - Metrics collection and storage
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: meta-agent-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+      - '--storage.tsdb.retention.time=30d'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerting/meta-agent-factory-alerts.yaml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    environment:
+      - PROMETHEUS_RETENTION_TIME=30d
+      - PROMETHEUS_STORAGE_PATH=/prometheus
+
+  # Alertmanager - Alert routing and notification
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: meta-agent-alertmanager
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+      - '--web.route-prefix=/'
+      - '--cluster.listen-address='
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alerting/alertmanager-config.yaml:/etc/alertmanager/alertmanager.yml:ro
+      - ./alerting/templates/:/etc/alertmanager/templates/:ro
+      - alertmanager_data:/alertmanager
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    environment:
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - PAGERDUTY_INTEGRATION_KEY=${PAGERDUTY_INTEGRATION_KEY}
+    depends_on:
+      prometheus:
+        condition: service_healthy
+
+  # Loki - Log aggregation and storage
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: meta-agent-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/tmp/loki
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Grafana - Dashboard and visualization platform
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: meta-agent-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Dashboard provisioning
+      - ./dashboards/provisioning/:/etc/grafana/provisioning/:ro
+      - ./dashboards/01-system-overview/:/var/lib/grafana/dashboards/system-overview/:ro
+      - ./dashboards/05-service-registry/:/var/lib/grafana/dashboards/service-registry/:ro
+      - ./dashboards/06-meta-monitoring/:/var/lib/grafana/dashboards/meta-monitoring/:ro
+      
+      # Alert rule provisioning
+      - ./alerting/grafana-alerts.yaml:/etc/grafana/provisioning/alerting/grafana-alerts.yaml:ro
+      
+      # Grafana data persistence
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitoring
+    environment:
+      # Security settings
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_SECRET_KEY=${GRAFANA_SECRET_KEY:-your-secret-key-here}
+      
+      # Server settings
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+      
+      # Database settings (SQLite for simplicity)
+      - GF_DATABASE_TYPE=sqlite3
+      - GF_DATABASE_PATH=/var/lib/grafana/grafana.db
+      
+      # Provisioning settings
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_PROVISIONING_PROVISIONING=/etc/grafana/provisioning
+      
+      # Feature toggles
+      - GF_FEATURE_TOGGLES_ENABLE=ngalert
+      - GF_UNIFIED_ALERTING_ENABLED=true
+      - GF_ALERTING_ENABLED=false
+      
+      # Plugin settings
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=
+      - GF_INSTALL_PLUGINS=
+      
+      # SMTP settings for alert notifications
+      - GF_SMTP_ENABLED=${GF_SMTP_ENABLED:-false}
+      - GF_SMTP_HOST=${GF_SMTP_HOST:-mail.company.com:587}
+      - GF_SMTP_USER=${GF_SMTP_USER:-alerts@company.com}
+      - GF_SMTP_PASSWORD=${GF_SMTP_PASSWORD}
+      - GF_SMTP_FROM_ADDRESS=${GF_SMTP_FROM_ADDRESS:-alerts@company.com}
+      - GF_SMTP_FROM_NAME=${GF_SMTP_FROM_NAME:-Meta-Agent Factory Alerts}
+      
+      # OAuth/SSO settings (optional)
+      - GF_AUTH_OAUTH_AUTO_LOGIN=${GF_AUTH_OAUTH_AUTO_LOGIN:-false}
+      - GF_AUTH_ANONYMOUS_ENABLED=${GF_AUTH_ANONYMOUS_ENABLED:-false}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+
+  # Node Exporter - System metrics collection
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: meta-agent-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9100/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Promtail - Log collection agent for Loki
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: meta-agent-promtail
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail/promtail-config.yaml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - monitoring
+    depends_on:
+      loki:
+        condition: service_healthy
+
+  # Meta-Agent Factory Application Metrics (placeholder)
+  # This should be replaced with your actual meta-agent factory services
+  meta-agent-metrics:
+    image: nginx:alpine
+    container_name: meta-agent-metrics-mock
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./mock-metrics/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./mock-metrics/metrics:/usr/share/nginx/html/:ro
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "prometheus.io/scrape=true"
+      - "prometheus.io/port=80"
+      - "prometheus.io/path=/metrics"
+
+# Persistent volumes for data retention
+volumes:
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/prometheus
+  
+  alertmanager_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/alertmanager
+  
+  loki_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/loki
+      
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/grafana
+
+# Dedicated monitoring network
+networks:
+  monitoring:
+    driver: bridge
+    name: meta-agent-monitoring
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+# Health check and monitoring metadata
+x-healthcheck-config: &healthcheck-config
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+# Common environment variables template
+x-common-env: &common-env
+  - TZ=UTC
+  - ENVIRONMENT=${ENVIRONMENT:-development}
+  - LOG_LEVEL=${LOG_LEVEL:-info}
+
+# Restart policy template
+x-restart-policy: &restart-policy
+  restart_policy:
+    condition: unless-stopped
+    delay: 5s
+    max_attempts: 3
+    window: 120s

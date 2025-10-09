@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  # NATS Prometheus Exporter
+  nats-exporter:
+    image: natsio/prometheus-nats-exporter:latest
+    container_name: nats-exporter
+    ports:
+      - "7777:7777"
+    command:
+      - '-varz'
+      - '-connz'
+      - '-routez'
+      - '-subz'
+      - '-jsz=all'
+      - 'http://host.docker.internal:8222'
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  # NATS Surveyor for advanced metrics
+  nats-surveyor:
+    image: natsio/nats-surveyor:latest
+    container_name: nats-surveyor
+    environment:
+      - NATS_SURVEYOR_SERVERS=nats://host.docker.internal:4222
+      - NATS_SURVEYOR_PROMETHEUS_PORT=7778
+      - NATS_SURVEYOR_LOG_LEVEL=info
+    ports:
+      - "7778:7778"
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3006:3000"  # Using 3006 to avoid conflicts
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,redis-datasource
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+
+  # OpenTelemetry Collector for distributed tracing
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "55681:55681" # Legacy Jaeger receiver
+    depends_on:
+      - tempo
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  # Tempo for trace storage
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo-config.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200"   # Tempo query
+      - "4319:4319"   # OTLP HTTP
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  nats-data:
+    driver: local
+  tempo-data:
+    driver: local
+
+networks:
+  monitoring-network:
+    driver: bridge
+    name: monitoring-network

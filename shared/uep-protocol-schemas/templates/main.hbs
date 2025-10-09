@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{info.title}} - Protocol Documentation</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    {{#if config.branding.favicon}}
+    <link rel="icon" href="{{config.branding.favicon}}" type="image/x-icon">
+    {{/if}}
+    <meta name="description" content="{{info.description}}">
+    <meta name="generator" content="UEP Protocol Documentation Generator v1.0.0">
+    <meta name="protocol-version" content="{{info.version}}">
+</head>
+<body class="{{config.theme}}">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                {{#if config.branding.logo}}
+                <img src="{{config.branding.logo}}" alt="{{config.branding.organization}}" class="logo">
+                {{/if}}
+                <div class="header-text">
+                    <h1>{{info.title}}</h1>
+                    <p class="version-badge">Version {{info.version}}</p>
+                    <p class="description">{{info.description}}</p>
+                </div>
+            </div>
+            
+            {{#if config.enableSearch}}
+            <div class="search-container">
+                <input type="search" id="search-input" placeholder="Search documentation..." class="search-input">
+                <div id="search-results" class="search-results"></div>
+            </div>
+            {{/if}}
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    {{#if config.generateTOC}}
+    <nav class="sidebar">
+        <div class="nav-content">
+            <h3>Table of Contents</h3>
+            <ul class="nav-list">
+                <li><a href="#overview">Overview</a></li>
+                {{#if servers}}
+                <li><a href="#servers">Servers</a></li>
+                {{/if}}
+                {{#if endpoints.length}}
+                <li>
+                    <a href="#endpoints">API Endpoints</a>
+                    <ul class="nav-sublist">
+                        {{#each endpoints}}
+                        <li><a href="#endpoint-{{@index}}">{{method}} {{path}}</a></li>
+                        {{/each}}
+                    </ul>
+                </li>
+                {{/if}}
+                {{#if schemas.length}}
+                <li>
+                    <a href="#schemas">Data Schemas</a>
+                    <ul class="nav-sublist">
+                        {{#each schemas}}
+                        <li><a href="#schema-{{name}}">{{name}}</a></li>
+                        {{/each}}
+                    </ul>
+                </li>
+                {{/if}}
+                {{#if config.includeExamples}}
+                <li><a href="#examples">Examples</a></li>
+                {{/if}}
+                {{#if config.includeChangelog}}
+                <li><a href="#changelog">Changelog</a></li>
+                {{/if}}
+            </ul>
+        </div>
+    </nav>
+    {{/if}}
+
+    <!-- Main Content -->
+    <main class="main-content {{#if config.generateTOC}}with-sidebar{{/if}}">
+        <div class="container">
+            <!-- Overview Section -->
+            <section id="overview" class="section">
+                <h2>Overview</h2>
+                <div class="overview-content">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <h4>Protocol ID</h4>
+                            <p>{{protocol.id}}</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>Version</h4>
+                            <p>{{info.version}}</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>Status</h4>
+                            <p class="status-{{metadata.status}}">{{metadata.status}}</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>Author</h4>
+                            <p>{{metadata.author}}</p>
+                        </div>
+                    </div>
+                    
+                    {{#if info.contact}}
+                    <div class="contact-info">
+                        <h4>Contact Information</h4>
+                        <p><strong>{{info.contact.name}}</strong></p>
+                        <p>Email: <a href="mailto:{{info.contact.email}}">{{info.contact.email}}</a></p>
+                        {{#if info.contact.url}}
+                        <p>Website: <a href="{{info.contact.url}}" target="_blank">{{info.contact.url}}</a></p>
+                        {{/if}}
+                    </div>
+                    {{/if}}
+                    
+                    {{#if info.license}}
+                    <div class="license-info">
+                        <h4>License</h4>
+                        <p>{{info.license.name}}</p>
+                        {{#if info.license.url}}
+                        <p><a href="{{info.license.url}}" target="_blank">View License</a></p>
+                        {{/if}}
+                    </div>
+                    {{/if}}
+                </div>
+            </section>
+
+            <!-- Servers Section -->
+            {{#if servers.length}}
+            <section id="servers" class="section">
+                <h2>Servers</h2>
+                <div class="servers-list">
+                    {{#each servers}}
+                    <div class="server-item">
+                        <h4>{{description}}</h4>
+                        <code class="server-url">{{url}}</code>
+                        {{#if variables}}
+                        <div class="server-variables">
+                            <h5>Variables:</h5>
+                            <ul>
+                                {{#each variables}}
+                                <li><strong>{{@key}}</strong>: {{description}} (default: {{default}})</li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                        {{/if}}
+                    </div>
+                    {{/each}}
+                </div>
+            </section>
+            {{/if}}
+
+            <!-- API Endpoints Section -->
+            {{#if endpoints.length}}
+            <section id="endpoints" class="section">
+                <h2>API Endpoints</h2>
+                <div class="endpoints-list">
+                    {{#each endpoints}}
+                    <div id="endpoint-{{@index}}" class="endpoint-item {{#if deprecated}}deprecated{{/if}}">
+                        <div class="endpoint-header">
+                            <span class="method method-{{method}}">{{method}}</span>
+                            <span class="path">{{path}}</span>
+                            {{#if deprecated}}
+                            <span class="deprecated-badge">DEPRECATED</span>
+                            {{/if}}
+                        </div>
+                        
+                        <div class="endpoint-content">
+                            <h4>{{summary}}</h4>
+                            {{#if description}}
+                            <p class="description">{{description}}</p>
+                            {{/if}}
+                            
+                            {{#if tags.length}}
+                            <div class="tags">
+                                {{#each tags}}
+                                <span class="tag">{{this}}</span>
+                                {{/each}}
+                            </div>
+                            {{/if}}
+                            
+                            {{#if parameters.length}}
+                            <div class="parameters">
+                                <h5>Parameters</h5>
+                                <table class="params-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>In</th>
+                                            <th>Required</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{#each parameters}}
+                                        <tr>
+                                            <td><code>{{name}}</code></td>
+                                            <td>{{schema.type}}</td>
+                                            <td>{{in}}</td>
+                                            <td>{{#if required}}Yes{{else}}No{{/if}}</td>
+                                            <td>{{description}}</td>
+                                        </tr>
+                                        {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{/if}}
+                            
+                            {{#if requestBody}}
+                            <div class="request-body">
+                                <h5>Request Body</h5>
+                                <p><strong>Content Type:</strong> {{requestBody.contentType}}</p>
+                                <p><strong>Required:</strong> {{#if requestBody.required}}Yes{{else}}No{{/if}}</p>
+                                {{#if requestBody.description}}
+                                <p>{{requestBody.description}}</p>
+                                {{/if}}
+                                {{#if requestBody.schema}}
+                                <div class="schema-preview">
+                                    <pre><code class="json">{{json requestBody.schema}}</code></pre>
+                                </div>
+                                {{/if}}
+                            </div>
+                            {{/if}}
+                            
+                            {{#if responses.length}}
+                            <div class="responses">
+                                <h5>Responses</h5>
+                                {{#each responses}}
+                                <div class="response-item">
+                                    <div class="response-header">
+                                        <span class="status-code status-{{statusCode}}">{{statusCode}}</span>
+                                        <span class="response-description">{{description}}</span>
+                                    </div>
+                                    {{#if schema}}
+                                    <div class="response-schema">
+                                        <h6>Response Schema</h6>
+                                        <pre><code class="json">{{json schema}}</code></pre>
+                                    </div>
+                                    {{/if}}
+                                </div>
+                                {{/each}}
+                            </div>
+                            {{/if}}
+                            
+                            {{#if examples.length}}
+                            <div class="examples">
+                                <h5>Examples</h5>
+                                {{#each examples}}
+                                <div class="example-item">
+                                    <h6>{{name}}</h6>
+                                    {{#if description}}
+                                    <p>{{description}}</p>
+                                    {{/if}}
+                                    <pre><code class="{{language}}">{{json value}}</code></pre>
+                                </div>
+                                {{/each}}
+                            </div>
+                            {{/if}}
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </section>
+            {{/if}}
+
+            <!-- Data Schemas Section -->
+            {{#if schemas.length}}
+            <section id="schemas" class="section">
+                <h2>Data Schemas</h2>
+                <div class="schemas-list">
+                    {{#each schemas}}
+                    <div id="schema-{{name}}" class="schema-item">
+                        <h3>{{name}}</h3>
+                        {{#if description}}
+                        <p class="description">{{description}}</p>
+                        {{/if}}
+                        
+                        <div class="schema-details">
+                            <p><strong>Type:</strong> {{type}}</p>
+                            {{#if required.length}}
+                            <p><strong>Required Fields:</strong> {{join required ", "}}</p>
+                            {{/if}}
+                        </div>
+                        
+                        {{#if properties.length}}
+                        <div class="properties">
+                            <h4>Properties</h4>
+                            <table class="properties-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Required</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each properties}}
+                                    <tr class="{{#if deprecated}}deprecated{{/if}}">
+                                        <td><code>{{name}}</code></td>
+                                        <td>{{type}}{{#if format}} ({{format}}){{/if}}</td>
+                                        <td>{{#if required}}Yes{{else}}No{{/if}}</td>
+                                        <td>
+                                            {{description}}
+                                            {{#if deprecated}}
+                                            <span class="deprecated-note">DEPRECATED</span>
+                                            {{/if}}
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                        {{/if}}
+                        
+                        {{#if examples.length}}
+                        <div class="schema-examples">
+                            <h4>Examples</h4>
+                            {{#each examples}}
+                            <div class="example-item">
+                                <h5>{{name}}</h5>
+                                {{#if description}}
+                                <p>{{description}}</p>
+                                {{/if}}
+                                <pre><code class="json">{{json value}}</code></pre>
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{/if}}
+                    </div>
+                    {{/each}}
+                </div>
+            </section>
+            {{/if}}
+
+            <!-- Examples Section -->
+            {{#if config.includeExamples}}
+            <section id="examples" class="section">
+                <h2>Usage Examples</h2>
+                <div class="examples-grid">
+                    <!-- Basic usage examples would be generated here -->
+                    <div class="example-category">
+                        <h3>Basic Usage</h3>
+                        <pre><code class="javascript">
+// Example API client usage
+const client = new UEPClient('{{servers.0.url}}');
+const response = await client.{{endpoints.0.path.replace(/[{}]/g, '')}}();
+console.log(response);
+                        </code></pre>
+                    </div>
+                </div>
+            </section>
+            {{/if}}
+
+            <!-- Changelog Section -->
+            {{#if config.includeChangelog}}
+            <section id="changelog" class="section">
+                <h2>Changelog</h2>
+                <div class="changelog-list">
+                    {{#each changelog}}
+                    <div class="changelog-item">
+                        <h4>Version {{version}} - {{formatDate timestamp}}</h4>
+                        <ul>
+                            {{#each changes}}
+                            <li>{{this}}</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/each}}
+                </div>
+            </section>
+            {{/if}}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; {{currentYear}} {{config.branding.organization}}. Generated with UEP Protocol Documentation Generator.</p>
+                <p>Generated on {{timestamp}}</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="assets/scripts.js"></script>
+    {{#if config.enableSearch}}
+    <script>
+        // Initialize search functionality
+        window.searchEnabled = true;
+    </script>
+    {{/if}}
+</body>
+</html>

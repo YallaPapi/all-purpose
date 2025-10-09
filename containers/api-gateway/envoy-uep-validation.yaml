@@ -1,0 +1,301 @@
+# Envoy configuration with UEP validation WASM plugin
+# Implements UEP protocol validation at the proxy level
+
+static_resources:
+  listeners:
+  - name: main
+    address:
+      socket_address:
+        protocol: TCP
+        address: 0.0.0.0
+        port_value: 8080
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          scheme_header_transformation:
+            scheme_to_overwrite: https
+          stat_prefix: ingress_http
+          access_log:
+          - name: envoy.access_loggers.stdout
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+          http_filters:
+          # UEP Validation Filter - Custom WASM Plugin
+          - name: envoy.filters.http.wasm
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+              config:
+                name: "uep_validation"
+                root_id: "uep_validation_root"
+                configuration:
+                  "@type": type.googleapis.com/google.protobuf.StringValue
+                  value: |
+                    {
+                      "validation_level": "strict",
+                      "circuit_breaker_threshold": 5,
+                      "timeout_ms": 5000,
+                      "retry_attempts": 3,
+                      "enable_api_gateway_validation": true,
+                      "enable_service_mesh_validation": true,
+                      "protocol_versions": ["1.0", "1.1", "2.0"],
+                      "required_headers": [
+                        "x-uep-version",
+                        "x-uep-agent-id",
+                        "x-uep-message-type"
+                      ],
+                      "validation_rules": {
+                        "max_payload_size": 1048576,
+                        "max_header_count": 50,
+                        "allowed_message_types": [
+                          "task",
+                          "response", 
+                          "event",
+                          "query",
+                          "command"
+                        ]
+                      }
+                    }
+                vm_config:
+                  vm_id: "uep_validation_vm"
+                  runtime: "envoy.wasm.runtime.v8"
+                  code:
+                    local:
+                      # In production, this would be a compiled WASM binary
+                      inline_string: |
+                        class UEPValidationFilter {
+                          constructor(rootContext) {
+                            this.config = JSON.parse(rootContext.getConfiguration());
+                          }
+
+                          onRequestHeaders() {
+                            const headers = this.getRequestHeaders();
+                            
+                            // Check required UEP headers
+                            for (const header of this.config.required_headers) {
+                              if (!headers[header]) {
+                                this.sendLocalResponse(400, `Missing required header: ${header}`, {}, []);
+                                return FilterHeadersStatus.StopIteration;
+                              }
+                            }
+
+                            // Validate UEP version
+                            const version = headers['x-uep-version'];
+                            if (!this.config.protocol_versions.includes(version)) {
+                              this.sendLocalResponse(400, `Unsupported UEP version: ${version}`, {}, []);
+                              return FilterHeadersStatus.StopIteration;
+                            }
+
+                            // Validate message type
+                            const messageType = headers['x-uep-message-type'];
+                            if (!this.config.validation_rules.allowed_message_types.includes(messageType)) {
+                              this.sendLocalResponse(400, `Invalid message type: ${messageType}`, {}, []);
+                              return FilterHeadersStatus.StopIteration;
+                            }
+
+                            return FilterHeadersStatus.Continue;
+                          }
+
+                          onRequestBody(bodySize, endOfStream) {
+                            if (bodySize > this.config.validation_rules.max_payload_size) {
+                              this.sendLocalResponse(413, "Payload too large", {}, []);
+                              return FilterDataStatus.StopIterationNoBuffer;
+                            }
+
+                            if (endOfStream) {
+                              // Validate UEP message structure
+                              const body = this.getRequestBody();
+                              try {
+                                const message = JSON.parse(body);
+                                if (!this.validateUEPMessage(message)) {
+                                  this.sendLocalResponse(400, "Invalid UEP message structure", {}, []);
+                                  return FilterDataStatus.StopIterationNoBuffer;
+                                }
+                              } catch (e) {
+                                this.sendLocalResponse(400, "Invalid JSON in request body", {}, []);
+                                return FilterDataStatus.StopIterationNoBuffer;
+                              }
+                            }
+
+                            return FilterDataStatus.Continue;
+                          }
+
+                          validateUEPMessage(message) {
+                            const requiredFields = ['messageType', 'agentId', 'timestamp', 'payload'];
+                            return requiredFields.every(field => message.hasOwnProperty(field));
+                          }
+
+                          onResponseHeaders() {
+                            // Add UEP validation metadata to response
+                            this.addResponseHeader('x-uep-validated', 'true');
+                            this.addResponseHeader('x-uep-validator-version', '1.0.0');
+                            return FilterHeadersStatus.Continue;
+                          }
+                        }
+          
+          # Rate limiting for UEP validation
+          - name: envoy.filters.http.local_ratelimit
+            typed_config:
+              "@type": type.googleapis.com/udpa.type.v1.TypedStruct
+              type_url: type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+              value:
+                stat_prefix: uep_rate_limiter
+                token_bucket:
+                  max_tokens: 100
+                  tokens_per_fill: 100
+                  fill_interval: 60s
+                filter_enabled:
+                  runtime_key: uep_rate_limit_enabled
+                  default_value:
+                    numerator: 100
+                    denominator: HUNDRED
+                filter_enforced:
+                  runtime_key: uep_rate_limit_enforced
+                  default_value:
+                    numerator: 100
+                    denominator: HUNDRED
+
+          # Standard router filter
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: local_service
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/api/uep/"
+                route:
+                  cluster: uep_service_cluster
+                  timeout: 30s
+                metadata:
+                  filter_metadata:
+                    envoy.filters.http.wasm:
+                      uep_validation_enabled: true
+              - match:
+                  prefix: "/api/agents/"
+                route:
+                  cluster: agent_cluster
+                  timeout: 30s
+                metadata:
+                  filter_metadata:
+                    envoy.filters.http.wasm:
+                      uep_validation_enabled: true
+              - match:
+                  prefix: "/health"
+                route:
+                  cluster: health_cluster
+                  timeout: 5s
+                metadata:
+                  filter_metadata:
+                    envoy.filters.http.wasm:
+                      uep_validation_enabled: false
+
+  clusters:
+  - name: uep_service_cluster
+    connect_timeout: 0.25s
+    type: LOGICAL_DNS
+    # Circuit breaker configuration
+    circuit_breakers:
+      thresholds:
+      - priority: DEFAULT
+        max_connections: 100
+        max_pending_requests: 100
+        max_requests: 100
+        max_retries: 3
+    health_checks:
+    - timeout: 5s
+      interval: 10s
+      unhealthy_threshold: 3
+      healthy_threshold: 2
+      http_health_check:
+        path: "/health"
+        expected_statuses:
+        - start: 200
+          end: 299
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: uep_service_cluster
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: uep-service
+                port_value: 3000
+
+  - name: agent_cluster
+    connect_timeout: 0.25s
+    type: LOGICAL_DNS
+    circuit_breakers:
+      thresholds:
+      - priority: DEFAULT
+        max_connections: 50
+        max_pending_requests: 50
+        max_requests: 50
+        max_retries: 2
+    health_checks:
+    - timeout: 3s
+      interval: 5s
+      unhealthy_threshold: 2
+      healthy_threshold: 2
+      http_health_check:
+        path: "/health"
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: agent_cluster
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: agent-registry
+                port_value: 3001
+
+  - name: health_cluster
+    connect_timeout: 0.25s
+    type: LOGICAL_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: health_cluster
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: localhost
+                port_value: 8080
+
+# Admin interface for monitoring and configuration
+admin:
+  access_log_path: /tmp/admin_access.log
+  address:
+    socket_address:
+      protocol: TCP
+      address: 127.0.0.1
+      port_value: 9901
+
+# Bootstrap configuration for UEP validation
+bootstrap_extensions:
+- name: envoy.bootstrap.wasm
+  typed_config:
+    "@type": type.googleapis.com/envoy.extensions.wasm.v3.WasmService
+    singleton: true
+    config:
+      name: "uep_validation_bootstrap"
+      root_id: "uep_validation_bootstrap_root"
+      vm_config:
+        vm_id: "uep_validation_bootstrap_vm"
+        runtime: "envoy.wasm.runtime.v8"
+        configuration:
+          "@type": type.googleapis.com/google.protobuf.StringValue
+          value: |
+            {
+              "validation_registry_endpoint": "http://uep-service:3000/api/validation/rules",
+              "circuit_breaker_state_endpoint": "http://uep-service:3000/api/circuit-breaker/state",
+              "metrics_endpoint": "http://observability:9090/metrics"
+            }

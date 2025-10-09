@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    container_name: nats-secure
+    ports:
+      - "4222:4222"    # Client connections
+      - "8222:8222"    # HTTP monitoring
+      - "6222:6222"    # Cluster routing (for future)
+    volumes:
+      - ./nats-server-secure.conf:/etc/nats/nats-server.conf:ro
+      - ./certs:/etc/nats/certs:ro
+      - nats-data:/data
+      - nats-logs:/var/log/nats
+    environment:
+      # These will be replaced with actual passwords at runtime
+      - FACTORY_CORE_PASSWORD=${FACTORY_CORE_PASSWORD:-factory-secret}
+      - BACKEND_AGENT_PASSWORD=${BACKEND_AGENT_PASSWORD:-backend-secret}
+      - FRONTEND_AGENT_PASSWORD=${FRONTEND_AGENT_PASSWORD:-frontend-secret}
+      - DEVOPS_AGENT_PASSWORD=${DEVOPS_AGENT_PASSWORD:-devops-secret}
+      - QA_AGENT_PASSWORD=${QA_AGENT_PASSWORD:-qa-secret}
+      - DOCUMENTATION_AGENT_PASSWORD=${DOCUMENTATION_AGENT_PASSWORD:-docs-secret}
+      - MONITORING_PASSWORD=${MONITORING_PASSWORD:-monitor-secret}
+    command: ["-c", "/etc/nats/nats-server.conf"]
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "-O", "-", "https://localhost:8222/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - all-purpose-network
+
+  # Example meta-agent with secure connection
+  backend-agent:
+    build: 
+      context: ../../src/meta-agents/backend-agent
+      dockerfile: Dockerfile
+    container_name: backend-agent-secure
+    environment:
+      - NODE_ENV=production
+      - NATS_URL=tls://nats:4222
+      - NATS_USER=backend-agent
+      - NATS_PASSWORD=${BACKEND_AGENT_PASSWORD:-backend-secret}
+      - NATS_TLS_CERT=/etc/nats/client/backend-agent.crt
+      - NATS_TLS_KEY=/etc/nats/client/backend-agent.key
+      - NATS_TLS_CA=/etc/nats/client/ca.crt
+    volumes:
+      - ./certs/backend-agent.crt:/etc/nats/client/backend-agent.crt:ro
+      - ./certs/backend-agent.key:/etc/nats/client/backend-agent.key:ro
+      - ./certs/ca.crt:/etc/nats/client/ca.crt:ro
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - all-purpose-network
+    restart: unless-stopped
+
+volumes:
+  nats-data:
+    driver: local
+  nats-logs:
+    driver: local
+
+networks:
+  all-purpose-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

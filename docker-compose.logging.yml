@@ -1,0 +1,437 @@
+# Complete Observability Stack for Meta-Agent Factory
+# Includes: Prometheus, Grafana, Loki, Tempo, Alertmanager, OpenTelemetry Collector
+# Usage: docker-compose -f docker-compose.logging.yml up -d
+
+version: '3.8'
+
+services:
+  # Factory Core with structured logging
+  factory-core:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=json
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=factory-core"
+
+  # Domain Agents with structured logging
+  domain-agents:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=json
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=domain-agents"
+
+  # API Gateway with access logging
+  api-gateway:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=api-gateway"
+
+  # NATS Broker with debug logging
+  nats-broker:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=nats-broker"
+
+  # UEP Service with protocol logging
+  uep-service:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=json
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=uep-service"
+
+  # UEP Registry with service discovery logging
+  uep-registry:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+        labels: "service,component"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=uep-registry"
+
+  # Observability services logging
+  observability:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=observability"
+
+  loki:
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=loki"
+
+  promtail:
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=promtail"
+
+  # Supporting services
+  redis:
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=redis"
+
+  etcd:
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    labels:
+      - "logging=promtail"
+      - "logging.jobname=etcd"
+
+  # ===== OBSERVABILITY STACK =====
+  
+  # Prometheus - Metrics collection and storage
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: meta-agent-factory-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}'
+      - '--storage.tsdb.retention.size=${PROMETHEUS_RETENTION_SIZE:-10GB}'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+      - '--log.level=info'
+    volumes:
+      - ./containers/observability/prometheus-enhanced.yml:/etc/prometheus/prometheus.yml:ro
+      - ./containers/observability/recording_rules.yml:/etc/prometheus/recording_rules.yml:ro
+      - ./containers/observability/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - ./data/prometheus:/prometheus
+    environment:
+      - ENVIRONMENT=${DEPLOYMENT_ENVIRONMENT:-development}
+      - CLUSTER_NAME=${DEPLOYMENT_CLUSTER:-meta-agent-factory}
+    networks:
+      - observability
+    depends_on:
+      - alertmanager
+    labels:
+      - "meta-agent-factory.service.name=prometheus"
+      - "meta-agent-factory.service.tier=tier-1"
+      - "meta-agent-factory.team=platform-engineering"
+      - "logging=promtail"
+      - "logging.jobname=prometheus"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Grafana - Visualization and dashboards
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: meta-agent-factory-grafana
+    restart: unless-stopped
+    ports:
+      - "3004:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+      - GF_LOG_LEVEL=info
+    volumes:
+      - ./containers/observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./containers/observability/grafana-dashboard-*.json:/var/lib/grafana/dashboards/:ro
+      - ./data/grafana:/var/lib/grafana
+    networks:
+      - observability
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    labels:
+      - "meta-agent-factory.service.name=grafana"
+      - "meta-agent-factory.service.tier=tier-1"
+      - "meta-agent-factory.team=platform-engineering"
+      - "logging=promtail"
+      - "logging.jobname=grafana"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Loki - Log aggregation
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: meta-agent-factory-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./containers/observability/loki.yml:/etc/loki/local-config.yaml:ro
+      - ./data/loki:/loki
+    networks:
+      - observability
+    labels:
+      - "meta-agent-factory.service.name=loki"
+      - "meta-agent-factory.service.tier=tier-1"
+      - "meta-agent-factory.team=platform-engineering"
+      - "logging=promtail"
+      - "logging.jobname=loki"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # Promtail - Log collection agent
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: meta-agent-factory-promtail
+    restart: unless-stopped
+    volumes:
+      - ./containers/observability/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - observability
+    depends_on:
+      - loki
+    labels:
+      - "meta-agent-factory.service.name=promtail"
+      - "meta-agent-factory.service.tier=tier-2"
+      - "meta-agent-factory.team=platform-engineering"
+      - "logging=promtail"
+      - "logging.jobname=promtail"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # Tempo - Distributed tracing storage
+  tempo:
+    image: grafana/tempo:2.3.0
+    container_name: meta-agent-factory-tempo
+    restart: unless-stopped
+    ports:
+      - "3200:3200"
+      - "9095:9095"  # Tempo gRPC
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./containers/observability/tempo.yml:/etc/tempo.yaml:ro
+      - ./data/tempo:/var/tempo
+    networks:
+      - observability
+    labels:
+      - "meta-agent-factory.service.name=tempo"
+      - "meta-agent-factory.service.tier=tier-1"
+      - "meta-agent-factory.team=platform-engineering"
+      - "logging=promtail"
+      - "logging.jobname=tempo"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # OpenTelemetry Collector - Trace and metrics processing
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    container_name: meta-agent-factory-otel-collector
+    restart: unless-stopped
+    ports:
+      - "4317:4317"  # OTLP gRPC receiver
+      - "4318:4318"  # OTLP HTTP receiver
+      - "8888:8888"  # Prometheus metrics endpoint
+      - "8889:8889"  # Prometheus exporter
+      - "13133:13133" # Health check
+    command: ["--config=/etc/otelcol-contrib/otel-collector.yaml"]
+    volumes:
+      - ./containers/observability/otel-collector.yml:/etc/otelcol-contrib/otel-collector.yaml:ro
+    networks:
+      - observability
+    depends_on:
+      - tempo
+      - prometheus
+      - loki
+    environment:
+      - ENVIRONMENT=${DEPLOYMENT_ENVIRONMENT:-development}
+      - CLUSTER_NAME=${DEPLOYMENT_CLUSTER:-meta-agent-factory}
+    labels:
+      - "meta-agent-factory.service.name=otel-collector"
+      - "meta-agent-factory.service.tier=tier-1"
+      - "meta-agent-factory.team=platform-engineering"
+      - "logging=promtail"
+      - "logging.jobname=otel-collector"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # Alertmanager - Alert management and routing
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: meta-agent-factory-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+      - '--cluster.listen-address='
+      - '--log.level=info'
+    volumes:
+      - ./containers/observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./data/alertmanager:/alertmanager
+    networks:
+      - observability
+    environment:
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com:587}
+      - ALERT_EMAIL_FROM=${ALERT_EMAIL_FROM:-alerts@meta-agent-factory.com}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      - PAGERDUTY_INTEGRATION_KEY=${PAGERDUTY_INTEGRATION_KEY:-}
+    labels:
+      - "meta-agent-factory.service.name=alertmanager"
+      - "meta-agent-factory.service.tier=tier-1"
+      - "meta-agent-factory.team=platform-engineering"
+      - "logging=promtail"
+      - "logging.jobname=alertmanager"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # Jaeger UI - Distributed tracing UI (optional)
+  jaeger:
+    image: jaegertracing/all-in-one:1.51.0
+    container_name: meta-agent-factory-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # Jaeger gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=grpc-plugin
+      - GRPC_STORAGE_SERVER=tempo:9095
+    networks:
+      - observability
+    depends_on:
+      - tempo
+    labels:
+      - "meta-agent-factory.service.name=jaeger"
+      - "meta-agent-factory.service.tier=tier-2"
+      - "meta-agent-factory.team=platform-engineering"
+      - "logging=promtail"
+      - "logging.jobname=jaeger"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+networks:
+  observability:
+    driver: bridge
+    name: meta-agent-factory-observability
+
+volumes:
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/prometheus
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/grafana
+  loki_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/loki
+  tempo_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/tempo
+  alertmanager_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/alertmanager

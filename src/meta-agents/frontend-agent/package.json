@@ -1,0 +1,82 @@
+{
+  "name": "@all-purpose/frontend-agent",
+  "version": "1.0.0",
+  "description": "Intelligent frontend development agent with Context7 integration for React/Vue/Angular components, UI/UX design, state management, and performance optimization",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "ts-node src/main.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "frontend",
+    "react",
+    "vue",
+    "angular",
+    "ui-components",
+    "state-management",
+    "performance-optimization",
+    "context7",
+    "uep",
+    "meta-agent"
+  ],
+  "author": "All-Purpose Project",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.11.17",
+    "express": "^4.18.2",
+    "@types/express": "^4.17.21",
+    "joi": "^17.11.0",
+    "@types/joi": "^17.2.3",
+    "winston": "^3.11.0",
+    "uuid": "^9.0.1",
+    "@types/uuid": "^9.0.8",
+    "handlebars": "^4.7.8",
+    "@types/handlebars": "^4.1.0",
+    "fs-extra": "^11.2.0",
+    "@types/fs-extra": "^11.0.4",
+    "chalk": "^4.1.2",
+    "glob": "^10.3.10",
+    "chokidar": "^3.6.0",
+    "openai": "^4.28.4",
+    "nats": "^2.24.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src", "<rootDir>/tests"],
+    "testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/templates/**/*"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
+}

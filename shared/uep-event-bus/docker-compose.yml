@@ -1,0 +1,273 @@
+# UEP Event Bus - NATS JetStream Cluster Deployment
+# 
+# This Docker Compose configuration deploys a highly available NATS JetStream
+# cluster for the UEP Message Broker system with monitoring and observability.
+
+version: '3.8'
+
+services:
+  # NATS JetStream Cluster Nodes
+  nats-1:
+    image: nats:2.10-alpine
+    container_name: uep-nats-1
+    hostname: nats-1
+    ports:
+      - "4222:4222"    # Client connections
+      - "8222:8222"    # HTTP monitoring
+      - "6222:6222"    # Routing port for clustering
+    command: >
+      --server_name=nats-1
+      --jetstream
+      --store_dir=/data
+      --cluster_name=uep-cluster
+      --cluster=nats://0.0.0.0:6222
+      --routes=nats://nats-2:6222,nats://nats-3:6222
+      --http_port=8222
+      --log_file=/logs/nats-1.log
+      --max_payload=8MB
+      --max_connections=1000
+      --max_subscriptions=1000
+      --max_control_line=1024
+      --max_pending=256MB
+    volumes:
+      - ./data/nats-1:/data
+      - ./logs:/logs
+    networks:
+      - uep-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  nats-2:
+    image: nats:2.10-alpine
+    container_name: uep-nats-2
+    hostname: nats-2
+    ports:
+      - "4223:4222"    # Client connections
+      - "8223:8222"    # HTTP monitoring
+      - "6223:6222"    # Routing port for clustering
+    command: >
+      --server_name=nats-2
+      --jetstream
+      --store_dir=/data
+      --cluster_name=uep-cluster
+      --cluster=nats://0.0.0.0:6222
+      --routes=nats://nats-1:6222,nats://nats-3:6222
+      --http_port=8222
+      --log_file=/logs/nats-2.log
+      --max_payload=8MB
+      --max_connections=1000
+      --max_subscriptions=1000
+      --max_control_line=1024
+      --max_pending=256MB
+    volumes:
+      - ./data/nats-2:/data
+      - ./logs:/logs
+    networks:
+      - uep-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    depends_on:
+      - nats-1
+
+  nats-3:
+    image: nats:2.10-alpine
+    container_name: uep-nats-3
+    hostname: nats-3
+    ports:
+      - "4224:4222"    # Client connections
+      - "8224:8222"    # HTTP monitoring
+      - "6224:6222"    # Routing port for clustering
+    command: >
+      --server_name=nats-3
+      --jetstream
+      --store_dir=/data
+      --cluster_name=uep-cluster
+      --cluster=nats://0.0.0.0:6222
+      --routes=nats://nats-1:6222,nats://nats-2:6222
+      --http_port=8222
+      --log_file=/logs/nats-3.log
+      --max_payload=8MB
+      --max_connections=1000
+      --max_subscriptions=1000
+      --max_control_line=1024
+      --max_pending=256MB
+    volumes:
+      - ./data/nats-3:/data
+      - ./logs:/logs
+    networks:
+      - uep-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    depends_on:
+      - nats-1
+      - nats-2
+
+  # NATS Load Balancer (HAProxy)
+  nats-lb:
+    image: haproxy:2.8-alpine
+    container_name: uep-nats-lb
+    ports:
+      - "4220:4222"    # Load balanced client connections
+      - "8220:8404"    # HAProxy stats
+    volumes:
+      - ./config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - uep-network
+    depends_on:
+      - nats-1
+      - nats-2
+      - nats-3
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8404/stats"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # NATS Surveyor (Monitoring and Observability)
+  nats-surveyor:
+    image: natsio/nats-surveyor:0.5.3
+    container_name: uep-nats-surveyor
+    ports:
+      - "7777:7777"    # Surveyor HTTP port
+    command: >
+      --urls=nats://nats-1:4222,nats://nats-2:4222,nats://nats-3:4222
+      --http-port=7777
+      --observations=300
+      --count=30
+    networks:
+      - uep-network
+    depends_on:
+      - nats-1
+      - nats-2
+      - nats-3
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7777/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: uep-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - uep-network
+    depends_on:
+      - nats-surveyor
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: uep-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - uep-network
+    depends_on:
+      - prometheus
+
+  # NATS CLI for management and testing
+  nats-cli:
+    image: natsio/nats-box:0.14.1
+    container_name: uep-nats-cli
+    networks:
+      - uep-network
+    volumes:
+      - ./scripts:/scripts:ro
+    command: sleep infinity
+    depends_on:
+      - nats-lb
+
+  # UEP Event Bus Test Client
+  uep-test-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-client
+    container_name: uep-test-client
+    environment:
+      - NATS_SERVERS=nats://nats-lb:4222
+      - UEP_NAMESPACE=uep-test
+      - LOG_LEVEL=debug
+    volumes:
+      - ./tests:/tests:ro
+      - ./logs:/logs
+    networks:
+      - uep-network
+    depends_on:
+      - nats-lb
+    profiles:
+      - testing
+
+# Networks
+networks:
+  uep-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# Health check for the entire stack
+# Use: docker-compose ps to see health status

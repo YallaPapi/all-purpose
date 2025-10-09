@@ -1,0 +1,96 @@
+{
+  "name": "@uep/service-discovery",
+  "version": "1.0.0",
+  "description": "UEP Meta-Agent Factory Service Discovery and Registry System",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "tsx test-redis-registry.ts",
+    "test:integration": "docker-compose -f docker-compose-redis-registry.yml --profile dev up -d && npm run test && docker-compose -f docker-compose-redis-registry.yml --profile dev down",
+    "start:dev": "docker-compose -f docker-compose-redis-registry.yml --profile dev up -d",
+    "start:prod": "docker-compose -f docker-compose-redis-registry.yml --profile prod up -d",
+    "stop": "docker-compose -f docker-compose-redis-registry.yml down",
+    "clean": "rm -rf dist node_modules",
+    "lint": "eslint --ext .ts .",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "service-discovery",
+    "service-registry",
+    "redis",
+    "consul",
+    "containerization",
+    "microservices",
+    "uep",
+    "meta-agents"
+  ],
+  "author": "UEP Meta-Agent Factory Team",
+  "license": "MIT",
+  "dependencies": {
+    "ioredis": "^5.3.2",
+    "consul": "^0.42.0",
+    "@opentelemetry/sdk-node": "^0.45.0",
+    "@opentelemetry/api": "^1.6.0",
+    "@opentelemetry/exporter-otlp-http": "^0.45.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.40.0",
+    "@opentelemetry/resources": "^1.17.0",
+    "@opentelemetry/semantic-conventions": "^1.17.0",
+    "@opentelemetry/sdk-metrics": "^1.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "node": ">=18.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./redis": {
+      "import": "./dist/RedisServiceRegistry.js",
+      "require": "./dist/RedisServiceRegistry.js",
+      "types": "./dist/RedisServiceRegistry.d.ts"
+    },
+    "./consul": {
+      "import": "./dist/ConsulServiceRegistry.js",
+      "require": "./dist/ConsulServiceRegistry.js",
+      "types": "./dist/ConsulServiceRegistry.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "require": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "redis/**/*",
+    "docker-compose-*.yml",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uep-factory/service-discovery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/uep-factory/service-discovery/issues"
+  },
+  "homepage": "https://github.com/uep-factory/service-discovery#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

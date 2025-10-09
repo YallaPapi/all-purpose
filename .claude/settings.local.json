@@ -1,6 +1,7 @@
 {
   "toolConfirmation": false,
   "verbose": true,
+  "CLAUDE_CODE_MAX_OUTPUT_TOKENS": 50000,
   "permissions": {
     "allow": [
       "Bash(where task-master)"
@@ -12,5 +13,4 @@
     "task-master-ai"
   ],
   "enableAllProjectMcpServers": true,
-  "apiKeyHelper": "~/.claude/anthropic_key.sh"
 }

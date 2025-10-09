@@ -1,0 +1,80 @@
+{
+  "project": {
+    "name": "Prospector Agent - Lead Generation Machine",
+    "type": "api-service",
+    "description": "Lead discovery engine using Google Places API integration with All-Purpose Pattern methodology for unlimited industry/location combinations",
+    "priority": "high",
+    "requirements": {
+      "framework": "Node.js",
+      "database": "Redis",
+      "apis": ["Google Places API (New)", "Apify Google Maps"],
+      "deployment": "Vercel",
+      "features": [
+        "Google Places API Text Search and Nearby Search",
+        "All-Purpose Pattern - zero hardcoded limitations",
+        "Dynamic query generation for unlimited industries/locations",
+        "Redis lead deduplication system",
+        "Rate limiting and cost optimization",
+        "Universal lead output format (ProspectedLead)",
+        "Apify fallback for high-volume operations",
+        "Automated discovery cycles with monitoring"
+      ]
+    }
+  },
+  "orchestration": {
+    "agents": {
+      "prd-parser": {
+        "priority": 1,
+        "task": "Parse Prospector Agent PRD and generate structured tasks",
+        "input": "../../../prospector-agent-tasks.json"
+      },
+      "all-purpose-pattern": {
+        "priority": 2,
+        "task": "Apply All-Purpose Pattern to eliminate hardcoded limitations"
+      },
+      "scaffold-generator": {
+        "priority": 3,
+        "task": "Generate Node.js project structure with Google Places API integration"
+      },
+      "template-engine-factory": {
+        "priority": 4,
+        "task": "Create lead discovery components and API handlers"
+      },
+      "parameter-flow": {
+        "priority": 5,
+        "task": "Configure data flow between Google Places API and Redis storage"
+      },
+      "vercel-native-architecture": {
+        "priority": 6,
+        "task": "Setup Vercel serverless deployment configuration"
+      },
+      "five-document-framework": {
+        "priority": 7,
+        "task": "Generate comprehensive documentation and setup guides"
+      },
+      "thirty-minute-rule": {
+        "priority": 8,
+        "task": "Validate all tasks follow 30-minute complexity rule"
+      }
+    }
+  },
+  "compliance": {
+    "dataRetention": "30 days for lead data",
+    "apiRateLimits": {
+      "googlePlaces": "10000 requests/month",
+      "apify": "1000 actor runs/month"
+    },
+    "security": ["API key rotation", "HTTPS only", "Input validation", "Rate limiting"]
+  },
+  "outputs": {
+    "targetDirectory": "../../../generated/prospector-agent",
+    "codeGeneration": true,
+    "documentation": true,
+    "testing": true,
+    "deployment": true,
+    "patterns": {
+      "allPurposePattern": true,
+      "zeroHardcodedLimitations": true
+    }
+  }
+}

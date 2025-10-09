@@ -1,0 +1,55 @@
+name: Quick Build Core Services
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'Dockerfile'
+      - '.github/workflows/quick-build.yml'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-core:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Lead Generator
+      run: |
+        docker build -t ${{ env.REGISTRY }}/${{ github.repository }}/lead-generator:latest .
+        docker push ${{ env.REGISTRY }}/${{ github.repository }}/lead-generator:latest
+
+    - name: Build Observability Dashboard
+      run: |
+        docker build -f Dockerfile.observability -t ${{ env.REGISTRY }}/${{ github.repository }}/observability:latest .
+        docker push ${{ env.REGISTRY }}/${{ github.repository }}/observability:latest
+
+    - name: Summary
+      run: |
+        echo "### 🚀 Build Complete!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Images published:**" >> $GITHUB_STEP_SUMMARY
+        echo "- \`${{ env.REGISTRY }}/${{ github.repository }}/lead-generator:latest\`" >> $GITHUB_STEP_SUMMARY
+        echo "- \`${{ env.REGISTRY }}/${{ github.repository }}/observability:latest\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Next steps:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Deploy to your cloud provider" >> $GITHUB_STEP_SUMMARY
+        echo "2. Set environment variables" >> $GITHUB_STEP_SUMMARY
+        echo "3. Access observability dashboard" >> $GITHUB_STEP_SUMMARY

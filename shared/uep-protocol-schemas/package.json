@@ -1,0 +1,56 @@
+{
+  "name": "@uep/protocol-schemas",
+  "version": "1.0.0",
+  "description": "UEP Protocol Schema Repository - Git-based protocol definition storage and management",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "validate-schemas": "node scripts/validate-all-schemas.js",
+    "generate-docs": "node scripts/generate-documentation.js",
+    "sync-git": "node scripts/sync-git-repository.js"
+  },
+  "keywords": [
+    "uep",
+    "protocol",
+    "schema",
+    "repository",
+    "versioning",
+    "openapi",
+    "asyncapi",
+    "git"
+  ],
+  "author": "UEP Development Team",
+  "license": "UEP-Protocol",
+  "dependencies": {
+    "@openapi/validator": "^1.0.0",
+    "@asyncapi/parser": "^2.0.0",
+    "semantic-version": "^1.0.0",
+    "yaml": "^2.0.0",
+    "markdown-it": "^13.0.0",
+    "handlebars": "^4.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@uep/validation": "^1.0.0",
+    "@uep/communication": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uep/protocol-schemas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/uep/protocol-schemas/issues"
+  },
+  "homepage": "https://github.com/uep/protocol-schemas#readme"
+}

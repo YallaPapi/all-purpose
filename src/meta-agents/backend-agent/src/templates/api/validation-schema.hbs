@@ -1,0 +1,26 @@
+/**
+ * Validation Schemas
+ * Joi schemas for API request validation
+ */
+
+import joi from 'joi';
+
+export const validationSchemas: Record<string, joi.Schema> = {
+{{#each endpoints}}
+  '{{camelCase (concat method path)}}': joi.object({
+    {{#if (includes path ':')}}}
+    params: joi.object({
+      {{#each (extractParams path)}}
+      {{this}}: joi.string().required(),
+      {{/each}}
+    }),
+    {{/if}}
+    body: joi.object({
+      // TODO: Define body schema for {{camelCase (concat method path)}}
+    }),
+    query: joi.object({
+      // TODO: Define query schema for {{camelCase (concat method path)}}
+    })
+  }),
+{{/each}}
+};

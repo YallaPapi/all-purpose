@@ -1,0 +1,23 @@
+{
+  "type": "scaffold",
+  "description": "Performance Monitoring Dashboard for Lead Generation Factory - Create a comprehensive real-time performance monitoring dashboard that provides observability into agent performance, campaign metrics, compliance indicators, and system health. This dashboard will enable observability-driven development and provide real-time insights for the Lead Generation Factory system.",
+  "requirements": {
+    "projectName": "monitoring-dashboard",
+    "framework": "nextjs",
+    "features": [
+      "Real-time analytics dashboard",
+      "Agent performance monitoring", 
+      "Campaign metrics tracking",
+      "Compliance indicators",
+      "System health monitoring",
+      "WebSocket real-time updates",
+      "Redis for data caching",
+      "Interactive charts and graphs",
+      "Export and reporting functionality",
+      "Responsive design with dark/light mode"
+    ],
+    "targetDirectory": "../../../generated/monitoring-dashboard"
+  },
+  "priority": "high",
+  "prdContent": "# Performance Monitoring Dashboard - Product Requirements Document\n\n## Project Overview\n\n**Project Name**: Performance Monitoring Dashboard for Lead Generation Factory  \n**Project Type**: Real-time Analytics Dashboard  \n**Target Completion**: 2025-07-27  \n**Priority**: High  \n\n## Executive Summary\n\nCreate a comprehensive real-time performance monitoring dashboard that provides observability into agent performance, campaign metrics, compliance indicators, and system health. This dashboard will enable observability-driven development and provide real-time insights for the Lead Generation Factory system.\n\n## Core Requirements\n\n### 1. Dashboard Architecture\n\n**Requirement**: Web-based real-time dashboard with responsive design\n- React/Next.js frontend with real-time updates\n- Express.js backend with WebSocket support\n- Redis for real-time data caching\n- Integration with existing UEP Meta-Agent Factory\n\n### 2. Volume Metrics Tracking\n\n**Requirement**: Real-time monitoring of outreach volume and deliverability\n- Daily outreach count across all channels\n- Deliverability rates by channel (email, LinkedIn, Twitter, SMS, voice)\n- Platform safety scores and health metrics\n- Multi-channel reach analysis\n\n### 3. Quality Metrics Dashboard\n\n**Requirement**: Campaign performance and engagement tracking\n- Open rates by channel and campaign\n- Response rates with sentiment analysis\n- Meeting booking rates and conversion funnel\n- Personalization depth scoring\n\n### 4. Conversion Metrics Analysis\n\n**Requirement**: End-to-end conversion tracking and pipeline analysis\n- Meeting attendance rates\n- Demo-to-proposal conversion rates\n- Proposal-to-close rates\n- Sales cycle length analysis\n\n### 5. Stealth Metrics Monitoring\n\n**Requirement**: Anti-detection and compliance monitoring\n- Domain health scores and reputation tracking\n- Account safety indicators across platforms\n- Legal compliance status by jurisdiction\n- Reputation score monitoring\n\n### 6. Real-time Data Collection\n\n**Requirement**: Live data ingestion from all agents and channels\n- WebSocket connections for real-time updates\n- Event-driven data collection from UEP system\n- Data validation and quality checks\n- Error handling and retry mechanisms\n\n### 7. Visualization Components\n\n**Requirement**: Interactive charts and graphs for metric visualization\n- Real-time line charts for trends\n- Gauge charts for rates and percentages\n- Heatmaps for channel performance\n- Interactive filtering and drill-down\n\n### 8. Alerting and Notifications\n\n**Requirement**: Automated alerts for metrics below targets\n- Real-time threshold monitoring\n- Email and Slack notification integration\n- Escalation procedures for critical alerts\n- Alert history and resolution tracking\n\n### 9. A/B Testing Analysis\n\n**Requirement**: Campaign optimization through A/B testing framework\n- Test variant performance comparison\n- Statistical significance calculation\n- Automated winner determination\n- Campaign optimization recommendations\n\n### 10. Export and Reporting\n\n**Requirement**: Data export and automated reporting functionality\n- CSV/Excel export for all metrics\n- Automated daily/weekly reports\n- Custom report builder\n- API access for external integrations"
+}

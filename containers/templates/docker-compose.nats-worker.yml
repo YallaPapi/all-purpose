@@ -1,0 +1,106 @@
+version: '3.8'
+
+# Template for NATS-only worker services without HTTP endpoints
+# Use this as a reference for services that only connect to NATS and process messages
+
+services:
+  # Example NATS Worker - Backend Agent
+  backend-agent-worker:
+    build:
+      context: ../domain-agents
+      dockerfile: Dockerfile.working
+    container_name: backend-agent-worker
+    environment:
+      - NODE_ENV=production
+      - NATS_URL=nats://nats-broker:4222
+      - AGENT_TYPE=backend
+      - FACTORY_CORE_URL=http://factory-core:3000
+      - UEP_REGISTRY_URL=http://uep-registry:3001
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # OpenTelemetry Configuration
+      - OTEL_SERVICE_NAME=backend-agent-worker
+      - OTEL_SERVICE_VERSION=1.0.0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=backend-agent-worker,service.version=1.0.0,deployment.environment=production
+    volumes:
+      - ./data/backend-agent:/app/data
+      - ./logs:/app/logs
+    networks:
+      - meta-agent-factory
+    depends_on:
+      nats-broker:
+        condition: service_healthy
+      factory-core:
+        condition: service_healthy
+    restart: unless-stopped
+    # NATS-only health check using Node.js script
+    healthcheck:
+      test: ["CMD", "node", "/app/src/nats-health-check.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    # No exposed ports - this is a pure worker service
+    # Override the default command to run the NATS-only worker
+    command: ["node", "src/simple-domain-agent.ts"]
+
+  # Example NATS Worker - Frontend Agent  
+  frontend-agent-worker:
+    build:
+      context: ../domain-agents
+      dockerfile: Dockerfile.working
+    container_name: frontend-agent-worker
+    environment:
+      - NODE_ENV=production
+      - NATS_URL=nats://nats-broker:4222
+      - AGENT_TYPE=frontend
+      - FACTORY_CORE_URL=http://factory-core:3000
+      - UEP_REGISTRY_URL=http://uep-registry:3001
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./data/frontend-agent:/app/data
+      - ./logs:/app/logs
+    networks:
+      - meta-agent-factory
+    depends_on:
+      nats-broker:
+        condition: service_healthy
+      factory-core:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "/app/src/nats-health-check.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    command: ["node", "src/simple-domain-agent.ts"]
+
+networks:
+  meta-agent-factory:
+    external: true
+
+volumes:
+  backend_agent_data:
+    driver: local
+  frontend_agent_data:
+    driver: local

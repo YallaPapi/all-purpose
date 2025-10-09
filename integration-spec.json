@@ -1,0 +1,161 @@
+{
+  "architectureName": "Meta-Agent-Factory-Integration",
+  "description": "Integration architecture for UEP Meta-Agent Factory with standardized parameter mapping",
+  "components": [
+    {
+      "id": "uep-factory",
+      "name": "UEP Meta-Agent Factory",
+      "type": "orchestrator",
+      "location": "src/meta-agents/UEPMetaAgentFactory.js",
+      "expectedMethods": {
+        "createAgent": {
+          "parameters": ["agentType", "agentId", "config"],
+          "returns": "agentInstance"
+        }
+      },
+      "expectedAgentInterface": {
+        "process": {
+          "parameters": ["input", "options"],
+          "returns": "result"
+        },
+        "generate": {
+          "parameters": ["options"],
+          "returns": "scaffoldResult"
+        },
+        "start": {
+          "parameters": [],
+          "returns": "void"
+        },
+        "stop": {
+          "parameters": [],
+          "returns": "void"
+        }
+      }
+    },
+    {
+      "id": "prd-parser",
+      "name": "PRD Parser Agent",
+      "type": "processor",
+      "location": "src/meta-agents/prd-parser/main.js",
+      "actualMethods": {
+        "processPRDFile": {
+          "parameters": ["filepath", "agentName"],
+          "returns": "string"
+        },
+        "process": {
+          "parameters": ["input", "options"],
+          "returns": "result"
+        },
+        "start": {
+          "parameters": [],
+          "returns": "void"
+        },
+        "stop": {
+          "parameters": [],
+          "returns": "void"
+        }
+      },
+      "requiredMappings": {
+        "process": "direct_mapping"
+      }
+    },
+    {
+      "id": "scaffold-generator",
+      "name": "Enhanced Scaffold Generator",
+      "type": "generator",
+      "location": "src/meta-agents/enhanced-scaffold-generator.js",
+      "actualMethods": {
+        "processWithUEPContext": {
+          "parameters": ["input", "memory", "uepMetadata"],
+          "returns": "result"
+        },
+        "_processCore": {
+          "parameters": ["input", "memory"],
+          "returns": "result"
+        }
+      },
+      "requiredMappings": {
+        "generate": "adapter_mapping_to_processWithUEPContext"
+      }
+    },
+    {
+      "id": "uep-system",
+      "name": "Universal Execution Protocol",
+      "type": "middleware",
+      "location": "src/uep/",
+      "actualMethods": {
+        "process": {
+          "parameters": ["taskInput", "options"],
+          "returns": "uepResult"
+        }
+      }
+    },
+    {
+      "id": "rag-system",
+      "name": "RAG System",
+      "type": "knowledge",
+      "location": "rag-system/",
+      "actualMethods": {
+        "search": {
+          "parameters": ["query", "options"],
+          "returns": "searchResults"
+        },
+        "addContext": {
+          "parameters": ["content", "metadata"],
+          "returns": "contextId"
+        }
+      }
+    }
+  ],
+  "integrationRequirements": {
+    "dataFlowPatterns": [
+      "factory-to-agent",
+      "agent-to-agent", 
+      "uep-coordination",
+      "rag-enhancement"
+    ],
+    "parameterTransformations": [
+      {
+        "from": "factory.createAgent",
+        "to": "agent.constructor",
+        "mapping": "direct_config_pass"
+      },
+      {
+        "from": "factory.expects.process", 
+        "to": "prd-parser.process",
+        "mapping": "direct_mapping"
+      },
+      {
+        "from": "factory.expects.generate",
+        "to": "scaffold-generator.processWithUEPContext",
+        "mapping": "adapter_with_parameter_transformation"
+      }
+    ],
+    "synchronizationNeeds": [
+      "eventual-consistency"
+    ],
+    "performanceTargets": {
+      "latency": 100,
+      "throughput": 1000
+    },
+    "reliabilityRequirements": {
+      "availability": "99.9%"
+    }
+  },
+  "mappingStrategies": {
+    "adapter_mapping_to_processWithUEPContext": {
+      "description": "Map generate(options) to processWithUEPContext(input, memory, uepMetadata)",
+      "transformation": {
+        "input": "options",
+        "memory": "''",
+        "uepMetadata": "null"
+      },
+      "validation": ["options_not_null", "valid_project_structure"]
+    },
+    "direct_config_pass": {
+      "description": "Pass configuration directly from factory to agent",
+      "transformation": "passthrough",
+      "validation": ["config_schema_validation"]
+    }
+  }
+}

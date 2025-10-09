@@ -1,0 +1,51 @@
+{
+  "name": "@meta-agents/post-creation-investigator",
+  "version": "1.0.0",
+  "description": "Post-Creation Investigator Agent - Validates and investigates generated projects for completeness and functionality",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/main.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "fs-extra": "^11.2.0",
+    "uuid": "^10.0.0",
+    "express": "^4.21.1",
+    "supertest": "^7.0.0",
+    "jest": "^29.7.0",
+    "playwright": "^1.48.2",
+    "lighthouse": "^12.2.1",
+    "winston": "^3.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.4",
+    "@types/fs-extra": "^11.0.4",
+    "@types/uuid": "^10.0.0",
+    "@types/express": "^4.17.21",
+    "@types/supertest": "^6.0.2",
+    "@types/jest": "^29.5.14",
+    "typescript": "^5.6.3",
+    "eslint": "^9.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.11.0",
+    "@typescript-eslint/parser": "^8.11.0",
+    "rimraf": "^6.0.1"
+  },
+  "keywords": [
+    "meta-agent",
+    "post-creation",
+    "investigator",
+    "validation",
+    "testing",
+    "project-analysis"
+  ],
+  "author": "Meta-Agent Factory",
+  "license": "MIT"
+}

@@ -35,6 +35,24 @@ async function main(): Promise<void> {
       enableAutoComplianceEnforcement: true
     });
 
+    // Initialize UEP connection for real-time coordination
+    await orchestrator.initializeUEPConnection();
+
+    // Setup graceful shutdown
+    const gracefulShutdown = async (signal: string) => {
+      logger.info(`📡 Received ${signal}, initiating graceful shutdown...`);
+      try {
+        await orchestrator.shutdown();
+        process.exit(0);
+      } catch (error) {
+        logger.error('❌ Error during graceful shutdown', { error });
+        process.exit(1);
+      }
+    };
+
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
     // Execute based on mode
     switch (mode) {
       case 'orchestrate':
@@ -54,10 +72,14 @@ async function main(): Promise<void> {
         break;
       default:
         logger.error('Invalid mode specified', { mode, validModes: ['orchestrate', 'audit', 'compliance', 'status', 'pipeline'] });
+        await orchestrator.shutdown();
         process.exit(1);
     }
 
     logger.info('🎉 IOA execution completed successfully', { mode });
+
+    // Cleanup after execution
+    await orchestrator.shutdown();
 
   } catch (error) {
     logger.error('❌ IOA execution failed', {

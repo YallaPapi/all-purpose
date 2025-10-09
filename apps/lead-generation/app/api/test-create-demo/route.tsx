@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         companyName: 'Test Solar Company',
-        contactName: 'John Doe',
-        contactEmail: 'john@testcompany.com',
+        contactName: 'Alex Demo',
+        contactEmail: 'alex@testcompany.com',
         location: 'Austin, TX',
         domain: host, // Pass the current domain explicitly
       }),

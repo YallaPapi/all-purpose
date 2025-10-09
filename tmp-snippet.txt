@@ -1,0 +1,10 @@
+em "You made an enquiry via our website, if you no longer wish to speak with us, reply with the word 'delete'"`,
+      model: "gpt-4-1106-preview",
+      tools: [{ type: "code_interpreter" }]
+    });
+
+    // Store the assistant in Redis with company data
+    try {
+      const { Redis } = await import('@upstash/redis');
+      const redis = new Redis({
+        url: process.env.KV_REST_API_U

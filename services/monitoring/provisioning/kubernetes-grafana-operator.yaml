@@ -1,0 +1,327 @@
+# Kubernetes Grafana Operator Configuration for Meta-Agent Factory Dashboards
+# Task 231.3 - Implement Dashboards and Panels
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grafana-monitoring
+  labels:
+    name: grafana-monitoring
+    purpose: meta-agent-factory-observability
+---
+# Grafana Instance
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: meta-agent-factory-grafana
+  namespace: grafana-monitoring
+  labels:
+    dashboards: "meta-agent-factory"
+spec:
+  config:
+    log:
+      mode: "console"
+    auth:
+      disable_login_form: false
+    security:
+      admin_user: admin
+      admin_password: admin
+    server:
+      http_port: 3000
+    dashboards:
+      default_home_dashboard_path: "/var/lib/grafana/dashboards/meta-agent-factory-overview.json"
+  deployment:
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: grafana
+      template:
+        metadata:
+          labels:
+            app: grafana
+        spec:
+          containers:
+          - name: grafana
+            image: grafana/grafana:10.2.0
+            ports:
+            - containerPort: 3000
+            env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin"
+            - name: GF_INSTALL_PLUGINS
+              value: "grafana-piechart-panel"
+            volumeMounts:
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+            - name: dashboard-provisioning
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: datasource-provisioning
+              mountPath: /etc/grafana/provisioning/datasources
+          volumes:
+          - name: grafana-storage
+            emptyDir: {}
+          - name: dashboard-provisioning
+            configMap:
+              name: dashboard-provisioning-config
+          - name: datasource-provisioning
+            configMap:
+              name: datasource-provisioning-config
+---
+# Service for Grafana
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: grafana-monitoring
+spec:
+  selector:
+    app: grafana
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: ClusterIP
+---
+# Dashboard Provisioning ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-provisioning-config
+  namespace: grafana-monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'meta-agent-factory-dashboards'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards
+---
+# Datasource Provisioning ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datasource-provisioning-config
+  namespace: grafana-monitoring
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-server:80
+        isDefault: true
+        editable: true
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+        editable: true
+      - name: Tempo
+        type: tempo
+        access: proxy
+        url: http://tempo:3200
+        editable: true
+      - name: Alertmanager
+        type: alertmanager
+        access: proxy
+        url: http://alertmanager:9093
+        jsonData:
+          implementation: prometheus
+        editable: true
+---
+# System Overview Folder
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: system-overview-folder
+  namespace: grafana-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  name: "01-System-Overview"
+  permissions:
+    - role: "Admin"
+      permission: "Admin"
+    - role: "Editor"
+      permission: "Edit"
+    - role: "Viewer"  
+      permission: "View"
+---
+# Service Health Folder
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: service-health-folder
+  namespace: grafana-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  name: "02-Service-Health"
+  permissions:
+    - role: "Admin"
+      permission: "Admin"
+    - role: "Editor"
+      permission: "Edit"
+    - role: "Viewer"
+      permission: "View"
+---
+# Agent Coordination Folder
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: agent-coordination-folder
+  namespace: grafana-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  name: "03-Agent-Coordination"
+  permissions:
+    - role: "Admin"
+      permission: "Admin"
+    - role: "Editor"
+      permission: "Edit"
+    - role: "Viewer"
+      permission: "View"
+---
+# Service Mesh Folder
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: service-mesh-folder
+  namespace: grafana-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  name: "04-Service-Mesh"
+  permissions:
+    - role: "Admin"
+      permission: "Admin"
+    - role: "Editor"
+      permission: "Edit"
+    - role: "Viewer"
+      permission: "View"
+---
+# Troubleshooting Folder
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: troubleshooting-folder
+  namespace: grafana-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  name: "05-Troubleshooting"
+  permissions:
+    - role: "Admin"
+      permission: "Admin"
+    - role: "Editor"
+      permission: "Edit"
+    - role: "Viewer"
+      permission: "View"
+---
+# Meta-Monitoring Folder
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: meta-monitoring-folder
+  namespace: grafana-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  name: "06-Meta-Monitoring"
+  permissions:
+    - role: "Admin"
+      permission: "Admin"
+    - role: "Editor"
+      permission: "Edit"
+    - role: "Viewer"
+      permission: "View"
+---
+# Meta-Agent Factory Overview Dashboard
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: meta-agent-factory-overview
+  namespace: grafana-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  folder: "01-System-Overview"
+  datasources:
+    - inputName: "prometheus_datasource"
+      datasourceName: "Prometheus"
+    - inputName: "loki_datasource"
+      datasourceName: "Loki"
+    - inputName: "alertmanager_datasource"
+      datasourceName: "Alertmanager"
+  json: |
+    $(cat ../dashboards/01-system-overview/meta-agent-factory-overview.json)
+---
+# Service Registry Health Dashboard
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: service-registry-health
+  namespace: grafana-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "meta-agent-factory"
+  folder: "02-Service-Health"
+  datasources:
+    - inputName: "prometheus_datasource"
+      datasourceName: "Prometheus"
+    - inputName: "loki_datasource"
+      datasourceName: "Loki"
+  json: |
+    $(cat ../dashboards/02-service-health/service-registry-health.json)
+---
+# Role-Based Access Control (RBAC)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: grafana-monitoring
+  name: grafana-operator-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets", "services", "serviceaccounts"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["grafana.integreatly.org"]
+  resources: ["grafanas", "grafanadashboards", "grafanafolders", "grafanadatasources"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: grafana-operator-rolebinding
+  namespace: grafana-monitoring
+subjects:
+- kind: ServiceAccount
+  name: grafana-operator
+  namespace: grafana-monitoring
+roleRef:
+  kind: Role
+  name: grafana-operator-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana-operator
+  namespace: grafana-monitoring

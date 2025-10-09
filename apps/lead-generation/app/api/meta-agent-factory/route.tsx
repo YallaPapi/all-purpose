@@ -565,8 +565,9 @@ async function executeInfraOrchestrator(agentPath: string, task: any, generatedD
   console.log('🏗️ Running Infrastructure Orchestrator with real validation...');
   
   return new Promise((resolve, reject) => {
-    // Use the working Infrastructure Orchestrator like in the implementation example
-    const agent = spawn('node', ['dist/main.js', 'orchestrate', '--enable-investigation', '--project-root', generatedDir], {
+    // Use the working Infrastructure Orchestrator with proper path resolution
+    const ioaMainPath = path.join(path.dirname(agentPath), 'dist', 'main.js');
+    const agent = spawn('node', [ioaMainPath, 'orchestrate', '--enable-investigation', '--project-root', generatedDir], {
       cwd: path.dirname(agentPath),
       stdio: ['pipe', 'pipe', 'pipe']
     });

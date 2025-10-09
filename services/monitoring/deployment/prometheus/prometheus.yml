@@ -1,0 +1,234 @@
+# Prometheus Configuration for Meta-Agent Factory Monitoring
+# Task 231.5 - Production-ready metrics collection configuration
+# Optimized for Docker Compose deployment with service discovery
+
+global:
+  scrape_interval: 15s          # Default scrape interval
+  evaluation_interval: 15s      # Evaluate rules every 15 seconds
+  scrape_timeout: 10s           # Default scrape timeout
+  
+  # External labels for federation and Alertmanager
+  external_labels:
+    cluster: 'meta-agent-factory'
+    environment: 'production'
+    region: 'us-east-1'
+    replica: '1'
+
+# Rule files for alerting
+rule_files:
+  - "/etc/prometheus/alert_rules.yml"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+      path_prefix: /
+      scheme: http
+      timeout: 10s
+      api_version: v2
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+    
+  # Alertmanager monitoring
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+
+  # Grafana monitoring
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+
+  # Loki monitoring
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+
+  # Node Exporter - System metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+
+  # Meta-Agent Factory Services
+  - job_name: 'meta-agent-factory'
+    static_configs:
+      - targets: ['meta-agent-metrics:80']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: meta-agent-metrics:80
+
+  # Docker Container Discovery (for dynamic service discovery)
+  - job_name: 'docker-containers'
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 30s
+        port: 80
+    relabel_configs:
+      # Only scrape containers with prometheus.io/scrape=true label
+      - source_labels: [__meta_docker_container_label_prometheus_io_scrape]
+        action: keep
+        regex: true
+      
+      # Use custom port if specified
+      - source_labels: [__meta_docker_container_label_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: (.+)
+        replacement: ${__meta_docker_container_network_ip}:${1}
+      
+      # Use custom metrics path if specified
+      - source_labels: [__meta_docker_container_label_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      
+      # Set job name from container label
+      - source_labels: [__meta_docker_container_label_prometheus_io_job]
+        action: replace
+        target_label: job
+      
+      # Set instance name from container name
+      - source_labels: [__meta_docker_container_name]
+        action: replace
+        target_label: instance
+        regex: /(.+)
+        replacement: ${1}
+      
+      # Add container metadata as labels
+      - source_labels: [__meta_docker_container_id]
+        target_label: container_id
+        regex: (.{12}).*
+        replacement: ${1}
+      
+      - source_labels: [__meta_docker_container_image]
+        target_label: container_image
+      
+      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+        target_label: compose_service
+
+  # Service Registry Monitoring (when available)
+  - job_name: 'service-registry'
+    static_configs:
+      - targets: ['service-registry:8500']  # Consul-style service registry
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: /v1/agent/metrics
+    scheme: http
+    params:
+      format: ['prometheus']
+
+  # UEP Protocol Monitoring (Meta-Agent coordination)
+  - job_name: 'uep-protocol'
+    static_configs:
+      - targets: ['uep-coordinator:9200']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+
+  # Agent-specific monitoring jobs
+  - job_name: 'meta-agent-infrastructure'
+    static_configs:
+      - targets: ['infra-orchestrator:9201']
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scheme: http
+
+  - job_name: 'meta-agent-prd-parser'
+    static_configs:
+      - targets: ['prd-parser:9202']
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scheme: http
+
+  - job_name: 'meta-agent-scaffold'
+    static_configs:
+      - targets: ['scaffold-generator:9203']
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scheme: http
+
+  - job_name: 'meta-agent-template'
+    static_configs:
+      - targets: ['template-engine:9204']
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scheme: http
+
+  - job_name: 'meta-agent-pattern'
+    static_configs:
+      - targets: ['pattern-agent:9205']
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scheme: http
+
+# Storage configuration
+storage:
+  tsdb:
+    path: /prometheus
+    retention.time: 30d
+    retention.size: 10GB
+    wal-compression: true
+    no-lockfile: false
+    allow-overlapping-blocks: false
+    min-block-duration: 2h
+    max-block-duration: 25h
+
+# Remote write configuration (for federation or external storage)
+# remote_write:
+#   - url: "https://prometheus-remote-write-endpoint.com/api/v1/write"
+#     queue_config:
+#       capacity: 10000
+#       max_shards: 1000
+#       min_shards: 1
+#       max_samples_per_send: 1000
+#       batch_send_deadline: 5s
+#       min_backoff: 30ms
+#       max_backoff: 100ms
+
+# Remote read configuration (for federated queries)
+# remote_read:
+#   - url: "https://prometheus-remote-read-endpoint.com/api/v1/read"
+#     read_recent: true
+
+# Tracing configuration (optional, for performance monitoring)
+# tracing:
+#   endpoint: "http://jaeger:14268/api/traces"
+#   sampler:
+#     type: probabilistic
+#     param: 0.1

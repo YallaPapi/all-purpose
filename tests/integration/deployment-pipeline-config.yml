@@ -1,0 +1,419 @@
+# Deployment Pipeline Configuration
+# Based on TaskMaster research for continuous validation integration
+# Embeds validation at every pipeline stage with automated gates
+
+name: continuous-validation-pipeline
+version: 1.0.0
+
+# Pipeline environments with specific criteria
+environments:
+  development:
+    url: http://localhost:3000
+    validation_level: basic
+    auto_deploy: true
+    gates:
+      test_coverage: 80
+      max_failure_rate: 0.05
+      max_vulnerabilities:
+        critical: 0
+        high: 2
+      performance_baseline: 70
+    
+  staging:
+    url: http://staging.localhost:3000
+    validation_level: comprehensive
+    auto_deploy: true
+    gates:
+      test_coverage: 90
+      max_failure_rate: 0.02
+      max_vulnerabilities:
+        critical: 0
+        high: 0
+      performance_baseline: 85
+      security_scan: required
+    
+  production:
+    url: https://production.example.com
+    validation_level: full
+    auto_deploy: false
+    manual_approval: true
+    gates:
+      test_coverage: 95
+      max_failure_rate: 0.01
+      max_vulnerabilities:
+        critical: 0
+        high: 0
+      performance_baseline: 90
+      security_scan: required
+      compliance_check: required
+      load_test: required
+
+# Pipeline stages - executed in order
+stages:
+  build:
+    name: "Build & Compile"
+    timeout: 600 # 10 minutes
+    retry_attempts: 2
+    commands:
+      - npm ci
+      - npm run build
+      - docker build -t app:${BUILD_ID} .
+    artifacts:
+      - dist/
+      - Dockerfile
+      - package.json
+    validation:
+      - build_success: true
+      - artifact_size: < 500MB
+      - security_scan: basic
+    
+  test:
+    name: "Test Execution & Validation"
+    timeout: 1800 # 30 minutes
+    retry_attempts: 3
+    depends_on: [build]
+    parallel:
+      unit_tests:
+        command: npm test -- --coverage --reporters=default,./tests/dashboard/jest-dashboard-reporter.js
+        coverage_threshold: 80
+      integration_tests:
+        command: npm run test:integration
+        timeout: 900
+      continuous_validation:
+        command: node tests/production-readiness/continuous-validation-suite.js
+        environment: ${ENVIRONMENT}
+    validation:
+      - test_coverage: >= ${environment.gates.test_coverage}%
+      - failure_rate: <= ${environment.gates.max_failure_rate}
+      - all_critical_tests: pass
+    
+  security:
+    name: "Security Validation"
+    timeout: 900 # 15 minutes
+    retry_attempts: 2
+    depends_on: [build]
+    commands:
+      - npm audit --audit-level high
+      - docker run --rm -v $(pwd):/app clair-scanner app:${BUILD_ID}
+      - node tests/security/vulnerability-scan.js
+    validation:
+      - vulnerabilities.critical: <= ${environment.gates.max_vulnerabilities.critical}
+      - vulnerabilities.high: <= ${environment.gates.max_vulnerabilities.high}
+      - security_score: >= 85
+    
+  performance:
+    name: "Performance Testing"
+    timeout: 1200 # 20 minutes
+    retry_attempts: 2
+    depends_on: [build, test]
+    environment_specific: true
+    commands:
+      - node tests/performance/workflow-execution-load.test.js
+      - node tests/performance/agent-registry-load.test.js
+      - k6 run --out json=performance-results.json tests/performance/load-test.js
+    validation:
+      - response_time_p95: <= 1000ms
+      - throughput: >= 1000 req/s
+      - error_rate: <= 0.01
+      - performance_score: >= ${environment.gates.performance_baseline}
+    
+  deploy:
+    name: "Deployment"
+    timeout: 1800 # 30 minutes
+    retry_attempts: 1
+    depends_on: [build, test, security, performance]
+    environment_specific: true
+    strategy:
+      development: rolling
+      staging: blue_green
+      production: canary
+    pre_deploy:
+      - backup_current_version
+      - health_check_current
+      - notify_stakeholders
+    deploy:
+      - deploy_new_version
+      - wait_for_health_checks
+      - run_smoke_tests
+    post_deploy:
+      - verify_deployment
+      - update_monitoring
+      - notify_completion
+    validation:
+      - deployment_success: true
+      - health_checks: all_pass
+      - smoke_tests: all_pass
+    rollback:
+      on_failure: true
+      timeout: 300
+      validation_required: true
+    
+  monitor:
+    name: "Post-Deployment Monitoring"
+    timeout: 900 # 15 minutes
+    continuous: true
+    depends_on: [deploy]
+    monitoring:
+      - health_endpoint: ${environment.url}/api/health
+      - metrics_endpoint: ${environment.url}/api/metrics
+      - logs: application,system,security
+    alerts:
+      - error_rate: > 0.05
+      - response_time: > 2000ms
+      - availability: < 0.99
+    validation:
+      - system_stable: true
+      - no_critical_alerts: true
+      - performance_within_baseline: true
+
+# Integration configurations
+integrations:
+  dashboard:
+    url: http://localhost:3001
+    websocket: ws://localhost:3001
+    events:
+      - pipeline_started
+      - stage_completed
+      - validation_results
+      - deployment_status
+      - monitoring_updates
+    
+  redis:
+    url: redis://localhost:6379
+    channels:
+      - deployment:request
+      - pipeline:stage-completed
+      - monitoring:alert
+      - test:results
+    
+  notifications:
+    slack:
+      webhook: ${SLACK_WEBHOOK_URL}
+      channels:
+        - "#deployments"
+        - "#alerts"
+    email:
+      smtp_server: ${SMTP_SERVER}
+      recipients:
+        - devops@company.com
+        - alerts@company.com
+    
+  monitoring:
+    prometheus:
+      url: http://localhost:9090
+      metrics:
+        - pipeline_duration
+        - stage_success_rate
+        - deployment_frequency
+        - failure_rate
+    grafana:
+      url: http://localhost:3000
+      dashboards:
+        - pipeline-overview
+        - deployment-metrics
+        - system-health
+
+# Deployment strategies
+deployment_strategies:
+  rolling:
+    max_unavailable: 25%
+    max_surge: 25%
+    timeout: 600
+    
+  blue_green:
+    switch_threshold: 95% # health check pass rate
+    rollback_threshold: 90%
+    verification_period: 180 # seconds
+    
+  canary:
+    initial_traffic: 5%
+    increment: 10%
+    max_traffic: 100%
+    stabilization_period: 300 # seconds
+    promotion_criteria:
+      max_error_rate: 0.01
+      max_latency_p95: 1000
+      min_success_rate: 0.99
+
+# Production readiness checklist
+production_readiness:
+  security:
+    - container_vulnerability_scan: complete
+    - dependency_security_audit: pass
+    - network_policies: configured
+    - rbac_permissions: configured
+    - secrets_management: secure
+    - tls_certificates: valid
+    
+  observability:
+    - logging: configured
+    - metrics_collection: operational
+    - distributed_tracing: enabled
+    - alerting_rules: configured
+    - dashboards: created
+    - sla_monitoring: active
+    
+  scalability:
+    - resource_limits: configured
+    - autoscaling: configured
+    - load_testing: complete
+    - connection_pooling: configured
+    - caching: implemented
+    - cdn: configured
+    
+  reliability:
+    - health_checks: implemented
+    - graceful_shutdown: implemented
+    - circuit_breakers: configured
+    - retry_policies: implemented
+    - backup_procedures: tested
+    - disaster_recovery: validated
+    
+  compliance:
+    - data_retention: implemented
+    - gdpr_compliance: verified
+    - audit_logging: enabled
+    - access_controls: documented
+    - change_management: followed
+    - documentation: updated
+
+# CI/CD Integration Scripts
+ci_cd_integration:
+  github_actions: |
+    name: Continuous Validation Pipeline
+    on: [push, pull_request]
+    jobs:
+      deploy:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v3
+          - name: Setup Pipeline
+            run: |
+              cd tests/integration
+              npm install
+              node validation-dashboard-integration.js &
+          - name: Execute Pipeline
+            run: |
+              curl -X POST http://localhost:3001/api/pipeline/execute \
+                -H "Content-Type: application/json" \
+                -d '{"environment": "staging", "trigger": "github_actions"}'
+  
+  gitlab_ci: |
+    stages:
+      - build
+      - test
+      - security
+      - performance
+      - deploy
+      - monitor
+    
+    variables:
+      PIPELINE_CONFIG: tests/integration/deployment-pipeline-config.yml
+    
+    before_script:
+      - cd tests/integration
+      - node validation-dashboard-integration.js &
+    
+    execute_pipeline:
+      stage: deploy
+      script:
+        - curl -X POST http://localhost:3001/api/pipeline/execute \
+            -H "Content-Type: application/json" \
+            -d '{"environment": "$CI_ENVIRONMENT_NAME", "trigger": "gitlab_ci"}'
+  
+  jenkins: |
+    pipeline {
+        agent any
+        environment {
+            PIPELINE_CONFIG = 'tests/integration/deployment-pipeline-config.yml'
+        }
+        stages {
+            stage('Setup') {
+                steps {
+                    sh 'cd tests/integration && node validation-dashboard-integration.js &'
+                }
+            }
+            stage('Execute Pipeline') {
+                steps {
+                    sh '''
+                        curl -X POST http://localhost:3001/api/pipeline/execute \
+                          -H "Content-Type: application/json" \
+                          -d '{"environment": "${ENVIRONMENT}", "trigger": "jenkins"}'
+                    '''
+                }
+            }
+        }
+    }
+
+# Monitoring and Alerting
+monitoring:
+  health_checks:
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    endpoints:
+      - /api/health
+      - /api/ready
+      - /api/metrics
+  
+  metrics:
+    collection_interval: 15s
+    retention: 7d
+    custom_metrics:
+      - pipeline_execution_time
+      - validation_success_rate
+      - deployment_frequency
+      - rollback_frequency
+  
+  alerts:
+    critical:
+      - pipeline_failure_rate > 0.1
+      - deployment_blocked > 30min
+      - system_unavailable > 1min
+    warning:
+      - test_coverage < 90%
+      - performance_degradation > 20%
+      - security_scan_findings > 0
+
+# Configuration validation
+validation:
+  required_environment_variables:
+    - NODE_ENV
+    - REDIS_URL
+    - DASHBOARD_URL
+    - MONITORING_URL
+  
+  required_tools:
+    - node: ">=16.0.0"
+    - npm: ">=8.0.0"
+    - docker: ">=20.0.0"
+    - redis: ">=6.0.0"
+  
+  required_ports:
+    - 3000: application
+    - 3001: dashboard
+    - 6379: redis
+    - 9090: prometheus
+
+# Usage examples
+examples:
+  start_pipeline: |
+    # Start the validation dashboard integration
+    node tests/integration/validation-dashboard-integration.js
+    
+    # Execute pipeline for staging
+    curl -X POST http://localhost:3001/api/pipeline/execute \
+      -H "Content-Type: application/json" \
+      -d '{"environment": "staging", "options": {"strategy": "blue_green"}}'
+  
+  check_deployment_gate: |
+    # Check deployment gate status
+    curl http://localhost:3001/api/gates/staging
+  
+  view_pipeline_status: |
+    # View active pipeline status
+    curl http://localhost:3001/api/pipeline/status
+  
+  monitoring_dashboard: |
+    # Access monitoring dashboard
+    open http://localhost:3001/admin/observability

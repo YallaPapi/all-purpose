@@ -1,0 +1,16 @@
+{
+  "agentName": "devops-agent", 
+  "description": "Domain-specific agent for DevOps tasks including CI/CD setup, infrastructure-as-code, and observability",
+  "features": [
+    "Docker containerization setup",
+    "Vercel/AWS deployment configurations",
+    "CI/CD pipeline automation (GitHub Actions)",
+    "Infrastructure monitoring setup",
+    "Environment configuration management",
+    "Infrastructure-as-code generation",
+    "UEP integration for agent coordination"
+  ],
+  "framework": "node",
+  "includeTests": true,
+  "includeDocumentation": true
+}

@@ -1,0 +1,241 @@
+# OpenTelemetry Collector Configuration - Context7 Enhanced
+# Receives, processes, and exports traces from Meta-Agent Factory services
+# Context7 Methodology Implementation with UEP Protocol Support
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://localhost:3000"
+            - "http://localhost:8080"
+            - "https://*.vercel.app"
+  # jaeger:
+  #   protocols:
+  #     grpc:
+  #       endpoint: 0.0.0.0:14250
+  #     thrift_http:
+  #       endpoint: 0.0.0.0:14268
+  #     thrift_binary:
+  #       endpoint: 0.0.0.0:6832
+  #     thrift_compact:
+  #       endpoint: 0.0.0.0:6831
+  zipkin:
+    endpoint: 0.0.0.0:9411
+  
+  # Prometheus receiver for metrics collection
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'factory-services'
+          static_configs:
+            - targets: ['factory-core:3000', 'domain-agents:3001', 'rag-factory-test:3007']
+          scrape_interval: 15s
+          metrics_path: /metrics
+
+processors:
+  # Memory limiter - first in pipeline for safety
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+    check_interval: 5s
+
+  # Context7 Resource Enhancement
+  resource:
+    attributes:
+      - key: environment
+        value: ${ENVIRONMENT}
+        action: upsert
+      - key: cluster
+        value: meta-agent-factory
+        action: upsert
+      - key: version
+        from_attribute: service.version
+        action: insert
+      - key: context7.enabled
+        value: "true"
+        action: upsert
+      - key: uep.protocol.version
+        value: "2.0.0"
+        action: upsert
+      - key: meta-agent.factory.cluster
+        value: "production"
+        action: upsert
+
+  # Context7 Span Processing and UEP Enhancement
+  transform:
+    trace_statements:
+      - context: span
+        statements:
+          # Add Context7 boundary markers
+          - set(attributes["context7.processed"], "true")
+          - set(attributes["context7.collector.timestamp"], Now())
+          
+          # Extract UEP protocol information from span name or attributes
+          - set(attributes["uep.operation.type"], "unknown") where attributes["uep.operation"] == nil
+          - set(attributes["context7.boundary.type"], "explicit") where attributes["context7.boundary"] != nil
+          
+          # Normalize meta-agent service names
+          - replace_pattern(resource.attributes["service.name"], "meta-agent-(.+)", "meta-agent.${1}")
+          
+          # Add trace correlation for Context7 fidelity
+          - set(attributes["context7.trace.quality"], "high") where trace_id != nil
+          - set(attributes["context7.span.duration.ms"], (end_time_unix_nano - start_time_unix_nano) / 1000000)
+
+  # Filter out noise and health check spans
+  filter:
+    traces:
+      span:
+        - 'attributes["http.route"] == "/health"'
+        - 'attributes["http.route"] == "/metrics"'
+        - 'attributes["http.route"] == "/ready"'
+        - 'attributes["http.route"] == "/live"'
+        - 'name == "DNS"'  # Filter noisy DNS spans
+        - 'IsMatch(attributes["http.user_agent"], ".*kube-probe.*")'  # Filter Kubernetes probes
+
+  # Context7 Sampling Strategy
+  probabilistic_sampler:
+    hash_seed: 22
+    sampling_percentage: ${TRACE_SAMPLING_PERCENTAGE}  # Environment configurable
+    
+  # Tail-based sampling for Context7 error preservation
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    expected_new_traces_per_sec: 10
+    policies:
+      # Always sample errors for Context7 integrity
+      - name: error_policy
+        type: status_code
+        status_code: {status_codes: [ERROR]}
+      # Always sample UEP protocol violations
+      - name: uep_violations
+        type: string_attribute
+        string_attribute: {key: uep.protocol.violation, values: [true]}
+      # Sample Context7 boundary violations
+      - name: context7_issues
+        type: string_attribute  
+        string_attribute: {key: context7.integrity.issue, values: [true]}
+      # Probabilistic sampling for normal traces
+      - name: probabilistic_policy
+        type: probabilistic
+        probabilistic: {sampling_percentage: 1}
+
+  # Batch processing optimized for Context7
+  batch:
+    timeout: 2s
+    send_batch_size: 512
+    send_batch_max_size: 1024
+    metadata_cardinality_limit: 1000
+
+  # Context7 Span Enrichment
+  # span processor is not available in otel-collector-contrib
+  # Use attributes processor instead
+  attributes:
+    actions:
+      - key: span.name
+        action: update
+        from_attribute: http.route
+      - key: span.service
+        action: insert
+        from_attribute: service.name
+
+exporters:
+  # Export to Tempo for trace storage with Context7 enhancement
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+    headers:
+      "X-Context7-Enabled": "true"
+      "X-UEP-Protocol-Version": "2.0.0"
+
+  # Export to Jaeger for UI with Context7 tags
+  # jaeger:
+  #   endpoint: jaeger:14250
+  #   tls:
+  #     insecure: true
+
+  # Export traces to Prometheus as metrics with Context7 labels  
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: "context7"
+    const_labels:
+      context7_enabled: "true"
+      uep_protocol: "2.0.0"
+      meta_agent_factory: "true"
+    send_timestamps: true
+    enable_open_metrics: true
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Export metrics to Prometheus
+  prometheusremotewrite:
+    endpoint: "http://prometheus:9090/api/v1/write"
+    headers:
+      "X-Context7-Source": "otel-collector"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Context7 Enhanced Logging for debugging
+  logging:
+    sampling_initial: 5
+    sampling_thereafter: 200
+    # Enable detailed logging for Context7 debugging  
+    verbosity: detailed
+
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+  
+  pipelines:
+    # Context7 Enhanced Trace Pipeline
+    traces:
+      receivers: [otlp, zipkin]
+      processors: [
+        memory_limiter,      # Safety first
+        resource,            # Context7 resource attribution
+        transform,           # Context7 span enhancement
+        filter,              # Noise reduction
+        tail_sampling,       # Context7 intelligent sampling
+        batch,               # Performance optimization
+        attributes           # Span attribute processing
+      ]
+      exporters: [otlp/tempo, logging]
+    
+    # Context7 Enhanced Metrics Pipeline
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [
+        memory_limiter,
+        resource,
+        batch
+      ]
+      exporters: [prometheus, prometheusremotewrite]
+
+  # Context7 Telemetry Configuration
+  telemetry:
+    logs:
+      level: "info"
+      development: false
+      encoding: "json"
+      output_paths: ["stdout"]
+      error_output_paths: ["stderr"]
+      initial_fields:
+        context7_enabled: true
+        uep_protocol_version: "2.0.0"
+    metrics:
+      address: 0.0.0.0:8888
+      level: detailed

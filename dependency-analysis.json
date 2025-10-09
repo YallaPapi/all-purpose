@@ -1,0 +1,1201 @@
+{
+  "total": 45,
+  "deps": {
+    "fs-extra": {
+      "./.test-output/test-uep/package.json": "^11.3.0",
+      "./generated/allpurposepattern/package.json": "^11.3.0",
+      "./generated/documentation-consolidation-agent/package.json": "^11.3.0",
+      "./generated/monitoring-dashboard/package.json": "^11.3.0",
+      "./generated-projects/youtube-github-cross-reference/package.json": "^11.3.0",
+      "./package.json": "^11.3.0",
+      "./packages/generated-outputs/youtube-github-cross-reference/package.json": "^11.3.0",
+      "./packages/meta-agents/account-creation-system/package.json": "^11.2.0",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^11.3.0",
+      "./packages/meta-agents/five-document-framework/package.json": "^11.2.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^11.2.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^11.2.0",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^11.2.0",
+      "./packages/meta-agents/scaffold-generator/package.json": "^11.3.0",
+      "./packages/meta-agents/template-engine-factory/package.json": "^11.2.0",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^11.2.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^11.2.0",
+      "./packages/rag-system/package.json": "^11.2.0",
+      "./rag-system/package.json": "^11.2.0",
+      "./src/meta-agents/account-creation-system/package.json": "^11.2.0",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^11.3.0",
+      "./src/meta-agents/backend-agent/backend/package.json": "^11.3.0",
+      "./src/meta-agents/backend-agent/package.json": "^11.2.0",
+      "./src/meta-agents/five-document-framework/package.json": "^11.2.0",
+      "./src/meta-agents/frontend-agent/backend/package.json": "^11.3.0",
+      "./src/meta-agents/frontend-agent/package.json": "^11.2.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^11.3.0",
+      "./src/meta-agents/parameter-flow/package.json": "^11.2.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^11.2.0",
+      "./src/meta-agents/scaffold-generator/package.json": "^11.3.0",
+      "./src/meta-agents/scaffold-generator/prospector/package.json": "^11.3.0",
+      "./src/meta-agents/template-engine-factory/package.json": "^11.2.0",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^11.2.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^11.2.0"
+    },
+    "chalk": {
+      "./.test-output/test-uep/package.json": "^4.1.2",
+      "./generated/allpurposepattern/package.json": "^4.1.2",
+      "./generated/documentation-consolidation-agent/package.json": "^4.1.2",
+      "./generated/monitoring-dashboard/package.json": "^4.1.2",
+      "./generated-projects/youtube-github-cross-reference/package.json": "^4.1.2",
+      "./packages/generated-outputs/youtube-github-cross-reference/package.json": "^4.1.2",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^4.1.2",
+      "./packages/meta-agents/five-document-framework/package.json": "^5.3.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^4.1.2",
+      "./packages/meta-agents/scaffold-generator/package.json": "^4.1.2",
+      "./packages/meta-agents/template-engine-factory/package.json": "^4.1.2",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^4.1.2",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^4.1.2",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^4.1.2",
+      "./src/meta-agents/backend-agent/backend/package.json": "^4.1.2",
+      "./src/meta-agents/backend-agent/package.json": "^4.1.2",
+      "./src/meta-agents/five-document-framework/package.json": "^5.3.0",
+      "./src/meta-agents/frontend-agent/backend/package.json": "^4.1.2",
+      "./src/meta-agents/frontend-agent/package.json": "^4.1.2",
+      "./src/meta-agents/parameter-flow/package.json": "^4.1.2",
+      "./src/meta-agents/scaffold-generator/package.json": "^4.1.2",
+      "./src/meta-agents/scaffold-generator/prospector/package.json": "^4.1.2",
+      "./src/meta-agents/template-engine-factory/package.json": "^4.1.2",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^4.1.2",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^4.1.2"
+    },
+    "@itseasy21/mcp-knowledge-graph": {
+      "./apps/lead-generation/package.json": "^1.0.7",
+      "./configs/package.json": "^1.0.7"
+    },
+    "@upstash/redis": {
+      "./apps/lead-generation/package.json": "^1.35.1",
+      "./configs/package.json": "^1.35.1",
+      "./generated-projects/youtube-github-system/package.json": "^1.35.1",
+      "./package.json": "^1.35.1",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^1.35.1"
+    },
+    "@upstash/vector": {
+      "./apps/lead-generation/package.json": "^1.2.2",
+      "./configs/package.json": "^1.2.2",
+      "./generated-projects/youtube-github-system/package.json": "^1.2.2",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^1.2.2",
+      "./packages/rag-system/package.json": "^1.2.2",
+      "./rag-system/package.json": "^1.2.2"
+    },
+    "chokidar": {
+      "./apps/lead-generation/package.json": "^4.0.3",
+      "./configs/package.json": "^4.0.3",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^3.5.3",
+      "./packages/meta-agents/prd-parser/package.json": "^3.5.3",
+      "./packages/rag-system/package.json": "^3.6.0",
+      "./rag-system/package.json": "^3.6.0",
+      "./src/meta-agents/backend-agent/package.json": "^3.6.0",
+      "./src/meta-agents/frontend-agent/package.json": "^3.6.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^3.5.3",
+      "./src/meta-agents/prd-parser/package.json": "^3.5.3"
+    },
+    "glob": {
+      "./apps/lead-generation/package.json": "^11.0.3",
+      "./configs/package.json": "^11.0.3",
+      "./packages/meta-agents/five-document-framework/package.json": "^10.3.10",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^10.3.10",
+      "./packages/meta-agents/parameter-flow/package.json": "^10.3.10",
+      "./packages/meta-agents/template-engine-factory/package.json": "^10.3.10",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^10.3.10",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^10.3.10",
+      "./packages/rag-system/package.json": "^11.0.3",
+      "./rag-system/package.json": "^11.0.3",
+      "./src/meta-agents/backend-agent/package.json": "^10.3.10",
+      "./src/meta-agents/five-document-framework/package.json": "^10.3.10",
+      "./src/meta-agents/frontend-agent/package.json": "^10.3.10",
+      "./src/meta-agents/infra-orchestrator/package.json": "^10.3.10",
+      "./src/meta-agents/parameter-flow/package.json": "^10.3.10",
+      "./src/meta-agents/template-engine-factory/package.json": "^10.3.10",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^10.3.10",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^10.3.10"
+    },
+    "mustache": {
+      "./apps/lead-generation/package.json": "^4.2.0",
+      "./configs/package.json": "^4.2.0",
+      "./packages/meta-agents/template-engine-factory/package.json": "^4.2.0",
+      "./src/meta-agents/template-engine-factory/package.json": "^4.2.0"
+    },
+    "next": {
+      "./apps/lead-generation/package.json": "15.4.1",
+      "./configs/package.json": "15.4.1",
+      "./generated-projects/youtube-github-system/package.json": "15.4.3",
+      "./packages/generated-outputs/youtube-github-system/package.json": "15.4.3"
+    },
+    "openai": {
+      "./apps/lead-generation/package.json": "^5.10.1",
+      "./configs/package.json": "^5.10.1",
+      "./generated-projects/youtube-github-system/package.json": "^5.10.2",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^5.10.2",
+      "./packages/rag-system/package.json": "^4.28.4",
+      "./rag-system/package.json": "^4.28.4",
+      "./src/meta-agents/backend-agent/package.json": "^4.28.4",
+      "./src/meta-agents/frontend-agent/package.json": "^4.28.4"
+    },
+    "react": {
+      "./apps/lead-generation/package.json": "19.1.0",
+      "./configs/package.json": "19.1.0",
+      "./generated-projects/youtube-github-system/package.json": "19.1.0",
+      "./packages/generated-outputs/youtube-github-system/package.json": "19.1.0"
+    },
+    "react-dom": {
+      "./apps/lead-generation/package.json": "19.1.0",
+      "./configs/package.json": "19.1.0",
+      "./generated-projects/youtube-github-system/package.json": "19.1.0",
+      "./packages/generated-outputs/youtube-github-system/package.json": "19.1.0"
+    },
+    "task-master-ai": {
+      "./apps/lead-generation/package.json": "^0.21.0",
+      "./configs/package.json": "^0.21.0",
+      "./packages/rag-system/package.json": "^0.21.0"
+    },
+    "winston": {
+      "./apps/lead-generation/package.json": "^3.17.0",
+      "./configs/package.json": "^3.17.0",
+      "./packages/meta-agents/account-creation-system/package.json": "^3.15.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^3.11.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^3.11.0",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^3.15.0",
+      "./packages/meta-agents/template-engine-factory/package.json": "^3.11.0",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^3.11.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^3.11.0",
+      "./packages/rag-system/package.json": "^3.11.0",
+      "./rag-system/package.json": "^3.11.0",
+      "./src/meta-agents/account-creation-system/package.json": "^3.15.0",
+      "./src/meta-agents/backend-agent/package.json": "^3.11.0",
+      "./src/meta-agents/frontend-agent/package.json": "^3.11.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^3.11.0",
+      "./src/meta-agents/parameter-flow/package.json": "^3.11.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^3.15.0",
+      "./src/meta-agents/template-engine-factory/package.json": "^3.11.0",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^3.11.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^3.11.0"
+    },
+    "@octokit/rest": {
+      "./generated-projects/youtube-github-system/package.json": "^22.0.0",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^22.0.0"
+    },
+    "dotenv": {
+      "./generated-projects/youtube-github-system/package.json": "^17.2.0",
+      "./package.json": "^17.2.1",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^17.2.0",
+      "./packages/meta-agents/account-creation-system/package.json": "^16.4.5",
+      "./packages/meta-agents/prd-parser/package.json": "^17.2.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^16.3.1",
+      "./src/meta-agents/account-creation-system/package.json": "^16.4.5",
+      "./src/meta-agents/prd-parser/package.json": "^17.2.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^16.3.1"
+    },
+    "lucide-react": {
+      "./generated-projects/youtube-github-system/package.json": "^0.525.0",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^0.525.0"
+    },
+    "youtube-transcript": {
+      "./generated-projects/youtube-github-system/package.json": "^1.2.1",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^1.2.1"
+    },
+    "@babel/core": {
+      "./package.json": "^7.28.0"
+    },
+    "@babel/parser": {
+      "./package.json": "^7.28.0",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^7.23.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^7.23.6",
+      "./packages/meta-agents/parameter-flow/package.json": "^7.23.6",
+      "./packages/meta-agents/template-engine-factory/package.json": "^7.23.6",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.23.6",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^7.23.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^7.23.6",
+      "./src/meta-agents/parameter-flow/package.json": "^7.23.6",
+      "./src/meta-agents/template-engine-factory/package.json": "^7.23.6"
+    },
+    "@babel/traverse": {
+      "./package.json": "^7.28.0",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^7.23.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^7.23.6",
+      "./packages/meta-agents/parameter-flow/package.json": "^7.23.6",
+      "./packages/meta-agents/template-engine-factory/package.json": "^7.23.6",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.23.6",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^7.23.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^7.23.6",
+      "./src/meta-agents/parameter-flow/package.json": "^7.23.6",
+      "./src/meta-agents/template-engine-factory/package.json": "^7.23.6",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.23.6"
+    },
+    "@babel/types": {
+      "./package.json": "^7.28.2",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^7.23.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^7.23.6",
+      "./packages/meta-agents/parameter-flow/package.json": "^7.23.6",
+      "./packages/meta-agents/template-engine-factory/package.json": "^7.23.6",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.23.6",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^7.23.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^7.23.6",
+      "./src/meta-agents/parameter-flow/package.json": "^7.23.6",
+      "./src/meta-agents/template-engine-factory/package.json": "^7.23.6",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.23.6"
+    },
+    "@types/node": {
+      "./package.json": "^24.1.0",
+      "./src/meta-agents/backend-agent/package.json": "^20.11.17",
+      "./src/meta-agents/frontend-agent/package.json": "^20.11.17"
+    },
+    "commander": {
+      "./package.json": "^14.0.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^11.1.0",
+      "./packages/meta-agents/scaffold-generator/package.json": "^14.0.0",
+      "./packages/meta-agents/template-engine-factory/package.json": "^11.1.0",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^11.1.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^11.1.0",
+      "./src/meta-agents/parameter-flow/package.json": "^11.1.0",
+      "./src/meta-agents/scaffold-generator/package.json": "^14.0.0",
+      "./src/meta-agents/template-engine-factory/package.json": "^11.1.0",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^11.1.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^11.1.0"
+    },
+    "typescript": {
+      "./package.json": "^5.8.3",
+      "./src/meta-agents/backend-agent/package.json": "^5.3.3",
+      "./src/meta-agents/frontend-agent/package.json": "^5.3.3"
+    },
+    "zod": {
+      "./package.json": "^3.25.76",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^3.22.4",
+      "./src/meta-agents/infra-orchestrator/package.json": "^3.22.4"
+    },
+    "playwright": {
+      "./packages/meta-agents/account-creation-system/package.json": "^1.48.2",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^1.48.2",
+      "./src/meta-agents/account-creation-system/package.json": "^1.48.2",
+      "./src/meta-agents/post-creation-investigator/package.json": "^1.48.2"
+    },
+    "imapflow": {
+      "./packages/meta-agents/account-creation-system/package.json": "^1.0.191",
+      "./src/meta-agents/account-creation-system/package.json": "^1.0.191"
+    },
+    "nodemailer": {
+      "./packages/meta-agents/account-creation-system/package.json": "^6.9.15",
+      "./src/meta-agents/account-creation-system/package.json": "^6.9.15"
+    },
+    "axios": {
+      "./packages/meta-agents/account-creation-system/package.json": "^1.7.7",
+      "./packages/meta-agents/parameter-flow/package.json": "^1.6.0",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^1.7.7",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^1.6.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^1.6.0",
+      "./src/meta-agents/account-creation-system/package.json": "^1.7.7",
+      "./src/meta-agents/parameter-flow/package.json": "^1.6.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^1.7.7",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^1.6.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^1.6.0"
+    },
+    "uuid": {
+      "./packages/meta-agents/account-creation-system/package.json": "^10.0.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^9.0.1",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^10.0.0",
+      "./packages/meta-agents/template-engine-factory/package.json": "^9.0.1",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^9.0.1",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^9.0.1",
+      "./packages/rag-system/package.json": "^9.0.1",
+      "./rag-system/package.json": "^9.0.1",
+      "./src/meta-agents/account-creation-system/package.json": "^10.0.0",
+      "./src/meta-agents/backend-agent/package.json": "^9.0.1",
+      "./src/meta-agents/frontend-agent/package.json": "^9.0.1",
+      "./src/meta-agents/parameter-flow/package.json": "^9.0.1",
+      "./src/meta-agents/post-creation-investigator/package.json": "^10.0.0",
+      "./src/meta-agents/template-engine-factory/package.json": "^9.0.1",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^9.0.1",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^9.0.1"
+    },
+    "bcryptjs": {
+      "./packages/meta-agents/account-creation-system/package.json": "^2.4.3",
+      "./src/meta-agents/account-creation-system/package.json": "^2.4.3"
+    },
+    "node-cron": {
+      "./packages/meta-agents/account-creation-system/package.json": "^3.0.3",
+      "./packages/rag-system/package.json": "^3.0.3",
+      "./rag-system/package.json": "^3.0.3",
+      "./src/meta-agents/account-creation-system/package.json": "^3.0.3"
+    },
+    "crypto": {
+      "./packages/meta-agents/account-creation-system/package.json": "^1.0.1",
+      "./src/meta-agents/account-creation-system/package.json": "^1.0.1"
+    },
+    "handlebars": {
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^4.7.8",
+      "./packages/meta-agents/five-document-framework/package.json": "^4.7.8",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^4.7.8",
+      "./packages/meta-agents/scaffold-generator/package.json": "^4.7.8",
+      "./packages/meta-agents/template-engine-factory/package.json": "^4.7.8",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^4.7.8",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^4.7.8",
+      "./src/meta-agents/backend-agent/package.json": "^4.7.8",
+      "./src/meta-agents/five-document-framework/package.json": "^4.7.8",
+      "./src/meta-agents/frontend-agent/package.json": "^4.7.8",
+      "./src/meta-agents/infra-orchestrator/package.json": "^4.7.8",
+      "./src/meta-agents/scaffold-generator/package.json": "^4.7.8",
+      "./src/meta-agents/template-engine-factory/package.json": "^4.7.8",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^4.7.8"
+    },
+    "yaml": {
+      "./packages/meta-agents/five-document-framework/package.json": "^2.4.1",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^2.3.4",
+      "./packages/meta-agents/parameter-flow/package.json": "^2.3.4",
+      "./packages/meta-agents/template-engine-factory/package.json": "^2.3.4",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^2.3.4",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^2.3.4",
+      "./src/meta-agents/five-document-framework/package.json": "^2.4.1",
+      "./src/meta-agents/infra-orchestrator/package.json": "^2.3.4",
+      "./src/meta-agents/parameter-flow/package.json": "^2.3.4",
+      "./src/meta-agents/template-engine-factory/package.json": "^2.3.4",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^2.3.4",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^2.3.4"
+    },
+    "semver": {
+      "./packages/meta-agents/five-document-framework/package.json": "^7.6.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.5.4",
+      "./src/meta-agents/five-document-framework/package.json": "^7.6.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.5.4"
+    },
+    "cross-spawn": {
+      "./packages/meta-agents/five-document-framework/package.json": "^7.0.6",
+      "./src/meta-agents/five-document-framework/package.json": "^7.0.6"
+    },
+    "mermaid": {
+      "./packages/meta-agents/infra-orchestrator/package.json": "^10.6.1",
+      "./src/meta-agents/infra-orchestrator/package.json": "^10.6.1"
+    },
+    "joi": {
+      "./packages/meta-agents/infra-orchestrator/package.json": "^17.11.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^17.11.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^17.11.0",
+      "./packages/rag-system/package.json": "^17.11.0",
+      "./rag-system/package.json": "^17.11.0",
+      "./src/meta-agents/backend-agent/package.json": "^17.11.0",
+      "./src/meta-agents/frontend-agent/package.json": "^17.11.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^17.11.0",
+      "./src/meta-agents/parameter-flow/package.json": "^17.11.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^17.11.0"
+    },
+    "@babel/generator": {
+      "./packages/meta-agents/parameter-flow/package.json": "^7.23.6",
+      "./packages/meta-agents/template-engine-factory/package.json": "^7.23.6",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.23.6",
+      "./src/meta-agents/parameter-flow/package.json": "^7.23.6",
+      "./src/meta-agents/template-engine-factory/package.json": "^7.23.6",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.23.6"
+    },
+    "ajv": {
+      "./packages/meta-agents/parameter-flow/package.json": "^8.12.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^8.12.0",
+      "./src/meta-agents/parameter-flow/package.json": "^8.12.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^8.12.0"
+    },
+    "graphql": {
+      "./packages/meta-agents/parameter-flow/package.json": "^16.8.1",
+      "./src/meta-agents/parameter-flow/package.json": "^16.8.1"
+    },
+    "json-schema": {
+      "./packages/meta-agents/parameter-flow/package.json": "^0.4.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^0.4.0",
+      "./src/meta-agents/parameter-flow/package.json": "^0.4.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^0.4.0"
+    },
+    "lodash": {
+      "./packages/meta-agents/parameter-flow/package.json": "^4.17.21",
+      "./packages/meta-agents/template-engine-factory/package.json": "^4.17.21",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^4.17.21",
+      "./src/meta-agents/parameter-flow/package.json": "^4.17.21",
+      "./src/meta-agents/template-engine-factory/package.json": "^4.17.21",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^4.17.21"
+    },
+    "yup": {
+      "./packages/meta-agents/parameter-flow/package.json": "^1.4.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^1.4.0",
+      "./src/meta-agents/parameter-flow/package.json": "^1.4.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^1.4.0"
+    },
+    "express": {
+      "./packages/meta-agents/post-creation-investigator/package.json": "^4.21.1",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^4.18.2",
+      "./packages/rag-system/package.json": "^4.18.2",
+      "./rag-system/package.json": "^4.18.2",
+      "./src/meta-agents/backend-agent/package.json": "^4.18.2",
+      "./src/meta-agents/frontend-agent/package.json": "^4.18.2",
+      "./src/meta-agents/post-creation-investigator/package.json": "^4.21.1",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^4.18.2"
+    },
+    "supertest": {
+      "./packages/meta-agents/post-creation-investigator/package.json": "^7.0.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^7.0.0"
+    },
+    "jest": {
+      "./packages/meta-agents/post-creation-investigator/package.json": "^29.7.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^29.7.0"
+    },
+    "lighthouse": {
+      "./packages/meta-agents/post-creation-investigator/package.json": "^12.2.1",
+      "./src/meta-agents/post-creation-investigator/package.json": "^12.2.1"
+    },
+    "events": {
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^3.3.0",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^3.3.0"
+    },
+    "@vercel/analytics": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^1.1.1",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^1.1.1"
+    },
+    "@vercel/blob": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^0.15.1",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^0.15.1"
+    },
+    "@vercel/edge": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^1.1.1",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^1.1.1"
+    },
+    "@vercel/kv": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^1.0.1",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^1.0.1"
+    },
+    "@vercel/node": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^3.0.12",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^3.0.12"
+    },
+    "@vercel/postgres": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^0.5.1",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^0.5.1"
+    },
+    "@vercel/speed-insights": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^1.0.2",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^1.0.2"
+    },
+    "archiver": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^6.0.1",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^6.0.1"
+    },
+    "tar": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^6.2.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^6.2.0"
+    },
+    "@qdrant/js-client-rest": {
+      "./packages/rag-system/package.json": "^1.8.2",
+      "./rag-system/package.json": "^1.8.2"
+    },
+    "ioredis": {
+      "./rag-system/package.json": "^5.3.2"
+    },
+    "lru-cache": {
+      "./rag-system/package.json": "^10.1.0"
+    },
+    "minimatch": {
+      "./rag-system/package.json": "^9.0.3"
+    },
+    "@types/express": {
+      "./src/meta-agents/backend-agent/package.json": "^4.17.21",
+      "./src/meta-agents/frontend-agent/package.json": "^4.17.21"
+    },
+    "@types/joi": {
+      "./src/meta-agents/backend-agent/package.json": "^17.2.3",
+      "./src/meta-agents/frontend-agent/package.json": "^17.2.3"
+    },
+    "@types/uuid": {
+      "./src/meta-agents/backend-agent/package.json": "^9.0.8",
+      "./src/meta-agents/frontend-agent/package.json": "^9.0.8"
+    },
+    "@types/handlebars": {
+      "./src/meta-agents/backend-agent/package.json": "^4.1.0",
+      "./src/meta-agents/frontend-agent/package.json": "^4.1.0"
+    },
+    "@types/fs-extra": {
+      "./src/meta-agents/backend-agent/package.json": "^11.0.4",
+      "./src/meta-agents/frontend-agent/package.json": "^11.0.4"
+    },
+    "inquirer": {
+      "./src/meta-agents/vercel-native-architecture/package.json": "^12.8.2"
+    }
+  },
+  "devDeps": {
+    "jest": {
+      "./.test-output/test-uep/package.json": "^30.0.5",
+      "./generated/allpurposepattern/package.json": "^30.0.5",
+      "./generated/documentation-consolidation-agent/package.json": "^30.0.5",
+      "./generated/monitoring-dashboard/package.json": "^30.0.5",
+      "./generated-projects/youtube-github-cross-reference/package.json": "^30.0.5",
+      "./packages/generated-outputs/youtube-github-cross-reference/package.json": "^30.0.5",
+      "./packages/meta-agents/account-creation-system/package.json": "^29.7.0",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^29.7.0",
+      "./packages/meta-agents/five-document-framework/package.json": "^29.7.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^29.7.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^29.7.0",
+      "./packages/meta-agents/prd-parser/package.json": "^29.7.0",
+      "./packages/meta-agents/scaffold-generator/package.json": "^30.0.5",
+      "./packages/meta-agents/template-engine-factory/package.json": "^29.7.0",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^29.7.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^29.7.0",
+      "./packages/rag-system/package.json": "^29.7.0",
+      "./rag-system/package.json": "^29.7.0",
+      "./src/meta-agents/account-creation-system/package.json": "^29.7.0",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^29.7.0",
+      "./src/meta-agents/backend-agent/backend/package.json": "^30.0.5",
+      "./src/meta-agents/backend-agent/package.json": "^29.7.0",
+      "./src/meta-agents/five-document-framework/package.json": "^29.7.0",
+      "./src/meta-agents/frontend-agent/backend/package.json": "^30.0.5",
+      "./src/meta-agents/frontend-agent/package.json": "^29.7.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^29.7.0",
+      "./src/meta-agents/parameter-flow/package.json": "^29.7.0",
+      "./src/meta-agents/prd-parser/package.json": "^29.7.0",
+      "./src/meta-agents/scaffold-generator/package.json": "^30.0.5",
+      "./src/meta-agents/scaffold-generator/prospector/package.json": "^30.0.5",
+      "./src/meta-agents/template-engine-factory/package.json": "^29.7.0",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^29.7.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^29.7.0"
+    },
+    "eslint": {
+      "./.test-output/test-uep/package.json": "^9.31.0",
+      "./generated/allpurposepattern/package.json": "^9.31.0",
+      "./generated/documentation-consolidation-agent/package.json": "^9.31.0",
+      "./generated/monitoring-dashboard/package.json": "^9.31.0",
+      "./generated-projects/youtube-github-cross-reference/package.json": "^9.31.0",
+      "./generated-projects/youtube-github-system/package.json": "^9",
+      "./package.json": "^9.32.0",
+      "./packages/generated-outputs/youtube-github-cross-reference/package.json": "^9.31.0",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^9",
+      "./packages/meta-agents/account-creation-system/package.json": "^9.13.0",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^8.57.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^8.54.0",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^9.13.0",
+      "./packages/meta-agents/prd-parser/package.json": "^8.57.0",
+      "./packages/meta-agents/scaffold-generator/package.json": "^9.31.0",
+      "./src/meta-agents/account-creation-system/package.json": "^9.13.0",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^8.57.0",
+      "./src/meta-agents/backend-agent/backend/package.json": "^9.31.0",
+      "./src/meta-agents/backend-agent/package.json": "^8.56.0",
+      "./src/meta-agents/frontend-agent/backend/package.json": "^9.31.0",
+      "./src/meta-agents/frontend-agent/package.json": "^8.56.0",
+      "./src/meta-agents/infra-orchestrator/package.json": "^8.54.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^9.13.0",
+      "./src/meta-agents/prd-parser/package.json": "^8.57.0",
+      "./src/meta-agents/scaffold-generator/package.json": "^9.31.0",
+      "./src/meta-agents/scaffold-generator/prospector/package.json": "^9.31.0"
+    },
+    "@eslint/js": {
+      "./.test-output/test-uep/package.json": "^9.31.0",
+      "./generated/allpurposepattern/package.json": "^9.31.0",
+      "./generated/documentation-consolidation-agent/package.json": "^9.31.0",
+      "./generated/monitoring-dashboard/package.json": "^9.31.0",
+      "./generated-projects/youtube-github-cross-reference/package.json": "^9.31.0",
+      "./packages/generated-outputs/youtube-github-cross-reference/package.json": "^9.31.0",
+      "./packages/meta-agents/scaffold-generator/package.json": "^9.31.0",
+      "./src/meta-agents/backend-agent/backend/package.json": "^9.31.0",
+      "./src/meta-agents/frontend-agent/backend/package.json": "^9.31.0",
+      "./src/meta-agents/scaffold-generator/package.json": "^9.31.0",
+      "./src/meta-agents/scaffold-generator/prospector/package.json": "^9.31.0"
+    },
+    "@tailwindcss/postcss": {
+      "./apps/lead-generation/package.json": "^4",
+      "./configs/package.json": "^4",
+      "./generated-projects/youtube-github-system/package.json": "^4",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^4"
+    },
+    "@types/node": {
+      "./apps/lead-generation/package.json": "^20",
+      "./configs/package.json": "^20",
+      "./generated-projects/youtube-github-system/package.json": "^20",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^20",
+      "./packages/meta-agents/account-creation-system/package.json": "^22.8.4",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^20.10.0",
+      "./packages/meta-agents/five-document-framework/package.json": "^20.11.19",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^20.9.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^20.10.0",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^22.8.4",
+      "./packages/meta-agents/template-engine-factory/package.json": "^20.10.0",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^20.10.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^20.10.0",
+      "./packages/rag-system/package.json": "^20.11.17",
+      "./rag-system/package.json": "^20.11.17",
+      "./src/meta-agents/account-creation-system/package.json": "^22.8.4",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^20.10.0",
+      "./src/meta-agents/five-document-framework/package.json": "^20.11.19",
+      "./src/meta-agents/infra-orchestrator/package.json": "^20.9.0",
+      "./src/meta-agents/parameter-flow/package.json": "^20.10.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^22.8.4",
+      "./src/meta-agents/template-engine-factory/package.json": "^20.10.0",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^20.10.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^20.10.0"
+    },
+    "@types/react": {
+      "./apps/lead-generation/package.json": "^19",
+      "./configs/package.json": "^19",
+      "./generated-projects/youtube-github-system/package.json": "^19",
+      "./package.json": "19.1.8",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^19"
+    },
+    "@types/react-dom": {
+      "./apps/lead-generation/package.json": "^19",
+      "./configs/package.json": "^19",
+      "./generated-projects/youtube-github-system/package.json": "^19",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^19"
+    },
+    "tailwindcss": {
+      "./apps/lead-generation/package.json": "^4",
+      "./configs/package.json": "^4",
+      "./generated-projects/youtube-github-system/package.json": "^4",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^4"
+    },
+    "typescript": {
+      "./apps/lead-generation/package.json": "^5",
+      "./configs/package.json": "^5",
+      "./generated-projects/youtube-github-system/package.json": "^5",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^5",
+      "./packages/meta-agents/account-creation-system/package.json": "^5.6.3",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^5.4.0",
+      "./packages/meta-agents/five-document-framework/package.json": "^5.3.3",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^5.3.2",
+      "./packages/meta-agents/parameter-flow/package.json": "^5.3.2",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^5.6.3",
+      "./packages/meta-agents/template-engine-factory/package.json": "^5.3.2",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^5.3.2",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^5.3.2",
+      "./packages/rag-system/package.json": "^5.3.3",
+      "./rag-system/package.json": "^5.3.3",
+      "./src/meta-agents/account-creation-system/package.json": "^5.6.3",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^5.4.0",
+      "./src/meta-agents/five-document-framework/package.json": "^5.3.3",
+      "./src/meta-agents/infra-orchestrator/package.json": "^5.3.2",
+      "./src/meta-agents/parameter-flow/package.json": "^5.3.2",
+      "./src/meta-agents/post-creation-investigator/package.json": "^5.6.3",
+      "./src/meta-agents/template-engine-factory/package.json": "^5.3.2",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^5.3.2",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^5.3.2"
+    },
+    "@eslint/eslintrc": {
+      "./generated-projects/youtube-github-system/package.json": "^3",
+      "./packages/generated-outputs/youtube-github-system/package.json": "^3"
+    },
+    "eslint-config-next": {
+      "./generated-projects/youtube-github-system/package.json": "15.4.3",
+      "./packages/generated-outputs/youtube-github-system/package.json": "15.4.3"
+    },
+    "eslint-plugin-import": {
+      "./package.json": "^2.32.0"
+    },
+    "@types/fs-extra": {
+      "./packages/meta-agents/account-creation-system/package.json": "^11.0.4",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^11.0.4",
+      "./packages/meta-agents/five-document-framework/package.json": "^11.0.4",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^11.0.4",
+      "./packages/meta-agents/parameter-flow/package.json": "^11.0.4",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^11.0.4",
+      "./packages/meta-agents/template-engine-factory/package.json": "^11.0.4",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^11.0.4",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^11.0.4",
+      "./packages/rag-system/package.json": "^11.0.4",
+      "./rag-system/package.json": "^11.0.4",
+      "./src/meta-agents/account-creation-system/package.json": "^11.0.4",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^11.0.4",
+      "./src/meta-agents/five-document-framework/package.json": "^11.0.4",
+      "./src/meta-agents/infra-orchestrator/package.json": "^11.0.4",
+      "./src/meta-agents/parameter-flow/package.json": "^11.0.4",
+      "./src/meta-agents/post-creation-investigator/package.json": "^11.0.4",
+      "./src/meta-agents/template-engine-factory/package.json": "^11.0.4",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^11.0.4",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^11.0.4"
+    },
+    "@types/uuid": {
+      "./packages/meta-agents/account-creation-system/package.json": "^10.0.0",
+      "./packages/meta-agents/parameter-flow/package.json": "^9.0.7",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^10.0.0",
+      "./packages/meta-agents/template-engine-factory/package.json": "^9.0.7",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^9.0.7",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^9.0.7",
+      "./packages/rag-system/package.json": "^9.0.8",
+      "./rag-system/package.json": "^9.0.8",
+      "./src/meta-agents/account-creation-system/package.json": "^10.0.0",
+      "./src/meta-agents/parameter-flow/package.json": "^9.0.7",
+      "./src/meta-agents/post-creation-investigator/package.json": "^10.0.0",
+      "./src/meta-agents/template-engine-factory/package.json": "^9.0.7",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^9.0.7",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^9.0.8"
+    },
+    "@types/bcryptjs": {
+      "./packages/meta-agents/account-creation-system/package.json": "^2.4.6",
+      "./src/meta-agents/account-creation-system/package.json": "^2.4.6"
+    },
+    "@types/nodemailer": {
+      "./packages/meta-agents/account-creation-system/package.json": "^6.4.16",
+      "./src/meta-agents/account-creation-system/package.json": "^6.4.16"
+    },
+    "@types/node-cron": {
+      "./packages/meta-agents/account-creation-system/package.json": "^3.0.11",
+      "./src/meta-agents/account-creation-system/package.json": "^3.0.11"
+    },
+    "@types/jest": {
+      "./packages/meta-agents/account-creation-system/package.json": "^29.5.14",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^29.5.0",
+      "./packages/meta-agents/five-document-framework/package.json": "^29.5.12",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^29.5.8",
+      "./packages/meta-agents/parameter-flow/package.json": "^29.5.8",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^29.5.14",
+      "./packages/meta-agents/template-engine-factory/package.json": "^29.5.8",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^29.5.8",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^29.5.8",
+      "./packages/rag-system/package.json": "^29.5.12",
+      "./rag-system/package.json": "^29.5.12",
+      "./src/meta-agents/account-creation-system/package.json": "^29.5.14",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^29.5.0",
+      "./src/meta-agents/backend-agent/package.json": "^29.5.12",
+      "./src/meta-agents/five-document-framework/package.json": "^29.5.12",
+      "./src/meta-agents/frontend-agent/package.json": "^29.5.12",
+      "./src/meta-agents/infra-orchestrator/package.json": "^29.5.8",
+      "./src/meta-agents/parameter-flow/package.json": "^29.5.8",
+      "./src/meta-agents/post-creation-investigator/package.json": "^29.5.14",
+      "./src/meta-agents/template-engine-factory/package.json": "^29.5.8",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^29.5.8",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^29.5.8"
+    },
+    "@typescript-eslint/eslint-plugin": {
+      "./packages/meta-agents/account-creation-system/package.json": "^8.11.0",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^6.21.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^6.12.0",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^8.11.0",
+      "./src/meta-agents/account-creation-system/package.json": "^8.11.0",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^6.21.0",
+      "./src/meta-agents/backend-agent/package.json": "^6.19.1",
+      "./src/meta-agents/frontend-agent/package.json": "^6.19.1",
+      "./src/meta-agents/infra-orchestrator/package.json": "^6.12.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^8.11.0"
+    },
+    "@typescript-eslint/parser": {
+      "./packages/meta-agents/account-creation-system/package.json": "^8.11.0",
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^6.21.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^6.12.0",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^8.11.0",
+      "./src/meta-agents/account-creation-system/package.json": "^8.11.0",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^6.21.0",
+      "./src/meta-agents/backend-agent/package.json": "^6.19.1",
+      "./src/meta-agents/frontend-agent/package.json": "^6.19.1",
+      "./src/meta-agents/infra-orchestrator/package.json": "^6.12.0",
+      "./src/meta-agents/post-creation-investigator/package.json": "^8.11.0"
+    },
+    "rimraf": {
+      "./packages/meta-agents/account-creation-system/package.json": "^6.0.1",
+      "./packages/meta-agents/five-document-framework/package.json": "^5.0.5",
+      "./packages/meta-agents/parameter-flow/package.json": "^5.0.5",
+      "./packages/meta-agents/post-creation-investigator/package.json": "^6.0.1",
+      "./packages/meta-agents/template-engine-factory/package.json": "^5.0.5",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^5.0.5",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^5.0.5",
+      "./src/meta-agents/account-creation-system/package.json": "^6.0.1",
+      "./src/meta-agents/backend-agent/package.json": "^5.0.5",
+      "./src/meta-agents/five-document-framework/package.json": "^5.0.5",
+      "./src/meta-agents/frontend-agent/package.json": "^5.0.5",
+      "./src/meta-agents/parameter-flow/package.json": "^5.0.5",
+      "./src/meta-agents/post-creation-investigator/package.json": "^6.0.1",
+      "./src/meta-agents/template-engine-factory/package.json": "^5.0.5",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^5.0.5",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^5.0.5"
+    },
+    "@types/babel__parser": {
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^7.1.5",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^7.1.1",
+      "./packages/meta-agents/parameter-flow/package.json": "^7.1.5",
+      "./packages/meta-agents/template-engine-factory/package.json": "^7.1.5",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.1.5",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^7.1.5",
+      "./src/meta-agents/infra-orchestrator/package.json": "^7.1.1",
+      "./src/meta-agents/parameter-flow/package.json": "^7.1.5",
+      "./src/meta-agents/template-engine-factory/package.json": "^7.1.5",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.1.5"
+    },
+    "@types/babel__traverse": {
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^7.20.7",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^7.20.4",
+      "./packages/meta-agents/parameter-flow/package.json": "^7.20.7",
+      "./packages/meta-agents/template-engine-factory/package.json": "^7.20.7",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.20.7",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^7.20.7",
+      "./src/meta-agents/infra-orchestrator/package.json": "^7.20.4",
+      "./src/meta-agents/parameter-flow/package.json": "^7.20.7",
+      "./src/meta-agents/template-engine-factory/package.json": "^7.20.7",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.20.7"
+    },
+    "ts-jest": {
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^29.4.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^29.1.1",
+      "./packages/meta-agents/parameter-flow/package.json": "^29.1.1",
+      "./packages/meta-agents/template-engine-factory/package.json": "^29.1.1",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^29.1.1",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^29.1.1",
+      "./packages/rag-system/package.json": "^29.1.2",
+      "./rag-system/package.json": "^29.1.2",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^29.4.0",
+      "./src/meta-agents/backend-agent/package.json": "^29.1.2",
+      "./src/meta-agents/frontend-agent/package.json": "^29.1.2",
+      "./src/meta-agents/infra-orchestrator/package.json": "^29.1.1",
+      "./src/meta-agents/parameter-flow/package.json": "^29.1.1",
+      "./src/meta-agents/template-engine-factory/package.json": "^29.1.1",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^29.1.1",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^29.1.1"
+    },
+    "ts-node": {
+      "./packages/meta-agents/all-purpose-pattern/package.json": "^10.9.0",
+      "./packages/meta-agents/infra-orchestrator/package.json": "^10.9.1",
+      "./packages/rag-system/package.json": "^10.9.2",
+      "./rag-system/package.json": "^10.9.2",
+      "./src/meta-agents/all-purpose-pattern/package.json": "^10.9.0",
+      "./src/meta-agents/backend-agent/package.json": "^10.9.2",
+      "./src/meta-agents/frontend-agent/package.json": "^10.9.2",
+      "./src/meta-agents/infra-orchestrator/package.json": "^10.9.1"
+    },
+    "@types/handlebars": {
+      "./packages/meta-agents/five-document-framework/package.json": "^4.1.0",
+      "./src/meta-agents/five-document-framework/package.json": "^4.1.0"
+    },
+    "@types/semver": {
+      "./packages/meta-agents/five-document-framework/package.json": "^7.5.8",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.5.6",
+      "./src/meta-agents/five-document-framework/package.json": "^7.5.8",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.5.6"
+    },
+    "@types/cross-spawn": {
+      "./packages/meta-agents/five-document-framework/package.json": "^6.0.6",
+      "./src/meta-agents/five-document-framework/package.json": "^6.0.6"
+    },
+    "@types/babel__generator": {
+      "./packages/meta-agents/parameter-flow/package.json": "^7.27.0",
+      "./packages/meta-agents/template-engine-factory/package.json": "^7.27.0",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^7.27.0",
+      "./src/meta-agents/parameter-flow/package.json": "^7.27.0",
+      "./src/meta-agents/template-engine-factory/package.json": "^7.27.0",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.27.0"
+    },
+    "@types/lodash": {
+      "./packages/meta-agents/parameter-flow/package.json": "^4.14.202",
+      "./packages/meta-agents/template-engine-factory/package.json": "^4.14.202",
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^4.14.202",
+      "./src/meta-agents/parameter-flow/package.json": "^4.14.202",
+      "./src/meta-agents/template-engine-factory/package.json": "^4.14.202",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^4.14.202"
+    },
+    "@types/express": {
+      "./packages/meta-agents/post-creation-investigator/package.json": "^4.17.21",
+      "./packages/meta-agents/thirty-minute-rule/package.json": "^4.17.21",
+      "./packages/rag-system/package.json": "^4.17.21",
+      "./rag-system/package.json": "^4.17.21",
+      "./src/meta-agents/post-creation-investigator/package.json": "^4.17.21",
+      "./src/meta-agents/thirty-minute-rule/package.json": "^4.17.21"
+    },
+    "@types/supertest": {
+      "./packages/meta-agents/post-creation-investigator/package.json": "^6.0.2",
+      "./src/meta-agents/post-creation-investigator/package.json": "^6.0.2"
+    },
+    "@types/mustache": {
+      "./packages/meta-agents/template-engine-factory/package.json": "^4.2.5",
+      "./src/meta-agents/template-engine-factory/package.json": "^4.2.5"
+    },
+    "@types/archiver": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^6.0.2",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^6.0.2"
+    },
+    "@types/tar": {
+      "./packages/meta-agents/vercel-native-architecture/package.json": "^6.1.10",
+      "./src/meta-agents/vercel-native-architecture/package.json": "^6.1.10"
+    },
+    "nodemon": {
+      "./packages/rag-system/package.json": "^3.0.3",
+      "./rag-system/package.json": "^3.0.3"
+    },
+    "@babel/parser": {
+      "./src/meta-agents/vercel-native-architecture/package.json": "^7.28.0"
+    }
+  },
+  "types": {
+    "./.next/package.json": "commonjs",
+    "./.next/types/package.json": "module",
+    "./.test-output/test-uep/package.json": "commonjs",
+    "./apps/lead-generation/.next/package.json": "commonjs",
+    "./apps/lead-generation/.next/types/package.json": "module",
+    "./apps/lead-generation/package.json": "commonjs",
+    "./configs/package.json": "commonjs",
+    "./generated/allpurposepattern/package.json": "commonjs",
+    "./generated/documentation-consolidation-agent/package.json": "commonjs",
+    "./generated/monitoring-dashboard/package.json": "commonjs",
+    "./generated-projects/youtube-github-cross-reference/package.json": "commonjs",
+    "./generated-projects/youtube-github-system/.next/types/package.json": "module",
+    "./generated-projects/youtube-github-system/package.json": "commonjs",
+    "./package.json": "module",
+    "./packages/generated-outputs/youtube-github-cross-reference/package.json": "commonjs",
+    "./packages/generated-outputs/youtube-github-system/package.json": "commonjs",
+    "./packages/meta-agents/account-creation-system/package.json": "commonjs",
+    "./packages/meta-agents/all-purpose-pattern/package.json": "commonjs",
+    "./packages/meta-agents/five-document-framework/package.json": "module",
+    "./packages/meta-agents/infra-orchestrator/package.json": "module",
+    "./packages/meta-agents/parameter-flow/package.json": "commonjs",
+    "./packages/meta-agents/post-creation-investigator/package.json": "commonjs",
+    "./packages/meta-agents/prd-parser/package.json": "commonjs",
+    "./packages/meta-agents/scaffold-generator/package.json": "commonjs",
+    "./packages/meta-agents/template-engine-factory/package.json": "commonjs",
+    "./packages/meta-agents/thirty-minute-rule/package.json": "commonjs",
+    "./packages/meta-agents/vercel-native-architecture/package.json": "commonjs",
+    "./packages/rag-system/package.json": "commonjs",
+    "./rag-system/package.json": "commonjs",
+    "./src/meta-agents/account-creation-system/package.json": "commonjs",
+    "./src/meta-agents/all-purpose-pattern/package.json": "commonjs",
+    "./src/meta-agents/backend-agent/backend/package.json": "commonjs",
+    "./src/meta-agents/backend-agent/package.json": "commonjs",
+    "./src/meta-agents/five-document-framework/package.json": "module",
+    "./src/meta-agents/frontend-agent/backend/package.json": "commonjs",
+    "./src/meta-agents/frontend-agent/package.json": "commonjs",
+    "./src/meta-agents/infra-orchestrator/package.json": "module",
+    "./src/meta-agents/parameter-flow/package.json": "module",
+    "./src/meta-agents/post-creation-investigator/package.json": "commonjs",
+    "./src/meta-agents/prd-parser/package.json": "module",
+    "./src/meta-agents/scaffold-generator/package.json": "module",
+    "./src/meta-agents/scaffold-generator/prospector/package.json": "commonjs",
+    "./src/meta-agents/template-engine-factory/package.json": "module",
+    "./src/meta-agents/thirty-minute-rule/package.json": "commonjs",
+    "./src/meta-agents/vercel-native-architecture/package.json": "module"
+  },
+  "conflicts": [
+    {
+      "dependency": "fs-extra",
+      "versions": [
+        "^11.3.0",
+        "^11.2.0"
+      ],
+      "locations": 34
+    },
+    {
+      "dependency": "chalk",
+      "versions": [
+        "^4.1.2",
+        "^5.3.0"
+      ],
+      "locations": 25
+    },
+    {
+      "dependency": "winston",
+      "versions": [
+        "^3.17.0",
+        "^3.15.0",
+        "^3.11.0"
+      ],
+      "locations": 20
+    },
+    {
+      "dependency": "glob",
+      "versions": [
+        "^11.0.3",
+        "^10.3.10"
+      ],
+      "locations": 18
+    },
+    {
+      "dependency": "uuid",
+      "versions": [
+        "^10.0.0",
+        "^9.0.1"
+      ],
+      "locations": 16
+    },
+    {
+      "dependency": "yaml",
+      "versions": [
+        "^2.4.1",
+        "^2.3.4"
+      ],
+      "locations": 12
+    },
+    {
+      "dependency": "@babel/traverse",
+      "versions": [
+        "^7.28.0",
+        "^7.23.0",
+        "^7.23.6"
+      ],
+      "locations": 11
+    },
+    {
+      "dependency": "@babel/types",
+      "versions": [
+        "^7.28.2",
+        "^7.23.0",
+        "^7.23.6"
+      ],
+      "locations": 11
+    },
+    {
+      "dependency": "commander",
+      "versions": [
+        "^14.0.0",
+        "^11.1.0"
+      ],
+      "locations": 11
+    },
+    {
+      "dependency": "chokidar",
+      "versions": [
+        "^4.0.3",
+        "^3.5.3",
+        "^3.6.0"
+      ],
+      "locations": 10
+    },
+    {
+      "dependency": "@babel/parser",
+      "versions": [
+        "^7.28.0",
+        "^7.23.0",
+        "^7.23.6"
+      ],
+      "locations": 10
+    },
+    {
+      "dependency": "axios",
+      "versions": [
+        "^1.7.7",
+        "^1.6.0"
+      ],
+      "locations": 10
+    },
+    {
+      "dependency": "dotenv",
+      "versions": [
+        "^17.2.0",
+        "^17.2.1",
+        "^16.4.5",
+        "^16.3.1"
+      ],
+      "locations": 9
+    },
+    {
+      "dependency": "openai",
+      "versions": [
+        "^5.10.1",
+        "^5.10.2",
+        "^4.28.4"
+      ],
+      "locations": 8
+    },
+    {
+      "dependency": "express",
+      "versions": [
+        "^4.21.1",
+        "^4.18.2"
+      ],
+      "locations": 8
+    },
+    {
+      "dependency": "next",
+      "versions": [
+        "15.4.1",
+        "15.4.3"
+      ],
+      "locations": 4
+    },
+    {
+      "dependency": "semver",
+      "versions": [
+        "^7.6.0",
+        "^7.5.4"
+      ],
+      "locations": 4
+    },
+    {
+      "dependency": "@types/node",
+      "versions": [
+        "^24.1.0",
+        "^20.11.17"
+      ],
+      "locations": 3
+    },
+    {
+      "dependency": "typescript",
+      "versions": [
+        "^5.8.3",
+        "^5.3.3"
+      ],
+      "locations": 3
+    },
+    {
+      "dependency": "zod",
+      "versions": [
+        "^3.25.76",
+        "^3.22.4"
+      ],
+      "locations": 3
+    }
+  ],
+  "duplicates": {
+    "fs-extra": 34,
+    "chalk": 25,
+    "@itseasy21/mcp-knowledge-graph": 2,
+    "@upstash/redis": 5,
+    "@upstash/vector": 6,
+    "chokidar": 10,
+    "glob": 18,
+    "mustache": 4,
+    "next": 4,
+    "openai": 8,
+    "react": 4,
+    "react-dom": 4,
+    "task-master-ai": 3,
+    "winston": 20,
+    "@octokit/rest": 2,
+    "dotenv": 9,
+    "lucide-react": 2,
+    "youtube-transcript": 2,
+    "@babel/parser": 10,
+    "@babel/traverse": 11,
+    "@babel/types": 11,
+    "@types/node": 3,
+    "commander": 11,
+    "typescript": 3,
+    "zod": 3,
+    "playwright": 4,
+    "imapflow": 2,
+    "nodemailer": 2,
+    "axios": 10,
+    "uuid": 16,
+    "bcryptjs": 2,
+    "node-cron": 4,
+    "crypto": 2,
+    "handlebars": 14,
+    "yaml": 12,
+    "semver": 4,
+    "cross-spawn": 2,
+    "mermaid": 2,
+    "joi": 10,
+    "@babel/generator": 6,
+    "ajv": 4,
+    "graphql": 2,
+    "json-schema": 4,
+    "lodash": 6,
+    "yup": 4,
+    "express": 8,
+    "supertest": 2,
+    "jest": 2,
+    "lighthouse": 2,
+    "events": 2,
+    "@vercel/analytics": 2,
+    "@vercel/blob": 2,
+    "@vercel/edge": 2,
+    "@vercel/kv": 2,
+    "@vercel/node": 2,
+    "@vercel/postgres": 2,
+    "@vercel/speed-insights": 2,
+    "archiver": 2,
+    "tar": 2,
+    "@qdrant/js-client-rest": 2,
+    "@types/express": 2,
+    "@types/joi": 2,
+    "@types/uuid": 2,
+    "@types/handlebars": 2,
+    "@types/fs-extra": 2
+  }
+}

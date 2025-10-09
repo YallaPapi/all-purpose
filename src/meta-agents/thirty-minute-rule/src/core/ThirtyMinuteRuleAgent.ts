@@ -37,6 +37,7 @@ import {
 import { DebuggingSessionManager } from './DebuggingSessionManager.js';
 import { ComponentIsolationTester } from './ComponentIsolationTester.js';
 import { DebugEndpointGenerator } from '../debug/DebugEndpointGenerator.js';
+import { RealUEPWrapper, RealUEPWrapperConfig } from '../RealUEPWrapper.js';
 
 /**
  * Thirty-Minute Rule Agent - Prevents endless debugging loops through systematic time-bounded debugging
@@ -47,6 +48,7 @@ export class ThirtyMinuteRuleAgent extends EventEmitter {
   private sessionManager: DebuggingSessionManager;
   private isolationTester: ComponentIsolationTester;
   private endpointGenerator: DebugEndpointGenerator;
+  private uepWrapper?: RealUEPWrapper;
   private isInitialized: boolean = false;
   private metaAgentIntegration?: MetaAgentIntegration;
 
@@ -85,6 +87,112 @@ export class ThirtyMinuteRuleAgent extends EventEmitter {
 
     // Set up event forwarding for observability
     this.setupEventForwarding();
+
+    // Initialize UEP wrapper for real-time coordination
+    this.initializeUEP();
+  }
+
+  /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  private initializeUEP(): void {
+    try {
+      const uepConfig: RealUEPWrapperConfig = {
+        agentId: 'thirty-minute-rule-agent',
+        agentType: 'coordination',
+        capabilities: {
+          debugging: ['time-bounded-sessions', 'debug-endpoint-generation', 'component-isolation-testing'],
+          testing: ['isolation-tests', 'health-checks', 'fallback-mechanisms'],
+          endpoints: ['auto-generation', 'custom-debug-endpoints', 'health-monitoring'],
+          timeManagement: ['session-timers', 'timeout-handling', 'progress-tracking'],
+          knowledgeExtraction: ['pattern-recognition', 'solution-capture', 'best-practices'],
+          coordination: ['meta-agent-integration', 'context7-support', 'taskmaster-integration']
+        },
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      };
+
+      this.uepWrapper = new RealUEPWrapper(uepConfig);
+      this.setupUEPEventHandlers();
+      
+      console.log('✅ REAL UEP wrapper initialized for Thirty-Minute-Rule Agent');
+    } catch (error) {
+      console.error('❌ Failed to initialize UEP wrapper for Thirty-Minute-Rule Agent', { error });
+    }
+  }
+
+  /**
+   * Setup UEP event handlers for task coordination
+   */
+  private setupUEPEventHandlers(): void {
+    if (!this.uepWrapper) return;
+
+    // Handle task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      console.log('📋 Received task via UEP', { taskId: task.id, type: task.type });
+      
+      try {
+        let result;
+        switch (task.type) {
+          case 'debugging-session':
+          case 'start-debugging-session':
+            result = { sessionId: await this.startDebuggingSession(task) };
+            break;
+          case 'generate-debug-endpoints':
+            result = await this.generateDebugEndpoints(task);
+            break;
+          case 'run-isolation-tests':
+            result = await this.runIsolationTests(task.components, task.configuration);
+            break;
+          case 'get-debugging-status':
+          case 'status':
+            result = this.getDebuggingStatus();
+            break;
+          case 'query-knowledge':
+            result = this.queryKnowledge(task.filters || {});
+            break;
+          case 'complete-debugging-session':
+            if (task.sessionId && task.resolution) {
+              result = await this.completeDebuggingSession(task.sessionId, task.resolution);
+            } else {
+              result = { success: false, error: 'Missing sessionId or resolution' };
+            }
+            break;
+          case 'cancel-debugging-session':
+            if (task.sessionId && task.reason) {
+              await this.cancelDebuggingSession(task.sessionId, task.reason);
+              result = { success: true, message: 'Session cancelled' };
+            } else {
+              result = { success: false, error: 'Missing sessionId or reason' };
+            }
+            break;
+          default:
+            result = { success: false, error: `Unknown task type: ${task.type}` };
+        }
+
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, result);
+        }
+      } catch (error) {
+        console.error('❌ Task execution failed', { taskId: task.id, error });
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, { 
+            success: false, 
+            error: error instanceof Error ? error.message : String(error) 
+          });
+        }
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (message) => {
+      console.log('📢 Received system broadcast', { 
+        type: message.payload.type, 
+        from: message.from 
+      });
+    });
+
+    console.log('✅ UEP event handlers configured for Thirty-Minute-Rule Agent');
   }
 
   /**
@@ -110,6 +218,11 @@ export class ThirtyMinuteRuleAgent extends EventEmitter {
 
       // Load existing knowledge base
       await this.loadKnowledgeBase();
+
+      // Initialize UEP connection for real-time coordination
+      if (this.uepWrapper) {
+        await this.uepWrapper.initialize();
+      }
 
       this.isInitialized = true;
 
@@ -296,6 +409,15 @@ export class ThirtyMinuteRuleAgent extends EventEmitter {
         result,
         timestamp: new Date().toISOString()
       });
+
+      // Broadcast debugging session result via UEP
+      if (this.uepWrapper) {
+        try {
+          await this.uepWrapper.broadcastDebuggingSession(result);
+        } catch (error) {
+          console.warn('⚠️ Failed to broadcast debugging session result via UEP', { error });
+        }
+      }
 
       console.log(chalk.green(`🎉 Debugging session completed: ${sessionId}`));
       console.log(chalk.blue(`📊 Knowledge extracted: ${result.knowledgeExtracted.length} items`));
@@ -646,6 +768,36 @@ export class ThirtyMinuteRuleAgent extends EventEmitter {
       }
     } catch (error: any) {
       console.warn(chalk.yellow(`⚠️  Failed to share knowledge: ${error.message}`));
+    }
+  }
+
+  /**
+   * Graceful shutdown with UEP cleanup
+   */
+  async shutdown(): Promise<void> {
+    console.log('🛑 Shutting down Thirty-Minute Rule Agent...');
+
+    try {
+      // Cleanup UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
+
+      // Cancel any active debugging sessions
+      for (const sessionId of this.debuggingSessions.keys()) {
+        try {
+          await this.cancelDebuggingSession(sessionId, 'Agent shutdown');
+        } catch (error) {
+          console.warn(`Failed to cancel session ${sessionId}:`, error);
+        }
+      }
+
+      this.isInitialized = false;
+      console.log('✅ Thirty-Minute Rule Agent shut down successfully');
+    } catch (error) {
+      console.error('❌ Error during Thirty-Minute Rule Agent shutdown', { error });
+      throw error;
     }
   }
 }

@@ -1,38 +1,76 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
+// GET method for backwards compatibility
 export async function GET(request: NextRequest) {
+  return handleDemoCreation(request);
+}
+
+// POST method for new functionality
+export async function POST(request: NextRequest) {
+  return handleDemoCreation(request);
+}
+
+async function handleDemoCreation(request: NextRequest) {
   try {
+    // Parse request data for POST requests
+    let requestData = {
+      companyName: 'Quick Demo Business Co',
+      industry: 'business-services',
+      generateUnique: false
+    };
+
+    if (request.method === 'POST') {
+      try {
+        const body = await request.json();
+        requestData = { ...requestData, ...body };
+      } catch (parseError) {
+        console.log('Could not parse POST body, using defaults');
+      }
+    }
+
+    // Generate unique company slug if requested
+    let companySlug = 'quick-demo-business';
+    let companyName = requestData.companyName;
+    
+    if (requestData.generateUnique) {
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 8);
+      companySlug = `demo-${timestamp}-${random}`;
+      companyName = `${requestData.companyName} (${random.toUpperCase()})`;
+    }
+
     // Initialize OpenAI client inside function to avoid build-time issues
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
+    
     // Get the current domain dynamically
     const protocol = request.headers.get('x-forwarded-proto') || 'https';
     const host = request.headers.get('x-vercel-deployment-url') || 
                  request.headers.get('host') || 
-                 'solarbookers.com';
+                 'localhost:3000';
     const currentDomain = `${protocol}://${host}`;
     
-    console.log('Creating quick demo with domain:', currentDomain);
+    console.log('Creating demo with:', { companySlug, companyName, industry: requestData.industry, domain: currentDomain });
 
     // Create assistant directly without calling other endpoints
     const assistant = await openai.beta.assistants.create({
-      name: 'Quick Demo Business Services Assistant',
-      instructions: `Your job is to qualify leads over SMS for business services. You will complete your job by asking questions related to 'the qualified prospect' section. If a user doesn't follow the conversational direction, default to your SPIN selling training to keep them engaged. Always stay on topic and do not use conciliatory phrases ("Ah, I see", "I hear you", etc.) when the user expresses disinterest.
+      name: `${companyName} Lead Generation Assistant`,
+      instructions: `Your job is to qualify leads over SMS for ${requestData.industry} services. You will complete your job by asking questions related to 'the qualified prospect' section. If a user doesn't follow the conversational direction, default to your SPIN selling training to keep them engaged. Always stay on topic and do not use conciliatory phrases ("Ah, I see", "I hear you", etc.) when the user expresses disinterest.
 
 PROSPECT INFORMATION:
 - Name: Demo User
-- Company: Quick Demo Business Co
+- Company: ${companyName}
 - Title: Business Owner
 - Location: Austin, TX
-- Industry: Business Services
-- Company Description: Professional business consulting and support services
+- Industry: ${requestData.industry}
+- Company Description: Professional ${requestData.industry} and support services
 
 Your Output style: casual message, conversational, American casual
 Your training: The Challenger Sale, Business Services
 
-FIRST Message: "It's Sarah from Business Lead Pro here. Is this the same Demo User that reached out about business consulting services in the last couple of months?"
+FIRST Message: "It's Sarah from ${companyName} here. Is this the same Demo User that reached out about ${requestData.industry} services in the last couple of months?"
 
 Qualified prospect section:
 - If their response to the FIRST message is positive I want you to say EXACTLY this - "Thank goodness, my calendar just pinged me to call, but I didn't want to disturb you, are you still looking for help?" but if their response to the FIRST message was negative I want you to say EXACTLY this "Sorry about that, just to confirm, are you interested in business services?". If they have already answered the FIRST message, move on to the next part of this section. 
@@ -66,8 +104,7 @@ FAQ:
       tools: [{ type: "code_interpreter" }]
     });
 
-    // Store the assistant in Redis if possible
-    const companySlug = 'quick-demo-business';
+    // Store the assistant in Redis with company data
     try {
       const { Redis } = await import('@upstash/redis');
       const redis = new Redis({
@@ -75,8 +112,17 @@ FAQ:
         token: process.env.KV_REST_API_TOKEN!,
       });
       
-      await redis.set(`company:${companySlug}`, assistant.id);
-      console.log(`Stored assistant ${assistant.id} for ${companySlug}`);
+      // Store both assistant ID and company data
+      const companyData = {
+        assistantId: assistant.id,
+        companyName: companyName,
+        industry: requestData.industry,
+        createdAt: new Date().toISOString(),
+        slug: companySlug
+      };
+      
+      await redis.set(`company:${companySlug}`, JSON.stringify(companyData));
+      console.log(`Stored assistant ${assistant.id} for ${companySlug} with data:`, companyData);
     } catch (redisError) {
       console.log('Warning: Could not store in Redis:', redisError);
     }
@@ -84,7 +130,22 @@ FAQ:
     // Generate demo URL
     const demoUrl = `${currentDomain}/${companySlug}`;
     
-    // Return HTML response with working demo link
+    // Return JSON for POST requests, HTML for GET requests (backwards compatibility)
+    if (request.method === 'POST') {
+      return new Response(JSON.stringify({
+        success: true,
+        demoUrl: demoUrl,
+        assistantId: assistant.id,
+        companySlug: companySlug,
+        companyName: companyName,
+        industry: requestData.industry,
+        message: 'Demo created successfully'
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Return HTML response for GET requests (backwards compatibility)
     const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -144,22 +205,39 @@ FAQ:
   } catch (error) {
     console.error('Quick demo creation failed:', error);
     
+    const errorInfo = {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+      hasRedisUrl: !!process.env.KV_REST_API_URL,
+      details: error instanceof Error ? error.stack : error
+    };
+
+    // Return JSON for POST requests
+    if (request.method === 'POST') {
+      return new Response(JSON.stringify({
+        success: false,
+        error: errorInfo.error,
+        debug: errorInfo
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Return HTML for GET requests (backwards compatibility)
     const errorHtml = `<!DOCTYPE html>
 <html>
 <head><title>Demo Creation Failed</title></head>
 <body style="font-family: Arial; padding: 40px; text-align: center;">
   <h1 style="color: red;">❌ Demo Creation Failed</h1>
-  <p><strong>Error:</strong> ${error instanceof Error ? error.message : 'Unknown error'}</p>
+  <p><strong>Error:</strong> ${errorInfo.error}</p>
   <p><strong>Debug Info:</strong></p>
-  <pre style="background: #f5f5f5; padding: 20px; text-align: left; border-radius: 5px;">${JSON.stringify({
-    hasOpenAIKey: !!process.env.OPENAI_API_KEY,
-    hasRedisUrl: !!process.env.KV_REST_API_URL,
-    error: error instanceof Error ? error.stack : error
-  }, null, 2)}</pre>
+  <pre style="background: #f5f5f5; padding: 20px; text-align: left; border-radius: 5px;">${JSON.stringify(errorInfo, null, 2)}</pre>
 </body>
 </html>`;
 
     return new Response(errorHtml, {
+      status: 500,
       headers: { 'Content-Type': 'text/html' }
     });
   }

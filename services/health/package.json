@@ -1,0 +1,100 @@
+{
+  "name": "@allpurp/uep-health-monitoring",
+  "version": "1.0.0",
+  "description": "UEP Health Monitoring Service with Consul integration and real-time WebSocket updates",
+  "type": "module",
+  "main": "dist/UEPHealthMonitoringService.js",
+  "types": "dist/UEPHealthMonitoringService.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --collectCoverageFrom='**/*.ts' --collectCoverageFrom='!**/*.test.ts' --collectCoverageFrom='!**/*.d.ts'",
+    "start": "node dist/UEPHealthMonitoringService.js",
+    "dev": "ts-node-esm UEPHealthMonitoringService.ts",
+    "lint": "eslint *.ts --fix",
+    "clean": "rimraf dist coverage",
+    "docker:build": "docker build -t uep-health-monitoring .",
+    "docker:run": "docker run -p 3001:3001 -e NODE_ENV=production uep-health-monitoring"
+  },
+  "keywords": [
+    "uep",
+    "health-monitoring",
+    "consul",
+    "websocket",
+    "prometheus",
+    "microservices",
+    "agent-coordination",
+    "real-time",
+    "observability"
+  ],
+  "author": "TaskMaster Research Implementation",
+  "license": "ISC",
+  "dependencies": {
+    "consul": "^0.40.0",
+    "express": "^4.21.2",
+    "socket.io": "^4.7.5",
+    "winston": "^3.17.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/consul": "^0.40.3",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.1.0",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9.32.0",
+    "jest": "^30.0.5",
+    "rimraf": "^6.0.1",
+    "socket.io-client": "^4.7.5",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest/presets/default-esm",
+    "extensionsToTreatAsEsm": [".ts"],
+    "testEnvironment": "node",
+    "moduleNameMapping": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "collectCoverageFrom": [
+      "**/*.{ts}",
+      "!**/*.test.{ts}",
+      "!**/*.d.ts",
+      "!node_modules/**",
+      "!dist/**",
+      "!coverage/**"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.ts",
+      "**/?(*.)+(spec|test).ts"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 75,
+        "functions": 75,
+        "lines": 75,
+        "statements": 75
+      }
+    },
+    "testTimeout": 30000,
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YallaPapi/all-purpose.git",
+    "directory": "services/health"
+  },
+  "bugs": {
+    "url": "https://github.com/YallaPapi/all-purpose/issues"
+  },
+  "homepage": "https://github.com/YallaPapi/all-purpose#readme"
+}

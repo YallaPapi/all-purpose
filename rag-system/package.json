@@ -11,7 +11,11 @@
     "test:watch": "jest --watch",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f qdrant"
+    "docker:logs": "docker-compose logs -f qdrant",
+    "cache:init": "node initialize-cached-rag.js",
+    "cache:test": "node test-cache-system.js",
+    "cache:stress": "node test-cache-system.js",
+    "cache:clear": "node -e \"const {createCacheManager} = require('./src/cache/CacheManager'); createCacheManager().then(c => c.clearCache().then(() => console.log('Cache cleared')))\""
   },
   "keywords": [
     "rag",
@@ -34,7 +38,10 @@
     "node-cron": "^3.0.3",
     "openai": "^4.28.4",
     "uuid": "^9.0.1",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "ioredis": "^5.3.2",
+    "lru-cache": "^10.1.0",
+    "minimatch": "^9.0.3"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

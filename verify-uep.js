@@ -7,8 +7,12 @@
  * Run this after setup to ensure everything is functional.
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function verifyUEP() {
   console.log('🔍 Verifying Universal Execution Protocol Setup...\n');
@@ -34,9 +38,9 @@ async function verifyUEP() {
   // Check 2: Dependencies
   console.log('\n2. Checking dependencies...');
   try {
-    require('dotenv');
-    require('fs-extra');
-    require('zod');
+    await import('dotenv');
+    await import('fs-extra');
+    await import('zod');
     console.log('✅ Required dependencies available');
     score += 15;
     checks.push({ name: 'Dependencies', status: '✅ PASS' });
@@ -49,7 +53,7 @@ async function verifyUEP() {
   // Check 3: UEP Module Import
   console.log('\n3. Checking UEP module import...');
   try {
-    const { createUEPMetaAgentFactory } = require('./src/meta-agents/UEPMetaAgentFactory');
+    const { createUEPMetaAgentFactory } = await import('./src/meta-agents/UEPMetaAgentFactory.js');
     console.log('✅ UEP factory module imports successfully');
     score += 20;
     checks.push({ name: 'UEP Module Import', status: '✅ PASS' });
@@ -64,7 +68,7 @@ async function verifyUEP() {
   try {
     await fs.access('dist/uep/cli.js');
     // Test CLI help (basic check)
-    const { spawn } = require('child_process');
+    const { spawn } = await import('child_process');
     const cliTest = new Promise((resolve, reject) => {
       const proc = spawn('node', ['dist/uep/cli.js', '--help'], { timeout: 5000 });
       let output = '';
@@ -92,8 +96,8 @@ async function verifyUEP() {
   // Check 5: Enhanced Agents
   console.log('\n5. Checking enhanced agents...');
   try {
-    const EnhancedPRDParser = require('./src/meta-agents/enhanced-prd-parser');
-    const { EnhancedScaffoldGenerator } = require('./src/meta-agents/enhanced-scaffold-generator');
+    const EnhancedPRDParser = await import('./src/meta-agents/enhanced-prd-parser.js');
+    const { EnhancedScaffoldGenerator } = await import('./src/meta-agents/enhanced-scaffold-generator.js');
     console.log('✅ Enhanced agents available');
     score += 15;
     checks.push({ name: 'Enhanced Agents', status: '✅ PASS' });
@@ -106,7 +110,7 @@ async function verifyUEP() {
   // Check 6: Basic UEP Factory Test
   console.log('\n6. Testing UEP factory creation...');
   try {
-    const { createUEPMetaAgentFactory } = require('./src/meta-agents/UEPMetaAgentFactory');
+    const { createUEPMetaAgentFactory } = await import('./src/meta-agents/UEPMetaAgentFactory.js');
     const factory = await createUEPMetaAgentFactory({
       enableUEP: true,
       logLevel: 'silent'
@@ -196,7 +200,7 @@ function showQuickGuide() {
 }
 
 // Main execution
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   verifyUEP().then(success => {
     if (success) {
       showQuickGuide();
@@ -213,4 +217,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { verifyUEP };
+export { verifyUEP };

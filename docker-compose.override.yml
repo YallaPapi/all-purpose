@@ -1,0 +1,39 @@
+services:
+  # Fix NATS health check
+  nats-broker:
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Ensure factory-core uses RealMetaAgentFactory
+  factory-core:
+    environment:
+      - USE_REAL_AGENTS=true
+      - AGENT_BASE_PATH=/app/src/meta-agents
+    volumes:
+      - ./src/meta-agents:/app/src/meta-agents:ro
+      - ./containers/factory-core/src:/app/src:ro
+
+  # Add development logging
+  redis:
+    command: redis-server --loglevel debug
+
+  # Enable observability stack in development
+  observability:
+    environment:
+      - LOG_LEVEL=debug
+    
+  tempo:
+    environment:
+      - LOG_LEVEL=debug
+    
+  loki:
+    environment:
+      - LOG_LEVEL=debug
+    
+  alertmanager:
+    environment:
+      - LOG_LEVEL=debug

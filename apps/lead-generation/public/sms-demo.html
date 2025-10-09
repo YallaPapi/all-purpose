@@ -59,7 +59,7 @@
                             </div>
                             <div>
                                 <div class="font-medium text-black">Sarah</div>
-                                <div class="text-xs text-gray-500" id="companyName">ABC Solar Solutions</div>
+                                <div class="text-xs text-gray-500" id="companyName">Demo Services</div>
                             </div>
                         </div>
                         <div class="flex gap-3">
@@ -160,9 +160,9 @@
                 
                 // Update scenario info
                 document.getElementById('scenarioInfo').innerHTML = `
-                    <p><strong>Prospect:</strong> John Smith</p>
-                    <p><strong>Company:</strong> Acme Corp</p>
-                    <p><strong>Solar Company:</strong> ABC Solar Solutions</p>
+                    <p><strong>Prospect:</strong> Demo Contact</p>
+                    <p><strong>Company:</strong> Demo Company</p>
+                    <p><strong>Service Provider:</strong> Demo Services</p>
                 `;
                 
                 // Enable input immediately
@@ -171,7 +171,7 @@
                 
                 // Start conversation automatically
                 setTimeout(() => {
-                    addMessage("It's Sarah from ABC Solar Solutions here. Is this the same John Smith that got a Solar services quote from us in the last couple of months?", 'assistant');
+                    addMessage("Demo conversation will begin with AI assistant's first message based on actual lead data.", 'assistant');
                 }, 1000);
                 
             } else {
@@ -316,7 +316,7 @@
             if (currentAssistantId) {
                 // Add initial message after brief delay
                 setTimeout(() => {
-                    addMessage("It's Sarah from ABC Solar Solutions here. Is this the same John Smith that got a Solar services quote from us in the last couple of months?", 'assistant');
+                    addMessage("Demo conversation will begin with AI assistant's first message based on actual lead data.", 'assistant');
                 }, 500);
             }
         }

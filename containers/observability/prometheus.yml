@@ -1,0 +1,101 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'production'
+    cluster: 'meta-agent-factory'
+
+rule_files:
+  - "recording_rules.yml"
+  - "alert_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+
+  # Factory Core - 11 Meta-Agents with enhanced metrics
+  - job_name: 'factory-core'
+    static_configs:
+      - targets: ['factory-core:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'agent_.*'
+        target_label: 'component'
+        replacement: 'meta-agent'
+
+  # Domain Agents - 5 Specialized Agents
+  - job_name: 'domain-agents'
+    static_configs:
+      - targets: ['domain-agents:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # UEP Service - Protocol Validation
+  - job_name: 'uep-service'
+    static_configs:
+      - targets: ['uep-service:3002']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # UEP Registry - Service Discovery
+  - job_name: 'uep-registry'
+    static_configs:
+      - targets: ['uep-registry:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # API Gateway - Traefik
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # NATS Message Broker
+  - job_name: 'nats-broker'
+    static_configs:
+      - targets: ['nats-broker:8222']
+    metrics_path: '/varz'
+    scrape_interval: 30s
+
+  # Redis Cache
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Loki Logs
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Grafana Dashboard
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['observability:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - 'alertmanager:9093'
+      timeout: 10s
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 15d
+    retention.size: 10GB
+    wal-compression: true

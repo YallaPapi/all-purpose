@@ -1,0 +1,7 @@
+{
+  "agentType": "scaffold-generator",
+  "config": {
+    "projectName": "test-api",
+    "features": ["express", "postgres", "jwt"]
+  }
+}

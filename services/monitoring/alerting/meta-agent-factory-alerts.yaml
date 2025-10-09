@@ -1,0 +1,380 @@
+# Meta-Agent Factory Alerting Rules
+# Task 231.4 - Integrate Alerting and Meta-Monitoring
+# Prometheus alerting rules with proper labeling for dynamic routing
+
+groups:
+  - name: meta-agent-factory.rules
+    interval: 30s
+    rules:
+      # System Health Alerts
+      - alert: MetaAgentFactorySystemHealthLow
+        expr: |
+          (
+            (
+              avg(up{job=~"meta-agent-.*"}) * 0.3 +
+              (1 - avg(rate(http_request_errors_total[5m]) / rate(http_requests_total[5m]))) * 0.25 +
+              (1 - avg(cpu_usage_percent) / 100) * 0.2 +
+              (1 - avg(memory_usage_percent) / 100) * 0.15 +
+              avg(agent_coordination_success_rate) * 0.1
+            ) * 100
+          ) < 70
+        for: 2m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: system-overview
+          alert_type: health
+        annotations:
+          summary: "Meta-Agent Factory system health score below threshold"
+          description: "System health score has dropped to {{ $value | humanize }}% (below 70% threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/system-health"
+          dashboard_url: "https://grafana.company.com/d/meta-agent-factory-overview"
+
+      - alert: MetaAgentFactorySystemHealthCritical
+        expr: |
+          (
+            (
+              avg(up{job=~"meta-agent-.*"}) * 0.3 +
+              (1 - avg(rate(http_request_errors_total[5m]) / rate(http_requests_total[5m]))) * 0.25 +
+              (1 - avg(cpu_usage_percent) / 100) * 0.2 +
+              (1 - avg(memory_usage_percent) / 100) * 0.15 +
+              avg(agent_coordination_success_rate) * 0.1
+            ) * 100
+          ) < 50
+        for: 1m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: system-overview
+          alert_type: health
+        annotations:
+          summary: "Meta-Agent Factory system health critically low"
+          description: "System health score has dropped to {{ $value | humanize }}% (below 50% critical threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/system-health-critical"
+          dashboard_url: "https://grafana.company.com/d/meta-agent-factory-overview"
+
+      # Agent Coordination Alerts
+      - alert: AgentCoordinationFailureHigh
+        expr: (1 - avg(agent_coordination_success_rate)) * 100 > 20
+        for: 3m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: meta-agent
+          service: agent-coordination
+          alert_type: coordination
+        annotations:
+          summary: "High agent coordination failure rate"
+          description: "Agent coordination failure rate is {{ $value | humanize }}% (above 20% threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/coordination-failures"
+          dashboard_url: "https://grafana.company.com/d/agent-coordination-overview"
+
+      - alert: UEPProtocolComplianceViolation
+        expr: (1 - avg(uep_protocol_compliance_rate)) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: meta-agent
+          service: uep-protocol
+          alert_type: protocol
+        annotations:
+          summary: "UEP protocol compliance violations detected"
+          description: "UEP protocol compliance violation rate is {{ $value | humanize }}% (above 5% threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/uep-violations"
+          dashboard_url: "https://grafana.company.com/d/agent-coordination-overview"
+
+      # Service Registry Alerts
+      - alert: ServiceRegistryDown
+        expr: up{job="service-registry"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: service-registry
+          alert_type: availability
+        annotations:
+          summary: "Service Registry is down"
+          description: "Service Registry instance {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/service-registry-down"
+          dashboard_url: "https://grafana.company.com/d/service-registry-health"
+
+      - alert: ServiceRegistryHighErrorRate
+        expr: |
+          (
+            sum(rate(service_registry_requests_total{status=~"4..|5.."}[5m])) /
+            sum(rate(service_registry_requests_total[5m]))
+          ) * 100 > 5
+        for: 3m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: service-registry
+          alert_type: error_rate
+        annotations:
+          summary: "Service Registry high error rate"
+          description: "Service Registry error rate is {{ $value | humanize }}% (above 5% threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/service-registry-errors"
+          dashboard_url: "https://grafana.company.com/d/service-registry-health"
+
+      - alert: ServiceRegistryHighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(service_registry_request_duration_seconds_bucket[5m])) by (le)
+          ) * 1000 > 1000
+        for: 5m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: service-registry
+          alert_type: latency
+        annotations:
+          summary: "Service Registry high latency"
+          description: "Service Registry P95 latency is {{ $value | humanize }}ms (above 1000ms threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/service-registry-latency"
+          dashboard_url: "https://grafana.company.com/d/service-registry-health"
+
+      # Agent Registration Alerts
+      - alert: AgentRegistrationStorm
+        expr: rate(agent_registration_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: meta-agent
+          service: service-registry
+          alert_type: registration
+        annotations:
+          summary: "High agent registration rate detected"
+          description: "Agent registration rate is {{ $value | humanize }} registrations/sec (above 10/sec threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/registration-storm"
+          dashboard_url: "https://grafana.company.com/d/service-registry-health"
+
+      - alert: AgentDeregistrationStorm
+        expr: rate(agent_deregistration_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: meta-agent
+          service: service-registry
+          alert_type: deregistration
+        annotations:
+          summary: "High agent deregistration rate detected"
+          description: "Agent deregistration rate is {{ $value | humanize }} deregistrations/sec (above 5/sec threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/deregistration-storm"
+          dashboard_url: "https://grafana.company.com/d/service-registry-health"
+
+      # Resource Utilization Alerts
+      - alert: HighCPUUtilization
+        expr: avg(cpu_usage_percent) > 85
+        for: 5m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: infrastructure
+          alert_type: resource
+        annotations:
+          summary: "High CPU utilization across system"
+          description: "Average CPU utilization is {{ $value | humanize }}% (above 85% threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/high-cpu"
+          dashboard_url: "https://grafana.company.com/d/meta-agent-factory-overview"
+
+      - alert: HighMemoryUtilization
+        expr: avg(memory_usage_percent) > 90
+        for: 5m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: infrastructure
+          alert_type: resource
+        annotations:
+          summary: "High memory utilization across system"
+          description: "Average memory utilization is {{ $value | humanize }}% (above 90% threshold)"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/high-memory"
+          dashboard_url: "https://grafana.company.com/d/meta-agent-factory-overview"
+
+  - name: meta-monitoring.rules
+    interval: 30s
+    rules:
+      # Observability Stack Health Alerts
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: prometheus
+          alert_type: availability
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus instance {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://runbooks.company.com/observability/prometheus-down"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: loki
+          alert_type: availability
+        annotations:
+          summary: "Loki is down"
+          description: "Loki instance {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://runbooks.company.com/observability/loki-down"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: grafana
+          alert_type: availability
+        annotations:
+          summary: "Grafana is down"
+          description: "Grafana instance {{ $labels.instance }} has been down for more than 2 minutes"
+          runbook_url: "https://runbooks.company.com/observability/grafana-down"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      - alert: AlertmanagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: alertmanager
+          alert_type: availability
+        annotations:
+          summary: "Alertmanager is down"
+          description: "Alertmanager instance {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://runbooks.company.com/observability/alertmanager-down"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      # Deadman Switch Alert (Always firing unless system is down)
+      - alert: DeadmanSwitch
+        expr: vector(1)
+        labels:
+          severity: info
+          app: meta-agent-factory
+          team: platform
+          service: monitoring
+          alert_type: deadman
+        annotations:
+          summary: "Deadman switch - monitoring is alive"
+          description: "This alert should always be firing. If you are not receiving this alert, the monitoring system may be down."
+          runbook_url: "https://runbooks.company.com/observability/deadman-switch"
+
+      # Heartbeat Alert (Detects missing heartbeat)
+      - alert: HeartbeatMissing
+        expr: time() - meta_agent_factory_heartbeat > 300
+        for: 1m
+        labels:
+          severity: critical
+          app: meta-agent-factory
+          team: platform
+          service: monitoring
+          alert_type: heartbeat
+        annotations:
+          summary: "Meta-Agent Factory heartbeat missing"
+          description: "No heartbeat received from Meta-Agent Factory for {{ $value | humanizeDuration }}"
+          runbook_url: "https://runbooks.company.com/meta-agent-factory/heartbeat-missing"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      # Data Ingestion Alerts
+      - alert: PrometheusIngestionLow
+        expr: rate(prometheus_tsdb_samples_appended_total[5m]) < 100
+        for: 5m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: prometheus
+          alert_type: ingestion
+        annotations:
+          summary: "Prometheus data ingestion rate is low"
+          description: "Prometheus is ingesting only {{ $value | humanize }} samples/sec (below 100/sec threshold)"
+          runbook_url: "https://runbooks.company.com/observability/prometheus-ingestion-low"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      - alert: LokiIngestionErrors
+        expr: rate(loki_distributor_samples_received_total{status="error"}[5m]) > 10
+        for: 3m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: loki
+          alert_type: ingestion
+        annotations:
+          summary: "Loki ingestion errors detected"
+          description: "Loki is experiencing {{ $value | humanize }} ingestion errors/sec (above 10/sec threshold)"
+          runbook_url: "https://runbooks.company.com/observability/loki-ingestion-errors"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      # Alert Delivery Health
+      - alert: AlertmanagerNotificationFailures
+        expr: rate(alertmanager_notifications_failed_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: alertmanager
+          alert_type: notification
+        annotations:
+          summary: "Alertmanager notification failures detected"
+          description: "Alertmanager is experiencing {{ $value | humanize }} notification failures/sec for {{ $labels.integration }}"
+          runbook_url: "https://runbooks.company.com/observability/alertmanager-notification-failures"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      # Query Performance Alerts
+      - alert: PrometheusQuerySlow
+        expr: |
+          histogram_quantile(0.95, 
+            rate(prometheus_engine_query_duration_seconds_bucket[5m])
+          ) > 30
+        for: 5m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: prometheus
+          alert_type: performance
+        annotations:
+          summary: "Prometheus queries are slow"
+          description: "Prometheus P95 query duration is {{ $value | humanizeDuration }} (above 30s threshold)"
+          runbook_url: "https://runbooks.company.com/observability/prometheus-query-slow"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"
+
+      - alert: PrometheusRuleEvaluationSlow
+        expr: |
+          histogram_quantile(0.95, 
+            rate(prometheus_rule_evaluation_duration_seconds_bucket[5m])
+          ) > 10
+        for: 5m
+        labels:
+          severity: warning
+          app: meta-agent-factory
+          team: platform
+          service: prometheus
+          alert_type: performance
+        annotations:
+          summary: "Prometheus rule evaluation is slow"
+          description: "Prometheus P95 rule evaluation duration is {{ $value | humanizeDuration }} (above 10s threshold)"
+          runbook_url: "https://runbooks.company.com/observability/prometheus-rules-slow"
+          dashboard_url: "https://grafana.company.com/d/observability-stack-health"

@@ -13,7 +13,7 @@ export function detectDomain(request: NextRequest, fallbackDomain?: string): str
                 process.env.VERCEL_URL ||
                 process.env.VERCEL_BRANCH_URL ||
                 fallbackDomain ||
-                'all-purpose-1pd1-git-main-stuartoden-2590s-projects.vercel.app';
+                'dbjumpstartdemo.com';
   
   return domain;
 }

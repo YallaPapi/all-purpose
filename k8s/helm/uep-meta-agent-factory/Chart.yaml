@@ -1,0 +1,40 @@
+apiVersion: v2
+name: uep-meta-agent-factory
+description: UEP Meta-Agent Factory with Service Discovery - Complete Kubernetes deployment
+type: application
+version: 1.0.0
+appVersion: "2.0.0"
+home: https://github.com/uep-factory/meta-agent-factory
+sources:
+  - https://github.com/uep-factory/meta-agent-factory
+maintainers:
+  - name: UEP Factory Team
+    email: team@uep-factory.io
+keywords:
+  - uep
+  - meta-agents
+  - service-discovery
+  - microservices
+  - agent-factory
+annotations:
+  category: Development
+  licenses: MIT
+dependencies:
+  - name: redis
+    version: "17.3.7"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+  - name: consul
+    version: "1.0.2" 
+    repository: "https://helm.releases.hashicorp.com"
+    condition: consul.enabled
+  - name: prometheus
+    version: "15.16.1"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: monitoring.prometheus.enabled
+  - name: grafana
+    version: "6.44.11"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: monitoring.grafana.enabled
+icon: https://raw.githubusercontent.com/uep-factory/meta-agent-factory/main/docs/assets/logo.svg
+deprecated: false

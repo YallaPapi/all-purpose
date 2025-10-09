@@ -1,0 +1,60 @@
+{
+  "name": "uep-example-agent",
+  "version": "1.0.0",
+  "description": "Example UEP Meta-Agent using the base agent template",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --inspect=0.0.0.0:9229 src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "build": "echo 'No build step required for this example'",
+    "docker:build": "docker build --target production -t uep-example-agent .",
+    "docker:build:dev": "docker build --target development -t uep-example-agent:dev .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env uep-example-agent",
+    "docker:run:dev": "docker run -p 3000:3000 -p 9229:9229 --env-file .env uep-example-agent:dev"
+  },
+  "keywords": [
+    "uep",
+    "meta-agent",
+    "docker",
+    "microservice"
+  ],
+  "author": "UEP Meta-Agent Factory",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0",
+    "winston": "^3.11.0",
+    "prom-client": "^15.1.0",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.54.0",
+    "eslint-config-standard": "^17.1.0",
+    "prettier": "^3.1.0",
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uep-factory/meta-agents.git"
+  },
+  "bugs": {
+    "url": "https://github.com/uep-factory/meta-agents/issues"
+  },
+  "homepage": "https://github.com/uep-factory/meta-agents#readme"
+}

@@ -1,0 +1,395 @@
+# =============================================================================
+# UEP Agent Container Template - Docker Compose Configuration
+# =============================================================================
+#
+# This Docker Compose file demonstrates how to deploy a UEP agent with:
+# - UEP Registry integration
+# - Observability stack (Prometheus, Jaeger, etc.)
+# - Health checks and monitoring
+# - Proper networking and security
+#
+# Usage:
+#   1. Copy this file to your agent directory as docker-compose.yml
+#   2. Update the service name and image name
+#   3. Customize environment variables as needed
+#   4. Run: docker-compose up -d
+#
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # Sample UEP Agent Service
+  # =============================================================================
+  sample-uep-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: uep-production
+      args:
+        UEP_AGENT_TYPE: sample-agent
+        UEP_AGENT_NAME: "Sample UEP Agent"
+        UEP_AGENT_VERSION: "1.0.0"
+        BUILD_DATE: "2025-01-29T00:00:00Z"
+        GIT_COMMIT: "latest"
+    
+    image: sample-uep-agent:latest
+    container_name: sample-uep-agent
+    hostname: sample-uep-agent
+    restart: unless-stopped
+    
+    # Security configuration
+    user: "1000:1000"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    
+    # Port mappings
+    ports:
+      - "3000:3000"
+    
+    # Environment configuration
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: info
+      
+      # UEP Configuration
+      UEP_AGENT_TYPE: sample-agent
+      UEP_AGENT_NAME: "Sample UEP Agent"
+      UEP_AGENT_VERSION: "1.0.0"
+      UEP_PROTOCOL_VERSION: "2.0.0"
+      UEP_REGISTRY_URL: http://uep-registry:3000
+      UEP_SERVICE_URL: http://uep-service:3001
+      UEP_AUTO_REGISTER: "true"
+      UEP_VALIDATION_ENABLED: "true"
+      UEP_HEALTH_CHECK_INTERVAL: "30000"
+      
+      # OpenTelemetry Configuration
+      OTEL_COLLECTOR_URL: http://otel-collector:4318
+      OTEL_SERVICE_NAME: sample-agent
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_RESOURCE_ATTRIBUTES: service.name=sample-agent,service.version=1.0.0
+      
+      # Application Configuration
+      SERVICE_PORT: "3000"
+      HEALTH_CHECK_PATH: "/health"
+      METRICS_PATH: "/metrics"
+      CORS_ORIGIN: "*"
+    
+    # Health check configuration
+    healthcheck:
+      test: ["CMD", "/app/uep-health-check.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Volume mounts (read-only root filesystem)
+    volumes:
+      - agent-logs:/app/logs
+      - agent-data:/app/data
+      - agent-tmp:/app/tmp:rw
+      - agent-uep:/app/uep
+    
+    # Networking
+    networks:
+      - uep-network
+      - monitoring-network
+    
+    # Dependencies
+    depends_on:
+      uep-registry:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    
+    # Labels for monitoring and management
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sample-agent.rule=Host(`sample-agent.local`)"
+      - "traefik.http.services.sample-agent.loadbalancer.server.port=3000"
+      - "prometheus.io/scrape=true"
+      - "prometheus.io/port=3000"
+      - "prometheus.io/path=/metrics"
+      - "uep.agent.type=sample-agent"
+      - "uep.agent.version=1.0.0"
+
+  # =============================================================================
+  # UEP Registry Service (Required Dependency)
+  # =============================================================================
+  uep-registry:
+    image: uep-registry:latest
+    container_name: uep-registry
+    hostname: uep-registry
+    restart: unless-stopped
+    
+    ports:
+      - "3001:3000"
+    
+    environment:
+      NODE_ENV: production
+      REGISTRY_PORT: "3000"
+      ETCD_ENDPOINTS: "http://etcd:2379"
+      REDIS_URL: "redis://redis:6379"
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    networks:
+      - uep-network
+    
+    depends_on:
+      - etcd
+      - redis
+
+  # =============================================================================
+  # Supporting Infrastructure Services
+  # =============================================================================
+  
+  # ETCD for service registry storage
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.12
+    container_name: etcd
+    hostname: etcd
+    restart: unless-stopped
+    
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd0
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd:2380
+      - --initial-cluster=etcd0=http://etcd:2380
+      - --initial-cluster-token=etcd-cluster-1
+      - --initial-cluster-state=new
+      - --auto-compaction-retention=1
+    
+    volumes:
+      - etcd-data:/etcd-data
+    
+    networks:
+      - uep-network
+    
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and temporary storage
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    hostname: redis
+    restart: unless-stopped
+    
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    
+    volumes:
+      - redis-data:/data
+    
+    networks:
+      - uep-network
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    hostname: otel-collector
+    restart: unless-stopped
+    
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+    
+    volumes:
+      - ./config/otel-collector.yaml:/etc/otel-collector-config.yaml:ro
+    
+    networks:
+      - uep-network
+      - monitoring-network
+    
+    depends_on:
+      - jaeger
+      - prometheus
+
+  # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    hostname: jaeger
+    restart: unless-stopped
+    
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # Jaeger collector HTTP
+    
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    
+    networks:
+      - monitoring-network
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    hostname: prometheus
+    restart: unless-stopped
+    
+    ports:
+      - "9090:9090"
+    
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    
+    networks:
+      - monitoring-network
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    hostname: grafana
+    restart: unless-stopped
+    
+    ports:
+      - "3001:3000"
+    
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    
+    networks:
+      - monitoring-network
+    
+    depends_on:
+      - prometheus
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  uep-network:
+    driver: bridge
+    name: uep-network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+  monitoring-network:
+    driver: bridge
+    name: monitoring-network
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  # Agent data volumes
+  agent-logs:
+    driver: local
+    name: sample-agent-logs
+  
+  agent-data:
+    driver: local
+    name: sample-agent-data
+  
+  agent-tmp:
+    driver: local
+    name: sample-agent-tmp
+  
+  agent-uep:
+    driver: local
+    name: sample-agent-uep
+  
+  # Infrastructure data volumes
+  etcd-data:
+    driver: local
+    name: etcd-data
+  
+  redis-data:
+    driver: local
+    name: redis-data
+  
+  prometheus-data:
+    driver: local
+    name: prometheus-data
+  
+  grafana-data:
+    driver: local
+    name: grafana-data
+
+# =============================================================================
+# Usage Examples
+# =============================================================================
+#
+# Start the complete stack:
+#   docker-compose up -d
+#
+# View logs:
+#   docker-compose logs -f sample-uep-agent
+#
+# Check health:
+#   docker-compose ps
+#   curl http://localhost:3000/health
+#
+# Access monitoring:
+#   - Grafana: http://localhost:3001 (admin/admin)
+#   - Prometheus: http://localhost:9090
+#   - Jaeger: http://localhost:16686
+#
+# Scale the agent:
+#   docker-compose up -d --scale sample-uep-agent=3
+#
+# Stop the stack:
+#   docker-compose down
+#
+# Clean up (including volumes):
+#   docker-compose down -v
+#
+# =============================================================================

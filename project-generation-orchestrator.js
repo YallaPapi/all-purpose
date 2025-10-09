@@ -7,9 +7,14 @@
  * Usage: node project-generation-orchestrator.js --project=prospector-agent
  */
 
-const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs-extra');
+import { spawn } from 'child_process';
+import path from 'path';
+import fs from 'fs-extra';
+import { fileURLToPath } from 'url';
+
+// ES modules don't have __dirname, so we need to create it
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class ProjectGenerationOrchestrator {
   constructor(projectName, config = {}) {
@@ -39,7 +44,7 @@ class ProjectGenerationOrchestrator {
       {
         name: 'Template-Engine-Factory',
         path: 'src/meta-agents/template-engine-factory',
-        command: 'node dist/main.js',
+        command: 'node dist/main.js generate implementation-system --description "Generated implementation from basic structure" --project-root ../../../generated --output-dir ./generated-template-systems --engine handlebars --language typescript --format esm',
         input: 'basic-structure',
         output: 'implementation-code'
       },
@@ -53,15 +58,22 @@ class ProjectGenerationOrchestrator {
       {
         name: 'Parameter-Flow',
         path: 'src/meta-agents/parameter-flow',
-        command: 'node dist/main.js',
+        command: 'node dist/main.js build-architecture --name "Data Flow Configuration" --description "Configure parameter flow for generated project" --components \'[{"componentId":"pattern-applied-project","name":"Pattern Applied Project","type":"processing-unit","version":"1.0.0","interface":{"inputParameters":[],"outputParameters":[],"events":[],"methods":[],"protocols":["file-system"]},"capabilities":{"supportedDataTypes":["json","typescript"],"supportedOperations":["read","transform"],"supportedProtocols":["file-system"],"scalingCapabilities":["horizontal"],"reliabilityLevel":"high"},"configuration":{},"health":{}}]\'',
         input: 'pattern-applied',
         output: 'data-flow-configured'
+      },
+      {
+        name: 'Infrastructure-Orchestrator',
+        path: 'src/meta-agents/infra-orchestrator',
+        command: 'npm run build && node dist/main.js orchestrate --project-root ../../../generated --enable-investigation --project-name {PROJECT_NAME}',
+        input: 'data-flow-configured',
+        output: 'orchestrated-infrastructure'
       },
       {
         name: 'Vercel-Native-Architecture',
         path: 'src/meta-agents/vercel-native-architecture',
         command: 'node dist/main.js',
-        input: 'data-flow-configured',
+        input: 'orchestrated-infrastructure', 
         output: 'deployment-ready'
       },
       {
@@ -74,9 +86,45 @@ class ProjectGenerationOrchestrator {
       {
         name: 'Thirty-Minute-Rule',
         path: 'src/meta-agents/thirty-minute-rule',
-        command: 'node dist/main.js',
+        command: 'node dist/main.js status',
         input: 'documented',
         output: 'validated'
+      },
+      // Domain Agents - Complete software development
+      {
+        name: 'Backend-Agent',
+        path: '.',
+        command: 'node -e "import(\'./generated/backend-agent/dist/core/BackendAgent.js\').then(async ({BackendAgent}) => { const agent = new BackendAgent({enableUEP: true, outputDir: \'./generated/{PROJECT_NAME}/src/backend\', projectRoot: \'./generated/{PROJECT_NAME}\'}); await agent.initialize(); const result = await agent.processTask(\'Design API backend\', {type: \'design-api\'}); console.log(\'✅ Backend Agent completed:\', result.success); await agent.shutdown(); })"',
+        input: 'validated',
+        output: 'backend-complete'
+      },
+      {
+        name: 'Frontend-Agent', 
+        path: '.',
+        command: 'node -e "import(\'./generated/frontend-agent/dist/core/FrontendAgent.js\').then(async ({FrontendAgent}) => { const agent = new FrontendAgent({enableUEP: true, outputDir: \'./generated/{PROJECT_NAME}/src/frontend\', projectRoot: \'./generated/{PROJECT_NAME}\'}); await agent.initialize(); const result = await agent.processTask(\'Generate UI components\', {type: \'generate-component\'}); console.log(\'✅ Frontend Agent completed:\', result.success); await agent.shutdown(); })"',
+        input: 'backend-complete',
+        output: 'frontend-complete'
+      },
+      {
+        name: 'DevOps-Agent',
+        path: '.',
+        command: 'node -e "import(\'./generated/devops-agent/dist/core/DevOpsAgent.js\').then(async ({DevOpsAgent}) => { const agent = new DevOpsAgent({enableUEP: true, outputDir: \'./generated/{PROJECT_NAME}/devops\', projectRoot: \'./generated/{PROJECT_NAME}\'}); await agent.initialize(); const result = await agent.processTask(\'Configure deployment\', {type: \'configure-deployment\'}); console.log(\'✅ DevOps Agent completed:\', result.success); await agent.shutdown(); })"',
+        input: 'frontend-complete', 
+        output: 'deployment-configured'
+      },
+      {
+        name: 'QA-Agent',
+        path: '.',
+        command: 'node -e "import(\'./generated/qa-agent/dist/core/QAAgent.js\').then(async ({QAAgent}) => { const agent = new QAAgent({enableUEP: true, outputDir: \'./generated/{PROJECT_NAME}/tests\', projectRoot: \'./generated/{PROJECT_NAME}\'}); await agent.initialize(); const result = await agent.processTask(\'Generate test plan\', {type: \'generate-test-plan\'}); console.log(\'✅ QA Agent completed:\', result.success); await agent.shutdown(); })"',
+        input: 'deployment-configured',
+        output: 'testing-complete'
+      },
+      {
+        name: 'Post-Creation-Investigator',
+        path: 'src/meta-agents/post-creation-investigator',
+        command: 'npm run start-simple investigate -p ../../../generated/{PROJECT_NAME} -t generic -f text',
+        input: 'testing-complete',
+        output: 'investigation-complete'
       }
     ];
     
@@ -110,14 +158,24 @@ class ProjectGenerationOrchestrator {
     const outputPath = path.join(this.config.projectRoot, this.projectName);
     
     // Prepare agent command with proper arguments
-    const commandParts = agent.command.split(' ');
+    // Replace project name placeholder
+    const commandWithProjectName = agent.command.replace(/{PROJECT_NAME}/g, this.projectName);
+    const commandParts = commandWithProjectName.split(' ');
     const command = commandParts[0];
+    
+    // Only add arguments for agents that support them
+    const supportsProjectArg = ['PRD-Parser', 'Scaffold-Generator'].includes(agent.name);
+    
     const args = [
-      ...commandParts.slice(1),
-      '--project', this.projectName,
-      '--input', inputData || agent.input,
-      '--output', outputPath
+      ...commandParts.slice(1)
     ];
+    
+    // Add project-specific arguments only for compatible agents
+    if (supportsProjectArg) {
+      args.push('--project', this.projectName);
+      args.push('--input', inputData || agent.input);
+      args.push('--output', outputPath);
+    }
 
     return new Promise((resolve, reject) => {
       const proc = spawn(command, args, {
@@ -268,9 +326,9 @@ async function main() {
   }
 }
 
-// Execute if run directly
-if (require.main === module) {
+// Execute if run directly  
+if (__filename === process.argv[1] || process.argv[1].endsWith('project-generation-orchestrator.js')) {
   main().catch(console.error);
 }
 
-module.exports = { ProjectGenerationOrchestrator };
+export { ProjectGenerationOrchestrator };

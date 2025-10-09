@@ -1,0 +1,551 @@
+---
+# Consul Server StatefulSet for High Availability
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: consul-server
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+    version: "1.18.0"
+spec:
+  serviceName: consul-server
+  replicas: 3
+  selector:
+    matchLabels:
+      app: consul-server
+      component: consul
+  template:
+    metadata:
+      labels:
+        app: consul-server
+        component: consul
+        version: "1.18.0"
+      annotations:
+        consul.hashicorp.com/config-checksum: ""
+    spec:
+      serviceAccountName: consul-server
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: consul-server
+              topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: consul
+        image: hashicorp/consul:1.18.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: CONSUL_ENCRYPT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: consul-encrypt-key
+              key: key
+        - name: CONSUL_ACL_INITIAL_MANAGEMENT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: consul-acl-token
+              key: management-token
+        - name: CONSUL_ACL_AGENT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: consul-acl-token
+              key: agent-token
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        command:
+        - "/bin/sh"
+        - "-ec"
+        - |
+          CONSUL_FULLNAME="consul-server"
+          
+          exec /usr/local/bin/docker-entrypoint.sh consul agent \
+            -advertise="${POD_IP}" \
+            -bind=0.0.0.0 \
+            -bootstrap-expect=3 \
+            -client=0.0.0.0 \
+            -config-dir=/consul/config \
+            -datacenter=uep-prod \
+            -data-dir=/consul/data \
+            -domain=consul \
+            -hcl="connect { enabled = true }" \
+            -ui-config-dir=/consul/ui \
+            -retry-join="consul-server-0.consul-server.consul.svc.cluster.local" \
+            -retry-join="consul-server-1.consul-server.consul.svc.cluster.local" \
+            -retry-join="consul-server-2.consul-server.consul.svc.cluster.local" \
+            -server
+        volumeMounts:
+        - name: data
+          mountPath: /consul/data
+        - name: config
+          mountPath: /consul/config
+        - name: tls
+          mountPath: /consul/tls
+          readOnly: true
+        - name: ca-certificates
+          mountPath: /etc/ssl/certs
+          readOnly: true
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - consul leave
+        ports:
+        - containerPort: 8500
+          name: http
+        - containerPort: 8501
+          name: https
+        - containerPort: 8502
+          name: grpc
+        - containerPort: 8503
+          name: grpc-tls
+        - containerPort: 8300
+          name: server
+        - containerPort: 8301
+          name: serf-lan
+        - containerPort: 8302
+          name: serf-wan
+        - containerPort: 8600
+          name: dns-tcp
+          protocol: TCP
+        - containerPort: 8600
+          name: dns-udp
+          protocol: UDP
+        readinessProbe:
+          exec:
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              curl -k https://127.0.0.1:8501/v1/status/leader 2>/dev/null | \
+              grep -E '".+"'
+          failureThreshold: 2
+          initialDelaySeconds: 5
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              curl -k https://127.0.0.1:8501/v1/status/leader 2>/dev/null | \
+              grep -E '".+"'
+          failureThreshold: 2
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+      volumes:
+      - name: config
+        configMap:
+          name: consul-server-config
+      - name: tls
+        secret:
+          secretName: consul-server-tls
+      - name: ca-certificates
+        hostPath:
+          path: /etc/ssl/certs
+          type: DirectoryOrCreate
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: fast-ssd
+
+---
+# Consul Server Service (Headless for StatefulSet)
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul-server
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  ports:
+  - name: http
+    port: 8500
+    targetPort: 8500
+  - name: https
+    port: 8501
+    targetPort: 8501
+  - name: grpc
+    port: 8502
+    targetPort: 8502
+  - name: grpc-tls
+    port: 8503
+    targetPort: 8503
+  - name: server
+    port: 8300
+    targetPort: 8300
+  - name: serf-lan-tcp
+    protocol: TCP
+    port: 8301
+    targetPort: 8301
+  - name: serf-lan-udp
+    protocol: UDP
+    port: 8301
+    targetPort: 8301
+  - name: serf-wan-tcp
+    protocol: TCP
+    port: 8302
+    targetPort: 8302
+  - name: serf-wan-udp
+    protocol: UDP
+    port: 8302
+    targetPort: 8302
+  - name: dns-tcp
+    protocol: TCP
+    port: 8600
+    targetPort: 8600
+  - name: dns-udp
+    protocol: UDP
+    port: 8600
+    targetPort: 8600
+  clusterIP: None
+  selector:
+    app: consul-server
+    component: consul
+
+---
+# Consul UI Service (LoadBalancer for external access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul-ui
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul-ui
+spec:
+  type: LoadBalancer
+  ports:
+  - name: https
+    port: 443
+    targetPort: 8501
+    protocol: TCP
+  selector:
+    app: consul-server
+    component: consul
+
+---
+# Consul Server ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consul-server-config
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+data:
+  consul.hcl: |
+    datacenter = "uep-prod"
+    data_dir = "/consul/data"
+    log_level = "INFO"
+    node_name = "${POD_NAME}"
+    server = true
+    
+    # Production cluster configuration
+    bootstrap_expect = 3
+    
+    # Network configuration
+    bind_addr = "${POD_IP}"
+    client_addr = "0.0.0.0"
+    
+    # UI configuration
+    ui_config {
+      enabled = true
+      content_path = "/ui/"
+    }
+    
+    # DNS configuration
+    dns_config {
+      enable_truncate = true
+      only_passing = true
+      max_stale = "5s"
+      node_ttl = "30s"
+      service_ttl = "10s"
+    }
+    
+    # Security settings
+    enable_local_script_checks = false
+    disable_remote_exec = true
+    disable_update_check = true
+    
+    # Connect (service mesh) configuration
+    connect {
+      enabled = true
+      ca_provider = "consul"
+    }
+    
+    ports {
+      grpc = 8502
+      grpc_tls = 8503
+      https = 8501
+    }
+    
+    # Production ACL configuration
+    acl = {
+      enabled = true
+      default_policy = "deny"
+      enable_token_persistence = true
+      
+      tokens {
+        initial_management = "${CONSUL_ACL_INITIAL_MANAGEMENT_TOKEN}"
+        agent = "${CONSUL_ACL_AGENT_TOKEN}"
+      }
+    }
+    
+    # TLS configuration
+    tls {
+      defaults {
+        verify_incoming = true
+        verify_outgoing = true
+        
+        ca_file = "/consul/tls/ca.pem"
+        cert_file = "/consul/tls/consul.pem"
+        key_file = "/consul/tls/consul-key.pem"
+      }
+      
+      internal_rpc {
+        verify_server_hostname = true
+      }
+      
+      https {
+        ca_file = "/consul/tls/ca.pem"
+        cert_file = "/consul/tls/consul.pem"
+        key_file = "/consul/tls/consul-key.pem"
+      }
+      
+      grpc {
+        ca_file = "/consul/tls/ca.pem"
+        cert_file = "/consul/tls/consul.pem"
+        key_file = "/consul/tls/consul-key.pem"
+      }
+    }
+    
+    # Encryption configuration
+    encrypt = "${CONSUL_ENCRYPT_KEY}"
+    encrypt_verify_incoming = true
+    encrypt_verify_outgoing = true
+    
+    # Production monitoring
+    telemetry {
+      prometheus_retention_time = "300s"
+      disable_hostname = false
+      metrics_prefix = "consul_prod"
+    }
+    
+    # Autopilot configuration
+    autopilot {
+      cleanup_dead_servers = true
+      last_contact_threshold = "200ms"
+      max_trailing_logs = 250
+      server_stabilization_time = "10s"
+    }
+    
+    # Performance configuration
+    performance {
+      raft_multiplier = 3
+      rpc_hold_timeout = "7s"
+    }
+    
+    # Limits configuration
+    limits {
+      http_max_conns_per_client = 200
+      https_handshake_timeout = "5s"
+      rpc_handshake_timeout = "5s"
+      rpc_max_conns_per_client = 100
+    }
+
+---
+# Service Account for Consul Server
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: consul-server
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+
+---
+# ClusterRole for Consul Server
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: consul-server
+  labels:
+    app: consul-server
+    component: consul
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding for Consul Server
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: consul-server
+  labels:
+    app: consul-server
+    component: consul
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: consul-server
+subjects:
+- kind: ServiceAccount
+  name: consul-server
+  namespace: consul
+
+---
+# PodDisruptionBudget for High Availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: consul-server
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: consul-server
+      component: consul
+
+---
+# NetworkPolicy for Consul Security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: consul-server
+  namespace: consul
+  labels:
+    app: consul-server
+    component: consul
+spec:
+  podSelector:
+    matchLabels:
+      app: consul-server
+      component: consul
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow access from UEP agents
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: uep-agents
+    ports:
+    - protocol: TCP
+      port: 8500
+    - protocol: TCP
+      port: 8501
+  # Allow internal cluster communication
+  - from:
+    - podSelector:
+        matchLabels:
+          app: consul-server
+    ports:
+    - protocol: TCP
+      port: 8300
+    - protocol: TCP
+      port: 8301
+    - protocol: UDP
+      port: 8301
+    - protocol: TCP
+      port: 8302
+    - protocol: UDP
+      port: 8302
+  # Allow DNS queries
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 8600
+    - protocol: UDP
+      port: 8600
+  egress:
+  # Allow outbound to other Consul servers
+  - to:
+    - podSelector:
+        matchLabels:
+          app: consul-server
+    ports:
+    - protocol: TCP
+      port: 8300
+    - protocol: TCP
+      port: 8301
+    - protocol: UDP
+      port: 8301
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+  # Allow HTTPS outbound for health checks
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443

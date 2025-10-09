@@ -1,0 +1,89 @@
+{
+  "architectureName": "AllPurp-Complete-Migration-Architecture",
+  "description": "Complete microservices migration architecture with all 4 phases implemented",
+  "components": [
+    {
+      "id": "api-gateway",
+      "type": "gateway",
+      "path": "containers/api-gateway",
+      "interfaces": ["REST", "WebSocket"],
+      "dependencies": ["uep-service", "microservices"]
+    },
+    {
+      "id": "uep-service", 
+      "type": "messaging",
+      "path": "containers/uep-service",
+      "interfaces": ["EventBus", "UEP Protocol"],
+      "dependencies": ["meta-agents"]
+    },
+    {
+      "id": "meta-agents",
+      "type": "processing",
+      "path": "src/meta-agents",
+      "interfaces": ["CLI", "UEP", "Agent Coordination"],
+      "dependencies": ["uep-service", "rag-system"]
+    },
+    {
+      "id": "microservices",
+      "type": "services",
+      "path": "microservices",
+      "interfaces": ["REST", "gRPC"],
+      "dependencies": ["api-gateway", "database"]
+    },
+    {
+      "id": "kubernetes",
+      "type": "orchestration", 
+      "path": "k8s",
+      "interfaces": ["K8s API", "Istio", "Helm"],
+      "dependencies": ["all-services"]
+    },
+    {
+      "id": "observability",
+      "type": "monitoring",
+      "path": "observability",
+      "interfaces": ["Prometheus", "Grafana", "Jaeger", "ELK"],
+      "dependencies": ["all-services"]
+    },
+    {
+      "id": "database",
+      "type": "persistence",
+      "path": "sql",
+      "interfaces": ["SQL", "Registry API"],
+      "dependencies": ["microservices"]
+    },
+    {
+      "id": "shared-messaging",
+      "type": "communication",
+      "path": "shared/messaging",
+      "interfaces": ["EventBus", "UEP Events"],
+      "dependencies": ["uep-service", "meta-agents"]
+    },
+    {
+      "id": "original-app",
+      "type": "application",
+      "path": "src",
+      "interfaces": ["Next.js", "React", "REST"],
+      "dependencies": ["api-gateway"]
+    }
+  ],
+  "integrationRequirements": {
+    "dataFlowPatterns": ["event-driven", "request-response", "pub-sub", "microservices"],
+    "synchronizationNeeds": ["eventual-consistency", "strong-consistency", "async-processing"],
+    "performanceTargets": {
+      "latency": 50,
+      "throughput": 10000,
+      "concurrent_users": 1000
+    },
+    "reliabilityRequirements": {
+      "availability": "99.99%",
+      "fault_tolerance": "multi-zone",
+      "disaster_recovery": "automated"
+    },
+    "securityRequirements": {
+      "authentication": "JWT + OAuth",
+      "authorization": "RBAC",
+      "encryption": "TLS 1.3",
+      "compliance": ["SOC2", "GDPR"]
+    }
+  }
+}

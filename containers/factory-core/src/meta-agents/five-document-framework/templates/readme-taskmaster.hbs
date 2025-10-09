@@ -1,0 +1,636 @@
+# TaskMaster Integration Guide - {{project.name}}
+
+> **Complete TaskMaster Workflow for {{project.name}}**  
+> **Last Updated**: {{helpers.formatDate timestamp}}  
+> **Research-Backed Development Process**
+
+---
+
+## 🎯 **Overview**
+
+This guide establishes the complete TaskMaster workflow for {{project.name}}, integrating research-backed task management with systematic development processes. TaskMaster provides AI-powered task analysis, complexity assessment, and research integration for enhanced development productivity.
+
+{{#if project.description}}
+**Project Context**: {{project.description}}
+{{/if}}
+
+**Integration Level**: {{#if generation.integrateWithTaskMaster}}Full Integration{{else}}Basic Setup{{/if}}
+
+---
+
+## 🚀 **TaskMaster Setup**
+
+### Installation & Configuration
+```bash
+# Install TaskMaster CLI
+npm install -g taskmaster-cli
+
+# Verify installation
+task-master --version
+
+# Initialize in project
+cd {{project.name}}
+task-master init
+```
+
+### Environment Configuration
+```bash
+# Required environment variables
+export ANTHROPIC_API_KEY="your_claude_api_key"
+export PERPLEXITY_API_KEY="your_perplexity_api_key"
+
+# Optional: Enhanced integrations
+export GITHUB_TOKEN="your_github_token"
+export OPENAI_API_KEY="your_openai_api_key"
+```
+
+### Project Configuration (.taskmaster.json)
+```json
+{
+  "project": {
+    "name": "{{project.name}}",
+    "version": "{{project.version}}",
+    "type": "{{project.type}}",
+    "technologies": [{{#if computed.technologyList}}"{{joinArray computed.technologyList "\", \""}}"{{/if}}]
+  },
+  "settings": {
+    "research_enabled": true,
+    "complexity_analysis": true,
+    "auto_expand": true,
+    "max_tasks": {{#if generation.maxTasks}}{{generation.maxTasks}}{{else}}100{{/if}},
+    "research_depth": "comprehensive"
+  },
+  "integrations": {
+    {{#if generation.integrateWithGit}}
+    "git": {
+      "enabled": true,
+      "auto_commit": false,
+      "branch_strategy": "feature"
+    },
+    {{/if}}
+    "documentation": {
+      "enabled": true,
+      "auto_update": true,
+      "formats": ["markdown", "json"]
+    }
+  },
+  "templates": {
+    "task_format": "all-purpose-pattern",
+    "research_template": "comprehensive",
+    "output_format": "detailed"
+  }
+}
+```
+
+---
+
+## 📋 **Core TaskMaster Commands**
+
+### Parse PRD Command
+```bash
+# Parse requirements document
+task-master parse-prd --input="requirements.md" --research
+
+# Parse with specific format
+task-master parse-prd --input="{{project.name}}-requirements.txt" --format=structured --research
+
+# Parse with context injection
+task-master parse-prd --input="prd.md" --context="{{project.type}}" --research --output=tasks.json
+```
+
+**Expected Output**:
+```json
+{
+  "project_info": {
+    "name": "{{project.name}}",
+    "complexity_score": 7.5,
+    "estimated_duration": "2-3 weeks",
+    "technology_requirements": [{{#if computed.technologyList}}"{{joinArray computed.technologyList "\", \""}}"{{/if}}]
+  },
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Project Setup",
+      "description": "Initialize project structure and dependencies",
+      "complexity": 3,
+      "priority": "high",
+      "estimated_hours": 4,
+      "dependencies": [],
+      "research_notes": "Standard setup patterns identified"
+    }
+  ]
+}
+```
+
+### Complexity Analysis
+```bash
+# Analyze project complexity
+task-master analyze-complexity --research
+
+# Analyze specific tasks
+task-master analyze-complexity --tasks="T001,T002,T003" --research
+
+# Get complexity breakdown
+task-master analyze-complexity --breakdown --research --output=complexity-report.json
+```
+
+### Task Expansion
+```bash
+# Expand all tasks with research
+task-master expand --all --research
+
+# Expand specific task
+task-master expand --id="T001" --research --depth=detailed
+
+# Interactive expansion mode
+task-master expand --interactive --research
+```
+
+### Research Integration
+```bash
+# Research specific topic
+task-master research "{{project.type}} best practices" --save
+
+# Research technology integration
+task-master research "{{#if project.technologies.frontend}}{{joinArray project.technologies.frontend}} {{/if}}integration patterns" --depth=comprehensive
+
+# Research with project context
+task-master research "debugging {{project.type}} applications" --context="{{project.name}}" --save
+```
+
+---
+
+## 🔄 **Development Workflow**
+
+### Phase 1: Project Initialization
+```bash
+# 1. Parse project requirements
+task-master parse-prd --input="requirements.md" --research
+
+# 2. Analyze complexity and feasibility
+task-master analyze-complexity --research
+
+# 3. Generate initial task breakdown
+task-master expand --all --research
+
+# 4. Create development milestones
+task-master generate-milestones --research
+```
+
+### Phase 2: Sprint Planning
+```bash
+# 1. Select tasks for current sprint
+task-master select-tasks --sprint=1 --capacity=40h
+
+# 2. Research selected tasks
+task-master research-tasks --sprint=1
+
+# 3. Refine task estimates
+task-master refine-estimates --sprint=1 --research
+
+# 4. Generate sprint documentation
+task-master generate-sprint-docs --sprint=1
+```
+
+### Phase 3: Development Execution
+```bash
+# 1. Start task with research context
+task-master start --id="T001" --research
+
+# 2. Get task-specific guidance
+task-master guide --id="T001" --step="implementation"
+
+# 3. Research on-demand
+task-master research "specific technical challenge" --task="T001"
+
+# 4. Update task progress
+task-master update --id="T001" --status="in-progress" --notes="Implementation details"
+```
+
+### Phase 4: Review & Integration
+```bash
+# 1. Review completed tasks
+task-master review --completed --research
+
+# 2. Generate integration tasks
+task-master generate-integration-tasks --research
+
+# 3. Update project documentation
+task-master update-docs --auto
+
+# 4. Prepare next sprint
+task-master prepare-next-sprint --research
+```
+
+---
+
+## 🔍 **Research-Enhanced Development**
+
+### Automatic Research Integration
+```bash
+# Enable auto-research for all commands
+export TASKMASTER_AUTO_RESEARCH=true
+
+# Research depth levels
+task-master config set research_depth comprehensive  # thorough research
+task-master config set research_depth standard      # balanced approach
+task-master config set research_depth minimal       # quick lookups
+```
+
+### Custom Research Queries
+```bash
+# Technology-specific research
+task-master research "{{#if project.technologies.frontend}}{{project.technologies.frontend.[0]}}{{/if}} performance optimization" --save-as="frontend-performance"
+
+# Integration patterns
+task-master research "{{#if project.technologies.database}}{{project.technologies.database.[0]}}{{/if}} connection patterns" --save-as="database-patterns"
+
+# Security best practices
+task-master research "{{project.type}} security best practices 2025" --save-as="security-guidelines"
+```
+
+### Research Library Management
+```bash
+# View saved research
+task-master research --list
+
+# Search research library
+task-master research --search="performance"
+
+# Export research for documentation
+task-master research --export="research-library.md"
+
+# Import research from team
+task-master research --import="team-research.json"
+```
+
+---
+
+## 📊 **Project Tracking & Analytics**
+
+### Progress Monitoring
+```bash
+# Overall project status
+task-master status
+
+# Detailed progress report
+task-master progress --detailed --research
+
+# Generate status dashboard
+task-master dashboard --export="status.html"
+
+# Track velocity metrics
+task-master metrics --velocity --research
+```
+
+### Task Analytics
+```bash
+# Complexity distribution
+task-master analytics --complexity
+
+# Time estimation accuracy
+task-master analytics --estimation-accuracy
+
+# Research impact analysis
+task-master analytics --research-impact
+
+# Generate project insights
+task-master insights --comprehensive --research
+```
+
+---
+
+## 🔧 **{{capitalize project.type}} Specific Configuration**
+
+{{#ifEquals project.type "nextjs"}}
+### Next.js Project Optimization
+```json
+// .taskmaster.json additions
+{
+  "project_specific": {
+    "nextjs": {
+      "version": "latest",
+      "app_router": true,
+      "typescript": true,
+      "research_focuses": [
+        "Next.js 15 best practices",
+        "App Router patterns",
+        "Performance optimization",
+        "Deployment strategies"
+      ]
+    }
+  }
+}
+```
+
+**Specialized Commands**:
+```bash
+# Next.js specific task templates
+task-master templates --framework=nextjs
+
+# Research Next.js best practices
+task-master research "Next.js 15 app router patterns" --framework=nextjs
+
+# Generate Next.js specific tasks
+task-master generate-tasks --template=nextjs-app --research
+```
+{{/ifEquals}}
+
+{{#ifEquals project.type "react"}}
+### React Project Configuration
+```json
+// .taskmaster.json additions
+{
+  "project_specific": {
+    "react": {
+      "version": "18+",
+      "typescript": {{#if project.technologies.frontend}}{{#each project.technologies.frontend}}{{#ifEquals this "TypeScript"}}true{{/ifEquals}}{{/each}}{{else}}false{{/if}},
+      "research_focuses": [
+        "React 18 concurrent features",
+        "State management patterns",
+        "Component optimization",
+        "Testing strategies"
+      ]
+    }
+  }
+}
+```
+{{/ifEquals}}
+
+{{#ifEquals project.type "express"}}
+### Express.js API Configuration
+```json
+// .taskmaster.json additions
+{
+  "project_specific": {
+    "express": {
+      "version": "latest",
+      "typescript": true,
+      "research_focuses": [
+        "Express.js API design patterns",
+        "Middleware architecture",
+        "Security best practices",
+        "Performance optimization"
+      ]
+    }
+  }
+}
+```
+{{/ifEquals}}
+
+---
+
+## 🔗 **Integration with Meta-Agents**
+
+### PRD-Parser Integration
+```bash
+# Generate tasks from PRD using PRD-Parser
+task-master parse-prd --agent=prd-parser --input="project-requirements.md"
+
+# Sync with PRD-Parser output
+task-master sync --source=prd-parser --format=json
+```
+
+### Scaffold-Generator Integration
+```bash
+# Generate project structure with tasks
+task-master scaffold --template="{{project.type}}" --with-tasks
+
+# Update tasks when scaffold changes
+task-master sync --source=scaffold-generator --update-tasks
+```
+
+### Five-Document Framework Integration
+```bash
+# Update documentation with task progress
+task-master update-docs --framework=five-document --auto
+
+# Generate task-based documentation
+task-master generate-docs --include-tasks --format=five-document
+```
+
+{{#if generation.integrateWithRAG}}
+### RAG System Integration
+```bash
+# Enhanced context-aware task generation
+task-master generate --with-rag-context --research
+
+# Project-aware research queries
+task-master research --rag-enhanced --project-context
+```
+{{/if}}
+
+---
+
+## 📁 **File Organization**
+
+### TaskMaster Project Structure
+```
+{{project.name}}/
+├── .taskmaster.json          # Project configuration
+├── tasks/
+│   ├── current-sprint.json   # Active sprint tasks
+│   ├── backlog.json         # Task backlog
+│   ├── completed.json       # Completed tasks
+│   └── research/            # Saved research
+│       ├── frontend/        # Frontend research
+│       ├── backend/         # Backend research
+│       └── integration/     # Integration research
+├── docs/
+│   ├── task-reports/        # Generated reports
+│   ├── sprint-summaries/    # Sprint documentation
+│   └── research-library/    # Organized research
+└── .taskmaster-cache/       # Cache and temporary files
+```
+
+---
+
+## 🎛️ **Advanced Configuration**
+
+### Custom Task Templates
+```javascript
+// custom-templates/all-purpose-task.js
+module.exports = {
+  name: "All-Purpose Task Template",
+  description: "Following All-Purpose Pattern principles",
+  template: {
+    id: "{{generateId}}",
+    title: "{{title}}",
+    description: "{{description}}",
+    all_purpose_compliance: {
+      no_hardcoded_limits: true,
+      unlimited_scalability: true,
+      configuration_driven: true
+    },
+    research_context: {
+      technology_stack: [{{#if computed.technologyList}}"{{joinArray computed.technologyList "\", \""}}"{{/if}}],
+      project_type: "{{project.type}}",
+      complexity_factors: "{{complexityFactors}}"
+    },
+    acceptance_criteria: [
+      "NO hardcoded limitations",
+      "UNLIMITED scalability",
+      "Configuration-driven implementation",
+      "Research-backed approach"
+    ]
+  }
+};
+```
+
+### Research Configuration
+```json
+// research-config.json
+{
+  "perplexity": {
+    "api_key_env": "PERPLEXITY_API_KEY",
+    "model": "llama-3.1-sonar-huge-128k-online",
+    "temperature": 0.2,
+    "max_tokens": 4000
+  },
+  "search_strategies": {
+    "comprehensive": {
+      "queries_per_topic": 3,
+      "depth_levels": 3,
+      "include_recent": true,
+      "include_examples": true
+    },
+    "targeted": {
+      "queries_per_topic": 2,
+      "depth_levels": 2,
+      "focus_recent": true
+    }
+  },
+  "research_domains": [
+    "{{project.type}} best practices",
+    {{#if project.technologies.frontend}}
+    "{{joinArray project.technologies.frontend}} patterns",
+    {{/if}}
+    {{#if project.technologies.backend}}
+    "{{joinArray project.technologies.backend}} architecture",
+    {{/if}}
+    "performance optimization",
+    "security practices",
+    "testing strategies"
+  ]
+}
+```
+
+---
+
+## 🚨 **Troubleshooting TaskMaster**
+
+### Common Issues
+
+#### API Key Authentication
+```bash
+# Verify API keys
+task-master verify-keys
+
+# Test Perplexity connection
+task-master test --service=perplexity
+
+# Test Claude connection  
+task-master test --service=anthropic
+```
+
+#### Performance Issues
+```bash
+# Clear TaskMaster cache
+task-master cache --clear
+
+# Reduce research depth
+task-master config set research_depth minimal
+
+# Optimize configuration
+task-master optimize-config
+```
+
+#### Task Parsing Errors
+```bash
+# Validate PRD format
+task-master validate-prd --input="requirements.md"
+
+# Debug parsing issues
+task-master parse-prd --debug --input="requirements.md"
+
+# Use alternative parsing strategy
+task-master parse-prd --strategy=fallback --input="requirements.md"
+```
+
+---
+
+## 📈 **Success Metrics**
+
+### Development Velocity
+- **Task Completion Rate**: Target >85% within estimates
+- **Research Impact**: Measure quality improvements from research integration
+- **Time to Market**: Track overall project delivery timeline
+- **Code Quality**: Monitor defect rates and technical debt
+
+### TaskMaster Effectiveness
+- **Estimation Accuracy**: Compare actual vs. estimated effort
+- **Research Utilization**: Track research query frequency and application
+- **Task Granularity**: Monitor task size and complexity distribution
+- **Team Adoption**: Measure consistent TaskMaster usage across team
+
+---
+
+## 📚 **Additional Resources**
+
+### TaskMaster Documentation
+- [Official TaskMaster Guide](https://taskmaster-cli.com/docs)
+- [Research Integration Manual](https://taskmaster-cli.com/research)
+- [API Reference](https://taskmaster-cli.com/api)
+
+### Project-Specific Resources
+{{#if project.documentation.existingDocs}}
+{{#each project.documentation.existingDocs}}
+- [{{this}}]({{this}})
+{{/each}}
+{{else}}
+- [Environment Setup](ENVIRONMENT_SETUP.md)
+- [Debugging Guide](DEBUGGING_GUIDE.md) 
+- [Parameter Mapping](PARAMETER_MAPPING.md)
+{{/if}}
+
+### Community & Support
+- TaskMaster Discord Community
+- GitHub Issues for bug reports
+- Stack Overflow with `taskmaster-cli` tag
+
+---
+
+## 🔄 **Continuous Improvement**
+
+### Weekly Reviews
+```bash
+# Generate weekly progress report
+task-master report --weekly --research-insights
+
+# Analyze estimation accuracy
+task-master analyze --estimation-accuracy --week
+
+# Update project complexity model
+task-master update-complexity-model --based-on-actual
+```
+
+### Sprint Retrospectives
+```bash
+# Generate sprint retrospective data
+task-master retrospective --sprint=current --include-research
+
+# Identify improvement opportunities
+task-master insights --improvement-opportunities
+
+# Update templates based on learnings
+task-master update-templates --based-on-feedback
+```
+
+---
+
+**All-Purpose Pattern Compliance**: ✅ TaskMaster integration supports UNLIMITED project types, scales to ANY complexity, and adapts to ANY development methodology without hardcoded constraints.
+
+---
+
+*This TaskMaster integration guide is automatically maintained by the Five Document Framework Agent*  
+*Following All-Purpose Pattern: Universal, unlimited, and research-enhanced development workflows*

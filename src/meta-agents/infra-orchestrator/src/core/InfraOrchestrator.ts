@@ -11,11 +11,13 @@ import { IOAConfig, OrchestrationResult, AuditReport, StatusReport, ComplianceRe
 import { PatternDetectionEngine, CodebaseAnalysisReport } from '../patterns/PatternDetectionEngine.js';
 import { ResultClassifier, ClassificationReport } from '../patterns/ResultClassifier.js';
 import { logger } from '../utils/logger.js';
+import { RealUEPWrapper, RealUEPWrapperConfig } from '../RealUEPWrapper.js';
 
 export class InfraOrchestrator {
   private config: IOAConfig;
   private patternEngine: PatternDetectionEngine;
   private classifier: ResultClassifier;
+  private uepWrapper?: RealUEPWrapper;
 
   constructor(config: IOAConfig) {
     this.config = config;
@@ -28,6 +30,103 @@ export class InfraOrchestrator {
       ragIntegration: config.enableRAGIntegration,
       metaAgentCoordination: config.enableMetaAgentCoordination
     });
+
+    // Initialize UEP wrapper for real-time coordination
+    if (config.enableMetaAgentCoordination) {
+      this.initializeUEP();
+    }
+  }
+
+  /**
+   * Initialize REAL UEP wrapper for agent coordination
+   */
+  private initializeUEP(): void {
+    try {
+      const uepConfig: RealUEPWrapperConfig = {
+        agentId: 'infra-orchestrator-agent',
+        agentType: 'infrastructure',
+        capabilities: {
+          orchestration: ['full-orchestration', 'compliance-audit', 'status-report', 'ci-pipeline'],
+          coordination: ['meta-agent-coordination', 'rag-integration', 'task-generation'],
+          analysis: ['pattern-detection', 'compliance-scoring', 'project-health'],
+          reporting: ['audit-reports', 'status-reports', 'documentation-generation'],
+          automation: ['auto-docs', 'auto-tasks', 'compliance-enforcement']
+        },
+        enableRealTimeUpdates: true,
+        enableTaskDistribution: true
+      };
+
+      this.uepWrapper = new RealUEPWrapper(uepConfig);
+      this.setupUEPEventHandlers();
+      
+      logger.info('✅ REAL UEP wrapper initialized for Infra-Orchestrator Agent');
+    } catch (error) {
+      logger.error('❌ Failed to initialize UEP wrapper for Infra-Orchestrator Agent', { error });
+    }
+  }
+
+  /**
+   * Setup UEP event handlers for task coordination
+   */
+  private setupUEPEventHandlers(): void {
+    if (!this.uepWrapper) return;
+
+    // Handle task assignments
+    this.uepWrapper.on('task-assigned', async (task) => {
+      logger.info('📋 Received task via UEP', { taskId: task.id, type: task.type });
+      
+      try {
+        let result;
+        switch (task.type) {
+          case 'orchestrate':
+          case 'full-orchestration':
+            result = await this.runFullOrchestration();
+            break;
+          case 'compliance-audit':
+          case 'audit':
+            result = await this.runComplianceAudit();
+            break;
+          case 'status-report':
+          case 'status':
+            result = await this.generateStatusReport();
+            break;
+          case 'compliance-check':
+          case 'compliance':
+            await this.runComplianceCheck(); // This logs to console
+            result = { success: true, message: 'Compliance check completed' };
+            break;
+          case 'ci-pipeline':
+          case 'pipeline':
+            await this.runCIPipeline(); // This may exit process
+            result = { success: true, message: 'CI pipeline check completed' };
+            break;
+          default:
+            result = { success: false, error: `Unknown task type: ${task.type}` };
+        }
+
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, result);
+        }
+      } catch (error) {
+        logger.error('❌ Task execution failed', { taskId: task.id, error });
+        if (this.uepWrapper) {
+          await this.uepWrapper.sendTaskResult(task, { 
+            success: false, 
+            error: error instanceof Error ? error.message : String(error) 
+          });
+        }
+      }
+    });
+
+    // Handle system broadcasts
+    this.uepWrapper.on('system-broadcast', (message) => {
+      logger.info('📢 Received system broadcast', { 
+        type: message.payload.type, 
+        from: message.from 
+      });
+    });
+
+    logger.info('✅ UEP event handlers configured for Infra-Orchestrator Agent');
   }
 
   /**
@@ -95,6 +194,15 @@ export class InfraOrchestrator {
         tasksCompleted: result.tasksCompleted,
         complianceIssues: result.complianceResults.length
       });
+
+      // Broadcast orchestration result via UEP
+      if (this.uepWrapper) {
+        try {
+          await this.uepWrapper.broadcastOrchestrationResult(result);
+        } catch (error) {
+          logger.warn('⚠️ Failed to broadcast orchestration result via UEP', { error });
+        }
+      }
 
       return result;
 
@@ -165,6 +273,15 @@ export class InfraOrchestrator {
         totalIssues: allResults.length,
         criticalIssues: criticalIssues.length
       });
+
+      // Send audit report via UEP if wrapper is available
+      if (this.uepWrapper) {
+        try {
+          await this.uepWrapper.sendAuditReport('factory-core', auditReport);
+        } catch (error) {
+          logger.warn('⚠️ Failed to send audit report via UEP', { error });
+        }
+      }
 
       return auditReport;
 
@@ -251,6 +368,15 @@ export class InfraOrchestrator {
     console.log(`Meta-Agent Factory: ${statusReport.metaAgentFactory.completedAgents}/${statusReport.metaAgentFactory.totalAgents} agents complete`);
     console.log(`RAG System: ${statusReport.ragSystem.status}`);
     console.log(`Infrastructure: ${statusReport.infrastructure.deploymentHealth}`);
+
+    // Send status report via UEP if wrapper is available
+    if (this.uepWrapper) {
+      try {
+        await this.uepWrapper.sendStatusReport('factory-core', statusReport);
+      } catch (error) {
+        logger.warn('⚠️ Failed to send status report via UEP', { error });
+      }
+    }
 
     return statusReport;
   }
@@ -750,6 +876,41 @@ OBSERVABILITY_REDIS_URL=redis://localhost:6379
       
     } catch (error) {
       logger.error('❌ Failed to update environment documentation', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Initialize UEP connection asynchronously
+   */
+  async initializeUEPConnection(): Promise<void> {
+    if (this.uepWrapper && this.config.enableMetaAgentCoordination) {
+      try {
+        await this.uepWrapper.initialize();
+        logger.info('✅ REAL UEP connection initialized successfully for Infra-Orchestrator Agent');
+      } catch (error) {
+        logger.error('❌ Failed to initialize UEP connection for Infra-Orchestrator Agent', { error });
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * Graceful shutdown with UEP cleanup
+   */
+  async shutdown(): Promise<void> {
+    logger.info('🛑 Shutting down Infrastructure Orchestrator Agent...');
+
+    try {
+      // Cleanup UEP wrapper
+      if (this.uepWrapper) {
+        await this.uepWrapper.shutdown();
+        this.uepWrapper = undefined;
+      }
+
+      logger.info('✅ Infrastructure Orchestrator Agent shut down successfully');
+    } catch (error) {
+      logger.error('❌ Error during Infrastructure Orchestrator Agent shutdown', { error });
       throw error;
     }
   }

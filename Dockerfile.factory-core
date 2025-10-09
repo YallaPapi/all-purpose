@@ -1,0 +1,73 @@
+FROM node:20-alpine AS builder
+LABEL maintainer="meta-agent-factory"
+LABEL description="Factory Core with REAL Meta-Agents"
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ git
+
+WORKDIR /app
+
+# Copy the entire project structure
+COPY package*.json ./
+COPY tsconfig*.json ./
+
+# Copy all source code including agents
+COPY src/ ./src/
+COPY shared/ ./shared/
+COPY containers/factory-core/ ./containers/factory-core/
+
+# Create a unified package.json that includes all agent dependencies
+RUN echo '{"name":"meta-agent-factory-unified","version":"1.0.0","type":"module"}' > /tmp/package.json
+
+# Merge all agent package.json files
+RUN for agent in src/meta-agents/*/package.json; do \
+    if [ -f "$agent" ]; then \
+        echo "Processing $agent"; \
+        cat "$agent" | grep -E '"[^"]+"\s*:\s*"[^"]+"' | grep -v '"name"\|"version"\|"description"' >> /tmp/deps.txt; \
+    fi; \
+done
+
+# Install all dependencies
+WORKDIR /app/containers/factory-core
+RUN npm install
+
+# Install agent-specific dependencies
+WORKDIR /app
+RUN for agent in src/meta-agents/*; do \
+    if [ -d "$agent" ] && [ -f "$agent/package.json" ]; then \
+        echo "Installing dependencies for $agent"; \
+        cd "$agent" && npm install --production || true; \
+        cd /app; \
+    fi; \
+done
+
+# Production stage
+FROM node:20-alpine AS runtime
+
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+# Copy everything from builder
+COPY --from=builder /app/ /app/
+
+# Set working directory to factory-core
+WORKDIR /app/containers/factory-core
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data /app/generated
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD node src/health-check.js || exit 1
+
+# Environment
+ENV NODE_ENV=production
+ENV NODE_PATH=/app/src:/app/shared:/app/node_modules
+ENV PORT=3000
+
+# Run the factory
+CMD ["npx", "tsx", "src/factory-core.ts"]

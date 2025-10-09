@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{protocol.name}} - Interactive API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    {{#if config.branding.favicon}}
+    <link rel="icon" href="{{config.branding.favicon}}" type="image/x-icon">
+    {{/if}}
+    <style>
+        /* Custom styling for UEP branding */
+        .swagger-ui .topbar {
+            background-color: {{config.branding.primaryColor}};
+            padding: 10px 0;
+        }
+        
+        .swagger-ui .topbar .download-url-wrapper {
+            display: none;
+        }
+        
+        .swagger-ui .topbar-wrapper img {
+            max-height: 40px;
+        }
+        
+        .swagger-ui .info {
+            margin: 50px 0;
+        }
+        
+        .swagger-ui .info .title {
+            color: {{config.branding.primaryColor}};
+            font-family: {{config.branding.fontFamily}};
+        }
+        
+        .swagger-ui .scheme-container {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .uep-header {
+            background: linear-gradient(135deg, {{config.branding.primaryColor}}, {{config.branding.secondaryColor}});
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .uep-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-family: {{config.branding.fontFamily}};
+        }
+        
+        .uep-header .version {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        .uep-metadata {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid {{config.branding.primaryColor}};
+        }
+        
+        .uep-metadata h3 {
+            color: {{config.branding.primaryColor}};
+            margin-top: 0;
+        }
+        
+        .uep-metadata .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .uep-metadata .metadata-item {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .uep-metadata .metadata-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .uep-metadata .metadata-value {
+            color: #333;
+        }
+        
+        .uep-footer {
+            background: #f8f8f8;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            margin-top: 40px;
+            color: #666;
+        }
+        
+        /* Custom styling for better UX */
+        .swagger-ui .opblock.opblock-get .opblock-summary-method {
+            background: #61affe;
+        }
+        
+        .swagger-ui .opblock.opblock-post .opblock-summary-method {
+            background: #49cc90;
+        }
+        
+        .swagger-ui .opblock.opblock-put .opblock-summary-method {
+            background: #fca130;
+        }
+        
+        .swagger-ui .opblock.opblock-delete .opblock-summary-method {
+            background: #f93e3e;
+        }
+        
+        .swagger-ui .opblock.opblock-patch .opblock-summary-method {
+            background: #50e3c2;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .uep-header h1 {
+                font-size: 2em;
+            }
+            
+            .uep-metadata .metadata-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom UEP Header -->
+    <div class="uep-header">
+        {{#if config.branding.logo}}
+        <img src="{{config.branding.logo}}" alt="{{config.branding.organization}}" style="max-height: 60px; margin-bottom: 20px;">
+        {{/if}}
+        <h1>{{protocol.name}}</h1>
+        <div class="version">Version {{protocol.version}} - Interactive API Documentation</div>
+    </div>
+    
+    <!-- UEP Metadata Section -->
+    <div class="uep-metadata">
+        <h3>Protocol Information</h3>
+        <div class="metadata-grid">
+            <div class="metadata-item">
+                <div class="metadata-label">Protocol ID</div>
+                <div class="metadata-value">{{protocol.id}}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">Version</div>
+                <div class="metadata-value">{{protocol.version}}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">Status</div>
+                <div class="metadata-value">{{protocol.metadata.status}}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">Author</div>
+                <div class="metadata-value">{{protocol.metadata.author}}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">Created</div>
+                <div class="metadata-value">{{formatDate protocol.metadata.createdAt}}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">Last Updated</div>
+                <div class="metadata-value">{{formatDate protocol.metadata.lastUpdated}}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Swagger UI Container -->
+    <div id="swagger-ui"></div>
+    
+    <!-- UEP Footer -->
+    <div class="uep-footer">
+        <p>Generated by UEP Protocol Documentation Generator v1.0.0</p>
+        <p>Interactive documentation powered by Swagger UI | Generated on {{formatDate timestamp}}</p>
+        <p>&copy; {{currentYear}} {{config.branding.organization}}</p>
+    </div>
+
+    <!-- Swagger UI JavaScript -->
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+    
+    <script>
+        // Initialize Swagger UI
+        window.onload = function() {
+            const spec = {{{spec}}};
+            
+            // Add UEP-specific extensions to the spec
+            if (!spec.info.description) {
+                spec.info.description = 'Interactive API documentation for {{protocol.name}}';
+            }
+            
+            // Add custom extension for UEP metadata
+            spec['x-uep-metadata'] = {
+                protocolId: '{{protocol.id}}',
+                version: '{{protocol.version}}',
+                status: '{{protocol.metadata.status}}',
+                author: '{{protocol.metadata.author}}',
+                generatedAt: '{{timestamp}}'
+            };
+            
+            // Initialize Swagger UI
+            const ui = SwaggerUIBundle({
+                spec: spec,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                validatorUrl: null,
+                tryItOutEnabled: true,
+                requestInterceptor: function(request) {
+                    // Add custom headers for UEP protocol
+                    request.headers['X-UEP-Protocol-ID'] = '{{protocol.id}}';
+                    request.headers['X-UEP-Protocol-Version'] = '{{protocol.version}}';
+                    return request;
+                },
+                responseInterceptor: function(response) {
+                    // Log UEP protocol responses for debugging
+                    console.log('UEP Protocol Response:', {
+                        url: response.url,
+                        status: response.status,
+                        headers: response.headers,
+                        protocolId: '{{protocol.id}}'
+                    });
+                    return response;
+                },
+                onComplete: function() {
+                    console.log('UEP Protocol Documentation loaded successfully');
+                    
+                    // Add custom styling after load
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        /* Custom post-load styling */
+                        .swagger-ui .info .title:after {
+                            content: " (UEP Protocol)";
+                            font-size: 0.6em;
+                            color: {{config.branding.secondaryColor}};
+                            font-weight: normal;
+                        }
+                        
+                        /* Add protocol badges */
+                        .swagger-ui .info .description:before {
+                            content: "🔗 UEP Protocol";
+                            display: inline-block;
+                            background: {{config.branding.primaryColor}};
+                            color: white;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-size: 0.8em;
+                            margin-right: 10px;
+                            margin-bottom: 10px;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // Add UEP-specific features
+                    addUEPFeatures();
+                }
+            });
+            
+            window.ui = ui;
+        };
+        
+        function addUEPFeatures() {
+            // Add copy-to-clipboard functionality for curl commands
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('copy-to-clipboard')) {
+                    const code = e.target.parentNode.querySelector('code');
+                    if (code) {
+                        navigator.clipboard.writeText(code.textContent).then(function() {
+                            e.target.textContent = 'Copied!';
+                            setTimeout(() => {
+                                e.target.textContent = 'Copy';
+                            }, 2000);
+                        });
+                    }
+                }
+            });
+            
+            // Add UEP protocol validation
+            const validateUEPResponse = function(response) {
+                // Basic UEP protocol validation logic
+                if (response.headers && response.headers['x-uep-protocol-version']) {
+                    const serverVersion = response.headers['x-uep-protocol-version'];
+                    const clientVersion = '{{protocol.version}}';
+                    
+                    if (serverVersion !== clientVersion) {
+                        console.warn(`UEP Protocol version mismatch: Client expects ${clientVersion}, Server provides ${serverVersion}`);
+                    }
+                }
+            };
+            
+            // Add protocol-specific examples
+            addProtocolExamples();
+        }
+        
+        function addProtocolExamples() {
+            // Add UEP-specific request/response examples
+            const examples = {
+                {{#each endpoints}}
+                '{{path}}': {
+                    method: '{{method}}',
+                    description: '{{summary}}',
+                    curlExample: `curl -X {{method}} '{{../servers.0.url}}{{path}}' \\
+  -H 'X-UEP-Protocol-ID: {{../protocol.id}}' \\
+  -H 'X-UEP-Protocol-Version: {{../protocol.version}}' \\
+  -H 'Content-Type: application/json'{{#if requestBody}} \\
+  -d '{{json requestBody.examples.0.value}}'{{/if}}`
+                }{{#unless @last}},{{/unless}}
+                {{/each}}
+            };
+            
+            // Store examples globally for access
+            window.uepExamples = examples;
+        }
+        
+        // Add keyboard shortcuts for better UX
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('.download-url-wrapper input');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+            
+            // Ctrl/Cmd + / to show help
+            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                e.preventDefault();
+                showUEPHelp();
+            }
+        });
+        
+        function showUEPHelp() {
+            alert(`UEP Protocol Documentation Help:
+            
+Keyboard Shortcuts:
+• Ctrl/Cmd + K: Focus search
+• Ctrl/Cmd + /: Show this help
+
+Features:
+• Try It Out: Test API endpoints directly
+• Code Samples: Copy curl commands
+• Protocol Validation: Automatic version checking
+• UEP Headers: Automatically added to requests
+
+Protocol Info:
+• ID: {{protocol.id}}
+• Version: {{protocol.version}}
+• Status: {{protocol.metadata.status}}`);
+        }
+    </script>
+</body>
+</html>
